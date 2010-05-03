@@ -1,4 +1,4 @@
-package com.vaadin.calendar.gwt.client.ui;
+package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,14 +7,14 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.vaadin.calendar.gwt.client.ui.schedule.DayToolbar;
-import com.vaadin.calendar.gwt.client.ui.schedule.MonthGrid;
-import com.vaadin.calendar.gwt.client.ui.schedule.ScheduleEvent;
-import com.vaadin.calendar.gwt.client.ui.schedule.SimpleDayCell;
-import com.vaadin.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
-import com.vaadin.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
-import com.vaadin.calendar.gwt.client.ui.schedule.WeekGrid;
-import com.vaadin.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.MonthGrid;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEvent;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.UIDL;

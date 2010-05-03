@@ -7,10 +7,10 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import com.vaadin.Application;
-import com.vaadin.calendar.ui.Schedule;
-import com.vaadin.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.calendar.ui.Schedule.EventReader;
-import com.vaadin.calendar.ui.Schedule.ScheduleEvent;
+import com.vaadin.addon.calendar.ui.Schedule;
+import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;

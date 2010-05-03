@@ -1,4 +1,4 @@
-package com.vaadin.calendar.gwt.client.ui.schedule;
+package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 
 /**
  * A class representing a single cell within the calendar in month-view

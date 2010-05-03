@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.vaadin.calendar.gwt.client.ui.schedule;
+package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import com.vaadin.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;

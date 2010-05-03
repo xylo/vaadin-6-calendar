@@ -1,4 +1,4 @@
-package com.vaadin.calendar.gwt.client.ui.schedule;
+package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
@@ -28,8 +28,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.calendar.gwt.client.ui.VSchedule;
-import com.vaadin.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
+import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 
 public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.vaadin.calendar.gwt.client.ui.schedule;
+package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 

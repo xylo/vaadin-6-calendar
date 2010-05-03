@@ -8,10 +8,10 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
-import com.vaadin.calendar.ui.Schedule;
-import com.vaadin.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.calendar.ui.Schedule.EventReader;
-import com.vaadin.calendar.ui.Schedule.ScheduleEvent;
+import com.vaadin.addon.calendar.ui.Schedule;
+import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;

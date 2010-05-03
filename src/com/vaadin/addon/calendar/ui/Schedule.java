@@ -1,4 +1,4 @@
-package com.vaadin.calendar.ui;
+package com.vaadin.addon.calendar.ui;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.vaadin.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;

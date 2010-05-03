@@ -1,12 +1,12 @@
 /**
  * 
  */
-package com.vaadin.calendar.gwt.client.ui.schedule;
+package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.vaadin.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 
 public class MonthGrid extends Grid {
 

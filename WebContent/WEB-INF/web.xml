@@ -20,7 +20,7 @@
       <description>
   		Application widgetset</description>
       <param-name>widgetset</param-name>
-      <param-value>com.vaadin.calendar.gwt.CalendarWidgetset</param-value>
+      <param-value>com.vaadin.addon.calendar.gwt.CalendarWidgetset</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
