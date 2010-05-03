@@ -11,23 +11,21 @@ import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 
 public class CalendarBasics {
 
-    @Test
-    public void dummy() {
-        Schedule s = new Schedule(new EventReader() {
+	@Test
+	public void dummy() {
+		Schedule s = new Schedule(new EventReader() {
 
-            @Override
-            public ArrayList<ScheduleEvent> getEvents(Date fromStartDate,
-                    Date toEndDate) {
-                return new ArrayList<ScheduleEvent>();
-            }
+			public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
+				return new ArrayList<ScheduleEvent>();
+			}
 
-        });
+		});
 
-        Date startDate = new Date();
-        s.setStartDate(startDate);
-        s.setEndDate(startDate);
+		Date startDate = new Date();
+		s.setStartDate(startDate);
+		s.setEndDate(startDate);
 
-        assert (s.getStartDate().getTime() == startDate.getTime());
+		assert (s.getStartDate().getTime() == startDate.getTime());
 
-    }
+	}
 }
