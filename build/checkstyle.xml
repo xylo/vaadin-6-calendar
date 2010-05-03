@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC                                                                                                                                 
+    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"                                                                                                   
+    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+	<!--This file contains setup for checkstyle application-->
+	<!--Run this with command:-->
+	<!--	java -Dbasedir=$PWD/.. -jar lib/checkstyle-all-5.0.jar -c checkstyle.xml -->
+<module name="Checker">
+	<module name="TreeWalker">
+		<property name="cacheFile" value="target/cachefile" />
+
+		<!-- block left curlies at eol -->
+		<module name="LeftCurly" />
+		<!-- No blocks without braces -->
+		<module name="NeedBraces">
+			<property name="tokens" value="LITERAL_FINALLY,LITERAL_CATCH,LITERAL_TRY" />
+		</module>
+		<module name="EqualsHashCode" />
+		<!-- 
+		<module name="MagicNumber" />
+		 -->
+		<module name="MissingSwitchDefault" />
+		<module name="RedundantThrows" />
+		<module name="StringLiteralEquality" />
+
+		<module name="NestedIfDepth">
+			<property name="max" value="4" />
+		</module>
+
+		<module name="NestedTryDepth">
+			<property name="max" value="2" />
+		</module>
+
+		<module name="IllegalCatch" />
+
+		<!-- Too many return points indicate that method is bloated -->
+		<module name="ReturnCount">
+			<property name="max" value="3" />
+			<property name="format" value="^$" />
+		</module>
+
+		<!-- Check for //fall through in switch statements -->
+		<module name="FallThrough" />
+
+		<module name="EqualsHashCode" />
+
+
+
+		<module name="SimplifyBooleanReturn" />
+
+		<module name="StringLiteralEquality" />
+		<module name="RedundantThrows" />
+		<!-- 
+		<module name="CyclomaticComplexity">
+			<property name="max" value="10" />
+		</module>
+		 -->
+		<module name="TodoComment">
+			<property name="format" value="TODO" />
+		</module>
+		<module name="JavadocType" />
+		<!--
+			Enable this when types and packages have valid javadoc <module name="JavadocMethod"> <property name="scope" value="public" /> <property
+			name="allowUndeclaredRTE" value="true" /> </module>
+		-->
+
+
+		<module name="MethodLength">
+			<property name="tokens" value="METHOD_DEF" />
+			<property name="max" value="100" />
+		</module>
+	</module>
+	<!-- 
+<module name="JavadocPackage" />
+ -->
+
+
+
+
+
+
+
+
+	<module name="Translation" />
+</module>

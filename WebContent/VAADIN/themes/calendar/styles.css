@@ -1,0 +1,270 @@
+@import url(../reindeer/styles.css);
+
+/** General stuff here */
+.v-app {
+	background-color:#fff; 
+}
+.v-form fieldset {
+	border:none;	
+}
+/* Global font styles */
+.v-generated-body .v-app,
+.v-generated-body .v-window,
+.v-generated-body .v-popupview-popup,
+.v-generated-body .v-tooltip,
+.v-generated-body .v-app input,
+.v-generated-body .v-app select,
+.v-generated-body .v-app button,
+.v-generated-body .v-app textarea,
+.v-generated-body .v-window input,
+.v-generated-body .v-window select,
+.v-generated-body .v-window button,
+.v-generated-body .v-window textarea,
+.v-generated-body .v-popupview-popup input,
+.v-generated-body .v-popupview-popup select,
+.v-generated-body .v-popupview-popup button,
+.v-generated-body .v-popupview-popup textarea,
+.v-generated-body .v-filterselect-suggestpopup,
+.v-generated-body .v-datefield-popup,
+.v-generated-body .v-contextmenu,
+.v-generated-body .v-menubar-submenu {
+	font-family: Verdana, sans-serif;
+	font-size: 12px;
+	line-height: normal;
+	color: #4f4f4f;
+}
+/** Schedule */
+.v-app-ScheduleTestWeekly,
+	.v-app-ScheduleTestMonthly  {
+	background-color:#fff;
+}
+.v-schedule {
+	background-color:#F1EFEC;
+}
+.v-schedule-header-month {
+	background-color:#757575;
+	color:#fff;
+}
+.v-schedule-header-month .gwt-Label {
+	font-size:11px;
+	font-weight:bold;
+	color:#fff;
+	line-height:18px;
+}
+.v-schedule-header-daily .gwt-Label {
+	font-size:11px;
+	color:#fff;
+	height:14px;
+	line-height:10px;
+	background-color: #757575;
+}
+.v-schedule-header-daily .gwt-Label.back {
+	background: #757575 url(newimg/link/LB_4_Back_mouseover.png) no-repeat 6px 0;
+}
+.v-schedule-header-daily .gwt-Label.next {
+	background: #757575 url(newimg/link/LB_4_Next_mouseover.png) no-repeat center 0;
+}
+.v-schedule-header-daily .today {
+	text-decoration:underline;
+}
+.v-schedule-header-daily .gwt-Label:hover  {
+	color:rgb(188,217,120);
+	cursor:pointer;
+}                        
+.v-schedule-weekly-longevents {
+	border-left:1px solid #C9CDD2;	
+}
+.v-schedule-weekly-longevents .gwt-HTML {
+	border-right:1px solid #C9CDD2;	
+}
+.v-schedule-weekly-longevents .cell {
+	line-height:30px;
+	height:30px;
+	padding-left:4px;
+	color: #565656
+}
+
+.v-schedule-weektoolbar {
+	font-size:13px;
+	font-weight:bold;
+}
+.v-schedule-weektoolbar .gwt-Label {
+	float:left;
+	padding-top:5px;
+}
+.v-schedule-weektoolbar td {
+}
+.v-schedule-weektoolbar .gwt-Label:hover {
+	cursor:pointer;
+}
+.v-schedule-month {
+	/** TODO siirrä borderi viikkopaneelin oikealle puolelle*/
+	/** border-left:1px solid #C9CDD2; **/
+}
+.v-schedule-monthly-day {
+	border-right:1px solid #C9CDD2;
+	border-bottom:1px solid #C4C4C4;
+}
+.v-schedule-monthly-day:hover {
+	background-color:#fffedf;
+}
+.v-schedule-monthly-day .daycaption{
+	font-size:15px;
+	color:rgb(124,124,124);
+	line-height:20px;
+	padding-right:5px;
+}
+.v-schedule-monthly-day.selected {
+	background-color: rgb(188,217,120);	
+}
+.v-schedule-monthly-day .daycaption:hover {
+	cursor:pointer;
+}
+.v-schedule-monthly-day .bottomspacer {
+	/**bodyText*/
+	font-size:11px;
+	color:#565656;
+	padding-left:5px;
+}
+.v-schedule .month-event {
+	background-color: #fae;
+	height:13px;
+	margin-top:1px;
+	padding-left:4px;
+	line-height:14px;
+	margin-right:-1px;
+}
+.v-schedule-monthly-day .spacer {
+	height:14px;
+} 
+.v-schedule .month-event.event-start {	
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-bottomleft:5px;
+	-webkit-border-top-left-radius: 5px;
+	-webkit-border-bottom-left-radius:5px;
+	margin-left:2px;
+}
+.v-schedule .month-event.event-end {	
+	-moz-border-radius-topright:5px;
+	-moz-border-radius-bottomright:5px;
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-bottom-right-radius:5px;
+	margin-right:2px;
+}
+.v-schedule .month-event.short {
+	background-color: transparent;
+}
+.v-schedule .month-event:hover {
+	cursor:pointer;	
+}
+.v-schedule-monthly-day.disabled .month-event:hover,
+.v-schedule-monthly-day.disabled .daycaption:hover{
+	cursor:default;	
+}
+.v-schedule-monthly-day.disabled .daycaption {
+	color:#ccc;	
+}
+.v-schedule-monthly-day.disabled:hover {
+	background-color: #fff;	
+}
+.v-schedule .month-event.event-wide {
+	padding-top:3px;	
+}
+.v-schedule-monthly-day.greenEvent,
+	.v-schedule-weekly-longevents .greenEvent {
+	background-color: #d7e58f;
+}
+.v-schedule-monthly-day.orangeEvent,
+		.v-schedule-weekly-longevents .orangeEvent {
+	background-color: #ecb921;
+}
+.v-schedule-monthly-day.today .daycaption {
+	text-decoration:underline;
+}
+.v-schedule-wgwrapper {
+	overflow-x:hidden !important;
+	border: 1px solid #C9CDD2;
+	position:relative;
+	cursor:default;
+}
+.v-schedule-timebar .hour {
+	height:35px;
+	border-bottom: 1px solid #F1EFEC;
+	font-weight:bold;
+	float:right;
+	padding-left:10px;
+	padding-top:2px;
+	/**number*/
+	font-size:16px;/**16pt*/
+	color: #a8a8a8;/**168*/
+}
+.v-schedule-timebar .minutes {
+	float:right;
+	width:15px;
+	text-align:right;
+	height:35px;
+	/**number*/
+	font-size:12px;/**16pt*/
+	color: #a8a8a8;/**168*/
+	padding-top:2px;
+	padding-right:1px;
+}
+.v-schedule-datecell {
+	border-left:1px solid #ccc;	
+}
+.v-schedule-datecell .halfhour,
+.v-schedule-datecell .halfhour-even {
+	border-bottom:1px solid #ccc;
+	height:18px;
+}
+.v-schedule-datecell .halfhour.daterange,
+	.v-schedule-datecell .halfhour-even.daterange {
+	background-color:rgb(188,217,120);
+}
+.v-schedule-datecell .halfhour-even {
+	border-bottom:1px dotted #ddd;	
+}
+.v-schedule-datecell .halfhour.reserved, 
+	.v-schedule-datecell .halfhour-even.reserved {
+	background-color:#FF3333;
+}
+.v-schedule-datecell .dayevent {
+	/**bodyText*/
+	font-size:11px;
+	color:#565656;
+	padding-left:3px;
+}
+.v-schedule-datecell.orangeEvent .dayevent {
+	background-color: #ecb921;
+}
+.v-schedule-datecell.greenEvent .dayevent {
+	background-color: #d7e58f;
+}
+.v-schedule-datecell .caption {
+	background:transparent;
+	white-space:nowrap;
+	overflow:hidden;
+	cursor:pointer;
+	font-size:10px;
+	padding-left:3px;
+	height:14px;
+}
+.v-schedule-datecell .content {
+	overflow:hidden;
+	cursor:pointer;
+}
+.v-schedule-datecell .todaybar {
+	position:relative;
+	background-color:red;
+	height:2px;	
+	z-index:9999;
+}
+/** END - Schedule */
+
+/** Customized phase colors*/
+.v-schedule .color1 {
+	background-color:rgb(123,255,225);
+}
+.v-schedule .color2 {
+	background-color:#14E6FF;
+}

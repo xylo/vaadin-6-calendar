@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Calendar" basedir="../" default="compile-widgetset">
+	<property file="build/build.properties" />
+	<property name="configure.libs" value="" />
+	<property name="module.junit.dir" value="${basedir}/build/result/unittests" />
+
+	<target name="refresh-eclipse" if="eclipse.running">
+		<echo>Refreshing project folder</echo>
+		<eclipse.refreshLocal resource="CalendarTest" depth="infinite" />
+	</target>
+
+	<target name="clean_all">
+		<delete dir="${result-path}" includes="**/*" followsymlinks="false" includeemptydirs="true" defaultexcludes="false" failonerror="false">
+		</delete>
+	</target>
+
+	<target name="check-libs">
+		<available file="${gwt-user-jar-location}/gwt-user.jar" property="gwt-user.present" />
+		<available file="${gwt-dev-jar-location}/gwt-dev.jar" property="gwt-dev.present" />
+	</target>
+
+	<target name="configure" depends="check-libs">
+		<echo>Requirements for classpath:</echo>
+		<echo> ${gwt-user-jar-location}/gwt-user.jar</echo>
+		<echo> ${gwt-dev-jar-location}/gwt-dev.jar</echo>
+
+		<antcall target="check-libs">
+		</antcall>
+
+		<fail message="gwt-user.jar missing" unless="gwt-user.present" />
+		<fail message="${gwt-dev-jar-location}/gwt-dev.jar missing" unless="gwt-dev.present" />
+
+	</target>
+	<target name="check-widgetset-uptodate">
+		<echo>Checking if widgetset needs to be rebuilt</echo>
+		<uptodate targetfile="WebContent/VAADIN/widgetsets/.widgetset" property="widgetset.uptodate">
+			<srcfiles dir="src" includes="**/gwt/**/*" />
+		</uptodate>
+
+	</target>
+
+	<target name="compile-widgetset" depends="configure,check-widgetset-uptodate" unless="widgetset.uptodate">
+		<echo>Compiling widgetset</echo>
+
+		<java classname="com.vaadin.tools.WidgetsetCompiler" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-out" />
+			<arg value="WebContent/VAADIN/widgetsets" />
+			<arg value="com.vaadin.calendar.gwt.CalendarWidgetset" />
+			<jvmarg value="-Xss1024k" />
+			<jvmarg value="-Xmx1024M" />
+			<jvmarg value="-Djava.awt.headless=true" />
+			<classpath>
+				<path path="${basedir}/${result-path}/war/WEB-INF/classes" />
+				<path path="WebContent/WEB-INF/classes" />
+				<path path="src" />
+				<fileset dir="build/lib/gwt">
+					<include name="**/gwt-*.jar" />
+				</fileset>
+				<fileset dir="${gwt-dev-jar-location}">
+					<include name="**/gwt-*.jar" />
+				</fileset>
+				<fileset dir="WebContent/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</java>
+
+		<touch file="WebContent/VAADIN/widgetsets/.widgetset" verbose="true" />
+
+		<antcall target="refresh-eclipse" />
+	</target>
+
+	<path id="test.classpath">
+		<fileset dir="build/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="WebContent/WEB-INF/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<path id="compile.classpath">
+		<fileset dir="build/lib">
+			<include name="junit-4.6.jar" />
+		</fileset>
+	</path>
+
+	<target name="svn-update" unless="eclipse.running">
+		<exec executable="svn">
+			<arg line="update" />
+		</exec>
+	</target>
+	
+
+	<target name="compile-java">
+		<javac destdir="${result-path}/war/WEB-INF/classes" target="1.5" source="1.5">
+			<src path="src" />
+			<include name="**/*.*" />
+
+			<classpath refid="test.classpath" />
+			<classpath refid="compile.classpath" />
+			<classpath>
+				<path path="src" />
+				<path path="test-src" />
+				<path path="WebContet/WEB-INF/classes" />
+				<path path="${gwt-user-jar-location}/gwt-user.jar" />
+
+				<path path="${gwt-dev-jar-location}/gwt-dev.jar" />
+
+			</classpath>
+		</javac>
+
+	</target>
+
+
+	
+	<target name="testbench">
+		<subant target="run-and-clean-up" antfile="test.xml">
+			<fileset dir="test" includes="test.xml"/>
+		</subant>
+	</target>
+	
+</project>
