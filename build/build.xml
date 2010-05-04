@@ -31,12 +31,12 @@
 		<fail message="${gwt-dev-jar-location}/gwt-dev.jar missing" unless="gwt-dev.present" />
 
 	</target>
+
 	<target name="check-widgetset-uptodate">
 		<echo>Checking if widgetset needs to be rebuilt</echo>
 		<uptodate targetfile="WebContent/VAADIN/widgetsets/.widgetset" property="widgetset.uptodate">
 			<srcfiles dir="src" includes="**/gwt/**/*" />
 		</uptodate>
-
 	</target>
 
 	<target name="compile-widgetset" depends="configure,check-widgetset-uptodate" unless="widgetset.uptodate">
@@ -50,9 +50,9 @@
 			<jvmarg value="-Xmx1024M" />
 			<jvmarg value="-Djava.awt.headless=true" />
 			<classpath>
+				<path path="src" />
 				<path path="${basedir}/${result-path}/war/WEB-INF/classes" />
 				<path path="WebContent/WEB-INF/classes" />
-				<path path="src" />
 				<fileset dir="build/lib/gwt">
 					<include name="**/gwt-*.jar" />
 				</fileset>
