@@ -7,6 +7,7 @@
     <param-name>productionMode</param-name>
     <param-value>false</param-value>
   </context-param>
+  
   <servlet>
     <servlet-name>test</servlet-name>
     <servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
@@ -14,7 +15,7 @@
       <description>
   		Vaadin application class to start</description>
       <param-name>application</param-name>
-      <param-value>test.ScheduleTestMonthly</param-value>
+      <param-value>test.ScheduleTest</param-value>
     </init-param>
     <init-param>
       <description>
@@ -23,6 +24,7 @@
       <param-value>com.vaadin.addon.calendar.gwt.CalendarWidgetset</param-value>
     </init-param>
   </servlet>
+  
   <servlet-mapping>
     <servlet-name>test</servlet-name>
     <url-pattern>/*</url-pattern>

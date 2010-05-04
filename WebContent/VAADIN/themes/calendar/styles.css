@@ -59,10 +59,10 @@
 	background-color: #757575;
 }
 .v-schedule-header-daily .gwt-Label.back {
-	background: #757575 url(newimg/link/LB_4_Back_mouseover.png) no-repeat 6px 0;
+	background: #757575;
 }
 .v-schedule-header-daily .gwt-Label.next {
-	background: #757575 url(newimg/link/LB_4_Next_mouseover.png) no-repeat center 0;
+	background: #757575;
 }
 .v-schedule-header-daily .today {
 	text-decoration:underline;
@@ -98,7 +98,6 @@
 	cursor:pointer;
 }
 .v-schedule-month {
-	/** TODO siirrä borderi viikkopaneelin oikealle puolelle*/
 	/** border-left:1px solid #C9CDD2; **/
 }
 .v-schedule-monthly-day {

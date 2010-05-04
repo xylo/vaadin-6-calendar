@@ -9,7 +9,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -132,8 +131,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler, Mous
 			eventDiv.addStyleName("month-event short");
 			eventDiv.addMouseDownHandler(this);
 			eventDiv.addMouseUpHandler(this);
-			DateTimeFormat fg = DateTimeFormat.getShortTimeFormat();
-			eventDiv.setHTML(fg.format(fromDatetime) + " " + e.getCaption());
+			eventDiv.setHTML(schedule.getTimeFormat().format(fromDatetime) + " " + e.getCaption());
 		} else {
 			Date from = e.getFromDate();
 			Date to = e.getToDate();

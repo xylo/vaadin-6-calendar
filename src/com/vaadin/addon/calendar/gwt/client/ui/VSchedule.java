@@ -45,6 +45,9 @@ public class VSchedule extends Composite implements Paintable {
 
 	private DateTimeFormat dateformat_datetime = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
 	private DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
+	private DateTimeFormat time12format_date = DateTimeFormat.getFormat("h:mm a");
+	private DateTimeFormat time24format_date = DateTimeFormat.getFormat("HH:mm");
+
 	private boolean readOnly = false;
 
 	public VSchedule() {
@@ -332,6 +335,12 @@ public class VSchedule extends Composite implements Paintable {
 
 	public DateTimeFormat getDateFormat() {
 		return dateformat_date;
+	}
+
+	public DateTimeFormat getTimeFormat() {
+		if (format)
+			return time24format_date;
+		return time12format_date;
 	}
 
 	public DateTimeFormat getDateTimeFormat() {
