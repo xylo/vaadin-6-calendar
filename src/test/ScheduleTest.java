@@ -70,9 +70,13 @@ public class ScheduleTest extends Application implements EventReader {
 
 	private Select localeSelect;
 
+	private Button hideWeekendsButton;
+
 	private Window scheduleEventPopup;
 
 	private final Form scheduleEventForm = new Form();
+
+	private Button deleteEventButton;
 
 	private Mode viewMode = Mode.MONTH;
 
@@ -100,6 +104,7 @@ public class ScheduleTest extends Application implements EventReader {
 
 	private Layout initLayout(Window w) {
 		initNavigationButtons();
+		initHideWeekEndButton();
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSizeFull();
@@ -108,6 +113,7 @@ public class ScheduleTest extends Application implements EventReader {
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");
 		hl.setSpacing(true);
+		hl.setMargin(true);
 		hl.addComponent(prevButton);
 		hl.addComponent(captionLabel);
 		hl.addComponent(monthButton);
@@ -124,13 +130,16 @@ public class ScheduleTest extends Application implements EventReader {
 
 		HorizontalLayout controlPanel = new HorizontalLayout();
 		controlPanel.setSpacing(true);
+		controlPanel.setMargin(true);
 		controlPanel.setWidth("80%");
 		controlPanel.addComponent(localeSelect);
 		controlPanel.addComponent(timeZoneSelect);
 		controlPanel.addComponent(formatSelect);
+		controlPanel.addComponent(hideWeekendsButton);
 		controlPanel.setComponentAlignment(timeZoneSelect, Alignment.MIDDLE_LEFT);
 		controlPanel.setComponentAlignment(formatSelect, Alignment.MIDDLE_LEFT);
 		controlPanel.setComponentAlignment(localeSelect, Alignment.MIDDLE_LEFT);
+		controlPanel.setComponentAlignment(hideWeekendsButton, Alignment.MIDDLE_LEFT);
 
 		layout.addComponent(controlPanel);
 		layout.addComponent(hl);
@@ -175,8 +184,22 @@ public class ScheduleTest extends Application implements EventReader {
 		});
 	}
 
+	private void initHideWeekEndButton() {
+		hideWeekendsButton = new Button("Hide weekends");
+		hideWeekendsButton.setSwitchMode(true);
+		hideWeekendsButton.addListener(new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				schedule.setHideWeekends((Boolean) event.getButton().getValue());
+			}
+		});
+	}
+
 	private void initScheduler() {
 		schedule = new Schedule(this);
+		schedule.setHideWeekends(false);
 		schedule.setLocale(getLocale());
 		schedule.setImmediate(true);
 
@@ -211,15 +234,13 @@ public class ScheduleTest extends Application implements EventReader {
 		schedule.addNavigationListener(new NavigationListener() {
 
 			public void onScheduleForward() {
-				System.out.println("TODO: Navigationlistener: onScheduleForward");
 			}
 
 			public void onScheduleBackward() {
-				System.out.println("TODO: Navigationlistener: onScheduleBackward");
 			}
 
 			public void eventClicked(ScheduleEvent e) {
-				showEventPopup(e);
+				showEventPopup(e, false);
 			}
 
 			public void dateClicked(Date d) {
@@ -231,15 +252,14 @@ public class ScheduleTest extends Application implements EventReader {
 		schedule.addRangeSelectListener(new RangeSelectListener() {
 
 			public void rangeSelected(Date startDate, Date endDate) {
-				showEventPopup(createNewEvent(startDate, endDate));
+				showEventPopup(createNewEvent(startDate, endDate), true);
 			}
 		});
 
 		schedule.addEventMoveListener(new EventMoveListener() {
 
 			public void eventMoved(ScheduleEvent e, Date newFromDatetime) {
-				// TODO Auto-generated method stub
-
+				applyEventMove(e, newFromDatetime);
 			}
 		});
 	}
@@ -376,30 +396,34 @@ public class ScheduleTest extends Application implements EventReader {
 		switchToDayView(calendar.get(Calendar.DATE), calendar.get(Calendar.YEAR));
 	}
 
-	private void showEventPopup(ScheduleEvent event) {
+	private void applyEventMove(ScheduleEvent e, Date newFromDatetime) {
+		/* Update event dates */
+		long length = e.getWhenTo().getTime() - e.getWhenFrom().getTime();
+		e.setWhenFrom(newFromDatetime);
+		e.setWhenTo(new Date(newFromDatetime.getTime() + length));
+		schedule.requestRepaint();
+	}
+
+	private void showEventPopup(ScheduleEvent event, boolean newEvent) {
 		if (event == null)
 			return;
 
-		if (scheduleEventPopup == null) {
-			createScheduleEventPopup();
-		}
-
+		updateScheduleEventPopup(newEvent);
 		updateScheduleEventForm(event);
 
 		getMainWindow().addWindow(scheduleEventPopup);
 	}
 
-	/* Initializes a modal popup window to edit schedule event. */
+	/* Initializes a modal window to edit schedule event. */
 	private void createScheduleEventPopup() {
-		scheduleEventPopup = new Window();
+		VerticalLayout layout = new VerticalLayout();
+		layout.setMargin(true);
+		layout.setSpacing(true);
+
+		scheduleEventPopup = new Window(null, layout);
 		scheduleEventPopup.setWidth("400px");
 		scheduleEventPopup.setModal(true);
 		scheduleEventPopup.center();
-
-		VerticalLayout layout = new VerticalLayout();
-		layout.setSizeFull();
-		layout.setSpacing(true);
-		scheduleEventPopup.addComponent(layout);
 
 		layout.addComponent(scheduleEventForm);
 
@@ -419,6 +443,14 @@ public class ScheduleTest extends Application implements EventReader {
 				discardScheduleEvent();
 			}
 		});
+		deleteEventButton = new Button("Delete", new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				deleteScheduleEvent();
+			}
+		});
 		scheduleEventPopup.addListener(new CloseListener() {
 
 			private static final long serialVersionUID = 1L;
@@ -429,14 +461,25 @@ public class ScheduleTest extends Application implements EventReader {
 		});
 
 		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.setSizeFull();
 		buttons.setSpacing(true);
+		buttons.addComponent(deleteEventButton);
 		buttons.addComponent(apply);
 		buttons.addComponent(cancel);
-		buttons.setComponentAlignment(apply, Alignment.BOTTOM_RIGHT);
-		buttons.setComponentAlignment(cancel, Alignment.BOTTOM_RIGHT);
 		layout.addComponent(buttons);
 		layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
+	}
+
+	private void updateScheduleEventPopup(boolean newEvent) {
+		if (scheduleEventPopup == null) {
+			createScheduleEventPopup();
+		}
+
+		if (newEvent)
+			scheduleEventPopup.setCaption("New event");
+		else
+			scheduleEventPopup.setCaption("Edit event");
+
+		deleteEventButton.setVisible(!newEvent);
 	}
 
 	private void updateScheduleEventForm(ScheduleEvent event) {
@@ -451,27 +494,31 @@ public class ScheduleTest extends Application implements EventReader {
 
 			public Field createField(Item item, Object propertyId, Component uiContext) {
 				if (propertyId.equals("caption")) {
-					return createTextField();
+					return createTextField("Caption");
+
+				} else if (propertyId.equals("where")) {
+					return createTextField("Where");
+
 				} else if (propertyId.equals("description")) {
-					TextField f = createTextField();
+					TextField f = createTextField("Description");
 					f.setRows(3);
 					return f;
 				}
 				return null;
 			}
 
-			private TextField createTextField() {
-				TextField f = new TextField();
+			private TextField createTextField(String caption) {
+				TextField f = new TextField(caption);
 				f.setNullRepresentation("");
 				return f;
 			}
 		});
 
-		scheduleEventForm.setVisibleItemProperties(new Object[] { "caption", "description" });
+		scheduleEventForm.setVisibleItemProperties(new Object[] { "caption", "where", "description" });
 	}
 
 	private ScheduleEvent createNewEvent(Date startDate, Date endDate) {
-		ScheduleEvent event = schedule.new ScheduleEvent("New event", startDate, endDate);
+		ScheduleEvent event = schedule.new ScheduleEvent("", startDate, endDate);
 		switch (viewMode) {
 		case MONTH:
 			event.setStyleName("color1");
@@ -486,11 +533,19 @@ public class ScheduleTest extends Application implements EventReader {
 		return event;
 	}
 
-	@SuppressWarnings("unchecked")
+	/* Removes the event from the data source and requests repaint. */
+	private void deleteScheduleEvent() {
+		ScheduleEvent event = getFormScheduleEvent();
+		if (dataSource.contains(event))
+			dataSource.remove(event);
+		getMainWindow().removeWindow(scheduleEventPopup);
+		schedule.requestRepaint();
+	}
+
+	/* Adds/updates the event in the data source and requests repaint. */
 	private void commitScheduleEvent() {
 		scheduleEventForm.commit();
-		BeanItem<ScheduleEvent> item = (BeanItem<ScheduleEvent>) scheduleEventForm.getItemDataSource();
-		ScheduleEvent event = item.getBean();
+		ScheduleEvent event = getFormScheduleEvent();
 		if (!dataSource.contains(event))
 			dataSource.add(event);
 
@@ -501,6 +556,13 @@ public class ScheduleTest extends Application implements EventReader {
 	private void discardScheduleEvent() {
 		scheduleEventForm.discard();
 		getMainWindow().removeWindow(scheduleEventPopup);
+	}
+
+	@SuppressWarnings("unchecked")
+	private ScheduleEvent getFormScheduleEvent() {
+		BeanItem<ScheduleEvent> item = (BeanItem<ScheduleEvent>) scheduleEventForm.getItemDataSource();
+		ScheduleEvent event = item.getBean();
+		return event;
 	}
 
 	private void nextMonth() {

@@ -1,4 +1,4 @@
-@import url(../reindeer/styles.css);
+@import url(../runo/styles.css);
 
 /** General stuff here */
 .v-app {
@@ -59,11 +59,11 @@
 	background-color: #757575;
 }
 .v-schedule-header-daily .gwt-Label.back {
-	background: #757575;
+	background: #757575 url(../runo/icons/16/arrow-left.png) no-repeat 6px 0;
 }
 .v-schedule-header-daily .gwt-Label.next {
-	background: #757575;
-}
+	background: #757575 url(../runo/icons/16/arrow-right.png) no-repeat center 0;
+}right
 .v-schedule-header-daily .today {
 	text-decoration:underline;
 }

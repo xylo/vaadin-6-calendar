@@ -172,6 +172,7 @@ public class Schedule extends AbstractComponent {
 		target.addAttribute("monthNames", getMonthNamesShort());
 		target.addAttribute("fdow", currentCalendar.getFirstDayOfWeek());
 		target.addAttribute("readonly", isReadOnly());
+		target.addAttribute("hideWeekends", isHideWeekends());
 		// Use same timezone in all dates this component handles.
 		// Show "now"-marker in browser within given timezone.
 		Date now = new Date();
