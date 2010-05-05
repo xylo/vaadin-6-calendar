@@ -148,10 +148,11 @@ public class Schedule extends AbstractComponent {
 		return weeklyCaptionFormat.toPattern();
 	}
 
+	/** Sets the locale to be used in the Schedule component. */
 	@Override
 	public void setLocale(Locale l) {
 		weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, l);
-		requestRepaint();
+		super.setLocale(l);
 	}
 
 	@Override
@@ -420,7 +421,7 @@ public class Schedule extends AbstractComponent {
 	 *         Returned array is always .lenght() ==7
 	 */
 	protected String[] getDayNamesShort() {
-		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
+		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.DAY_OF_WEEK, Calendar.SHORT, getLocale());
 		String[] dayNames = new String[7];
 		for (String s : displayNames.keySet()) {
 			Integer value = displayNames.get(s);
@@ -434,7 +435,7 @@ public class Schedule extends AbstractComponent {
 	 *         Returned array is always .lenght() ==12
 	 */
 	protected String[] getMonthNamesShort() {
-		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.MONTH, Calendar.SHORT, getLocale());
 		String[] monthNames = new String[12];
 		for (String s : displayNames.keySet()) {
 			Integer value = displayNames.get(s);

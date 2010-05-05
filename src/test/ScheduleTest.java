@@ -494,7 +494,9 @@ public class ScheduleTest extends Application implements EventReader {
 
 			public Field createField(Item item, Object propertyId, Component uiContext) {
 				if (propertyId.equals("caption")) {
-					return createTextField("Caption");
+					TextField f = createTextField("Caption");
+					f.focus();
+					return f;
 
 				} else if (propertyId.equals("where")) {
 					return createTextField("Where");
