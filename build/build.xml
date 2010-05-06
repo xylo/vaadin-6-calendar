@@ -71,6 +71,7 @@
         
 		<javac destdir="${result.classes}" target="1.5" source="1.5">
 			<src path="src" />
+			<src path="${test.src.base}" />
 			<include name="**/*.*" />
 
 			<classpath refid="test.classpath" />
@@ -146,6 +147,9 @@
     <!-- Server-side JUnit tests -->
 	<target name="serverside-tests" depends="compile">
         <echo>Running JUnit tests in ${test.src.base}/${test.src.dir}</echo>
+
+        <echo>Test source base: ${test.src.base}</echo>
+        <echo>Test source dir:  ${test.src.dir}</echo>
 
 		<junit printsummary="yes" showoutput="true"> 
 			<classpath>
