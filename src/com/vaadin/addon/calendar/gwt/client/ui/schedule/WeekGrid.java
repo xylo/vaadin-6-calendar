@@ -1,6 +1,8 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -199,43 +201,125 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 		}
 
 		public void recalculateEventWidths() {
+			List<Group> groups = new ArrayList<Group>();
+
 			int count = getWidgetCount();
-			for (int i = 0; i < count;) {
-				DayEvent current = (DayEvent) getWidget(i);
-				int groupStartIndex = i;
-				int groupEndIndex = i;
-				DayEvent next = null;
-				int nextCount = i + 1;
-				int top = current.getTop();
-				int bottom = top + current.getOffsetHeight();
-				while (count > nextCount) {
-					next = (DayEvent) getWidget(nextCount);
-					int nextTop = next.getTop();
-					int nextBottom = nextTop + next.getOffsetHeight();
-					if ((top <= nextTop && bottom > nextTop) || (top <= nextBottom && bottom >= nextBottom) || (bottom <= nextBottom && bottom >= nextTop)
-							|| (top >= nextTop && top <= nextBottom)) {
-						groupEndIndex = nextCount;
-						nextCount++;
-						if (nextTop < top) {
-							top = nextTop;
+
+			List<Integer> handled = new ArrayList<Integer>();
+
+			// Iterate through all events and group them. Events that overlaps
+			// with each other, are added to the same group.
+			for (int i = 0; i < count; i++) {
+				if (handled.contains(i))
+					continue;
+
+				Group curGroup = getOverlappingEvents(i);
+				handled.addAll(curGroup.getItems());
+
+				int top = curGroup.top;
+				int bottom = curGroup.bottom;
+
+				boolean newGroup = true;
+				// No need to check other groups, if size equals the count
+				if (curGroup.getItems().size() != count) {
+					// Check other groups. When the whole group overlaps with
+					// other group, the group is merged to the other.
+					for (Group g : groups) {
+						int nextTop = g.top;
+						int nextBottom = g.bottom;
+
+						if (doOverlap(top, bottom, nextTop, nextBottom)) {
+							newGroup = false;
+							updateGroup(g, curGroup, top, bottom);
 						}
-						if (nextBottom > bottom) {
-							bottom = nextBottom;
-						}
-					} else {
-						break;
 					}
+				} else {
+					if (newGroup)
+						groups.add(curGroup);
+					break;
 				}
-				int widgetsInNextGroup = (groupEndIndex - groupStartIndex) + 1;
-				int eventWidth = ((width) / widgetsInNextGroup);
-				for (int j = i; j <= groupEndIndex; j++) {
-					DayEvent d = (DayEvent) getWidget(j);
+
+				if (newGroup)
+					groups.add(curGroup);
+			}
+
+			drawDayEvents(groups);
+		}
+
+		private void drawDayEvents(List<Group> groups) {
+			for (Group g : groups) {
+				int eventWidth = ((width) / g.getItems().size());
+				int i = 0;
+				for (Integer index : g.getItems()) {
+					DayEvent d = (DayEvent) getWidget(index);
 					d.setWidth(eventWidth - 4 + "px");
 					d.setMoveWidth(width);
-					d.getElement().getStyle().setLeft((eventWidth * (j - i)) + positionLeft, Unit.PX);
+					d.getElement().getStyle().setLeft((eventWidth * i) + positionLeft, Unit.PX);
+					i++;
 				}
-				i = i + widgetsInNextGroup;
 			}
+		}
+
+		private boolean doOverlap(int top, int bottom, int nextTop, int nextBottom) {
+			boolean isInsideFromBottomSide = top >= nextTop && top <= nextBottom;
+			boolean isFullyInside = top >= nextTop && bottom <= nextBottom;
+			boolean isInsideFromTopSide = bottom <= nextBottom && bottom >= nextTop;
+			boolean isFullyOverlapping = top < nextTop && bottom > nextBottom;
+			return isInsideFromBottomSide || isFullyInside || isInsideFromTopSide || isFullyOverlapping;
+		}
+
+		/* Update top and bottom values. Add new index to the group. */
+		private void updateGroup(Group targetGroup, Group byGroup, int top, int bottom) {
+			if (top < targetGroup.top)
+				targetGroup.top = top;
+			if (bottom > targetGroup.bottom)
+				targetGroup.bottom = bottom;
+
+			for (Integer index : byGroup.getItems()) {
+				if (!targetGroup.getItems().contains(index))
+					targetGroup.add(index);
+			}
+		}
+
+		/**
+		 * Returns all overlapping DayEvent indexes in the Group. Not including
+		 * the target.
+		 * 
+		 * @param targetIndex
+		 *            Index of DayEvent in the current DateCell widget.
+		 * @return Group that contains all Overlapping DayEvent indexes
+		 */
+		public Group getOverlappingEvents(int targetIndex) {
+			Group g = new Group(targetIndex);
+
+			int count = getWidgetCount();
+			DayEvent target = (DayEvent) getWidget(targetIndex);
+			int top = target.getTop();
+			int bottom = top + target.getOffsetHeight();
+
+			for (int i = 0; i < count; i++) {
+				if (targetIndex == i)
+					continue;
+
+				DayEvent d = (DayEvent) getWidget(i);
+				int nextTop = d.getTop();
+				int nextBottom = nextTop + d.getOffsetHeight();
+				if (doOverlap(top, bottom, nextTop, nextBottom)) {
+					g.add(i);
+
+					// Update top & bottom values to the greatest
+					if (nextTop < top) {
+						top = nextTop;
+					}
+					if (nextBottom > bottom) {
+						bottom = nextBottom;
+					}
+				}
+			}
+
+			g.top = top;
+			g.bottom = bottom;
+			return g;
 		}
 
 		public Date getDate() {
@@ -348,6 +432,25 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 						c.removeClassName("daterange");
 					}
 				}
+			}
+		}
+
+		private static class Group {
+			public int top;
+			public int bottom;
+			private List<Integer> items;
+
+			public Group(Integer index) {
+				items = new ArrayList<Integer>();
+				items.add(index);
+			}
+
+			public List<Integer> getItems() {
+				return items;
+			}
+
+			public void add(Integer index) {
+				this.items.add(index);
 			}
 		}
 
@@ -669,7 +772,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 		newParent.addEvent(dayEvent);
 		newParent.recalculateEventWidths();
 		DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
-		String eventMove = se.getIndex() + ":" + dateformat_date.format(targetDate) + "-" + fromDatetime.getHours() + "-" + fromDatetime.getMinutes();
+		DateTimeFormat dateformat_time = DateTimeFormat.getFormat("HH-mm");
+		String eventMove = se.getIndex() + ":" + dateformat_date.format(targetDate) + "-" + dateformat_time.format(fromDatetime);
 		schedule.getClient().updateVariable(schedule.getPID(), "eventMove", eventMove, true);
 	}
 

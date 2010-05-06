@@ -28,6 +28,8 @@ import com.vaadin.ui.ClientWidget;
 @ClientWidget(VSchedule.class)
 public class Schedule extends AbstractComponent {
 
+	private static final long serialVersionUID = -1858262705387350736L;
+
 	// type safe enum pattern
 	public static class CalendarFormat {
 		private final String type;
@@ -60,7 +62,7 @@ public class Schedule extends AbstractComponent {
 
 	protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
 	protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
-	protected DateFormat df_time_move = new SimpleDateFormat("yyyy-MM-dd-h-mm");
+	protected DateFormat df_time_move = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 	private ArrayList<RangeSelectListener> rangeSelectListeners = new ArrayList<RangeSelectListener>();
 	private ArrayList<EventMoveListener> eventMoveListeners = new ArrayList<EventMoveListener>();
 	private ArrayList<WeekClickListener> weekClickListeners = new ArrayList<WeekClickListener>();
@@ -287,6 +289,7 @@ public class Schedule extends AbstractComponent {
 						currentCalendar.add(Calendar.MINUTE, startMinutes);
 						Date start = currentCalendar.getTime();
 						currentCalendar.add(Calendar.MINUTE, endMinutes - startMinutes);
+						currentCalendar.add(Calendar.MILLISECOND, -1);
 						Date end = currentCalendar.getTime();
 						fireRangeSelect(start, end);
 					} catch (ParseException e) {
