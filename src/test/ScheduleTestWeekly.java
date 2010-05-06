@@ -85,8 +85,10 @@ public class ScheduleTestWeekly extends Application implements EventReader {
 				calendar.add(Calendar.MONTH, -1);
 				selectedDate = calendar.getTime();
 				schedule.setStartDate(selectedDate);
+				/* FIXME
 				String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-				label.setValue(cap);
+				*/
+				label.setValue("FIXME");
 				calendar.add(Calendar.MONTH, 1);
 				calendar.add(Calendar.DATE, -1);
 				schedule.setEndDate(calendar.getTime());

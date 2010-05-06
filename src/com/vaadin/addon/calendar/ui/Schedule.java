@@ -419,33 +419,47 @@ public class Schedule extends AbstractComponent {
 		}
 	}
 
-	/**
-	 * @return localized display names for weeks days starting from sunday.
-	 *         Returned array is always .lenght() ==7
-	 */
-	protected String[] getDayNamesShort() {
-		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.DAY_OF_WEEK, Calendar.SHORT, getLocale());
-		String[] dayNames = new String[7];
-		for (String s : displayNames.keySet()) {
-			Integer value = displayNames.get(s);
-			dayNames[value - 1] = s;
-		}
-		return dayNames;
-	}
+    /**
+     * @return localized display names for weeks days starting from sunday.
+     *         Returned array is always .lenght() ==7
+     */
+    protected String[] getDayNamesShort() {
+        /* FIXME
+        Map<String, Integer> displayNames = currentCalendar.getDisplayNames(
+                Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
+        */
+        
+        String[] dayNames = new String[7];
+        /* FIXME
+        for (String s : displayNames.keySet()) {
+            Integer value = displayNames.get(s);
+            dayNames[value - 1] = s;
+        } */
+        for (int i=0; i<dayNames.length; i++)
+            dayNames[i] = "FIXME";
+        return dayNames;
+    }
 
-	/**
-	 * @return localized display names for months starting from January.
-	 *         Returned array is always .lenght() ==12
-	 */
-	protected String[] getMonthNamesShort() {
-		Map<String, Integer> displayNames = currentCalendar.getDisplayNames(Calendar.MONTH, Calendar.SHORT, getLocale());
-		String[] monthNames = new String[12];
-		for (String s : displayNames.keySet()) {
-			Integer value = displayNames.get(s);
-			monthNames[value] = s;
-		}
-		return monthNames;
-	}
+    /**
+     * @return localized display names for months starting from January.
+     *         Returned array is always .lenght() ==12
+     */
+    protected String[] getMonthNamesShort() {
+        /* FIXME
+        Map<String, Integer> displayNames = currentCalendar.getDisplayNames(
+                Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+        */
+        String[] monthNames = new String[12];
+        /* FIXME
+        for (String s : displayNames.keySet()) {
+            Integer value = displayNames.get(s);
+            monthNames[value] = s;
+        } */
+        for (int i=0; i<monthNames.length; i++)
+            monthNames[i] = "FIXME";
+        
+        return monthNames;
+    }
 
 	/**
 	 * @param dateInWeek

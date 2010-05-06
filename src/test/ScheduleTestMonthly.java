@@ -48,8 +48,10 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 		calendar.setTime(today);
 		calendar.get(Calendar.MONTH);
 
+		/* FIXME
 		String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-		label.setValue(cap);
+        */
+		label.setValue("FIXME");
 		int rollAmount = calendar.get(Calendar.DAY_OF_MONTH) - 1;
 		calendar.add(Calendar.DAY_OF_MONTH, -rollAmount);
 		currentMonthsFirstDate = calendar.getTime();
@@ -57,7 +59,6 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 		calendar.add(Calendar.MONTH, 1);
 		calendar.add(Calendar.DATE, -1);
 		schedule.setEndDate(calendar.getTime());
-
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSizeFull();
 		vl.setMargin(true);
@@ -72,8 +73,10 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 				calendar.add(Calendar.MONTH, 1);
 				currentMonthsFirstDate = calendar.getTime();
 				schedule.setStartDate(currentMonthsFirstDate);
+		        /* FIXME
 				String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-				label.setValue(cap);
+                */
+				label.setValue("FIXME");
 				calendar.add(Calendar.MONTH, 1);
 				calendar.add(Calendar.DATE, -1);
 				schedule.setEndDate(calendar.getTime());
@@ -92,8 +95,10 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 				calendar.add(Calendar.MONTH, -1);
 				currentMonthsFirstDate = calendar.getTime();
 				schedule.setStartDate(currentMonthsFirstDate);
+				/* FIXME
 				String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-				label.setValue(cap);
+				*/
+				label.setValue("FIXME");
 				calendar.add(Calendar.MONTH, 1);
 				calendar.add(Calendar.DATE, -1);
 				schedule.setEndDate(calendar.getTime());
