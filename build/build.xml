@@ -147,10 +147,11 @@
 	<target name="serverside-tests" depends="compile">
         <echo>Running JUnit tests in ${test.src.base}/${test.src.dir}</echo>
 
-		<junit printsummary="yes"> 
+		<junit printsummary="yes" showoutput="true"> 
 			<classpath>
 				<pathelement path="${result.classes}" />
 				<path refid="compile.classpath"/>
+                <path refid="test.classpath"/>
 			</classpath>
 
 			<batchtest fork="yes">
