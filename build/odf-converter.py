@@ -109,8 +109,6 @@ if command == "stop":
     commandStop()
 
 elif command == "start" or command == "restart":
-    # Always try to stop.
-    commandStop()
     commandStart()
 
 elif command == "convert":
@@ -124,5 +122,8 @@ elif command == "convert":
     srcfile = sys.argv[2]
     trgfile = sys.argv[3]
     convert(srcfile, trgfile)
+else:
+    print "Invalid command '%s'" % (command)
+    sys.exit(1)
 
 print "Done."
