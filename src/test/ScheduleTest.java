@@ -631,8 +631,10 @@ public class ScheduleTest extends Application implements EventReader {
 	}
 
 	private void updateCaptionLabel() {
+	    /* FIXME
 		String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, getLocale()) + " " + calendar.get(Calendar.YEAR);
-		captionLabel.setValue(cap);
+		*/
+		captionLabel.setValue("FIXME");
 	}
 
 	/*
