@@ -262,8 +262,14 @@
 
 /** Customized phase colors*/
 .v-schedule .color1 {
-	background-color:rgb(123,255,225);
+	background-color:#9effae;
 }
 .v-schedule .color2 {
-	background-color:#14E6FF;
+	background-color:#8ac2ff;
+}
+.v-schedule .color3 {
+	background-color:#ff949b;
+}
+.v-schedule .color4 {
+	background-color:#ffc67a;
 }

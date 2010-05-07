@@ -1,10 +1,10 @@
 package test;
 
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Schedule;
@@ -19,205 +19,198 @@ import com.vaadin.ui.Button.ClickEvent;
 
 public class ScheduleTestMonthly extends Application implements EventReader {
 
-	private static final long serialVersionUID = -5436777475398410597L;
+    private static final long serialVersionUID = -5436777475398410597L;
 
-	GregorianCalendar calendar = new GregorianCalendar();
+    GregorianCalendar calendar = new GregorianCalendar();
 
-	private final long HOURINMILLIS = 60 * 60 * 1000;
+    private Schedule schedule;
 
-	private final long DAYINMILLIS = 24 * HOURINMILLIS;
+    private Date currentMonthsFirstDate = null;
 
-	private final long WEEKINMILLIS = 7 * DAYINMILLIS;
+    private Label label = new Label("");
 
-	private Schedule schedule;
+    @Override
+    public void init() {
+        Window w = new Window();
+        setMainWindow(w);
+        setTheme("calendar");
 
-	private Date currentMonthsFirstDate = null;
+        schedule = new Schedule(this);
+        schedule.setCalendarFormat(CalendarFormat.Format24H);
 
-	private Label label = new Label("");
+        Date today = new Date();
+        calendar.setTime(today);
+        calendar.get(Calendar.MONTH);
 
-	@Override
-	public void init() {
-		Window w = new Window();
-		setMainWindow(w);
-		setTheme("calendar");
+        DateFormatSymbols s = new DateFormatSymbols(getLocale());
+        String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
+        label.setValue(month + " " + calendar.get(Calendar.YEAR));
+        int rollAmount = calendar.get(Calendar.DAY_OF_MONTH) - 1;
+        calendar.add(Calendar.DAY_OF_MONTH, -rollAmount);
+        currentMonthsFirstDate = calendar.getTime();
+        schedule.setStartDate(currentMonthsFirstDate);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.DATE, -1);
+        schedule.setEndDate(calendar.getTime());
+        VerticalLayout vl = new VerticalLayout();
+        vl.setSizeFull();
+        vl.setMargin(true);
+        w.setContent(vl);
+        w.setSizeFull();
 
-		schedule = new Schedule(this);
-		schedule.setCalendarFormat(CalendarFormat.FORMAT_24H);
+        Button next = new Button("next", new Button.ClickListener() {
+            private static final long serialVersionUID = 1L;
 
-		Date today = new Date();
-		calendar.setTime(today);
-		calendar.get(Calendar.MONTH);
+            public void buttonClick(ClickEvent event) {
+                calendar.setTime(currentMonthsFirstDate);
+                calendar.add(Calendar.MONTH, 1);
+                currentMonthsFirstDate = calendar.getTime();
+                schedule.setStartDate(currentMonthsFirstDate);
+                DateFormatSymbols s = new DateFormatSymbols(getLocale());
+                String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
+                label.setValue(month + " " + calendar.get(Calendar.YEAR));
+                calendar.add(Calendar.MONTH, 1);
+                calendar.add(Calendar.DATE, -1);
+                schedule.setEndDate(calendar.getTime());
+            }
 
-		/* FIXME
-		String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-        */
-		label.setValue("FIXME");
-		int rollAmount = calendar.get(Calendar.DAY_OF_MONTH) - 1;
-		calendar.add(Calendar.DAY_OF_MONTH, -rollAmount);
-		currentMonthsFirstDate = calendar.getTime();
-		schedule.setStartDate(currentMonthsFirstDate);
-		calendar.add(Calendar.MONTH, 1);
-		calendar.add(Calendar.DATE, -1);
-		schedule.setEndDate(calendar.getTime());
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSizeFull();
-		vl.setMargin(true);
-		w.setContent(vl);
-		w.setSizeFull();
+        });
 
-		Button next = new Button("next", new Button.ClickListener() {
-			private static final long serialVersionUID = 1L;
+        vl.addComponent(label);
+        vl.addComponent(next);
 
-			public void buttonClick(ClickEvent event) {
-				calendar.setTime(currentMonthsFirstDate);
-				calendar.add(Calendar.MONTH, 1);
-				currentMonthsFirstDate = calendar.getTime();
-				schedule.setStartDate(currentMonthsFirstDate);
-		        /* FIXME
-				String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-                */
-				label.setValue("FIXME");
-				calendar.add(Calendar.MONTH, 1);
-				calendar.add(Calendar.DATE, -1);
-				schedule.setEndDate(calendar.getTime());
-			}
+        Button prev = new Button("prev", new Button.ClickListener() {
+            private static final long serialVersionUID = 1L;
 
-		});
+            public void buttonClick(ClickEvent event) {
+                calendar.setTime(currentMonthsFirstDate);
+                calendar.add(Calendar.MONTH, -1);
+                currentMonthsFirstDate = calendar.getTime();
+                schedule.setStartDate(currentMonthsFirstDate);
+                DateFormatSymbols s = new DateFormatSymbols(getLocale());
+                String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
+                label.setValue(month + " " + calendar.get(Calendar.YEAR));
+                calendar.add(Calendar.MONTH, 1);
+                calendar.add(Calendar.DATE, -1);
+                schedule.setEndDate(calendar.getTime());
+            }
 
-		vl.addComponent(label);
-		vl.addComponent(next);
+        });
 
-		Button prev = new Button("prev", new Button.ClickListener() {
-			private static final long serialVersionUID = 1L;
+        vl.addComponent(prev);
+        vl.addComponent(schedule);
+        vl.setExpandRatio(schedule, 1);
+    }
 
-			public void buttonClick(ClickEvent event) {
-				calendar.setTime(currentMonthsFirstDate);
-				calendar.add(Calendar.MONTH, -1);
-				currentMonthsFirstDate = calendar.getTime();
-				schedule.setStartDate(currentMonthsFirstDate);
-				/* FIXME
-				String cap = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " " + calendar.get(Calendar.YEAR);
-				*/
-				label.setValue("FIXME");
-				calendar.add(Calendar.MONTH, 1);
-				calendar.add(Calendar.DATE, -1);
-				schedule.setEndDate(calendar.getTime());
-			}
+    public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
+        // return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
+        return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
+    }
 
-		});
+    private ArrayList<ScheduleEvent> getEventsOverlappingForMonthlyTest(
+            Date fromStartDate, Date toEndDate) {
+        calendar.setTime(fromStartDate);
+        calendar.add(Calendar.DATE, 5);
+        ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
+        ScheduleEvent event = schedule.new ScheduleEvent("Phase1",
+                fromStartDate, calendar.getTime());
+        event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
+        event.setStyleName("color1");
+        e.add(event);
 
-		vl.addComponent(prev);
-		vl.addComponent(schedule);
-		vl.setExpandRatio(schedule, 1);
-	}
+        calendar.add(Calendar.DATE, 3);
+        Date d = calendar.getTime();
+        calendar.add(Calendar.DATE, 3);
+        Date d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Phase2", d, d2);
+        event.setStyleName("color2");
+        e.add(event);
 
-	public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
-		// return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
-		return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
-	}
+        calendar.add(Calendar.DATE, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.DATE, 10);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Phase3", d, d2);
+        event.setStyleName("color3");
+        e.add(event);
+        calendar.add(Calendar.DATE, -1);
+        d = calendar.getTime();
+        calendar.add(Calendar.DATE, 3);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Phase4", d, d2);
+        event.setStyleName("color4");
+        e.add(event);
 
-	private ArrayList<ScheduleEvent> getEventsOverlappingForMonthlyTest(Date fromStartDate, Date toEndDate) {
-		calendar.setTime(fromStartDate);
-		calendar.add(Calendar.DATE, 5);
-		ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
-		ScheduleEvent event = schedule.new ScheduleEvent("Phase1", fromStartDate, calendar.getTime());
-		event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
-		event.setStyleName("color1");
-		e.add(event);
+        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.HOUR, -6);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 1", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.DATE, 3);
-		Date d = calendar.getTime();
-		calendar.add(Calendar.DATE, 3);
-		Date d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Phase2", d, d2);
-		event.setStyleName("color2");
-		e.add(event);
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 2", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.DATE, 1);
-		d = calendar.getTime();
-		calendar.add(Calendar.DATE, 10);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Phase3", d, d2);
-		event.setStyleName("color3");
-		e.add(event);
-		calendar.add(Calendar.DATE, -1);
-		d = calendar.getTime();
-		calendar.add(Calendar.DATE, 3);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Phase4", d, d2);
-		event.setStyleName("color4");
-		e.add(event);
+        calendar.add(Calendar.MINUTE, 30);
+        d = calendar.getTime();
+        calendar.add(Calendar.MINUTE, 30);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 3", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.DATE, -1);
-		calendar.add(Calendar.HOUR, -6);
-		d = calendar.getTime();
-		calendar.add(Calendar.HOUR, 1);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 1", d, d2);
-		e.add(event);
+        calendar.add(Calendar.MINUTE, 30);
+        d = calendar.getTime();
+        calendar.add(Calendar.MINUTE, 30);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 4", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.HOUR, 1);
-		d = calendar.getTime();
-		calendar.add(Calendar.HOUR, 1);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 2", d, d2);
-		e.add(event);
+        calendar.add(Calendar.MINUTE, 30);
+        d = calendar.getTime();
+        calendar.add(Calendar.MINUTE, 30);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 5", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.MINUTE, 30);
-		d = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 30);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 3", d, d2);
-		e.add(event);
+        calendar.add(Calendar.MINUTE, 30);
+        d = calendar.getTime();
+        calendar.add(Calendar.MINUTE, 30);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 6", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.MINUTE, 30);
-		d = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 30);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 4", d, d2);
-		e.add(event);
+        calendar.add(Calendar.MINUTE, 30);
+        d = calendar.getTime();
+        calendar.add(Calendar.MINUTE, 30);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 7", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.MINUTE, 30);
-		d = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 30);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 5", d, d2);
-		e.add(event);
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 8", d, d2);
 
-		calendar.add(Calendar.MINUTE, 30);
-		d = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 30);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 6", d, d2);
-		e.add(event);
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 9", d, d2);
+        e.add(event);
 
-		calendar.add(Calendar.MINUTE, 30);
-		d = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 30);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 7", d, d2);
-		e.add(event);
-
-		calendar.add(Calendar.HOUR, 1);
-		d = calendar.getTime();
-		calendar.add(Calendar.HOUR, 1);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 8", d, d2);
-
-		calendar.add(Calendar.HOUR, 1);
-		d = calendar.getTime();
-		calendar.add(Calendar.HOUR, 1);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 9", d, d2);
-		e.add(event);
-
-		calendar.add(Calendar.HOUR, 1);
-		d = calendar.getTime();
-		calendar.add(Calendar.HOUR, 1);
-		d2 = calendar.getTime();
-		event = schedule.new ScheduleEvent("Session 10", d, d2);
-		e.add(event);
-		e.add(event);
-		return e;
-	}
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = schedule.new ScheduleEvent("Session 10", d, d2);
+        e.add(event);
+        e.add(event);
+        return e;
+    }
 }
