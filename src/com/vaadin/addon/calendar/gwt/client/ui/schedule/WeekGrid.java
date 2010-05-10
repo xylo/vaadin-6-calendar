@@ -677,8 +677,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                             / HALFHOUR_IN_PX;
                 }
 
-                int test = relativeX / (getOffsetWidth() + 3);
-                test = test * (getOffsetWidth() + 3);
+                int test = relativeX / (getOffsetWidth() + 5);
+                test = test * (getOffsetWidth() + 5);
 
                 Style s = getElement().getStyle();
 
@@ -711,7 +711,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 return readOnly;
             }
 
-        } // End of DayEvent
+        }
 
         @SuppressWarnings("deprecation")
         public void setToday(Date today) {
