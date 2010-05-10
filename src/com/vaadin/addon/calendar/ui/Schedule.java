@@ -293,14 +293,8 @@ public class Schedule extends AbstractComponent implements
             }
         }
         target.endTag("events");
-        target.addVariable(this, "rangeSelect", "");
-        target.addVariable(this, "eventOpened", -1);
-        target.addVariable(this, "dayOpened", "");
-        target.addVariable(this, "weekOpened", "");
         target.addVariable(this, "scroll", scrollTop);
-        target.addVariable(this, "eventMove", "");
         target.addVariable(this, "navigation", 0);
-        target.addAttribute("asdf", this);
         super.paintContent(target);
     }
 
