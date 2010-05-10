@@ -7,10 +7,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.ui.Schedule;
 import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
 import com.vaadin.addon.calendar.ui.Schedule.EventReader;
-import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -112,8 +112,8 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         calendar.setTime(fromStartDate);
         calendar.add(Calendar.DATE, 5);
         ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
-        ScheduleEvent event = schedule.new ScheduleEvent("Phase1",
-                fromStartDate, calendar.getTime());
+        ScheduleEvent event = new ScheduleTestEvent("Phase1", fromStartDate,
+                calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);
@@ -122,7 +122,7 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         Date d = calendar.getTime();
         calendar.add(Calendar.DATE, 3);
         Date d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Phase2", d, d2);
+        event = new ScheduleTestEvent("Phase2", d, d2);
         event.setStyleName("color2");
         e.add(event);
 
@@ -130,14 +130,14 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         d = calendar.getTime();
         calendar.add(Calendar.DATE, 10);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Phase3", d, d2);
+        event = new ScheduleTestEvent("Phase3", d, d2);
         event.setStyleName("color3");
         e.add(event);
         calendar.add(Calendar.DATE, -1);
         d = calendar.getTime();
         calendar.add(Calendar.DATE, 3);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Phase4", d, d2);
+        event = new ScheduleTestEvent("Phase4", d, d2);
         event.setStyleName("color4");
         e.add(event);
 
@@ -146,69 +146,69 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         d = calendar.getTime();
         calendar.add(Calendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 1", d, d2);
+        event = new ScheduleTestEvent("Session 1", d, d2);
         e.add(event);
 
         calendar.add(Calendar.HOUR, 1);
         d = calendar.getTime();
         calendar.add(Calendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 2", d, d2);
+        event = new ScheduleTestEvent("Session 2", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 3", d, d2);
+        event = new ScheduleTestEvent("Session 3", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 4", d, d2);
+        event = new ScheduleTestEvent("Session 4", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 5", d, d2);
+        event = new ScheduleTestEvent("Session 5", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 6", d, d2);
+        event = new ScheduleTestEvent("Session 6", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 7", d, d2);
-        e.add(event);
-
-        calendar.add(Calendar.HOUR, 1);
-        d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
-        d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 8", d, d2);
-
-        calendar.add(Calendar.HOUR, 1);
-        d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
-        d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 9", d, d2);
+        event = new ScheduleTestEvent("Session 7", d, d2);
         e.add(event);
 
         calendar.add(Calendar.HOUR, 1);
         d = calendar.getTime();
         calendar.add(Calendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 10", d, d2);
+        event = new ScheduleTestEvent("Session 8", d, d2);
+
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = new ScheduleTestEvent("Session 9", d, d2);
+        e.add(event);
+
+        calendar.add(Calendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(Calendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = new ScheduleTestEvent("Session 10", d, d2);
         e.add(event);
         e.add(event);
         return e;

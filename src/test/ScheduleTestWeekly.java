@@ -8,10 +8,10 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.ui.Schedule;
 import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
 import com.vaadin.addon.calendar.ui.Schedule.EventReader;
-import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -111,7 +111,6 @@ public class ScheduleTestWeekly extends Application implements EventReader {
 
             public void menuSelected(MenuItem selectedItem) {
                 schedule.setHideWeekends(true);
-
             }
 
         });
@@ -125,8 +124,8 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         calendar.setTime(fromStartDate);
         calendar.add(Calendar.DATE, 1);
         ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
-        ScheduleEvent event = schedule.new ScheduleEvent("Phase1",
-                fromStartDate, calendar.getTime());
+        ScheduleEvent event = new ScheduleTestEvent("Phase1", fromStartDate,
+                calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);
@@ -135,7 +134,7 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         Date d = calendar.getTime();
         calendar.add(Calendar.DATE, 1);
         Date d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Phase2", d, d2);
+        event = new ScheduleTestEvent("Phase2", d, d2);
         event.setStyleName("color2");
         e.add(event);
 
@@ -143,14 +142,14 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         d = calendar.getTime();
         calendar.add(Calendar.HOUR, 2);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Event 1", d, d2);
+        event = new ScheduleTestEvent("Event 1", d, d2);
         e.add(event);
 
         calendar.add(Calendar.HOUR, 2);
         d = calendar.getTime();
         calendar.add(Calendar.HOUR, 3);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Event 2", d, d2);
+        event = new ScheduleTestEvent("Event 2", d, d2);
         e.add(event);
 
         calendar.add(Calendar.HOUR, -2);
@@ -158,14 +157,14 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         calendar.add(Calendar.HOUR, 1);
         calendar.add(Calendar.MINUTE, 15);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Event 3", d, d2);
+        event = new ScheduleTestEvent("Event 3", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, -90);
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 1", d, d2);
+        event = new ScheduleTestEvent("Session 1", d, d2);
         e.add(event);
 
         calendar.add(Calendar.MINUTE, 250);
@@ -173,7 +172,7 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         d = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         d2 = calendar.getTime();
-        event = schedule.new ScheduleEvent("Session 2", d, d2);
+        event = new ScheduleTestEvent("Session 2", d, d2);
         event.setStyleName("test");
         e.add(event);
 

@@ -10,13 +10,13 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.ui.Schedule;
 import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
 import com.vaadin.addon.calendar.ui.Schedule.EventMoveListener;
 import com.vaadin.addon.calendar.ui.Schedule.EventReader;
 import com.vaadin.addon.calendar.ui.Schedule.NavigationListener;
 import com.vaadin.addon.calendar.ui.Schedule.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.Schedule.ScheduleEvent;
 import com.vaadin.addon.calendar.ui.Schedule.WeekClickListener;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -563,7 +563,7 @@ public class ScheduleTest extends Application implements EventReader {
     }
 
     private ScheduleEvent createNewEvent(Date startDate, Date endDate) {
-        ScheduleEvent event = schedule.new ScheduleEvent("", startDate, endDate);
+        ScheduleEvent event = new ScheduleTestEvent("", startDate, endDate);
         event.setStyleName("color1");
         return event;
     }
