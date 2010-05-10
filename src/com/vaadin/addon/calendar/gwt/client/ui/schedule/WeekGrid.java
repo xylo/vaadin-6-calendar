@@ -427,9 +427,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 String yr = (currentDate.getYear() + 1900) + "-"
                         + (currentDate.getMonth() + 1) + "-"
                         + currentDate.getDate();
-                schedule.getClient().updateVariable(schedule.getPID(),
-                        "rangeSelect",
-                        yr + ":" + startMinutes + ":" + endMinutes, true);
+
+                if (schedule.getClient().hasEventListeners(schedule,
+                        ScheduleEventId.RANGESELECT)) {
+                    schedule.getClient().updateVariable(schedule.getPID(),
+                            ScheduleEventId.RANGESELECT,
+                            yr + ":" + startMinutes + ":" + endMinutes, true);
+                }
                 eventRangeStart = -1;
             }
         }
@@ -633,8 +637,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                         DateCell parent = (DateCell) getParent();
                         VSchedule wk = (VSchedule) parent.getParent()
                                 .getParent().getParent().getParent();
-                        wk.getClient().updateVariable(wk.getPID(),
-                                "eventOpened", scheduleEvent.getIndex(), true);
+
+                        if (wk.getClient().hasEventListeners(wk,
+                                ScheduleEventId.EVENTCLICK)) {
+                            wk.getClient().updateVariable(wk.getPID(),
+                                    ScheduleEventId.EVENTCLICK,
+                                    scheduleEvent.getIndex(), true);
+                        }
                     } else if (e == getElement()) {
                     } else if (e == dayEvent) {
                     }
@@ -818,8 +827,12 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         String eventMove = se.getIndex() + ":"
                 + dateformat_date.format(targetDate) + "-"
                 + dateformat_time.format(fromDatetime);
-        schedule.getClient().updateVariable(schedule.getPID(), "eventMove",
-                eventMove, true);
+
+        if (schedule.getClient().hasEventListeners(schedule,
+                ScheduleEventId.EVENTMOVE)) {
+            schedule.getClient().updateVariable(schedule.getPID(),
+                    ScheduleEventId.EVENTMOVE, eventMove, true);
+        }
     }
 
     public void setToday(Date todayDate, Date todayTimestamp) {

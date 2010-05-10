@@ -16,6 +16,21 @@ import java.util.TimeZone;
 
 import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEventId;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickListener;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -30,7 +45,9 @@ import com.vaadin.ui.ClientWidget;
  * weekly view is used.
  */
 @ClientWidget(VSchedule.class)
-public class Schedule extends AbstractComponent {
+public class Schedule extends AbstractComponent implements
+        ScheduleEvents.NavigationNotifier, ScheduleEvents.EventMoveNotifier,
+        ScheduleEvents.RangeSelectNotifier {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -58,10 +75,6 @@ public class Schedule extends AbstractComponent {
     protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
     protected DateFormat df_time_move = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 
-    private ArrayList<RangeSelectListener> rangeSelectListeners = new ArrayList<RangeSelectListener>();
-    private ArrayList<EventMoveListener> eventMoveListeners = new ArrayList<EventMoveListener>();
-    private ArrayList<WeekClickListener> weekClickListeners = new ArrayList<WeekClickListener>();
-    private ArrayList<NavigationListener> navigationListeners = new ArrayList<NavigationListener>();
     protected boolean rangeSelection = true;
     private int scrollTop = 305;
 
@@ -322,8 +335,8 @@ public class Schedule extends AbstractComponent {
     @Override
     public void changeVariables(Object source, Map variables) {
         super.changeVariables(source, variables);
-        if (variables.containsKey("rangeSelect") && !isReadOnly()) {
-            String value = (String) variables.get("rangeSelect");
+        if (variables.containsKey(ScheduleEventId.RANGESELECT) && !isReadOnly()) {
+            String value = (String) variables.get(ScheduleEventId.RANGESELECT);
             if (value != null && value.length() > 14 && value.contains("TO")) {
                 String[] dates = value.split("TO");
                 try {
@@ -359,14 +372,14 @@ public class Schedule extends AbstractComponent {
                 }
             }
         }
-        if (variables.containsKey("eventOpened")) {
-            Integer i = (Integer) variables.get("eventOpened");
+        if (variables.containsKey(ScheduleEventId.EVENTCLICK)) {
+            Integer i = (Integer) variables.get(ScheduleEventId.EVENTCLICK);
             if (i >= 0 && i < events.size() && events.get(i) != null) {
                 fireEventClick(i);
             }
         }
-        if (variables.containsKey("dayOpened")) {
-            String message = (String) variables.get("dayOpened");
+        if (variables.containsKey(ScheduleEventId.DATECLICK)) {
+            String message = (String) variables.get(ScheduleEventId.DATECLICK);
             if (message != null && message.length() > 6) {
                 try {
                     Date d = df_date.parse(message);
@@ -375,9 +388,9 @@ public class Schedule extends AbstractComponent {
                 }
             }
         }
-        if (variables.containsKey("weekOpened")) {
+        if (variables.containsKey(ScheduleEventId.WEEKCLICK)) {
 
-            String s = (String) variables.get("weekOpened");
+            String s = (String) variables.get(ScheduleEventId.WEEKCLICK);
             if (s.length() > 0 && s.contains("w")) {
                 String[] splitted = s.split("w");
                 if (splitted.length == 2) {
@@ -399,8 +412,9 @@ public class Schedule extends AbstractComponent {
                 // Client cheating, do nothing
             }
         }
-        if (variables.containsKey("eventMove") && !isReadOnly()) {
-            String message = variables.get("eventMove").toString();
+        if (variables.containsKey(ScheduleEventId.EVENTMOVE) && !isReadOnly()) {
+            String message = variables.get(ScheduleEventId.EVENTMOVE)
+                    .toString();
             if (message != null && message.length() > 10) {
                 String[] splitted = message.split(":");
                 if (splitted.length == 2) {
@@ -436,46 +450,35 @@ public class Schedule extends AbstractComponent {
             currentCalendar.add(Calendar.DATE, durationInDays);
             endDate = currentCalendar.getTime();
             requestRepaint();
-            fireNavigationEvent();
+            fireNavigationEvent(index != -1);
         }
     }
 
-    private void fireNavigationEvent() {
-        for (NavigationListener l : navigationListeners) {
-            l.onScheduleForward();
-        }
+    private void fireNavigationEvent(boolean forward) {
+        if (forward)
+            fireEvent(new ForwardEvent(this));
+        else
+            fireEvent(new BackwardEvent(this));
     }
 
     private void fireEventMove(int index, Date newFromDatetime) {
-        ScheduleEvent e = events.get(index);
-        for (EventMoveListener l : eventMoveListeners) {
-            l.eventMoved(e, newFromDatetime);
-        }
+        fireEvent(new EventMoveEvent(this, events.get(index), newFromDatetime));
     }
 
     private void fireWeekClick(int week, int year) {
-        for (WeekClickListener l : weekClickListeners) {
-            l.weekClicked(week, year);
-        }
+        fireEvent(new WeekClickEvent(this, week, year));
     }
 
     private void fireEventClick(Integer i) {
-        ScheduleEvent e = events.get(i);
-        for (NavigationListener l : navigationListeners) {
-            l.eventClicked(e);
-        }
+        fireEvent(new EventClickEvent(this, events.get(i)));
     }
 
     private void fireDateClick(Date d) {
-        for (NavigationListener l : navigationListeners) {
-            l.dateClicked(d);
-        }
+        fireEvent(new DateClickEvent(this, d));
     }
 
     private void fireRangeSelect(Date from, Date to) {
-        for (RangeSelectListener rsl : rangeSelectListeners) {
-            rsl.rangeSelected(from, to);
-        }
+        fireEvent(new RangeSelectEvent(this, from, to));
     }
 
     /**
@@ -530,34 +533,6 @@ public class Schedule extends AbstractComponent {
         return currentCalendar.getTime();
     }
 
-    public void addWeekClickListener(WeekClickListener l) {
-        if (!weekClickListeners.contains(l)) {
-            weekClickListeners.add(l);
-        }
-    }
-
-    public void addEventMoveListener(EventMoveListener l) {
-        if (!eventMoveListeners.contains(l)) {
-            eventMoveListeners.add(l);
-        }
-    }
-
-    public void addRangeSelectListener(RangeSelectListener l) {
-        if (!rangeSelectListeners.contains(l)) {
-            rangeSelectListeners.add(l);
-        }
-    }
-
-    public void addNavigationListener(NavigationListener l) {
-        navigationListeners.add(l);
-    }
-
-    public void removeNavigationLister(NavigationListener l) {
-        if (!navigationListeners.contains(l)) {
-            navigationListeners.remove(l);
-        }
-    }
-
     /**
      * Disable or enable date range selection
      * 
@@ -582,38 +557,6 @@ public class Schedule extends AbstractComponent {
     }
 
     /**
-     * Listener for schedule event drag&drops
-     */
-    public interface EventMoveListener {
-        public void eventMoved(ScheduleEvent e, Date newFromDatetime);
-    }
-
-    /**
-     * Listener for day cell drag-marking with mouse
-     */
-    public interface RangeSelectListener {
-        public void rangeSelected(Date startDate, Date endDate);
-    }
-
-    public interface NavigationListener {
-        public void onScheduleForward();
-
-        public void onScheduleBackward();
-
-        public void dateClicked(Date d);
-
-        public void eventClicked(ScheduleEvent e);
-
-    }
-
-    /**
-     * Listener for week clicks
-     */
-    public interface WeekClickListener {
-        public void weekClicked(int week, int year);
-    }
-
-    /**
      * Interface for querying datasource. Schedule component must have
      * EventReader implementation. This interface will be dropped in future
      * versions. In future schedule will require DateContainer or similiar.
@@ -621,6 +564,72 @@ public class Schedule extends AbstractComponent {
     public interface EventReader {
         public ArrayList<ScheduleEvent> getEvents(Date fromStartDate,
                 Date toEndDate);
+    }
+
+    public void addListener(ForwardListener listener) {
+        addListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener,
+                ForwardListener.forwardMethod);
+    }
+
+    public void addListener(BackwardListener listener) {
+        addListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener,
+                BackwardListener.backwardMethod);
+    }
+
+    public void addListener(DateClickListener listener) {
+        addListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener,
+                DateClickListener.dateClickMethod);
+    }
+
+    public void addListener(EventClickListener listener) {
+        addListener(EventClickEvent.EVENT_ID, EventClickEvent.class, listener,
+                EventClickListener.eventClickMethod);
+    }
+
+    public void addListener(ScheduleEvents.WeekClickListener listener) {
+        addListener(WeekClickEvent.EVENT_ID, WeekClickEvent.class, listener,
+                WeekClickListener.weekClickMethod);
+    }
+
+    public void removeListener(ForwardListener listener) {
+        removeListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener);
+    }
+
+    public void removeListener(BackwardListener listener) {
+        removeListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener);
+    }
+
+    public void removeListener(DateClickListener listener) {
+        removeListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener);
+    }
+
+    public void removeListener(EventClickListener listener) {
+        removeListener(EventClickEvent.EVENT_ID, EventClickEvent.class,
+                listener);
+    }
+
+    public void removeListener(WeekClickListener listener) {
+        removeListener(WeekClickEvent.EVENT_ID, WeekClickEvent.class, listener);
+    }
+
+    public void addListener(EventMoveListener listener) {
+        addListener(EventMoveEvent.EVENT_ID, EventMoveEvent.class, listener,
+                EventMoveListener.eventMoveMethod);
+    }
+
+    public void removeListener(EventMoveListener listener) {
+        removeListener(EventMoveEvent.EVENT_ID, EventMoveEvent.class, listener);
+    }
+
+    public void addListener(RangeSelectListener listener) {
+        addListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
+                listener, RangeSelectListener.rangeSelectMethod);
+
+    }
+
+    public void removeListener(RangeSelectListener listener) {
+        removeListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
+                listener);
     }
 
 }

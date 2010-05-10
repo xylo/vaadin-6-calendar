@@ -13,11 +13,21 @@ import com.vaadin.Application;
 import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.ui.Schedule;
 import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.addon.calendar.ui.Schedule.EventMoveListener;
 import com.vaadin.addon.calendar.ui.Schedule.EventReader;
-import com.vaadin.addon.calendar.ui.Schedule.NavigationListener;
-import com.vaadin.addon.calendar.ui.Schedule.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.Schedule.WeekClickListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickEvent;
+import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickListener;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -228,45 +238,52 @@ public class ScheduleTest extends Application implements EventReader {
         addScheduleEventListeners();
     }
 
+    @SuppressWarnings("serial")
     private void addScheduleEventListeners() {
         // Register week clicks by changing the schedules start and end dates.
-        schedule.addWeekClickListener(new WeekClickListener() {
+        schedule.addListener(new WeekClickListener() {
 
-            public void weekClicked(int week, int year) {
-                switchToWeekView(week, year);
+            public void weekClick(WeekClickEvent event) {
+                switchToWeekView(event.getWeek(), event.getYear());
             }
         });
+        schedule.addListener(new ForwardListener() {
 
-        // Navigation listener is actually a container of few listeners.
-        schedule.addNavigationListener(new NavigationListener() {
-
-            public void onScheduleForward() {
+            public void forward(ForwardEvent event) {
             }
+        });
+        schedule.addListener(new BackwardListener() {
 
-            public void onScheduleBackward() {
+            public void backward(BackwardEvent event) {
             }
+        });
+        schedule.addListener(new EventClickListener() {
 
-            public void eventClicked(ScheduleEvent e) {
-                showEventPopup(e, false);
+            public void eventClick(EventClickEvent event) {
+                showEventPopup(event.getScheduleEvent(), false);
             }
+        });
+        schedule.addListener(new DateClickListener() {
 
-            public void dateClicked(Date d) {
+            public void dateClick(DateClickEvent event) {
                 // Schedules start and end dates will be changed.
-                handleDateClick(d);
+                handleDateClick(event.getDate());
             }
         });
 
-        schedule.addRangeSelectListener(new RangeSelectListener() {
+        schedule.addListener(new RangeSelectListener() {
 
-            public void rangeSelected(Date startDate, Date endDate) {
-                showEventPopup(createNewEvent(startDate, endDate), true);
+            public void rangeSelect(RangeSelectEvent event) {
+                showEventPopup(createNewEvent(event.getFrom(), event.getTo()),
+                        true);
             }
         });
 
-        schedule.addEventMoveListener(new EventMoveListener() {
+        schedule.addListener(new EventMoveListener() {
 
-            public void eventMoved(ScheduleEvent e, Date newFromDatetime) {
-                applyEventMove(e, newFromDatetime);
+            public void eventMove(EventMoveEvent event) {
+                applyEventMove(event.getScheduleEvent(), event
+                        .getNewFromDateTime());
             }
         });
     }

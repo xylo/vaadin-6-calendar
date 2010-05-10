@@ -82,8 +82,11 @@ public class MonthGrid extends Grid {
 
             value = schedule.getDateFormat().format(startDate) + "TO"
                     + schedule.getDateFormat().format(endDate);
-            schedule.getClient().updateVariable(schedule.getPID(),
-                    "rangeSelect", value, true);
+            if (schedule.getClient().hasEventListeners(schedule,
+                    ScheduleEventId.RANGESELECT)) {
+                schedule.getClient().updateVariable(schedule.getPID(),
+                        ScheduleEventId.RANGESELECT, value, true);
+            }
 
             selectionStart = null;
             selectionEnd = null;
