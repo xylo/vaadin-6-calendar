@@ -1,49 +1,65 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class WeeklyLongEvents extends HorizontalPanel {
+
     private static final int MARGINLEFT = 50;
-    private static final int BORDERWIDTH = 1;
-    private static final int HEIGHT = 30;
+
+    public static final int EVENT_HEIGTH = 15;
+
+    public static final int EVENT_MARGIN = 1;
+
     private int width;
+
+    private int rowCount = 0;
 
     public WeeklyLongEvents() {
         setStylePrimaryName("v-schedule-weekly-longevents");
         getElement().getStyle().setProperty("marginLeft", MARGINLEFT + "px");
-        setHeight(HEIGHT - BORDERWIDTH + "px");
     }
 
     public void addDate(Date d) {
-        DateCell dc = new DateCell();
-        dc.setDate(d);
-        add(dc);
+        DateCellContainer dcc = new DateCellContainer();
+        dcc.setDate(d);
+        add(dcc);
     }
 
     public void setWidthPX(int width) {
-        this.width = width - (MARGINLEFT + BORDERWIDTH + 16);
+        this.width = width - (MARGINLEFT + 16);
         if (getWidgetCount() == 0) {
             return;
         }
         updateCellWidths();
     }
 
+    public void addEvents(List<ScheduleEvent> events) {
+        addEmptyEventSlots(events.size());
+        for (ScheduleEvent e : events) {
+            addEvent(e);
+        }
+    }
+
     public void addEvent(ScheduleEvent e) {
+        updateEventSlot(e);
+
         int dateCount = getWidgetCount();
         Date from = e.getFromDate();
         Date to = e.getToDate();
         boolean started = false;
         for (int i = 0; i < dateCount; i++) {
-            DateCell dc = (DateCell) getWidget(i);
+            DateCellContainer dc = (DateCellContainer) getWidget(i);
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(to);
-            Element eventElement = dc.getEventElement();
+            Element eventElement = dc.getElement(e.getSlotIndex());
             if (comp >= 0 && comp2 <= 0) {
                 if (comp == 0) {
                     setStyleName(eventElement, "cell-start", true);
@@ -64,24 +80,78 @@ public class WeeklyLongEvents extends HorizontalPanel {
                     eventElement.setInnerText(e.getCaption());
                     started = true;
                 }
+
+                // heigth =
+                // Integer.parseInt(dc.getElement().getStyle().getHeight().substring(0,
+                // ));
             } else if (started) {
                 break;
             }
         }
     }
 
+    private void updateEventSlot(ScheduleEvent e) {
+        // TODO Now every event will be drawn to a new "line". Check if any
+        // line has free space where this event could fit, and put it there.
+        // Just updating the slotIndex should do the trick..
+        if (e.getSlotIndex() == -1) {
+            e.setSlotIndex(rowCount);
+            rowCount++;
+        }
+    }
+
+    private void addEmptyEventSlots(int eventCount) {
+        int dateCount = getWidgetCount();
+        for (int i = 0; i < dateCount; i++) {
+            DateCellContainer dc = (DateCellContainer) getWidget(i);
+            dc.addEmptyEventCells(eventCount);
+        }
+    }
+
+    public int getRowCount() {
+        return rowCount;
+    }
+
     public void updateCellWidths() {
         if (this.width > 0) {
             int cells = getWidgetCount();
             int cellWidth = width / cells;
-            cellWidth -= BORDERWIDTH;
             for (int i = 0; i < cells; i++) {
-                DateCell dc = (DateCell) getWidget(i);
+                DateCellContainer dc = (DateCellContainer) getWidget(i);
                 dc.setWidth(cellWidth + "px");
-                dc.setHeight((HEIGHT - BORDERWIDTH) + "px");
             }
         }
 
+    }
+
+    public int calculateHeigth() {
+        return getRowCount() * (EVENT_HEIGTH + EVENT_MARGIN);
+    }
+
+    public static class DateCellContainer extends VerticalPanel {
+        private Date date;
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public Element getElement(int slotIndex) {
+            return ((DateCell) getChildren().get(slotIndex)).getEventElement();
+        }
+
+        public void addEmptyEventCells(int eventCount) {
+            for (int i = 0; i < eventCount; i++) {
+                add(new DateCell());
+            }
+        }
+
+        public void addEmptyEventCell() {
+            add(new DateCell());
+        }
     }
 
     public static class DateCell extends HTML {

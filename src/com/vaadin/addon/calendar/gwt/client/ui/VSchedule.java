@@ -2,6 +2,7 @@ package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
@@ -91,10 +92,6 @@ public class VSchedule extends Composite implements Paintable {
         if (uidl.hasAttribute("readonly")) {
             readOnly = uidl.getBooleanAttribute("readonly");
         }
-        int firstDayOfWeek = uidl.getIntAttribute("fdow");
-        int scroll = uidl.getIntVariable("scroll");
-        String now = uidl.getStringAttribute("now");
-        Date today = dateformat_datetime.parse(now);
 
         UIDL daysUidl = uidl.getChildUIDL(0);
         int daysCount = daysUidl.getChildCount();
@@ -103,67 +100,89 @@ public class VSchedule extends Composite implements Paintable {
         }
 
         if (daysCount > 7) {
-            if (hideWeekends) {
-                nameToolbar.setDayNames(new String[] { dayNames[1],
-                        dayNames[2], dayNames[3], dayNames[4], dayNames[5] });
-            } else if (firstDayOfWeek == 2) {
-                nameToolbar.setDayNames(new String[] { dayNames[1],
-                        dayNames[2], dayNames[3], dayNames[4], dayNames[5],
-                        dayNames[6], dayNames[0] });
-            } else {
-                nameToolbar.setDayNames(new String[] { dayNames[0],
-                        dayNames[1], dayNames[2], dayNames[3], dayNames[4],
-                        dayNames[5], dayNames[6] });
-            }
+            updateMonthView(uidl, daysUidl);
 
-            weeklyLongEvents = null;
-            weekGrid = null;
-            updateMonthGrid(daysCount, daysUidl, today);
-            outer.add(nameToolbar, DockPanel.NORTH);
-            outer.add(weekToolbar, DockPanel.WEST);
-            outer.setCellHeight(nameToolbar, MONTHLY_DAYTOOLBARHEIGHT + "px");
-            outer.setCellWidth(weekToolbar, MONTHLY_WEEKTOOLBARWIDTH + "px");
-            weekToolbar.updateCellHeights();
-            outer.add(monthGrid, DockPanel.CENTER);
-            ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
-            updateEventsToMonthGrid(events);
-            recalculateHeights();
         } else {
-            monthGrid = null;
-            weeklyLongEvents = new WeeklyLongEvents();
-            if (weekGrid == null) {
-                weekGrid = new WeekGrid(this, format);
-            }
-            updateWeekGrid(daysCount, daysUidl, today);
-            ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
-            updateEventsToWeekGrid(events);
-            outer.add(dayToolbar, DockPanel.NORTH);
-            outer.add(weeklyLongEvents, DockPanel.NORTH);
-            outer.add(weekGrid, DockPanel.SOUTH);
-            weekGrid.setHeightPX(intHeight);
-            weekGrid.setWidthPX(intWidth);
-            outer.setCellHeight(dayToolbar, MONTHLY_DAYTOOLBARHEIGHT + "px");
-            dayToolbar.updateCellWidths();
-            weeklyLongEvents.setWidthPX(intWidth);
-            weeklyLongEvents.updateCellWidths();
-            weekGrid.setScrollPosition(scroll);
-            // weekGrid.updateCellWidths();
+            updateWeekView(uidl, daysUidl);
         }
 
     }
 
+    private void updateMonthView(UIDL uidl, UIDL daysUidl) {
+        int firstDayOfWeek = uidl.getIntAttribute("fdow");
+        Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
+
+        if (hideWeekends) {
+            nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
+                    dayNames[3], dayNames[4], dayNames[5] });
+        } else if (firstDayOfWeek == 2) {
+            nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
+                    dayNames[3], dayNames[4], dayNames[5], dayNames[6],
+                    dayNames[0] });
+        } else {
+            nameToolbar.setDayNames(new String[] { dayNames[0], dayNames[1],
+                    dayNames[2], dayNames[3], dayNames[4], dayNames[5],
+                    dayNames[6] });
+        }
+
+        weeklyLongEvents = null;
+        weekGrid = null;
+        updateMonthGrid(daysUidl.getChildCount(), daysUidl, today);
+        outer.add(nameToolbar, DockPanel.NORTH);
+        outer.add(weekToolbar, DockPanel.WEST);
+        outer.setCellHeight(nameToolbar, MONTHLY_DAYTOOLBARHEIGHT + "px");
+        outer.setCellWidth(weekToolbar, MONTHLY_WEEKTOOLBARWIDTH + "px");
+        weekToolbar.updateCellHeights();
+        outer.add(monthGrid, DockPanel.CENTER);
+        ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
+        updateEventsToMonthGrid(events);
+        recalculateHeights();
+    }
+
+    private void updateWeekView(UIDL uidl, UIDL daysUidl) {
+        int scroll = uidl.getIntVariable("scroll");
+        Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
+
+        monthGrid = null;
+        ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
+
+        weeklyLongEvents = new WeeklyLongEvents();
+        if (weekGrid == null) {
+            weekGrid = new WeekGrid(this, format);
+        }
+        updateWeekGrid(daysUidl.getChildCount(), daysUidl, today);
+        updateEventsToWeekGrid(events);
+        outer.add(dayToolbar, DockPanel.NORTH);
+        outer.add(weeklyLongEvents, DockPanel.NORTH);
+        outer.add(weekGrid, DockPanel.SOUTH);
+        weekGrid.setHeightPX(intHeight - weeklyLongEvents.calculateHeigth());
+        weekGrid.setWidthPX(intWidth);
+        outer.setCellHeight(dayToolbar, MONTHLY_DAYTOOLBARHEIGHT + "px");
+        dayToolbar.updateCellWidths();
+        weeklyLongEvents.setWidthPX(intWidth);
+        weekGrid.setScrollPosition(scroll);
+    }
+
     private void updateEventsToWeekGrid(ArrayList<ScheduleEvent> events) {
+        List<ScheduleEvent> overDayLong = new ArrayList<ScheduleEvent>();
+        List<ScheduleEvent> belowDayLong = new ArrayList<ScheduleEvent>();
         for (ScheduleEvent e : events) {
             Date when = e.getFromDate();
             Date to = e.getToDate();
             if (when.compareTo(to) != 0) {
-                weeklyLongEvents.addEvent(e);
-                if (e.getStyleName().length() > 0) {
-                    weekGrid.setDateColor(when, to, e.getStyleName());
-                }
+                // Event is set on more than one day.
+                overDayLong.add(e);
+
             } else {
-                weekGrid.addEvent(e);
+                // Event is set only on one day.
+                belowDayLong.add(e);
             }
+        }
+
+        weeklyLongEvents.addEvents(overDayLong);
+
+        for (ScheduleEvent e : belowDayLong) {
+            weekGrid.addEvent(e);
         }
     }
 
