@@ -262,7 +262,7 @@
         </zip>
     </target>
 
-	<target name="demo.war" depends="clean-all, package-jar">
+	<target name="demo.war" depends="package-jar">
 		<war destfile="${result-path}/${addon.name}-demo.war" webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="${result.classes}" includes="**/test/**"/>
 			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
