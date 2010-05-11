@@ -271,7 +271,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         calendarComponent.addListener(new RangeSelectListener() {
 
             public void rangeSelect(RangeSelectEvent event) {
-                showEventPopup(createNewEvent(event.getFrom(), event.getTo()),
+                showEventPopup(createNewEvent(event.getStart(), event.getEnd()),
                         true);
             }
         });
@@ -279,8 +279,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         calendarComponent.addListener(new EventMoveListener() {
 
             public void eventMove(MoveEvent event) {
-                applyEventMove(event.getCalendarEvent(), event
-                        .getNewFromDateTime());
+                applyEventMove(event.getCalendarEvent(), event.getNewStart());
             }
         });
     }

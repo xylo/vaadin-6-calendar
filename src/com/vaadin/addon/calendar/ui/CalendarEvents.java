@@ -6,22 +6,37 @@ import java.util.Date;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
-import com.vaadin.ui.Component;
 
 public interface CalendarEvents {
 
     /**
-     * Listener for calendar event drag&drops
+     * Listener interface for calendar event drag & drops.
      */
     public interface EventMoveNotifier {
 
+        /**
+         * Add a EventMoveListener.
+         * 
+         * @param listener
+         *            EventMoveListener to be added
+         */
         public void addListener(EventMoveListener listener);
 
+        /**
+         * Remove the EventMoveListener.
+         * 
+         * @param listener
+         *            EventMoveListener to be removed
+         * */
         public void removeListener(EventMoveListener listener);
     }
 
+    /**
+     * MoveEvent is sent when existing calendar event is dragged to a new
+     * position.
+     */
     @SuppressWarnings("serial")
-    public class MoveEvent extends Component.Event {
+    public class MoveEvent extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.EVENTMOVE;
 
@@ -29,68 +44,139 @@ public interface CalendarEvents {
         private Calendar.Event calendarEvent;
 
         /** New starting date for the moved Calendar.Event. */
-        private Date newFromDateTime;
+        private Date newStart;
 
-        public MoveEvent(Component source, Calendar.Event claendarEvent,
-                Date newFromDateTime) {
+        /**
+         * MoveEvent needs the target calendar event and new start date.
+         * 
+         * @param source
+         *            Calendar component.
+         * @param calendarEvent
+         *            Target calendar event.
+         * @param newStart
+         *            Target calendar event's new start date.
+         */
+        public MoveEvent(Calendar source, Calendar.Event calendarEvent,
+                Date newStart) {
             super(source);
-            this.calendarEvent = claendarEvent;
-            this.newFromDateTime = newFromDateTime;
+
+            this.calendarEvent = calendarEvent;
+            this.newStart = newStart;
         }
 
+        /**
+         * Get target calendar event.
+         * 
+         * @return Target calendar event.
+         */
         public Calendar.Event getCalendarEvent() {
             return calendarEvent;
         }
 
-        public Date getNewFromDateTime() {
-            return newFromDateTime;
+        /**
+         * Get new start date.
+         * 
+         * @return New start date.
+         */
+        public Date getNewStart() {
+            return newStart;
         }
     }
 
+    /** EventMoveListeners listens for MoveEvents. */
     public interface EventMoveListener extends ComponentEventListener {
 
+        /** Trigger method for the MoveEvent. */
         public static final Method eventMoveMethod = ReflectTools.findMethod(
                 EventMoveListener.class, "eventMove", MoveEvent.class);
 
+        /**
+         * This method will be called when calendar event has been moved to a
+         * new position.
+         * 
+         * @param event
+         *            MoveEvent containing specific information of the new
+         *            position and target calendar event.
+         */
         public void eventMove(MoveEvent event);
     }
 
     /**
-     * Listener for day cell drag-marking with mouse
+     * Listener interface for day or time cell drag-marking with mouse.
      */
     public interface RangeSelectNotifier {
 
+        /**
+         * Add RangeSelectListener that listens for drag-marking.
+         * 
+         * @param listener
+         *            RangeSelectListener to be added.
+         */
         public void addListener(RangeSelectListener listener);
 
+        /**
+         * Remove target RangeSelectListener;
+         * 
+         * @param listener
+         *            RangeSelectListener to be removed.
+         */
         public void removeListener(RangeSelectListener listener);
     }
 
+    /**
+     * RangeSelectEvent is sent when day or time cells are drag-marked with
+     * mouse.
+     */
     @SuppressWarnings("serial")
-    public class RangeSelectEvent extends Component.Event {
+    public class RangeSelectEvent extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.RANGESELECT;
 
-        private Date from;
+        /** Calendar event's start date. */
+        private Date start;
 
-        private Date to;
+        /** Calendar event's end date. */
+        private Date end;
 
-        public RangeSelectEvent(Component source, Date from, Date to) {
+        /**
+         * RangeSelectEvent needs a start and end date.
+         * 
+         * @param source
+         *            Calendar component.
+         * @param start
+         *            Start date.
+         * @param end
+         *            End date.
+         */
+        public RangeSelectEvent(Calendar source, Date start, Date end) {
             super(source);
-            this.from = from;
-            this.to = to;
+            this.start = start;
+            this.end = end;
         }
 
-        public Date getFrom() {
-            return from;
+        /**
+         * Get start date.
+         * 
+         * @return Start date.
+         */
+        public Date getStart() {
+            return start;
         }
 
-        public Date getTo() {
-            return to;
+        /**
+         * Get end date.
+         * 
+         * @return End date.
+         */
+        public Date getEnd() {
+            return end;
         }
     }
 
+    /** EventMoveListeners listens for RangeSelectEvent. */
     public interface RangeSelectListener extends ComponentEventListener {
 
+        /** Trigger method for the RangeSelectEvent. */
         public static final Method rangeSelectMethod = ReflectTools.findMethod(
                 RangeSelectListener.class, "rangeSelect",
                 RangeSelectEvent.class);
@@ -121,11 +207,11 @@ public interface CalendarEvents {
     }
 
     @SuppressWarnings("serial")
-    public class ForwardEvent extends Component.Event {
+    public class ForwardEvent extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.FORWARD;
 
-        public ForwardEvent(Component source) {
+        public ForwardEvent(Calendar source) {
             super(source);
         }
     }
@@ -139,11 +225,11 @@ public interface CalendarEvents {
     }
 
     @SuppressWarnings("serial")
-    public class BackwardEvent extends Component.Event {
+    public class BackwardEvent extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.BACKWARD;
 
-        public BackwardEvent(Component source) {
+        public BackwardEvent(Calendar source) {
             super(source);
         }
     }
@@ -157,13 +243,13 @@ public interface CalendarEvents {
     }
 
     @SuppressWarnings("serial")
-    public class DateClickEvent extends Component.Event {
+    public class DateClickEvent extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.DATECLICK;
 
         private Date date;
 
-        public DateClickEvent(Component source, Date date) {
+        public DateClickEvent(Calendar source, Date date) {
             super(source);
             this.date = date;
         }
@@ -182,13 +268,13 @@ public interface CalendarEvents {
     }
 
     @SuppressWarnings("serial")
-    public class EventClick extends Component.Event {
+    public class EventClick extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.EVENTCLICK;
 
         private Calendar.Event calendarEvent;
 
-        public EventClick(Component source, Calendar.Event calendarEvent) {
+        public EventClick(Calendar source, Calendar.Event calendarEvent) {
             super(source);
             this.calendarEvent = calendarEvent;
         }
@@ -207,7 +293,7 @@ public interface CalendarEvents {
     }
 
     @SuppressWarnings("serial")
-    public class WeekClick extends Component.Event {
+    public class WeekClick extends CalendarEvent {
 
         public static final String EVENT_ID = CalendarEventId.WEEKCLICK;
 
@@ -215,7 +301,7 @@ public interface CalendarEvents {
 
         private int year;
 
-        public WeekClick(Component source, int week, int year) {
+        public WeekClick(Calendar source, int week, int year) {
             super(source);
             this.week = week;
             this.year = year;

@@ -1,5 +1,9 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
+/**
+ * CalendarEventId contains static String identifiers for all Calendar events.
+ * These are used both in the client and server side code.
+ */
 public class CalendarEventId {
 
     public static final String EVENTMOVE = "eventMove";

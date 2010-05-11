@@ -21,10 +21,10 @@ import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
@@ -159,6 +159,7 @@ public class Calendar extends AbstractComponent implements
             if (zone == null)
                 zone = TimeZone.getDefault();
             currentCalendar.setTimeZone(zone);
+            df_time_move.setTimeZone(zone);
             requestRepaint();
         }
     }
@@ -447,30 +448,30 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
-    private void fireNavigationEvent(boolean forward) {
+    protected void fireNavigationEvent(boolean forward) {
         if (forward)
             fireEvent(new ForwardEvent(this));
         else
             fireEvent(new BackwardEvent(this));
     }
 
-    private void fireEventMove(int index, Date newFromDatetime) {
+    protected void fireEventMove(int index, Date newFromDatetime) {
         fireEvent(new MoveEvent(this, events.get(index), newFromDatetime));
     }
 
-    private void fireWeekClick(int week, int year) {
+    protected void fireWeekClick(int week, int year) {
         fireEvent(new WeekClick(this, week, year));
     }
 
-    private void fireEventClick(Integer i) {
+    protected void fireEventClick(Integer i) {
         fireEvent(new EventClick(this, events.get(i)));
     }
 
-    private void fireDateClick(Date d) {
+    protected void fireDateClick(Date d) {
         fireEvent(new DateClickEvent(this, d));
     }
 
-    private void fireRangeSelect(Date from, Date to) {
+    protected void fireRangeSelect(Date from, Date to) {
         fireEvent(new RangeSelectEvent(this, from, to));
     }
 
@@ -617,8 +618,7 @@ public class Calendar extends AbstractComponent implements
     }
 
     public void removeListener(EventClickListener listener) {
-        removeListener(EventClick.EVENT_ID, EventClick.class,
-                listener);
+        removeListener(EventClick.EVENT_ID, EventClick.class, listener);
     }
 
     public void removeListener(WeekClickListener listener) {
