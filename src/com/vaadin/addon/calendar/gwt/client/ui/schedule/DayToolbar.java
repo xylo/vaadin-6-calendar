@@ -5,7 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private int width = 0;
@@ -16,7 +16,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
     public DayToolbar() {
         setStylePrimaryName("v-schedule-header-daily");
-        setHeight(VSchedule.MONTHLY_DAYTOOLBARHEIGHT + "px");
+        setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT + "px");
         backLabel = new Label("");
         backLabel.addStyleName("back");
         nextLabel = new Label("");
@@ -94,23 +94,23 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
 
         public void onClick(ClickEvent event) {
-            VSchedule w = (VSchedule) getParent().getParent().getParent();
-            if (w.getClient().hasEventListeners(w, ScheduleEventId.DATECLICK)) {
+            VCalendar w = (VCalendar) getParent().getParent().getParent();
+            if (w.getClient().hasEventListeners(w, CalendarEventId.DATECLICK)) {
                 w.getClient().updateVariable(w.getPID(),
-                        ScheduleEventId.DATECLICK, date, true);
+                        CalendarEventId.DATECLICK, date, true);
             }
         }
 
     }
 
     public void onClick(ClickEvent event) {
-        VSchedule w = (VSchedule) getParent().getParent();
+        VCalendar w = (VCalendar) getParent().getParent();
         if (event.getSource() == nextLabel) {
-            if (w.getClient().hasEventListeners(w, ScheduleEventId.FORWARD)) {
+            if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
                 w.getClient().updateVariable(w.getPID(), "navigation", 1, true);
             }
         } else if (event.getSource() == backLabel) {
-            if (w.getClient().hasEventListeners(w, ScheduleEventId.BACKWARD)) {
+            if (w.getClient().hasEventListeners(w, CalendarEventId.BACKWARD)) {
                 w.getClient()
                         .updateVariable(w.getPID(), "navigation", -1, true);
             }

@@ -6,7 +6,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class SimpleDayToolbar extends HorizontalPanel {
     private int width = 0;
@@ -15,7 +15,7 @@ public class SimpleDayToolbar extends HorizontalPanel {
 
     public SimpleDayToolbar() {
         setStylePrimaryName("v-schedule-header-month");
-        setHeight(VSchedule.MONTHLY_DAYTOOLBARHEIGHT - BORDERWIDTH + "px");
+        setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT - BORDERWIDTH + "px");
     }
 
     public void setDayNames(String[] dayNames) {

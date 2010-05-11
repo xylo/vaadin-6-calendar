@@ -7,13 +7,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;
-    private VSchedule schedule;
+    private VCalendar schedule;
 
-    public SimpleWeekToolbar(VSchedule parent) {
+    public SimpleWeekToolbar(VCalendar parent) {
         this.schedule = parent;
         setCellSpacing(0);
         setCellPadding(0);
@@ -59,9 +59,9 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     public void onClick(ClickEvent event) {
         WeekLabel wl = (WeekLabel) event.getSource();
         if (schedule.getClient().hasEventListeners(schedule,
-                ScheduleEventId.WEEKCLICK)) {
+                CalendarEventId.WEEKCLICK)) {
             schedule.getClient().updateVariable(schedule.getPID(),
-                    ScheduleEventId.WEEKCLICK,
+                    CalendarEventId.WEEKCLICK,
                     wl.getYear() + "w" + wl.getWeek(), true);
         }
     }

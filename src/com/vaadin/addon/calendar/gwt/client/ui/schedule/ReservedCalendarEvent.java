@@ -2,7 +2,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
-public class ReservedScheduleEvent {
+public class ReservedCalendarEvent {
     private Date fromDate, toDate, fromDatetime, toDatetime;
 
     public void setToDate(Date toDate) {

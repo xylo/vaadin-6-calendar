@@ -40,14 +40,14 @@ public class WeeklyLongEvents extends HorizontalPanel {
         updateCellWidths();
     }
 
-    public void addEvents(List<ScheduleEvent> events) {
+    public void addEvents(List<CalendarEvent> events) {
         addEmptyEventSlots(events.size());
-        for (ScheduleEvent e : events) {
+        for (CalendarEvent e : events) {
             addEvent(e);
         }
     }
 
-    public void addEvent(ScheduleEvent e) {
+    public void addEvent(CalendarEvent e) {
         updateEventSlot(e);
 
         int dateCount = getWidgetCount();
@@ -90,7 +90,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
     }
 
-    private void updateEventSlot(ScheduleEvent e) {
+    private void updateEventSlot(CalendarEvent e) {
         // TODO Now every event will be drawn to a new "line". Check if any
         // line has free space where this event could fit, and put it there.
         // Just updating the slotIndex should do the trick..

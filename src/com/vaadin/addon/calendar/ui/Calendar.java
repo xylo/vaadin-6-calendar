@@ -13,39 +13,39 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEventId;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
+import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClickListener;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.ClientWidget;
 
 /**
- * Schedule is for visualizing events in calendar. Only
+ * Vaadin Calendar is for visualizing events in calendar. Only
  * {@link java.util.GregorianCalendar GregorianCalendar} is supported. Events
  * can be visualized in variable length view depending on start and end dates.<br/>
  * <li>You must set view daterange with setStartDate and setEndDate otherwise
  * schedule will be empty <li>If view start to view end is 7 days or smaller,
  * weekly view is used.
  */
-@ClientWidget(VSchedule.class)
+@ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
-        ScheduleEvents.NavigationNotifier, ScheduleEvents.EventMoveNotifier,
-        ScheduleEvents.RangeSelectNotifier {
+        CalendarEvents.NavigationNotifier, CalendarEvents.EventMoveNotifier,
+        CalendarEvents.RangeSelectNotifier {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -327,8 +327,8 @@ public class Calendar extends AbstractComponent implements
     @Override
     public void changeVariables(Object source, Map variables) {
         super.changeVariables(source, variables);
-        if (variables.containsKey(ScheduleEventId.RANGESELECT) && !isReadOnly()) {
-            String value = (String) variables.get(ScheduleEventId.RANGESELECT);
+        if (variables.containsKey(CalendarEventId.RANGESELECT) && !isReadOnly()) {
+            String value = (String) variables.get(CalendarEventId.RANGESELECT);
             if (value != null && value.length() > 14 && value.contains("TO")) {
                 String[] dates = value.split("TO");
                 try {
@@ -365,14 +365,14 @@ public class Calendar extends AbstractComponent implements
                 }
             }
         }
-        if (variables.containsKey(ScheduleEventId.EVENTCLICK)) {
-            Integer i = (Integer) variables.get(ScheduleEventId.EVENTCLICK);
+        if (variables.containsKey(CalendarEventId.EVENTCLICK)) {
+            Integer i = (Integer) variables.get(CalendarEventId.EVENTCLICK);
             if (i >= 0 && i < events.size() && events.get(i) != null) {
                 fireEventClick(i);
             }
         }
-        if (variables.containsKey(ScheduleEventId.DATECLICK)) {
-            String message = (String) variables.get(ScheduleEventId.DATECLICK);
+        if (variables.containsKey(CalendarEventId.DATECLICK)) {
+            String message = (String) variables.get(CalendarEventId.DATECLICK);
             if (message != null && message.length() > 6) {
                 try {
                     Date d = df_date.parse(message);
@@ -381,9 +381,9 @@ public class Calendar extends AbstractComponent implements
                 }
             }
         }
-        if (variables.containsKey(ScheduleEventId.WEEKCLICK)) {
+        if (variables.containsKey(CalendarEventId.WEEKCLICK)) {
 
-            String s = (String) variables.get(ScheduleEventId.WEEKCLICK);
+            String s = (String) variables.get(CalendarEventId.WEEKCLICK);
             if (s.length() > 0 && s.contains("w")) {
                 String[] splitted = s.split("w");
                 if (splitted.length == 2) {
@@ -405,8 +405,8 @@ public class Calendar extends AbstractComponent implements
                 // Client cheating, do nothing
             }
         }
-        if (variables.containsKey(ScheduleEventId.EVENTMOVE) && !isReadOnly()) {
-            String message = variables.get(ScheduleEventId.EVENTMOVE)
+        if (variables.containsKey(CalendarEventId.EVENTMOVE) && !isReadOnly()) {
+            String message = variables.get(CalendarEventId.EVENTMOVE)
                     .toString();
             if (message != null && message.length() > 10) {
                 String[] splitted = message.split(":");
@@ -455,15 +455,15 @@ public class Calendar extends AbstractComponent implements
     }
 
     private void fireEventMove(int index, Date newFromDatetime) {
-        fireEvent(new EventMoveEvent(this, events.get(index), newFromDatetime));
+        fireEvent(new MoveEvent(this, events.get(index), newFromDatetime));
     }
 
     private void fireWeekClick(int week, int year) {
-        fireEvent(new WeekClickEvent(this, week, year));
+        fireEvent(new WeekClick(this, week, year));
     }
 
     private void fireEventClick(Integer i) {
-        fireEvent(new EventClickEvent(this, events.get(i)));
+        fireEvent(new EventClick(this, events.get(i)));
     }
 
     private void fireDateClick(Date d) {
@@ -595,12 +595,12 @@ public class Calendar extends AbstractComponent implements
     }
 
     public void addListener(EventClickListener listener) {
-        addListener(EventClickEvent.EVENT_ID, EventClickEvent.class, listener,
+        addListener(EventClick.EVENT_ID, EventClick.class, listener,
                 EventClickListener.eventClickMethod);
     }
 
-    public void addListener(ScheduleEvents.WeekClickListener listener) {
-        addListener(WeekClickEvent.EVENT_ID, WeekClickEvent.class, listener,
+    public void addListener(CalendarEvents.WeekClickListener listener) {
+        addListener(WeekClick.EVENT_ID, WeekClick.class, listener,
                 WeekClickListener.weekClickMethod);
     }
 
@@ -617,21 +617,21 @@ public class Calendar extends AbstractComponent implements
     }
 
     public void removeListener(EventClickListener listener) {
-        removeListener(EventClickEvent.EVENT_ID, EventClickEvent.class,
+        removeListener(EventClick.EVENT_ID, EventClick.class,
                 listener);
     }
 
     public void removeListener(WeekClickListener listener) {
-        removeListener(WeekClickEvent.EVENT_ID, WeekClickEvent.class, listener);
+        removeListener(WeekClick.EVENT_ID, WeekClick.class, listener);
     }
 
     public void addListener(EventMoveListener listener) {
-        addListener(EventMoveEvent.EVENT_ID, EventMoveEvent.class, listener,
+        addListener(MoveEvent.EVENT_ID, MoveEvent.class, listener,
                 EventMoveListener.eventMoveMethod);
     }
 
     public void removeListener(EventMoveListener listener) {
-        removeListener(EventMoveEvent.EVENT_ID, EventMoveEvent.class, listener);
+        removeListener(MoveEvent.EVENT_ID, MoveEvent.class, listener);
     }
 
     public void addListener(RangeSelectListener listener) {

@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.MonthGrid;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEvent;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
@@ -20,7 +20,7 @@ import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.UIDL;
 
-public class VSchedule extends Composite implements Paintable {
+public class VCalendar extends Composite implements Paintable {
 
     public static final int MONTHLY_WEEKTOOLBARWIDTH = 20;
     public static final int MONTHLY_DAYTOOLBARHEIGHT = 20;
@@ -55,7 +55,7 @@ public class VSchedule extends Composite implements Paintable {
 
     private boolean readOnly = false;
 
-    public VSchedule() {
+    public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
         setStylePrimaryName("v-schedule");
@@ -134,7 +134,7 @@ public class VSchedule extends Composite implements Paintable {
         outer.setCellWidth(weekToolbar, MONTHLY_WEEKTOOLBARWIDTH + "px");
         weekToolbar.updateCellHeights();
         outer.add(monthGrid, DockPanel.CENTER);
-        ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
+        ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
         updateEventsToMonthGrid(events);
         recalculateHeights();
     }
@@ -144,7 +144,7 @@ public class VSchedule extends Composite implements Paintable {
         Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
 
         monthGrid = null;
-        ArrayList<ScheduleEvent> events = getEvents(uidl.getChildUIDL(1));
+        ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
 
         weeklyLongEvents = new WeeklyLongEvents();
         if (weekGrid == null) {
@@ -163,10 +163,10 @@ public class VSchedule extends Composite implements Paintable {
         weekGrid.setScrollPosition(scroll);
     }
 
-    private void updateEventsToWeekGrid(ArrayList<ScheduleEvent> events) {
-        List<ScheduleEvent> overDayLong = new ArrayList<ScheduleEvent>();
-        List<ScheduleEvent> belowDayLong = new ArrayList<ScheduleEvent>();
-        for (ScheduleEvent e : events) {
+    private void updateEventsToWeekGrid(ArrayList<CalendarEvent> events) {
+        List<CalendarEvent> overDayLong = new ArrayList<CalendarEvent>();
+        List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();
+        for (CalendarEvent e : events) {
             Date when = e.getFromDate();
             Date to = e.getToDate();
             if (when.compareTo(to) != 0) {
@@ -181,13 +181,13 @@ public class VSchedule extends Composite implements Paintable {
 
         weeklyLongEvents.addEvents(overDayLong);
 
-        for (ScheduleEvent e : belowDayLong) {
+        for (CalendarEvent e : belowDayLong) {
             weekGrid.addEvent(e);
         }
     }
 
-    private void updateEventsToMonthGrid(ArrayList<ScheduleEvent> events) {
-        for (ScheduleEvent e : events) {
+    private void updateEventsToMonthGrid(ArrayList<CalendarEvent> events) {
+        for (CalendarEvent e : events) {
             Date when = e.getFromDate();
             Date to = e.getToDate();
             boolean eventAdded = false;
@@ -223,9 +223,9 @@ public class VSchedule extends Composite implements Paintable {
     }
 
     /** Transforms uidl to list of ScheduleEvents */
-    protected ArrayList<ScheduleEvent> getEvents(UIDL childUIDL) {
+    protected ArrayList<CalendarEvent> getEvents(UIDL childUIDL) {
         int eventCount = childUIDL.getChildCount();
-        ArrayList<ScheduleEvent> events = new ArrayList<ScheduleEvent>();
+        ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
         for (int i = 0; i < eventCount; i++) {
             UIDL eventUIDL = childUIDL.getChildUIDL(i);
             int index = eventUIDL.getIntAttribute("i");
@@ -236,7 +236,7 @@ public class VSchedule extends Composite implements Paintable {
             String timeto = eventUIDL.getStringAttribute("tto");
             String desc = eventUIDL.getStringAttribute("desc");
             String style = eventUIDL.getStringAttribute("extracss");
-            ScheduleEvent e = new ScheduleEvent();
+            CalendarEvent e = new CalendarEvent();
             e.setCaption(caption);
             e.setDescription(desc);
             e.setIndex(index);

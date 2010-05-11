@@ -3,15 +3,15 @@ package com.vaadin.addon.calendar.ui;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEventId;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
 import com.vaadin.ui.Component;
 
-public interface ScheduleEvents {
+public interface CalendarEvents {
 
     /**
-     * Listener for schedule event drag&drops
+     * Listener for calendar event drag&drops
      */
     public interface EventMoveNotifier {
 
@@ -21,25 +21,25 @@ public interface ScheduleEvents {
     }
 
     @SuppressWarnings("serial")
-    public class EventMoveEvent extends Component.Event {
+    public class MoveEvent extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.EVENTMOVE;
+        public static final String EVENT_ID = CalendarEventId.EVENTMOVE;
 
         /** Index for the moved Schedule.Event. */
-        private Calendar.Event scheduleEvent;
+        private Calendar.Event calendarEvent;
 
-        /** New starting date for the moved Schedule.Event. */
+        /** New starting date for the moved Calendar.Event. */
         private Date newFromDateTime;
 
-        public EventMoveEvent(Component source, Calendar.Event scheduleEvent,
+        public MoveEvent(Component source, Calendar.Event claendarEvent,
                 Date newFromDateTime) {
             super(source);
-            this.scheduleEvent = scheduleEvent;
+            this.calendarEvent = claendarEvent;
             this.newFromDateTime = newFromDateTime;
         }
 
-        public Calendar.Event getScheduleEvent() {
-            return scheduleEvent;
+        public Calendar.Event getCalendarEvent() {
+            return calendarEvent;
         }
 
         public Date getNewFromDateTime() {
@@ -50,9 +50,9 @@ public interface ScheduleEvents {
     public interface EventMoveListener extends ComponentEventListener {
 
         public static final Method eventMoveMethod = ReflectTools.findMethod(
-                EventMoveListener.class, "eventMove", EventMoveEvent.class);
+                EventMoveListener.class, "eventMove", MoveEvent.class);
 
-        public void eventMove(EventMoveEvent event);
+        public void eventMove(MoveEvent event);
     }
 
     /**
@@ -68,7 +68,7 @@ public interface ScheduleEvents {
     @SuppressWarnings("serial")
     public class RangeSelectEvent extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.RANGESELECT;
+        public static final String EVENT_ID = CalendarEventId.RANGESELECT;
 
         private Date from;
 
@@ -123,7 +123,7 @@ public interface ScheduleEvents {
     @SuppressWarnings("serial")
     public class ForwardEvent extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.FORWARD;
+        public static final String EVENT_ID = CalendarEventId.FORWARD;
 
         public ForwardEvent(Component source) {
             super(source);
@@ -141,7 +141,7 @@ public interface ScheduleEvents {
     @SuppressWarnings("serial")
     public class BackwardEvent extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.BACKWARD;
+        public static final String EVENT_ID = CalendarEventId.BACKWARD;
 
         public BackwardEvent(Component source) {
             super(source);
@@ -159,7 +159,7 @@ public interface ScheduleEvents {
     @SuppressWarnings("serial")
     public class DateClickEvent extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.DATECLICK;
+        public static final String EVENT_ID = CalendarEventId.DATECLICK;
 
         private Date date;
 
@@ -182,40 +182,40 @@ public interface ScheduleEvents {
     }
 
     @SuppressWarnings("serial")
-    public class EventClickEvent extends Component.Event {
+    public class EventClick extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.EVENTCLICK;
+        public static final String EVENT_ID = CalendarEventId.EVENTCLICK;
 
-        private Calendar.Event scheduleEvent;
+        private Calendar.Event calendarEvent;
 
-        public EventClickEvent(Component source, Calendar.Event scheduleEvent) {
+        public EventClick(Component source, Calendar.Event calendarEvent) {
             super(source);
-            this.scheduleEvent = scheduleEvent;
+            this.calendarEvent = calendarEvent;
         }
 
-        public Calendar.Event getScheduleEvent() {
-            return scheduleEvent;
+        public Calendar.Event getCalendarEvent() {
+            return calendarEvent;
         }
     }
 
     public interface EventClickListener extends ComponentEventListener {
 
         public static final Method eventClickMethod = ReflectTools.findMethod(
-                EventClickListener.class, "eventClick", EventClickEvent.class);
+                EventClickListener.class, "eventClick", EventClick.class);
 
-        public void eventClick(EventClickEvent event);
+        public void eventClick(EventClick event);
     }
 
     @SuppressWarnings("serial")
-    public class WeekClickEvent extends Component.Event {
+    public class WeekClick extends Component.Event {
 
-        public static final String EVENT_ID = ScheduleEventId.WEEKCLICK;
+        public static final String EVENT_ID = CalendarEventId.WEEKCLICK;
 
         private int week;
 
         private int year;
 
-        public WeekClickEvent(Component source, int week, int year) {
+        public WeekClick(Component source, int week, int year) {
             super(source);
             this.week = week;
             this.year = year;
@@ -233,8 +233,8 @@ public interface ScheduleEvents {
     public interface WeekClickListener extends ComponentEventListener {
 
         public static final Method weekClickMethod = ReflectTools.findMethod(
-                WeekClickListener.class, "weekClick", WeekClickEvent.class);
+                WeekClickListener.class, "weekClick", WeekClick.class);
 
-        public void weekClick(WeekClickEvent event);
+        public void weekClick(WeekClick event);
     }
 }

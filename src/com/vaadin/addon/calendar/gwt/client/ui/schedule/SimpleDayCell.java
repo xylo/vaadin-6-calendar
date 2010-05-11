@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 /**
  * A class representing a single cell within the calendar in month-view
@@ -26,7 +26,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         MouseDownHandler, MouseOverHandler, NativePreviewHandler {
 
-    private final VSchedule schedule;
+    private final VCalendar schedule;
     private Date date;
     private boolean enabled = true;
     private int intHeight;
@@ -35,7 +35,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     private static final int LINEHEIGHT = 18;
     private static final int EVENTHEIGHT = 14;
     private static final int BORDERPADDINGHEIGHT = 1;
-    private ScheduleEvent[] events = new ScheduleEvent[10];
+    private CalendarEvent[] events = new CalendarEvent[10];
     private int cell;
     private int row;
     private boolean monthNameVisible;
@@ -47,7 +47,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     private boolean labelMouseDown;
     private int eventCount = 0;
 
-    public SimpleDayCell(VSchedule schedule, int row, int cell) {
+    public SimpleDayCell(VCalendar schedule, int row, int cell) {
         this.schedule = schedule;
         this.row = row;
         this.cell = cell;
@@ -106,7 +106,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         }
         int eventsAdded = 0;
         for (int i = 0; i < slots; i++) {
-            ScheduleEvent e = events[i];
+            CalendarEvent e = events[i];
             if (e == null) {
                 HTML slot = new HTML();
                 slot.addStyleName("spacer");
@@ -127,7 +127,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         }
     }
 
-    private MonthEventLabel createMonthEventLabel(ScheduleEvent e) {
+    private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         MonthEventLabel eventDiv = new MonthEventLabel();
         if (e.getFromDate().compareTo(e.getToDate()) == 0) {
             Date fromDatetime = e.getFromDatetime();
@@ -166,7 +166,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         return eventDiv;
     }
 
-    public void addScheduleEvent(ScheduleEvent e) {
+    public void addScheduleEvent(CalendarEvent e) {
         eventCount++;
         int slot = e.getSlotIndex();
         if (slot == -1) {
@@ -215,11 +215,11 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         } else if (w instanceof MonthEventLabel && monthEventMouseDown) {
             MonthEventLabel me = (MonthEventLabel) w;
             int index = getWidgetIndex(me);
-            ScheduleEvent e = events[index - 1];
+            CalendarEvent e = events[index - 1];
             if (schedule.getClient().hasEventListeners(schedule,
-                    ScheduleEventId.EVENTCLICK)) {
+                    CalendarEventId.EVENTCLICK)) {
                 schedule.getClient().updateVariable(schedule.getPID(),
-                        ScheduleEventId.EVENTCLICK, e.getIndex(), true);
+                        CalendarEventId.EVENTCLICK, e.getIndex(), true);
             }
             event.stopPropagation();
         } else if (w == this) {
@@ -228,9 +228,9 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         } else if (w instanceof Label && labelMouseDown) {
             String clickedDate = schedule.getDateFormat().format(date);
             if (schedule.getClient().hasEventListeners(schedule,
-                    ScheduleEventId.DATECLICK)) {
+                    CalendarEventId.DATECLICK)) {
                 schedule.getClient().updateVariable(schedule.getPID(),
-                        ScheduleEventId.DATECLICK, clickedDate, true);
+                        CalendarEventId.DATECLICK, clickedDate, true);
             }
             event.stopPropagation();
         }
@@ -290,7 +290,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         }
     }
 
-    public ScheduleEvent getScheduleEvent(int i) {
+    public CalendarEvent getScheduleEvent(int i) {
         return events[i];
     }
 

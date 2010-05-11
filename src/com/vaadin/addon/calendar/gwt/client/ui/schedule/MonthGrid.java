@@ -6,7 +6,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class MonthGrid extends Grid {
 
@@ -14,11 +14,11 @@ public class MonthGrid extends Grid {
     private static final int BORDERWIDTH = 1;
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
-    private VSchedule schedule;
+    private VCalendar schedule;
     private boolean rangeSelectDisabled;
     private boolean readOnly;
 
-    public MonthGrid(VSchedule parent, int rows, int columns) {
+    public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
         this.schedule = parent;
         setCellSpacing(0);
@@ -83,9 +83,9 @@ public class MonthGrid extends Grid {
             value = schedule.getDateFormat().format(startDate) + "TO"
                     + schedule.getDateFormat().format(endDate);
             if (schedule.getClient().hasEventListeners(schedule,
-                    ScheduleEventId.RANGESELECT)) {
+                    CalendarEventId.RANGESELECT)) {
                 schedule.getClient().updateVariable(schedule.getPID(),
-                        ScheduleEventId.RANGESELECT, value, true);
+                        CalendarEventId.RANGESELECT, value, true);
             }
 
             selectionStart = null;

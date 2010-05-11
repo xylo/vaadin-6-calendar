@@ -7,7 +7,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
-public class ScheduleEvent {
+public class CalendarEvent {
     private int index;
     private String caption;
     private Date fromDate, toDate;

@@ -11,20 +11,20 @@ import java.util.TimeZone;
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickEvent;
-import com.vaadin.addon.calendar.ui.ScheduleEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClickListener;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -240,7 +240,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         // Register week clicks by changing the schedules start and end dates.
         calendarComponent.addListener(new WeekClickListener() {
 
-            public void weekClick(WeekClickEvent event) {
+            public void weekClick(WeekClick event) {
                 switchToWeekView(event.getWeek(), event.getYear());
             }
         });
@@ -256,8 +256,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         });
         calendarComponent.addListener(new EventClickListener() {
 
-            public void eventClick(EventClickEvent event) {
-                showEventPopup(event.getScheduleEvent(), false);
+            public void eventClick(EventClick event) {
+                showEventPopup(event.getCalendarEvent(), false);
             }
         });
         calendarComponent.addListener(new DateClickListener() {
@@ -278,8 +278,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         calendarComponent.addListener(new EventMoveListener() {
 
-            public void eventMove(EventMoveEvent event) {
-                applyEventMove(event.getScheduleEvent(), event
+            public void eventMove(MoveEvent event) {
+                applyEventMove(event.getCalendarEvent(), event
                         .getNewFromDateTime());
             }
         });

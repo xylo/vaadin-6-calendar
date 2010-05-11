@@ -1,6 +1,6 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
-public class ScheduleEventId {
+public class CalendarEventId {
 
     public static final String EVENTMOVE = "eventMove";
     public static final String RANGESELECT = "rangeSelect";

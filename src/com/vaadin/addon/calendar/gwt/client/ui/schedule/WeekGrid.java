@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 
 public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
@@ -38,12 +38,12 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     private int width = 0;
     private int height = 0;
     private HorizontalPanel content;
-    private VSchedule schedule;
+    private VCalendar schedule;
     private boolean readOnly;
     private boolean format24h;
     private Timebar timebar;
 
-    public WeekGrid(VSchedule parent, boolean format24h) {
+    public WeekGrid(VCalendar parent, boolean format24h) {
         this.schedule = parent;
         this.format24h = format24h;
         content = new HorizontalPanel();
@@ -351,7 +351,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         @SuppressWarnings("deprecation")
-        public void addEvent(ScheduleEvent e) {
+        public void addEvent(CalendarEvent e) {
             Element main = getElement();
             DayEvent de = new DayEvent(e);
             de.setReadOnly(readOnly);
@@ -421,7 +421,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 int startMinutes = slot * 30;
                 int endMinutes = (slotEndBeforeReserved + 1) * 30;
-                VSchedule schedule = (VSchedule) this.weekgrid.getParent()
+                VCalendar schedule = (VCalendar) this.weekgrid.getParent()
                         .getParent();
                 Date currentDate = getDate();
                 String yr = (currentDate.getYear() + 1900) + "-"
@@ -429,9 +429,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                         + currentDate.getDate();
 
                 if (schedule.getClient().hasEventListeners(schedule,
-                        ScheduleEventId.RANGESELECT)) {
+                        CalendarEventId.RANGESELECT)) {
                     schedule.getClient().updateVariable(schedule.getPID(),
-                            ScheduleEventId.RANGESELECT,
+                            CalendarEventId.RANGESELECT,
                             yr + ":" + startMinutes + ":" + endMinutes, true);
                 }
                 eventRangeStart = -1;
@@ -494,7 +494,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private Element caption = null;
             private Element dayEvent = null;
             private Element eventContent;
-            private ScheduleEvent scheduleEvent = null;
+            private CalendarEvent scheduleEvent = null;
             private HandlerRegistration moveRegistration;
             private int startY = -1;
             private int startX = -1;
@@ -511,7 +511,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private int startYrelative;
             private boolean readOnly;
 
-            public DayEvent(ScheduleEvent e2) {
+            public DayEvent(CalendarEvent e2) {
                 super();
                 setScheduleEvent(e2);
                 Style s = getElement().getStyle();
@@ -635,13 +635,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     Element e = Element.as(et);
                     if (e == caption || e == eventContent) {
                         DateCell parent = (DateCell) getParent();
-                        VSchedule wk = (VSchedule) parent.getParent()
+                        VCalendar wk = (VCalendar) parent.getParent()
                                 .getParent().getParent().getParent();
 
                         if (wk.getClient().hasEventListeners(wk,
-                                ScheduleEventId.EVENTCLICK)) {
+                                CalendarEventId.EVENTCLICK)) {
                             wk.getClient().updateVariable(wk.getPID(),
-                                    ScheduleEventId.EVENTCLICK,
+                                    CalendarEventId.EVENTCLICK,
                                     scheduleEvent.getIndex(), true);
                         }
                     } else if (e == getElement()) {
@@ -704,11 +704,11 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
             }
 
-            public void setScheduleEvent(ScheduleEvent scheduleEvent) {
+            public void setScheduleEvent(CalendarEvent scheduleEvent) {
                 this.scheduleEvent = scheduleEvent;
             }
 
-            public ScheduleEvent getScheduleEvent() {
+            public CalendarEvent getScheduleEvent() {
                 return scheduleEvent;
             }
 
@@ -741,7 +741,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         @SuppressWarnings("deprecation")
-        public void addReservedEvent(ReservedScheduleEvent e) {
+        public void addReservedEvent(ReservedCalendarEvent e) {
             Element main = getElement();
             Date fromDt = e.getFromDatetime();
             Date toDt = e.getToDatetime();
@@ -779,7 +779,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
     }
 
-    public void addEvent(ScheduleEvent e) {
+    public void addEvent(CalendarEvent e) {
         int dateCount = content.getWidgetCount();
         Date from = e.getFromDate();
         Date to = e.getToDate();
@@ -805,7 +805,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         DateCell previousParent = (DateCell) dayEvent.getParent();
         DateCell newParent = (DateCell) content
                 .getWidget((left / cellWidth) + 1);
-        ScheduleEvent se = dayEvent.getScheduleEvent();
+        CalendarEvent se = dayEvent.getScheduleEvent();
         Date targetDate = newParent.getDate();
         se.setFromDate(targetDate);
         se.setToDate(targetDate);
@@ -829,9 +829,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 + dateformat_time.format(fromDatetime);
 
         if (schedule.getClient().hasEventListeners(schedule,
-                ScheduleEventId.EVENTMOVE)) {
+                CalendarEventId.EVENTMOVE)) {
             schedule.getClient().updateVariable(schedule.getPID(),
-                    ScheduleEventId.EVENTMOVE, eventMove, true);
+                    CalendarEventId.EVENTMOVE, eventMove, true);
         }
     }
 
@@ -856,7 +856,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
     }
 
-    public void addReservedEvent(ReservedScheduleEvent e) {
+    public void addReservedEvent(ReservedCalendarEvent e) {
         int dateCount = content.getWidgetCount();
         Date from = e.getFromDate();
         Date to = e.getToDate();
