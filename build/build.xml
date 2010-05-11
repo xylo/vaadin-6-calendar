@@ -261,8 +261,8 @@
         </zip>
     </target>
 
-	<target name="calendar-demo.war" depends="clean-all, package-jar">
-		<war destfile="${result-path}/calendar-demo.war" webxml="WebContent/WEB-INF/web.xml">
+	<target name="demo.war" depends="clean-all, package-jar">
+		<war destfile="${result-path}/${addon.name}-demo.war" webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="${result.classes}" includes="**/test/**"/>
 			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
 			<lib file="${jar.path}" />
