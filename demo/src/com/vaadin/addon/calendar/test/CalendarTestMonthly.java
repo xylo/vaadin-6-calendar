@@ -1,4 +1,4 @@
-package test;
+package com.vaadin.addon.calendar.test;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package test;
+package com.vaadin.addon.calendar.test;
 
 import java.util.Date;
 

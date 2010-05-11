@@ -1,4 +1,4 @@
-package test;
+package com.vaadin.addon.calendar.test;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
@@ -17,10 +17,10 @@ import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
