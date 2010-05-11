@@ -2,7 +2,7 @@
 <project name="Calendar" basedir="../" default="all">
 
     <!-- Main target that does all -->
-    <target name="all" depends="compile, widgetset, tests, manual, package-jar, package-zip"/>
+    <target name="all" depends="compile, widgetset, tests, manual, package-jar, package-zip, demo.war"/>
 
     <!-- Non-project specific settings. -->
 	<property file="build/build.properties" />
