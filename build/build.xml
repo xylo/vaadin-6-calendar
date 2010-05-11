@@ -263,7 +263,7 @@
     </target>
 
 	<target name="demo.war" depends="package-jar">
-		<war destfile="${result-path}/${addon.name}-demo.war" webxml="WebContent/WEB-INF/web.xml">
+		<war destfile="${result-path}/${addon.name}.war" webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="${result.classes}" includes="**/test/**"/>
 			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
 			<lib file="${jar.path}" />
