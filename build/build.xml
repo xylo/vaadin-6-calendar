@@ -72,6 +72,7 @@
 		<javac destdir="${result.classes}" target="1.5" source="1.5">
 			<src path="src" />
 			<src path="${test.src.base}" />
+			<src path="${demo.src.base}" />
 			<include name="**/*.*" />
 
 			<classpath refid="test.classpath" />
@@ -108,7 +109,7 @@
 		<java classname="com.vaadin.tools.WidgetsetCompiler" failonerror="yes" fork="yes" maxmemory="512m">
 			<arg value="-out" />
 			<arg value="WebContent/VAADIN/widgetsets" />
-			<arg value="com.vaadin.calendar.gwt.CalendarWidgetset" />
+			<arg value="com.vaadin.addon.calendar.gwt.CalendarWidgetset" />
 			<jvmarg value="-Xss1024k" />
 			<jvmarg value="-Xmx1024M" />
 			<jvmarg value="-Djava.awt.headless=true" />
@@ -209,14 +210,13 @@
                 <attribute name="Implementation-Title" value="${addon.title}" />
                 <attribute name="Implementation-Version" value="${version}" />
                 <attribute name="Implementation-Vendor" value="${addon.vendor}" />
-                <attribute name="Vaadin-License-Title" value="${addon.license}" />
-                <attribute name="Vaadin-License-File" value="http://www.apache.org/licenses/LICENSE-2.0" />
             </manifest>
         	
         	<!-- The built server-side classes and the widget set class are here. -->
             <fileset dir="${result.classes}">
                 <patternset>
                     <include name="${src.package.dir}/**/*" />
+                	<exclude name="**/test/**" />
                 </patternset>
             </fileset>
 
@@ -224,13 +224,15 @@
         	<fileset dir="src">
                 <patternset>
                     <include name="${src.package.dir}/gwt/**/*" />
+                	<exclude name="**/test/**" />
                 </patternset>
             </fileset>
 
-        	<!-- Include the built widget set. -->
+        	<!-- Include the built widget set and themes. -->
         	<fileset dir="WebContent">
                 <patternset>
                     <include name="VAADIN/widgetsets/${addon.widgetset}/**/*" />
+                	<include name="VAADIN/themes/**/*" />
                 </patternset>
             </fileset>
         </jar>
@@ -259,6 +261,14 @@
         </zip>
     </target>
 
+	<target name="calendar-demo.war" depends="clean-all, package-jar">
+		<war destfile="${result-path}/calendar-demo.war" webxml="WebContent/WEB-INF/web.xml">
+			<classes dir="${result.classes}" includes="**/test/**"/>
+			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
+			<lib file="${jar.path}" />
+		</war>
+	</target>
+	
 </project>
 
 <!-- Keep this comment at the end of the file
