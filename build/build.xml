@@ -182,6 +182,7 @@
             <arg value="start"/>
         </exec>
 
+        <!-- Convert the ODF text document to PDF -->
         <java jar="build/lib/jodconverter/jodconverter-cli-2.2.2.jar" fork="true">
             <arg value="${manual.odt}"/>
             <arg value="${manual.pdf}"/>
