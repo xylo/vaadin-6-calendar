@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.VSchedule;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEventId;
 import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
@@ -45,7 +43,7 @@ import com.vaadin.ui.ClientWidget;
  * weekly view is used.
  */
 @ClientWidget(VSchedule.class)
-public class Schedule extends AbstractComponent implements
+public class Calendar extends AbstractComponent implements
         ScheduleEvents.NavigationNotifier, ScheduleEvents.EventMoveNotifier,
         ScheduleEvents.RangeSelectNotifier {
 
@@ -60,16 +58,16 @@ public class Schedule extends AbstractComponent implements
     protected boolean disableOverlappingLongEvents = true;
     protected CalendarFormat currentFormat;
 
-    protected Calendar currentCalendar = new GregorianCalendar();
+    protected java.util.Calendar currentCalendar = new GregorianCalendar();
     protected TimeZone timezone;
     protected Date startDate = null;
     protected Date endDate = null;
-    protected EventReader datasourceReader;
+    protected EventProvider schduleEventProvider;
 
     public static final long HOURINMILLIS = 60 * 60 * 1000;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;
 
-    private ArrayList<ScheduleEvent> events;
+    private List<Calendar.Event> events;
 
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
     protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
@@ -82,8 +80,8 @@ public class Schedule extends AbstractComponent implements
     private SimpleDateFormat weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
             .getDateInstance();
 
-    public Schedule(EventReader eventReader) {
-        datasourceReader = eventReader;
+    public Calendar(EventProvider schduleEventProvider) {
+        this.schduleEventProvider = schduleEventProvider;
         setSizeFull();
 
     }
@@ -273,17 +271,17 @@ public class Schedule extends AbstractComponent implements
             target.addAttribute("fdate", weeklyCaptionFormat
                     .format(currentCalendar.getTime()));
             target.addAttribute("dow", currentCalendar
-                    .get(Calendar.DAY_OF_WEEK));
-            target
-                    .addAttribute("w", currentCalendar
-                            .get(Calendar.WEEK_OF_YEAR));
+                    .get(java.util.Calendar.DAY_OF_WEEK));
+            target.addAttribute("w", currentCalendar
+                    .get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
-            currentCalendar.add(Calendar.DATE, 1);
+            currentCalendar.add(java.util.Calendar.DATE, 1);
         }
 
         target.endTag("days");
 
-        events = datasourceReader.getEvents(firstDateToShow, lastDateToShow);
+        events = schduleEventProvider
+                .getEvents(firstDateToShow, lastDateToShow);
         target.startTag("events");
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
@@ -306,13 +304,13 @@ public class Schedule extends AbstractComponent implements
      * @param target
      */
     protected void paintEvent(int i, PaintTarget target) throws PaintException {
-        ScheduleEvent e = events.get(i);
+        Calendar.Event e = events.get(i);
         target.addAttribute("i", i);
         target.addAttribute("caption", e.getCaption());
-        target.addAttribute("dfrom", df_date.format(e.getWhenFrom()));
-        target.addAttribute("dto", df_date.format(e.getWhenTo()));
-        target.addAttribute("tfrom", df_time.format(e.getWhenFrom()));
-        target.addAttribute("tto", df_time.format(e.getWhenTo()));
+        target.addAttribute("dfrom", df_date.format(e.getStart()));
+        target.addAttribute("dto", df_date.format(e.getEnd()));
+        target.addAttribute("tfrom", df_time.format(e.getStart()));
+        target.addAttribute("tto", df_time.format(e.getEnd()));
         target.addAttribute("description", e.getDescription() == null ? "" : e
                 .getDescription());
         target.addAttribute("extracss", e.getStyleName() == null ? "" : e
@@ -351,11 +349,12 @@ public class Schedule extends AbstractComponent implements
                         currentCalendar.setTime(d);
                         int startMinutes = Integer.parseInt(dates[1]);
                         int endMinutes = Integer.parseInt(dates[2]);
-                        currentCalendar.add(Calendar.MINUTE, startMinutes);
+                        currentCalendar.add(java.util.Calendar.MINUTE,
+                                startMinutes);
                         Date start = currentCalendar.getTime();
-                        currentCalendar.add(Calendar.MINUTE, endMinutes
-                                - startMinutes);
-                        currentCalendar.add(Calendar.MILLISECOND, -1);
+                        currentCalendar.add(java.util.Calendar.MINUTE,
+                                endMinutes - startMinutes);
+                        currentCalendar.add(java.util.Calendar.MILLISECOND, -1);
                         Date end = currentCalendar.getTime();
                         fireRangeSelect(start, end);
                     } catch (ParseException e) {
@@ -438,10 +437,10 @@ public class Schedule extends AbstractComponent implements
                 durationInDays = -durationInDays;
             }
             currentCalendar.setTime(startDate);
-            currentCalendar.add(Calendar.DATE, durationInDays);
+            currentCalendar.add(java.util.Calendar.DATE, durationInDays);
             startDate = currentCalendar.getTime();
             currentCalendar.setTime(endDate);
-            currentCalendar.add(Calendar.DATE, durationInDays);
+            currentCalendar.add(java.util.Calendar.DATE, durationInDays);
             endDate = currentCalendar.getTime();
             requestRepaint();
             fireNavigationEvent(index != -1);
@@ -504,8 +503,9 @@ public class Schedule extends AbstractComponent implements
     private Date getFirstDateForWeek(Date dateInWeek) {
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
         currentCalendar.setTime(dateInWeek);
-        while (firstDayOfWeek != currentCalendar.get(Calendar.DAY_OF_WEEK)) {
-            currentCalendar.add(Calendar.DATE, -1);
+        while (firstDayOfWeek != currentCalendar
+                .get(java.util.Calendar.DAY_OF_WEEK)) {
+            currentCalendar.add(java.util.Calendar.DATE, -1);
         }
         return currentCalendar.getTime();
     }
@@ -516,14 +516,15 @@ public class Schedule extends AbstractComponent implements
      */
     private Date getLastDateForWeek(Date dateInWeek) {
         currentCalendar.setTime(dateInWeek);
-        currentCalendar.add(Calendar.DATE, 1);
+        currentCalendar.add(java.util.Calendar.DATE, 1);
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
         // Roll to weeks last day using firstdayofweek. Roll until FDofW is
         // found and then roll back one day.
-        while (firstDayOfWeek != currentCalendar.get(Calendar.DAY_OF_WEEK)) {
-            currentCalendar.add(Calendar.DATE, 1);
+        while (firstDayOfWeek != currentCalendar
+                .get(java.util.Calendar.DAY_OF_WEEK)) {
+            currentCalendar.add(java.util.Calendar.DATE, 1);
         }
-        currentCalendar.add(Calendar.DATE, -1);
+        currentCalendar.add(java.util.Calendar.DATE, -1);
         return currentCalendar.getTime();
     }
 
@@ -552,12 +553,30 @@ public class Schedule extends AbstractComponent implements
 
     /**
      * Interface for querying datasource. Schedule component must have
-     * EventReader implementation. This interface will be dropped in future
+     * EventProvider implementation. This interface will be dropped in future
      * versions. In future schedule will require DateContainer or similiar.
      */
-    public interface EventReader {
-        public ArrayList<ScheduleEvent> getEvents(Date fromStartDate,
-                Date toEndDate);
+    public interface EventProvider {
+        public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate);
+    }
+
+    /**
+     * One event in schedule.<br/>
+     * <li>start, end and caption fields are mandatory. <li>In "allDay" events,
+     * starting and ending clocktimes are omitted in UI and only dates are
+     * shown.
+     */
+    public interface Event {
+
+        public Date getStart();
+
+        public Date getEnd();
+
+        public String getCaption();
+
+        public String getDescription();
+
+        public String getStyleName();
     }
 
     public void addListener(ForwardListener listener) {

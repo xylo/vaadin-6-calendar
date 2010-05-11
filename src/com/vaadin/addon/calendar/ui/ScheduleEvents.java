@@ -3,7 +3,6 @@ package com.vaadin.addon.calendar.ui;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import com.vaadin.addon.calendar.ScheduleEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.ScheduleEventId;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
@@ -26,20 +25,20 @@ public interface ScheduleEvents {
 
         public static final String EVENT_ID = ScheduleEventId.EVENTMOVE;
 
-        /** Index for the moved ScheduleEvent. */
-        private ScheduleEvent scheduleEvent;
+        /** Index for the moved Schedule.Event. */
+        private Calendar.Event scheduleEvent;
 
-        /** New starting date for the moved ScheduleEvent. */
+        /** New starting date for the moved Schedule.Event. */
         private Date newFromDateTime;
 
-        public EventMoveEvent(Component source, ScheduleEvent scheduleEvent,
+        public EventMoveEvent(Component source, Calendar.Event scheduleEvent,
                 Date newFromDateTime) {
             super(source);
             this.scheduleEvent = scheduleEvent;
             this.newFromDateTime = newFromDateTime;
         }
 
-        public ScheduleEvent getScheduleEvent() {
+        public Calendar.Event getScheduleEvent() {
             return scheduleEvent;
         }
 
@@ -187,14 +186,14 @@ public interface ScheduleEvents {
 
         public static final String EVENT_ID = ScheduleEventId.EVENTCLICK;
 
-        private ScheduleEvent scheduleEvent;
+        private Calendar.Event scheduleEvent;
 
-        public EventClickEvent(Component source, ScheduleEvent scheduleEvent) {
+        public EventClickEvent(Component source, Calendar.Event scheduleEvent) {
             super(source);
             this.scheduleEvent = scheduleEvent;
         }
 
-        public ScheduleEvent getScheduleEvent() {
+        public Calendar.Event getScheduleEvent() {
             return scheduleEvent;
         }
     }

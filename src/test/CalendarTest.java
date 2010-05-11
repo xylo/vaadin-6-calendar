@@ -2,7 +2,6 @@ package test;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -10,10 +9,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
-import com.vaadin.addon.calendar.ScheduleEvent;
-import com.vaadin.addon.calendar.ui.Schedule;
-import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
 import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.ScheduleEvents.BackwardListener;
 import com.vaadin.addon.calendar.ui.ScheduleEvents.DateClickEvent;
@@ -51,7 +48,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
 /** Scheduler component test application */
-public class ScheduleTest extends Application implements EventReader {
+public class CalendarTest extends Application implements Calendar.EventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -63,7 +60,7 @@ public class ScheduleTest extends Application implements EventReader {
 
     private GregorianCalendar calendar;
 
-    private Schedule schedule;
+    private Calendar calendarComponent;
 
     private Date currentMonthsFirstDate;
 
@@ -93,7 +90,7 @@ public class ScheduleTest extends Application implements EventReader {
 
     private Mode viewMode = Mode.MONTH;
 
-    private List<ScheduleEvent> dataSource = new ArrayList<ScheduleEvent>();
+    private List<Calendar.Event> dataSource = new ArrayList<Calendar.Event>();
 
     @Override
     public void init() {
@@ -158,8 +155,8 @@ public class ScheduleTest extends Application implements EventReader {
 
         layout.addComponent(controlPanel);
         layout.addComponent(hl);
-        layout.addComponent(schedule);
-        layout.setExpandRatio(schedule, 1);
+        layout.addComponent(calendarComponent);
+        layout.setExpandRatio(calendarComponent, 1);
         return layout;
     }
 
@@ -178,8 +175,8 @@ public class ScheduleTest extends Application implements EventReader {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                switchToWeekView(calendar.get(Calendar.WEEK_OF_YEAR), calendar
-                        .get(Calendar.YEAR));
+                switchToWeekView(calendar.get(GregorianCalendar.WEEK_OF_YEAR),
+                        calendar.get(GregorianCalendar.YEAR));
             }
         });
 
@@ -208,17 +205,17 @@ public class ScheduleTest extends Application implements EventReader {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                schedule
-                        .setHideWeekends((Boolean) event.getButton().getValue());
+                calendarComponent.setHideWeekends((Boolean) event.getButton()
+                        .getValue());
             }
         });
     }
 
     private void initScheduler() {
-        schedule = new Schedule(this);
-        schedule.setHideWeekends(false);
-        schedule.setLocale(getLocale());
-        schedule.setImmediate(true);
+        calendarComponent = new Calendar(this);
+        calendarComponent.setHideWeekends(false);
+        calendarComponent.setLocale(getLocale());
+        calendarComponent.setImmediate(true);
 
         Date today = new Date();
         calendar = new GregorianCalendar(getLocale());
@@ -226,14 +223,14 @@ public class ScheduleTest extends Application implements EventReader {
 
         updateCaptionLabel();
 
-        int rollAmount = calendar.get(Calendar.DAY_OF_MONTH) - 1;
-        calendar.add(Calendar.DAY_OF_MONTH, -rollAmount);
+        int rollAmount = calendar.get(GregorianCalendar.DAY_OF_MONTH) - 1;
+        calendar.add(GregorianCalendar.DAY_OF_MONTH, -rollAmount);
         resetTime(false);
         currentMonthsFirstDate = calendar.getTime();
-        schedule.setStartDate(currentMonthsFirstDate);
-        calendar.add(Calendar.MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setStartDate(currentMonthsFirstDate);
+        calendar.add(GregorianCalendar.MONTH, 1);
+        calendar.add(GregorianCalendar.DATE, -1);
+        calendarComponent.setEndDate(calendar.getTime());
 
         addScheduleEventListeners();
     }
@@ -241,29 +238,29 @@ public class ScheduleTest extends Application implements EventReader {
     @SuppressWarnings("serial")
     private void addScheduleEventListeners() {
         // Register week clicks by changing the schedules start and end dates.
-        schedule.addListener(new WeekClickListener() {
+        calendarComponent.addListener(new WeekClickListener() {
 
             public void weekClick(WeekClickEvent event) {
                 switchToWeekView(event.getWeek(), event.getYear());
             }
         });
-        schedule.addListener(new ForwardListener() {
+        calendarComponent.addListener(new ForwardListener() {
 
             public void forward(ForwardEvent event) {
             }
         });
-        schedule.addListener(new BackwardListener() {
+        calendarComponent.addListener(new BackwardListener() {
 
             public void backward(BackwardEvent event) {
             }
         });
-        schedule.addListener(new EventClickListener() {
+        calendarComponent.addListener(new EventClickListener() {
 
             public void eventClick(EventClickEvent event) {
                 showEventPopup(event.getScheduleEvent(), false);
             }
         });
-        schedule.addListener(new DateClickListener() {
+        calendarComponent.addListener(new DateClickListener() {
 
             public void dateClick(DateClickEvent event) {
                 // Schedules start and end dates will be changed.
@@ -271,7 +268,7 @@ public class ScheduleTest extends Application implements EventReader {
             }
         });
 
-        schedule.addListener(new RangeSelectListener() {
+        calendarComponent.addListener(new RangeSelectListener() {
 
             public void rangeSelect(RangeSelectEvent event) {
                 showEventPopup(createNewEvent(event.getFrom(), event.getTo()),
@@ -279,7 +276,7 @@ public class ScheduleTest extends Application implements EventReader {
             }
         });
 
-        schedule.addListener(new EventMoveListener() {
+        calendarComponent.addListener(new EventMoveListener() {
 
             public void eventMove(EventMoveEvent event) {
                 applyEventMove(event.getScheduleEvent(), event
@@ -376,15 +373,15 @@ public class ScheduleTest extends Application implements EventReader {
         TimeZone tz = null;
         if (!DEFAULT_ITEMID.equals(timezoneId))
             tz = TimeZone.getTimeZone((String) timezoneId);
-        schedule.setTimeZone(tz);
-        calendar.setTimeZone(schedule.getTimeZone());
+        calendarComponent.setTimeZone(tz);
+        calendar.setTimeZone(calendarComponent.getTimeZone());
     }
 
     private void updateScheduleFormat(Object format) {
         CalendarFormat calFormat = null;
         if (format instanceof CalendarFormat)
             calFormat = (CalendarFormat) format;
-        schedule.setCalendarFormat(calFormat);
+        calendarComponent.setCalendarFormat(calFormat);
     }
 
     private String getLocaleItemCaption(Locale l) {
@@ -398,7 +395,7 @@ public class ScheduleTest extends Application implements EventReader {
     }
 
     private void updateScheduleLocale(Locale l) {
-        schedule.setLocale(l);
+        calendarComponent.setLocale(l);
         calendar = new GregorianCalendar(l);
     }
 
@@ -432,19 +429,22 @@ public class ScheduleTest extends Application implements EventReader {
 
     private void handleDateClick(Date date) {
         calendar.setTime(date);
-        switchToDayView(calendar.get(Calendar.DATE), calendar
-                .get(Calendar.YEAR));
+        switchToDayView(calendar.get(GregorianCalendar.DATE), calendar
+                .get(GregorianCalendar.YEAR));
     }
 
-    private void applyEventMove(ScheduleEvent e, Date newFromDatetime) {
-        /* Update event dates */
-        long length = e.getWhenTo().getTime() - e.getWhenFrom().getTime();
-        e.setWhenFrom(newFromDatetime);
-        e.setWhenTo(new Date(newFromDatetime.getTime() + length));
-        schedule.requestRepaint();
+    private void applyEventMove(Calendar.Event event, Date newFromDatetime) {
+        if (event instanceof CalendarTestEvent) {
+            CalendarTestEvent e = (CalendarTestEvent) event;
+            /* Update event dates */
+            long length = e.getEnd().getTime() - e.getStart().getTime();
+            e.setStart(newFromDatetime);
+            e.setEnd(new Date(newFromDatetime.getTime() + length));
+            calendarComponent.requestRepaint();
+        }
     }
 
-    private void showEventPopup(ScheduleEvent event, boolean newEvent) {
+    private void showEventPopup(Calendar.Event event, boolean newEvent) {
         if (event == null)
             return;
 
@@ -522,10 +522,10 @@ public class ScheduleTest extends Application implements EventReader {
         deleteEventButton.setVisible(!newEvent);
     }
 
-    private void updateScheduleEventForm(ScheduleEvent event) {
+    private void updateScheduleEventForm(Calendar.Event event) {
         // Lets create a ScheduleEvent BeanItem and pass it to the form's data
         // source.
-        BeanItem<ScheduleEvent> item = new BeanItem<ScheduleEvent>(event);
+        BeanItem<Calendar.Event> item = new BeanItem<Calendar.Event>(event);
         scheduleEventForm.setWriteThrough(false);
         scheduleEventForm.setItemDataSource(item);
         scheduleEventForm.setFormFieldFactory(new FormFieldFactory() {
@@ -579,30 +579,30 @@ public class ScheduleTest extends Application implements EventReader {
                 "where", "description", "styleName" });
     }
 
-    private ScheduleEvent createNewEvent(Date startDate, Date endDate) {
-        ScheduleEvent event = new ScheduleTestEvent("", startDate, endDate);
+    private Calendar.Event createNewEvent(Date startDate, Date endDate) {
+        CalendarTestEvent event = new CalendarTestEvent("", startDate, endDate);
         event.setStyleName("color1");
         return event;
     }
 
     /* Removes the event from the data source and requests repaint. */
     private void deleteScheduleEvent() {
-        ScheduleEvent event = getFormScheduleEvent();
+        Calendar.Event event = getFormScheduleEvent();
         if (dataSource.contains(event))
             dataSource.remove(event);
         getMainWindow().removeWindow(scheduleEventPopup);
-        schedule.requestRepaint();
+        calendarComponent.requestRepaint();
     }
 
     /* Adds/updates the event in the data source and requests repaint. */
     private void commitScheduleEvent() {
         scheduleEventForm.commit();
-        ScheduleEvent event = getFormScheduleEvent();
+        Calendar.Event event = getFormScheduleEvent();
         if (!dataSource.contains(event))
             dataSource.add(event);
 
         getMainWindow().removeWindow(scheduleEventPopup);
-        schedule.requestRepaint();
+        calendarComponent.requestRepaint();
     }
 
     private void discardScheduleEvent() {
@@ -611,10 +611,10 @@ public class ScheduleTest extends Application implements EventReader {
     }
 
     @SuppressWarnings("unchecked")
-    private ScheduleEvent getFormScheduleEvent() {
-        BeanItem<ScheduleEvent> item = (BeanItem<ScheduleEvent>) scheduleEventForm
+    private Calendar.Event getFormScheduleEvent() {
+        BeanItem<Calendar.Event> item = (BeanItem<Calendar.Event>) scheduleEventForm
                 .getItemDataSource();
-        ScheduleEvent event = item.getBean();
+        Calendar.Event event = item.getBean();
         return event;
     }
 
@@ -644,47 +644,49 @@ public class ScheduleTest extends Application implements EventReader {
 
     private void rollMonth(int direction) {
         calendar.setTime(currentMonthsFirstDate);
-        calendar.add(Calendar.MONTH, direction);
+        calendar.add(GregorianCalendar.MONTH, direction);
         resetTime(false);
         currentMonthsFirstDate = calendar.getTime();
-        schedule.setStartDate(currentMonthsFirstDate);
+        calendarComponent.setStartDate(currentMonthsFirstDate);
 
         updateCaptionLabel();
 
-        calendar.add(Calendar.MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(GregorianCalendar.MONTH, 1);
+        calendar.add(GregorianCalendar.DATE, -1);
         resetTime(true);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     private void rollWeek(int direction) {
-        calendar.add(Calendar.WEEK_OF_YEAR, direction);
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.add(GregorianCalendar.WEEK_OF_YEAR, direction);
+        calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
+                .getFirstDayOfWeek());
         resetTime(false);
-        schedule.setStartDate(calendar.getTime());
+        calendarComponent.setStartDate(calendar.getTime());
 
         updateCaptionLabel();
 
         resetTime(true);
-        calendar.add(Calendar.DATE, 6);
-        schedule.setEndDate(calendar.getTime());
+        calendar.add(GregorianCalendar.DATE, 6);
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     private void rollDate(int direction) {
-        calendar.add(Calendar.DATE, direction);
+        calendar.add(GregorianCalendar.DATE, direction);
         resetTime(false);
-        schedule.setStartDate(calendar.getTime());
+        calendarComponent.setStartDate(calendar.getTime());
 
         updateCaptionLabel();
 
         resetTime(true);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     private void updateCaptionLabel() {
         DateFormatSymbols s = new DateFormatSymbols(getLocale());
-        String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
-        captionLabel.setValue(month + " " + calendar.get(Calendar.YEAR));
+        String month = s.getShortMonths()[calendar.get(GregorianCalendar.MONTH)];
+        captionLabel.setValue(month + " "
+                + calendar.get(GregorianCalendar.YEAR));
     }
 
     /*
@@ -697,17 +699,18 @@ public class ScheduleTest extends Application implements EventReader {
         weekButton.setVisible(false);
         monthButton.setVisible(true);
 
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.WEEK_OF_YEAR, week);
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.set(GregorianCalendar.YEAR, year);
+        calendar.set(GregorianCalendar.WEEK_OF_YEAR, week);
+        calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
+                .getFirstDayOfWeek());
         resetTime(false);
-        schedule.setStartDate(calendar.getTime());
+        calendarComponent.setStartDate(calendar.getTime());
 
         updateCaptionLabel();
 
         resetTime(true);
-        calendar.add(Calendar.DATE, 6);
-        schedule.setEndDate(calendar.getTime());
+        calendar.add(GregorianCalendar.DATE, 6);
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     /*
@@ -721,14 +724,14 @@ public class ScheduleTest extends Application implements EventReader {
         weekButton.setVisible(false);
 
         calendar.setTime(currentMonthsFirstDate);
-        schedule.setStartDate(currentMonthsFirstDate);
+        calendarComponent.setStartDate(currentMonthsFirstDate);
 
         updateCaptionLabel();
 
-        calendar.add(Calendar.MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(GregorianCalendar.MONTH, 1);
+        calendar.add(GregorianCalendar.DATE, -1);
         resetTime(true);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     /*
@@ -741,15 +744,15 @@ public class ScheduleTest extends Application implements EventReader {
         monthButton.setVisible(true);
         weekButton.setVisible(true);
 
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.DATE, date);
+        calendar.set(GregorianCalendar.YEAR, year);
+        calendar.set(GregorianCalendar.DATE, date);
         resetTime(false);
-        schedule.setStartDate(calendar.getTime());
+        calendarComponent.setStartDate(calendar.getTime());
 
         updateCaptionLabel();
 
         resetTime(true);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     /*
@@ -758,17 +761,19 @@ public class ScheduleTest extends Application implements EventReader {
      */
     private void resetTime(boolean max) {
         if (max) {
-            calendar.set(Calendar.HOUR_OF_DAY, calendar
-                    .getMaximum(Calendar.HOUR_OF_DAY));
-            calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
-            calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
-            calendar.set(Calendar.MILLISECOND, calendar
-                    .getMaximum(Calendar.MILLISECOND));
+            calendar.set(GregorianCalendar.HOUR_OF_DAY, calendar
+                    .getMaximum(GregorianCalendar.HOUR_OF_DAY));
+            calendar.set(GregorianCalendar.MINUTE, calendar
+                    .getMaximum(GregorianCalendar.MINUTE));
+            calendar.set(GregorianCalendar.SECOND, calendar
+                    .getMaximum(GregorianCalendar.SECOND));
+            calendar.set(GregorianCalendar.MILLISECOND, calendar
+                    .getMaximum(GregorianCalendar.MILLISECOND));
         } else {
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(GregorianCalendar.HOUR_OF_DAY, 0);
+            calendar.set(GregorianCalendar.MINUTE, 0);
+            calendar.set(GregorianCalendar.SECOND, 0);
+            calendar.set(GregorianCalendar.MILLISECOND, 0);
         }
     }
 
@@ -779,15 +784,15 @@ public class ScheduleTest extends Application implements EventReader {
      * com.vaadin.addon.calendar.ui.Schedule.EventReader#getEvents(java.util
      * .Date, java.util.Date)
      */
-    public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
-        ArrayList<ScheduleEvent> activeEvents = new ArrayList<ScheduleEvent>();
+    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
+        ArrayList<Calendar.Event> activeEvents = new ArrayList<Calendar.Event>();
 
-        for (ScheduleEvent ev : dataSource) {
+        for (Calendar.Event ev : dataSource) {
             long from = fromStartDate.getTime();
             long to = toEndDate.getTime();
 
-            long f = ev.getWhenFrom().getTime();
-            long t = ev.getWhenTo().getTime();
+            long f = ev.getStart().getTime();
+            long t = ev.getEnd().getTime();
             // Select only events that overlaps with fromStartDate and
             // toEndDate.
             if ((f <= to && f >= from) || (t >= from && t <= to)

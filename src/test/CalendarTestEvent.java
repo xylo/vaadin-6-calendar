@@ -2,39 +2,39 @@ package test;
 
 import java.util.Date;
 
-import com.vaadin.addon.calendar.ScheduleEvent;
+import com.vaadin.addon.calendar.ui.Calendar;
 
 /** Test ScheduleEvent implementation. */
-public class ScheduleTestEvent implements ScheduleEvent {
+public class CalendarTestEvent implements Calendar.Event {
 
-    private Date whenFrom;
-    private Date whenTo;
+    private Date start;
+    private Date end;
     private String caption;
     private String where;
     private String description;
     private Object data;
     private String styleName;
 
-    public ScheduleTestEvent(String caption, Date whenFrom, Date whenTo) {
+    public CalendarTestEvent(String caption, Date start, Date end) {
         this.caption = caption;
-        this.whenFrom = whenFrom;
-        this.whenTo = whenTo;
+        this.start = start;
+        this.end = end;
     }
 
-    public Date getWhenFrom() {
-        return whenFrom;
+    public Date getStart() {
+        return start;
     }
 
-    public void setWhenFrom(Date whenFrom) {
-        this.whenFrom = whenFrom;
+    public void setStart(Date start) {
+        this.start = start;
     }
 
-    public Date getWhenTo() {
-        return whenTo;
+    public Date getEnd() {
+        return end;
     }
 
-    public void setWhenTo(Date whenTo) {
-        this.whenTo = whenTo;
+    public void setEnd(Date end) {
+        this.end = end;
     }
 
     public String getCaption() {

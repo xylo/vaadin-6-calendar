@@ -2,21 +2,21 @@ package com.vaadin.addon.calendar;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Test;
 
-import com.vaadin.addon.calendar.ui.Schedule;
-import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Calendar;
 
 public class CalendarBasics {
 
     @Test
     public void dummy() {
-        Schedule s = new Schedule(new EventReader() {
+        Calendar s = new Calendar(new Calendar.EventProvider() {
 
-            public ArrayList<ScheduleEvent> getEvents(Date fromStartDate,
+            public List<Calendar.Event> getEvents(Date fromStartDate,
                     Date toEndDate) {
-                return new ArrayList<ScheduleEvent>();
+                return new ArrayList<Calendar.Event>();
             }
 
         });

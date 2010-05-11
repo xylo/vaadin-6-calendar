@@ -34,6 +34,8 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
         if (rowCount == 0)
             return;
         int cellheight = (height / rowCount) - 1;
+        if (cellheight < 1)
+            cellheight = 1;
         for (int i = 0; i < rowCount; i++) {
             getCellFormatter().setHeight(i, 0, cellheight + "px");
         }

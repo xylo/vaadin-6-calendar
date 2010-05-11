@@ -2,16 +2,15 @@ package test;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
-import com.vaadin.addon.calendar.ScheduleEvent;
-import com.vaadin.addon.calendar.ui.Schedule;
-import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -22,10 +21,12 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
-public class ScheduleTestWeekly extends Application implements EventReader {
+public class CalendarTestWeekly extends Application implements EventProvider {
+
     private static final long serialVersionUID = -5436777475398410597L;
+
     GregorianCalendar calendar = new GregorianCalendar();
-    private Schedule schedule;
+    private Calendar schedule;
     private Date selectedDate = null;
     private Label label = new Label("");
 
@@ -36,7 +37,7 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         setTheme("calendar");
 
-        schedule = new Schedule(this);
+        schedule = new Calendar(this);
         for (String s : TimeZone.getAvailableIDs()) {
             System.out.println(s);
         }
@@ -45,12 +46,12 @@ public class ScheduleTestWeekly extends Application implements EventReader {
 
         Date today = new Date();
         calendar.setTime(today);
-        String cap = calendar.get(Calendar.WEEK_OF_YEAR) + " "
-                + calendar.get(Calendar.YEAR);
+        String cap = calendar.get(GregorianCalendar.WEEK_OF_YEAR) + " "
+                + calendar.get(GregorianCalendar.YEAR);
         label.setValue(cap);
         selectedDate = calendar.getTime();
         schedule.setStartDate(selectedDate);
-        calendar.add(Calendar.DATE, 6);
+        calendar.add(GregorianCalendar.DATE, 6);
         schedule.setEndDate(calendar.getTime());
 
         VerticalLayout vl = new VerticalLayout();
@@ -63,13 +64,13 @@ public class ScheduleTestWeekly extends Application implements EventReader {
 
             public void buttonClick(ClickEvent event) {
                 calendar.setTime(selectedDate);
-                calendar.add(Calendar.DATE, 7);
+                calendar.add(GregorianCalendar.DATE, 7);
                 selectedDate = calendar.getTime();
                 schedule.setStartDate(selectedDate);
-                String cap = calendar.get(Calendar.WEEK_OF_YEAR) + " "
-                        + calendar.get(Calendar.YEAR);
+                String cap = calendar.get(GregorianCalendar.WEEK_OF_YEAR) + " "
+                        + calendar.get(GregorianCalendar.YEAR);
                 label.setValue(cap);
-                calendar.add(Calendar.DATE, 6);
+                calendar.add(GregorianCalendar.DATE, 6);
                 schedule.setEndDate(calendar.getTime());
             }
 
@@ -81,14 +82,16 @@ public class ScheduleTestWeekly extends Application implements EventReader {
 
             public void buttonClick(ClickEvent event) {
                 calendar.setTime(selectedDate);
-                calendar.add(Calendar.MONTH, -1);
+                calendar.add(GregorianCalendar.MONTH, -1);
                 selectedDate = calendar.getTime();
                 schedule.setStartDate(selectedDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
-                String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
-                label.setValue(month + " " + calendar.get(Calendar.YEAR));
-                calendar.add(Calendar.MONTH, 1);
-                calendar.add(Calendar.DATE, -1);
+                String month = s.getShortMonths()[calendar
+                        .get(GregorianCalendar.MONTH)];
+                label.setValue(month + " "
+                        + calendar.get(GregorianCalendar.YEAR));
+                calendar.add(GregorianCalendar.MONTH, 1);
+                calendar.add(GregorianCalendar.DATE, -1);
                 schedule.setEndDate(calendar.getTime());
             }
 
@@ -120,59 +123,59 @@ public class ScheduleTestWeekly extends Application implements EventReader {
         vl.setExpandRatio(schedule, 1);
     }
 
-    public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
+    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
         calendar.setTime(fromStartDate);
-        calendar.add(Calendar.DATE, 1);
-        ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
-        ScheduleEvent event = new ScheduleTestEvent("Phase1", fromStartDate,
-                calendar.getTime());
+        calendar.add(GregorianCalendar.DATE, 1);
+        ArrayList<Calendar.Event> e = new ArrayList<Calendar.Event>();
+        CalendarTestEvent event = new CalendarTestEvent("Phase1",
+                fromStartDate, calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);
 
-        calendar.add(Calendar.DATE, 3);
+        calendar.add(GregorianCalendar.DATE, 3);
         Date d = calendar.getTime();
-        calendar.add(Calendar.DATE, 1);
+        calendar.add(GregorianCalendar.DATE, 1);
         Date d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Phase2", d, d2);
+        event = new CalendarTestEvent("Phase2", d, d2);
         event.setStyleName("color2");
         e.add(event);
 
-        calendar.add(Calendar.DATE, -5);
+        calendar.add(GregorianCalendar.DATE, -5);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 2);
+        calendar.add(GregorianCalendar.HOUR, 2);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Event 1", d, d2);
+        event = new CalendarTestEvent("Event 1", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.HOUR, 2);
+        calendar.add(GregorianCalendar.HOUR, 2);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 3);
+        calendar.add(GregorianCalendar.HOUR, 3);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Event 2", d, d2);
+        event = new CalendarTestEvent("Event 2", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.HOUR, -2);
+        calendar.add(GregorianCalendar.HOUR, -2);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
-        calendar.add(Calendar.MINUTE, 15);
+        calendar.add(GregorianCalendar.HOUR, 1);
+        calendar.add(GregorianCalendar.MINUTE, 15);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Event 3", d, d2);
+        event = new CalendarTestEvent("Event 3", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, -90);
+        calendar.add(GregorianCalendar.MINUTE, -90);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 5);
+        calendar.add(GregorianCalendar.MINUTE, 5);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 1", d, d2);
+        event = new CalendarTestEvent("Session 1", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 250);
-        calendar.add(Calendar.DATE, 2);
+        calendar.add(GregorianCalendar.MINUTE, 250);
+        calendar.add(GregorianCalendar.DATE, 2);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 5);
+        calendar.add(GregorianCalendar.MINUTE, 5);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 2", d, d2);
+        event = new CalendarTestEvent("Session 2", d, d2);
         event.setStyleName("test");
         e.add(event);
 

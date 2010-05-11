@@ -2,28 +2,27 @@ package test;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import com.vaadin.Application;
-import com.vaadin.addon.calendar.ScheduleEvent;
-import com.vaadin.addon.calendar.ui.Schedule;
-import com.vaadin.addon.calendar.ui.Schedule.CalendarFormat;
-import com.vaadin.addon.calendar.ui.Schedule.EventReader;
+import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 
-public class ScheduleTestMonthly extends Application implements EventReader {
+public class CalendarTestMonthly extends Application implements EventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
     GregorianCalendar calendar = new GregorianCalendar();
 
-    private Schedule schedule;
+    private Calendar schedule;
 
     private Date currentMonthsFirstDate = null;
 
@@ -35,22 +34,22 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         setMainWindow(w);
         setTheme("calendar");
 
-        schedule = new Schedule(this);
+        schedule = new Calendar(this);
         schedule.setCalendarFormat(CalendarFormat.Format24H);
 
         Date today = new Date();
         calendar.setTime(today);
-        calendar.get(Calendar.MONTH);
+        calendar.get(GregorianCalendar.MONTH);
 
         DateFormatSymbols s = new DateFormatSymbols(getLocale());
-        String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
-        label.setValue(month + " " + calendar.get(Calendar.YEAR));
-        int rollAmount = calendar.get(Calendar.DAY_OF_MONTH) - 1;
-        calendar.add(Calendar.DAY_OF_MONTH, -rollAmount);
+        String month = s.getShortMonths()[calendar.get(GregorianCalendar.MONTH)];
+        label.setValue(month + " " + calendar.get(GregorianCalendar.YEAR));
+        int rollAmount = calendar.get(GregorianCalendar.DAY_OF_MONTH) - 1;
+        calendar.add(GregorianCalendar.DAY_OF_MONTH, -rollAmount);
         currentMonthsFirstDate = calendar.getTime();
         schedule.setStartDate(currentMonthsFirstDate);
-        calendar.add(Calendar.MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(GregorianCalendar.MONTH, 1);
+        calendar.add(GregorianCalendar.DATE, -1);
         schedule.setEndDate(calendar.getTime());
         VerticalLayout vl = new VerticalLayout();
         vl.setSizeFull();
@@ -63,14 +62,16 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 
             public void buttonClick(ClickEvent event) {
                 calendar.setTime(currentMonthsFirstDate);
-                calendar.add(Calendar.MONTH, 1);
+                calendar.add(GregorianCalendar.MONTH, 1);
                 currentMonthsFirstDate = calendar.getTime();
                 schedule.setStartDate(currentMonthsFirstDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
-                String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
-                label.setValue(month + " " + calendar.get(Calendar.YEAR));
-                calendar.add(Calendar.MONTH, 1);
-                calendar.add(Calendar.DATE, -1);
+                String month = s.getShortMonths()[calendar
+                        .get(GregorianCalendar.MONTH)];
+                label.setValue(month + " "
+                        + calendar.get(GregorianCalendar.YEAR));
+                calendar.add(GregorianCalendar.MONTH, 1);
+                calendar.add(GregorianCalendar.DATE, -1);
                 schedule.setEndDate(calendar.getTime());
             }
 
@@ -84,14 +85,16 @@ public class ScheduleTestMonthly extends Application implements EventReader {
 
             public void buttonClick(ClickEvent event) {
                 calendar.setTime(currentMonthsFirstDate);
-                calendar.add(Calendar.MONTH, -1);
+                calendar.add(GregorianCalendar.MONTH, -1);
                 currentMonthsFirstDate = calendar.getTime();
                 schedule.setStartDate(currentMonthsFirstDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
-                String month = s.getShortMonths()[calendar.get(Calendar.MONTH)];
-                label.setValue(month + " " + calendar.get(Calendar.YEAR));
-                calendar.add(Calendar.MONTH, 1);
-                calendar.add(Calendar.DATE, -1);
+                String month = s.getShortMonths()[calendar
+                        .get(GregorianCalendar.MONTH)];
+                label.setValue(month + " "
+                        + calendar.get(GregorianCalendar.YEAR));
+                calendar.add(GregorianCalendar.MONTH, 1);
+                calendar.add(GregorianCalendar.DATE, -1);
                 schedule.setEndDate(calendar.getTime());
             }
 
@@ -102,113 +105,115 @@ public class ScheduleTestMonthly extends Application implements EventReader {
         vl.setExpandRatio(schedule, 1);
     }
 
-    public ArrayList<ScheduleEvent> getEvents(Date fromStartDate, Date toEndDate) {
+    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
         // return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
         return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
     }
 
-    private ArrayList<ScheduleEvent> getEventsOverlappingForMonthlyTest(
+    private List<Calendar.Event> getEventsOverlappingForMonthlyTest(
             Date fromStartDate, Date toEndDate) {
         calendar.setTime(fromStartDate);
-        calendar.add(Calendar.DATE, 5);
-        ArrayList<ScheduleEvent> e = new ArrayList<ScheduleEvent>();
-        ScheduleEvent event = new ScheduleTestEvent("Phase1", fromStartDate,
-                calendar.getTime());
+        calendar.add(GregorianCalendar.DATE, 5);
+
+        List<Calendar.Event> e = new ArrayList<Calendar.Event>();
+
+        CalendarTestEvent event = new CalendarTestEvent("Phase1",
+                fromStartDate, calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);
 
-        calendar.add(Calendar.DATE, 3);
+        calendar.add(GregorianCalendar.DATE, 3);
         Date d = calendar.getTime();
-        calendar.add(Calendar.DATE, 3);
+        calendar.add(GregorianCalendar.DATE, 3);
         Date d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Phase2", d, d2);
+        event = new CalendarTestEvent("Phase2", d, d2);
         event.setStyleName("color2");
         e.add(event);
 
-        calendar.add(Calendar.DATE, 1);
+        calendar.add(GregorianCalendar.DATE, 1);
         d = calendar.getTime();
-        calendar.add(Calendar.DATE, 10);
+        calendar.add(GregorianCalendar.DATE, 10);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Phase3", d, d2);
+        event = new CalendarTestEvent("Phase3", d, d2);
         event.setStyleName("color3");
         e.add(event);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(GregorianCalendar.DATE, -1);
         d = calendar.getTime();
-        calendar.add(Calendar.DATE, 3);
+        calendar.add(GregorianCalendar.DATE, 3);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Phase4", d, d2);
+        event = new CalendarTestEvent("Phase4", d, d2);
         event.setStyleName("color4");
         e.add(event);
 
-        calendar.add(Calendar.DATE, -1);
-        calendar.add(Calendar.HOUR, -6);
+        calendar.add(GregorianCalendar.DATE, -1);
+        calendar.add(GregorianCalendar.HOUR, -6);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 1", d, d2);
+        event = new CalendarTestEvent("Session 1", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 2", d, d2);
+        event = new CalendarTestEvent("Session 2", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 3", d, d2);
+        event = new CalendarTestEvent("Session 3", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 4", d, d2);
+        event = new CalendarTestEvent("Session 4", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 5", d, d2);
+        event = new CalendarTestEvent("Session 5", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 6", d, d2);
+        event = new CalendarTestEvent("Session 6", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 30);
+        calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 7", d, d2);
+        event = new CalendarTestEvent("Session 7", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 8", d, d2);
+        event = new CalendarTestEvent("Session 8", d, d2);
 
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 9", d, d2);
+        event = new CalendarTestEvent("Session 9", d, d2);
         e.add(event);
 
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
-        calendar.add(Calendar.HOUR, 1);
+        calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new ScheduleTestEvent("Session 10", d, d2);
+        event = new CalendarTestEvent("Session 10", d, d2);
         e.add(event);
         e.add(event);
         return e;
