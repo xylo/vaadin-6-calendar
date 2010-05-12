@@ -4,7 +4,11 @@ import java.util.Date;
 
 import com.vaadin.addon.calendar.ui.Calendar;
 
-/** Test ScheduleEvent implementation. */
+/**
+ * Test Calendar.Event implementation.
+ * 
+ * @see com.vaadin.addon.calendar.ui.Calendar.Event
+ */
 public class CalendarTestEvent implements Calendar.Event {
 
     private Date start;
@@ -21,6 +25,11 @@ public class CalendarTestEvent implements Calendar.Event {
         this.end = end;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getStart()
+     */
     public Date getStart() {
         return start;
     }
@@ -29,6 +38,11 @@ public class CalendarTestEvent implements Calendar.Event {
         this.start = start;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getEnd()
+     */
     public Date getEnd() {
         return end;
     }
@@ -37,6 +51,11 @@ public class CalendarTestEvent implements Calendar.Event {
         this.end = end;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getCaption()
+     */
     public String getCaption() {
         return caption;
     }
@@ -53,6 +72,11 @@ public class CalendarTestEvent implements Calendar.Event {
         this.where = where;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getDescription()
+     */
     public String getDescription() {
         return description;
     }
@@ -69,11 +93,16 @@ public class CalendarTestEvent implements Calendar.Event {
         this.data = data;
     }
 
-    public void setStyleName(String styleName) {
-        this.styleName = styleName;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getStyleName()
+     */
     public String getStyleName() {
         return styleName;
+    }
+
+    public void setStyleName(String styleName) {
+        this.styleName = styleName;
     }
 }

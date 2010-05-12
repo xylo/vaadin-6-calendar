@@ -47,7 +47,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         this.schedule = parent;
         this.format24h = format24h;
         content = new HorizontalPanel();
-        addStyleName("v-schedule-wgwrapper");
+        addStyleName("v-calendar-wgwrapper");
         setWidget(content);
         timebar = new Timebar(format24h);
         content.add(timebar);
@@ -112,7 +112,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         private void createTimeBar(boolean format24h) {
-            setStylePrimaryName("v-schedule-timebar");
+            setStylePrimaryName("v-calendar-timebar");
             setWidth("49px");
             if (format24h) {
                 for (int i = 0; i < 24; i++) {
@@ -170,7 +170,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             this.weekgrid = parent;
             Element mainElement = DOM.createDiv();
             setElement(mainElement);
-            addStyleName("v-schedule-datecell");
+            addStyleName("v-calendar-datecell");
             addHandler(this, MouseDownEvent.getType());
             addHandler(this, MouseUpEvent.getType());
             addHandler(this, MouseMoveEvent.getType());
@@ -775,7 +775,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         public void setDateColor(String styleName) {
-            this.setStyleName("v-schedule-datecell " + styleName);
+            this.setStyleName("v-calendar-datecell " + styleName);
         }
     }
 

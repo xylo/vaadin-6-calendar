@@ -15,7 +15,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected Label nextLabel;
 
     public DayToolbar() {
-        setStylePrimaryName("v-schedule-header-daily");
+        setStylePrimaryName("v-calendar-header-daily");
         setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT + "px");
         backLabel = new Label("");
         backLabel.addStyleName("back");

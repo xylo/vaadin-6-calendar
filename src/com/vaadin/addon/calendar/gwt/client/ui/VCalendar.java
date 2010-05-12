@@ -8,9 +8,9 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.MonthGrid;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
@@ -58,7 +58,7 @@ public class VCalendar extends Composite implements Paintable {
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
-        setStylePrimaryName("v-schedule");
+        setStylePrimaryName("v-calendar");
         weekToolbar.setWidth(MONTHLY_WEEKTOOLBARWIDTH + "px");
         blockSelect(getElement());
     }

@@ -7,6 +7,9 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
 
+/**
+ * interface for all calendar component events.
+ */
 public interface CalendarEvents {
 
     /**

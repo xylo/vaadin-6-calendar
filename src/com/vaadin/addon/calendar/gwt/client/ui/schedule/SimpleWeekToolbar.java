@@ -17,7 +17,7 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
         this.schedule = parent;
         setCellSpacing(0);
         setCellPadding(0);
-        setStyleName("v-schedule-weektoolbar");
+        setStyleName("v-calendar-weektoolbar");
     }
 
     public void addWeek(int week, int year) {

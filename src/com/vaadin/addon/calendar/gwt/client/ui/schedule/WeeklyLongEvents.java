@@ -22,7 +22,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
     private int rowCount = 0;
 
     public WeeklyLongEvents() {
-        setStylePrimaryName("v-schedule-weekly-longevents");
+        setStylePrimaryName("v-calendar-weekly-longevents");
         getElement().getStyle().setProperty("marginLeft", MARGINLEFT + "px");
     }
 

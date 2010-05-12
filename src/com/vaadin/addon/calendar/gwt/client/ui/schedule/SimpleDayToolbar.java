@@ -14,7 +14,7 @@ public class SimpleDayToolbar extends HorizontalPanel {
     protected static final int BORDERWIDTH = 0;
 
     public SimpleDayToolbar() {
-        setStylePrimaryName("v-schedule-header-month");
+        setStylePrimaryName("v-calendar-header-month");
         setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT - BORDERWIDTH + "px");
     }
 

@@ -38,105 +38,105 @@
 	.v-app-ScheduleTestMonthly  {
 	background-color:#fff;
 }
-.v-schedule {
+.v-calendar {
 	background-color:#F1EFEC;
 }
-.v-schedule-header-month {
+.v-calendar-header-month {
 	background-color:#757575;
 	color:#fff;
 }
-.v-schedule-header-month .gwt-Label {
+.v-calendar-header-month .gwt-Label {
 	font-size:11px;
 	font-weight:bold;
 	color:#fff;
 	line-height:18px;
 }
-.v-schedule-header-daily .gwt-Label {
+.v-calendar-header-daily .gwt-Label {
 	font-size:11px;
 	color:#fff;
 	height:14px;
 	line-height:10px;
 	background-color: #757575;
 }
-.v-schedule-header-daily .gwt-Label.back {
+.v-calendar-header-daily .gwt-Label.back {
 	background: #757575 url(../runo/icons/16/arrow-left.png) no-repeat 6px 0;
 }
-.v-schedule-header-daily .gwt-Label.next {
+.v-calendar-header-daily .gwt-Label.next {
 	background: #757575 url(../runo/icons/16/arrow-right.png) no-repeat center 0;
 }right
-.v-schedule-header-daily .today {
+.v-calendar-header-daily .today {
 	text-decoration:underline;
 }
-.v-schedule-header-daily .gwt-Label:hover  {
+.v-calendar-header-daily .gwt-Label:hover  {
 	color:rgb(188,217,120);
 	cursor:pointer;
 }                        
-.v-schedule-weekly-longevents {
+.v-calendar-weekly-longevents {
 	border-left:1px solid #C9CDD2;	
 }
-.v-schedule-weekly-longevents .cell-start {
+.v-calendar-weekly-longevents .cell-start {
 	-moz-border-radius-topleft:5px;
 	-moz-border-radius-bottomleft:5px;
 	-webkit-border-top-left-radius: 5px;
 	-webkit-border-bottom-left-radius:5px;
 	margin-left:2px;
 }
-.v-schedule-weekly-longevents .cell-end {
+.v-calendar-weekly-longevents .cell-end {
 	-moz-border-radius-topright:5px;
 	-moz-border-radius-bottomright:5px;
 	-webkit-border-top-right-radius: 5px;
 	-webkit-border-bottom-right-radius:5px;
 	margin-right:2px;
 }
-.v-schedule-weekly-longevents .cell {
+.v-calendar-weekly-longevents .cell {
 	line-height:15px;
 	height:15px;
 	padding-left:4px;
 	margin-bottom: 1px;
 	color: #565656
 }
-.v-schedule-weektoolbar {
+.v-calendar-weektoolbar {
 	font-size:13px;
 	font-weight:bold;
 }
-.v-schedule-weektoolbar .gwt-Label {
+.v-calendar-weektoolbar .gwt-Label {
 	float:left;
 	padding-top:5px;
 }
-.v-schedule-weektoolbar td {
+.v-calendar-weektoolbar td {
 }
-.v-schedule-weektoolbar .gwt-Label:hover {
+.v-calendar-weektoolbar .gwt-Label:hover {
 	cursor:pointer;
 }
-.v-schedule-month {
+.v-calendar-month {
 	/** border-left:1px solid #C9CDD2; **/
 }
-.v-schedule-monthly-day {
+.v-calendar-monthly-day {
 	border-right:1px solid #C9CDD2;
 	border-bottom:1px solid #C4C4C4;
 }
-.v-schedule-monthly-day:hover {
+.v-calendar-monthly-day:hover {
 	background-color:#fffedf;
 }
-.v-schedule-monthly-day .daycaption{
+.v-calendar-monthly-day .daycaption{
 	font-size:15px;
 	color:rgb(124,124,124);
 	line-height:20px;
 	padding-right:5px;
 }
-.v-schedule-monthly-day.selected {
+.v-calendar-monthly-day.selected {
 	background-color: rgb(188,217,120);	
 }
-.v-schedule-monthly-day .daycaption:hover {
+.v-calendar-monthly-day .daycaption:hover {
 	cursor:pointer;
 }
-.v-schedule-monthly-day .bottomspacer {
+.v-calendar-monthly-day .bottomspacer {
 	/**bodyText*/
 	font-size:11px;
 	color:#565656;
 	padding-left:5px;
 }
-.v-schedule .month-event {
+.v-calendar .month-event {
 	background-color: #fae;
 	height:13px;
 	margin-top:1px;
@@ -144,60 +144,60 @@
 	line-height:14px;
 	margin-right:-1px;
 }
-.v-schedule-monthly-day .spacer {
+.v-calendar-monthly-day .spacer {
 	height:14px;
 } 
-.v-schedule .month-event.event-start {	
+.v-calendar .month-event.event-start {	
 	-moz-border-radius-topleft:5px;
 	-moz-border-radius-bottomleft:5px;
 	-webkit-border-top-left-radius: 5px;
 	-webkit-border-bottom-left-radius:5px;
 	margin-left:2px;
 }
-.v-schedule .month-event.event-end {	
+.v-calendar .month-event.event-end {	
 	-moz-border-radius-topright:5px;
 	-moz-border-radius-bottomright:5px;
 	-webkit-border-top-right-radius: 5px;
 	-webkit-border-bottom-right-radius:5px;
 	margin-right:2px;
 }
-.v-schedule .month-event.short {
+.v-calendar .month-event.short {
 	background-color: transparent;
 }
-.v-schedule .month-event:hover {
+.v-calendar .month-event:hover {
 	cursor:pointer;	
 }
-.v-schedule-monthly-day.disabled .month-event:hover,
-.v-schedule-monthly-day.disabled .daycaption:hover{
+.v-calendar-monthly-day.disabled .month-event:hover,
+.v-calendar-monthly-day.disabled .daycaption:hover{
 	cursor:default;	
 }
-.v-schedule-monthly-day.disabled .daycaption {
+.v-calendar-monthly-day.disabled .daycaption {
 	color:#ccc;	
 }
-.v-schedule-monthly-day.disabled:hover {
+.v-calendar-monthly-day.disabled:hover {
 	background-color: #fff;	
 }
-.v-schedule .month-event.event-wide {
+.v-calendar .month-event.event-wide {
 	padding-top:3px;	
 }
-.v-schedule-monthly-day.greenEvent,
-	.v-schedule-weekly-longevents .greenEvent {
+.v-calendar-monthly-day.greenEvent,
+	.v-calendar-weekly-longevents .greenEvent {
 	background-color: #d7e58f;
 }
-.v-schedule-monthly-day.orangeEvent,
-		.v-schedule-weekly-longevents .orangeEvent {
+.v-calendar-monthly-day.orangeEvent,
+		.v-calendar-weekly-longevents .orangeEvent {
 	background-color: #ecb921;
 }
-.v-schedule-monthly-day.today .daycaption {
+.v-calendar-monthly-day.today .daycaption {
 	text-decoration:underline;
 }
-.v-schedule-wgwrapper {
+.v-calendar-wgwrapper {
 	overflow-x:hidden !important;
 	border: 1px solid #C9CDD2;
 	position:relative;
 	cursor:default;
 }
-.v-schedule-timebar .hour {
+.v-calendar-timebar .hour {
 	height:35px;
 	border-bottom: 1px solid #F1EFEC;
 	font-weight:bold;
@@ -208,7 +208,7 @@
 	font-size:16px;/**16pt*/
 	color: #a8a8a8;/**168*/
 }
-.v-schedule-timebar .minutes {
+.v-calendar-timebar .minutes {
 	float:right;
 	width:15px;
 	text-align:right;
@@ -219,38 +219,38 @@
 	padding-top:2px;
 	padding-right:1px;
 }
-.v-schedule-datecell {
+.v-calendar-datecell {
 	border-left:1px solid #ccc;	
 }
-.v-schedule-datecell .halfhour,
-.v-schedule-datecell .halfhour-even {
+.v-calendar-datecell .halfhour,
+.v-calendar-datecell .halfhour-even {
 	border-bottom:1px solid #ccc;
 	height:18px;
 }
-.v-schedule-datecell .halfhour.daterange,
-	.v-schedule-datecell .halfhour-even.daterange {
+.v-calendar-datecell .halfhour.daterange,
+	.v-calendar-datecell .halfhour-even.daterange {
 	background-color:rgb(188,217,120);
 }
-.v-schedule-datecell .halfhour-even {
+.v-calendar-datecell .halfhour-even {
 	border-bottom:1px dotted #ddd;	
 }
-.v-schedule-datecell .halfhour.reserved, 
-	.v-schedule-datecell .halfhour-even.reserved {
+.v-calendar-datecell .halfhour.reserved, 
+	.v-calendar-datecell .halfhour-even.reserved {
 	background-color:#FF3333;
 }
-.v-schedule-datecell .dayevent {
+.v-calendar-datecell .dayevent {
 	/**bodyText*/
 	font-size:11px;
 	color:#565656;
 	padding-left:3px;
 }
-.v-schedule-datecell.orangeEvent .dayevent {
+.v-calendar-datecell.orangeEvent .dayevent {
 	background-color: #ecb921;
 }
-.v-schedule-datecell.greenEvent .dayevent {
+.v-calendar-datecell.greenEvent .dayevent {
 	background-color: #d7e58f;
 }
-.v-schedule-datecell .caption {
+.v-calendar-datecell .caption {
 	background:transparent;
 	white-space:nowrap;
 	overflow:hidden;
@@ -259,11 +259,11 @@
 	padding-left:3px;
 	height:14px;
 }
-.v-schedule-datecell .content {
+.v-calendar-datecell .content {
 	overflow:hidden;
 	cursor:pointer;
 }
-.v-schedule-datecell .todaybar {
+.v-calendar-datecell .todaybar {
 	position:relative;
 	background-color:red;
 	height:2px;	
@@ -272,15 +272,15 @@
 /** END - Schedule */
 
 /** Customized phase colors*/
-.v-schedule .color1 {
+.v-calendar .color1 {
 	background-color:#9effae;
 }
-.v-schedule .color2 {
+.v-calendar .color2 {
 	background-color:#8ac2ff;
 }
-.v-schedule .color3 {
+.v-calendar .color3 {
 	background-color:#ff949b;
 }
-.v-schedule .color4 {
+.v-calendar .color4 {
 	background-color:#ffc67a;
 }

@@ -23,7 +23,7 @@ public class MonthGrid extends Grid {
         this.schedule = parent;
         setCellSpacing(0);
         setCellPadding(0);
-        setStyleName("v-schedule-month");
+        setStyleName("v-calendar-month");
     }
 
     public void setSelectionEnd(SimpleDayCell simpleDayCell) {

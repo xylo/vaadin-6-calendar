@@ -51,7 +51,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         this.schedule = schedule;
         this.row = row;
         this.cell = cell;
-        setStyleName("v-schedule-monthly-day");
+        setStyleName("v-calendar-monthly-day");
         caption = new Label();
         bottomspacer = new HTML();
         bottomspacer.setStyleName("bottomspacer");

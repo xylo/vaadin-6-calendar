@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -26,7 +26,7 @@ public class CalendarTestWeekly extends Application implements EventProvider {
     private static final long serialVersionUID = -5436777475398410597L;
 
     GregorianCalendar calendar = new GregorianCalendar();
-    private Calendar schedule;
+    private Calendar calendarComponent;
     private Date selectedDate = null;
     private Label label = new Label("");
 
@@ -37,12 +37,12 @@ public class CalendarTestWeekly extends Application implements EventProvider {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         setTheme("calendar");
 
-        schedule = new Calendar(this);
+        calendarComponent = new Calendar(this);
         for (String s : TimeZone.getAvailableIDs()) {
             System.out.println(s);
         }
-        schedule.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"));
-        schedule.setCalendarFormat(CalendarFormat.Format24H);
+        calendarComponent.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"));
+        calendarComponent.setTimeFormat(TimeFormat.Format24H);
 
         Date today = new Date();
         calendar.setTime(today);
@@ -50,9 +50,9 @@ public class CalendarTestWeekly extends Application implements EventProvider {
                 + calendar.get(GregorianCalendar.YEAR);
         label.setValue(cap);
         selectedDate = calendar.getTime();
-        schedule.setStartDate(selectedDate);
+        calendarComponent.setStartDate(selectedDate);
         calendar.add(GregorianCalendar.DATE, 6);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
 
         VerticalLayout vl = new VerticalLayout();
         vl.setSizeFull();
@@ -66,12 +66,12 @@ public class CalendarTestWeekly extends Application implements EventProvider {
                 calendar.setTime(selectedDate);
                 calendar.add(GregorianCalendar.DATE, 7);
                 selectedDate = calendar.getTime();
-                schedule.setStartDate(selectedDate);
+                calendarComponent.setStartDate(selectedDate);
                 String cap = calendar.get(GregorianCalendar.WEEK_OF_YEAR) + " "
                         + calendar.get(GregorianCalendar.YEAR);
                 label.setValue(cap);
                 calendar.add(GregorianCalendar.DATE, 6);
-                schedule.setEndDate(calendar.getTime());
+                calendarComponent.setEndDate(calendar.getTime());
             }
 
         });
@@ -84,7 +84,7 @@ public class CalendarTestWeekly extends Application implements EventProvider {
                 calendar.setTime(selectedDate);
                 calendar.add(GregorianCalendar.MONTH, -1);
                 selectedDate = calendar.getTime();
-                schedule.setStartDate(selectedDate);
+                calendarComponent.setStartDate(selectedDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
                 String month = s.getShortMonths()[calendar
                         .get(GregorianCalendar.MONTH)];
@@ -92,7 +92,7 @@ public class CalendarTestWeekly extends Application implements EventProvider {
                         + calendar.get(GregorianCalendar.YEAR));
                 calendar.add(GregorianCalendar.MONTH, 1);
                 calendar.add(GregorianCalendar.DATE, -1);
-                schedule.setEndDate(calendar.getTime());
+                calendarComponent.setEndDate(calendar.getTime());
             }
 
         });
@@ -104,7 +104,7 @@ public class CalendarTestWeekly extends Application implements EventProvider {
             private static final long serialVersionUID = -4393494935292771814L;
 
             public void menuSelected(MenuItem selectedItem) {
-                schedule.setHideWeekends(false);
+                calendarComponent.setHideWeekends(false);
 
             }
 
@@ -113,14 +113,14 @@ public class CalendarTestWeekly extends Application implements EventProvider {
             private static final long serialVersionUID = -2176043834276176494L;
 
             public void menuSelected(MenuItem selectedItem) {
-                schedule.setHideWeekends(true);
+                calendarComponent.setHideWeekends(true);
             }
 
         });
         vl.addComponent(menu);
         vl.setComponentAlignment(menu, Alignment.BOTTOM_RIGHT);
-        vl.addComponent(schedule);
-        vl.setExpandRatio(schedule, 1);
+        vl.addComponent(calendarComponent);
+        vl.setExpandRatio(calendarComponent, 1);
     }
 
     public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {

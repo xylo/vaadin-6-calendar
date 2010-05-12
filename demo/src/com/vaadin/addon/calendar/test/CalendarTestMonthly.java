@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.CalendarFormat;
+import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -22,7 +22,7 @@ public class CalendarTestMonthly extends Application implements EventProvider {
 
     GregorianCalendar calendar = new GregorianCalendar();
 
-    private Calendar schedule;
+    private Calendar calendarComponent;
 
     private Date currentMonthsFirstDate = null;
 
@@ -34,8 +34,8 @@ public class CalendarTestMonthly extends Application implements EventProvider {
         setMainWindow(w);
         setTheme("calendar");
 
-        schedule = new Calendar(this);
-        schedule.setCalendarFormat(CalendarFormat.Format24H);
+        calendarComponent = new Calendar(this);
+        calendarComponent.setTimeFormat(TimeFormat.Format24H);
 
         Date today = new Date();
         calendar.setTime(today);
@@ -47,10 +47,10 @@ public class CalendarTestMonthly extends Application implements EventProvider {
         int rollAmount = calendar.get(GregorianCalendar.DAY_OF_MONTH) - 1;
         calendar.add(GregorianCalendar.DAY_OF_MONTH, -rollAmount);
         currentMonthsFirstDate = calendar.getTime();
-        schedule.setStartDate(currentMonthsFirstDate);
+        calendarComponent.setStartDate(currentMonthsFirstDate);
         calendar.add(GregorianCalendar.MONTH, 1);
         calendar.add(GregorianCalendar.DATE, -1);
-        schedule.setEndDate(calendar.getTime());
+        calendarComponent.setEndDate(calendar.getTime());
         VerticalLayout vl = new VerticalLayout();
         vl.setSizeFull();
         vl.setMargin(true);
@@ -64,7 +64,7 @@ public class CalendarTestMonthly extends Application implements EventProvider {
                 calendar.setTime(currentMonthsFirstDate);
                 calendar.add(GregorianCalendar.MONTH, 1);
                 currentMonthsFirstDate = calendar.getTime();
-                schedule.setStartDate(currentMonthsFirstDate);
+                calendarComponent.setStartDate(currentMonthsFirstDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
                 String month = s.getShortMonths()[calendar
                         .get(GregorianCalendar.MONTH)];
@@ -72,7 +72,7 @@ public class CalendarTestMonthly extends Application implements EventProvider {
                         + calendar.get(GregorianCalendar.YEAR));
                 calendar.add(GregorianCalendar.MONTH, 1);
                 calendar.add(GregorianCalendar.DATE, -1);
-                schedule.setEndDate(calendar.getTime());
+                calendarComponent.setEndDate(calendar.getTime());
             }
 
         });
@@ -87,7 +87,7 @@ public class CalendarTestMonthly extends Application implements EventProvider {
                 calendar.setTime(currentMonthsFirstDate);
                 calendar.add(GregorianCalendar.MONTH, -1);
                 currentMonthsFirstDate = calendar.getTime();
-                schedule.setStartDate(currentMonthsFirstDate);
+                calendarComponent.setStartDate(currentMonthsFirstDate);
                 DateFormatSymbols s = new DateFormatSymbols(getLocale());
                 String month = s.getShortMonths()[calendar
                         .get(GregorianCalendar.MONTH)];
@@ -95,14 +95,14 @@ public class CalendarTestMonthly extends Application implements EventProvider {
                         + calendar.get(GregorianCalendar.YEAR));
                 calendar.add(GregorianCalendar.MONTH, 1);
                 calendar.add(GregorianCalendar.DATE, -1);
-                schedule.setEndDate(calendar.getTime());
+                calendarComponent.setEndDate(calendar.getTime());
             }
 
         });
 
         vl.addComponent(prev);
-        vl.addComponent(schedule);
-        vl.setExpandRatio(schedule, 1);
+        vl.addComponent(calendarComponent);
+        vl.setExpandRatio(calendarComponent, 1);
     }
 
     public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
