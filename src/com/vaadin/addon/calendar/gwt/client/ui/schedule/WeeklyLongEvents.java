@@ -51,8 +51,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
         updateEventSlot(e);
 
         int dateCount = getWidgetCount();
-        Date from = e.getFromDate();
-        Date to = e.getToDate();
+        Date from = e.getStart();
+        Date to = e.getEnd();
         boolean started = false;
         for (int i = 0; i < dateCount; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
@@ -63,15 +63,19 @@ public class WeeklyLongEvents extends HorizontalPanel {
             if (comp >= 0 && comp2 <= 0) {
                 if (comp == 0) {
                     setStyleName(eventElement, "cell-start", true);
-                } else if (comp2 == 0) {
+                }
+                if (comp2 == 0) {
                     setStyleName(eventElement, "cell-end", true);
-                } else if (!started && comp > 0 && comp2 <= 0) {
+                }
+
+                if (!started && comp > 0 && comp2 <= 0) {
                     setStyleName(eventElement, "cell-continue-left", true);
                 } else if (comp > 0 && comp2 <= 0) {
                     setStyleName(eventElement, "cell", true);
                 } else if (i == (dateCount - 1)) {
                     setStyleName(eventElement, "cell-continue-right", true);
                 }
+
                 String extraStyle = e.getStyleName();
                 if (extraStyle != null && extraStyle.length() > 0) {
                     setStyleName(eventElement, extraStyle, true);

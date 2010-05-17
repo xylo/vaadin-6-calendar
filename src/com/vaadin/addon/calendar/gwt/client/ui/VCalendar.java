@@ -22,6 +22,10 @@ import com.vaadin.terminal.gwt.client.UIDL;
 
 public class VCalendar extends Composite implements Paintable {
 
+    public static final long MINUTEINMILLIS = 60 * 1000;
+    public static final long HOURINMILLIS = 60 * 60 * 1000;
+    public static final long DAYINMILLIS = 24 * HOURINMILLIS;
+
     public static final int MONTHLY_WEEKTOOLBARWIDTH = 20;
     public static final int MONTHLY_DAYTOOLBARHEIGHT = 20;
 
@@ -164,14 +168,14 @@ public class VCalendar extends Composite implements Paintable {
     }
 
     private void updateEventsToWeekGrid(ArrayList<CalendarEvent> events) {
-        List<CalendarEvent> overDayLong = new ArrayList<CalendarEvent>();
+        List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
         List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();
+        long rangeInMillis = 0;
         for (CalendarEvent e : events) {
-            Date when = e.getFromDate();
-            Date to = e.getToDate();
-            if (when.compareTo(to) != 0) {
-                // Event is set on more than one day.
-                overDayLong.add(e);
+            rangeInMillis = e.getRangeInMilliseconds();
+            if (rangeInMillis >= DAYINMILLIS || rangeInMillis == 0) {
+                // Event is set on one "allDay" event or more than one.
+                allDayLong.add(e);
 
             } else {
                 // Event is set only on one day.
@@ -179,7 +183,7 @@ public class VCalendar extends Composite implements Paintable {
             }
         }
 
-        weeklyLongEvents.addEvents(overDayLong);
+        weeklyLongEvents.addEvents(allDayLong);
 
         for (CalendarEvent e : belowDayLong) {
             weekGrid.addEvent(e);
@@ -188,8 +192,8 @@ public class VCalendar extends Composite implements Paintable {
 
     private void updateEventsToMonthGrid(ArrayList<CalendarEvent> events) {
         for (CalendarEvent e : events) {
-            Date when = e.getFromDate();
-            Date to = e.getToDate();
+            Date when = e.getStart();
+            Date to = e.getEnd();
             boolean eventAdded = false;
             boolean inProgress = false; // Event adding has started
             for (int row = 0; row < monthGrid.getRowCount(); row++) {
@@ -240,11 +244,12 @@ public class VCalendar extends Composite implements Paintable {
             e.setCaption(caption);
             e.setDescription(desc);
             e.setIndex(index);
-            e.setToDate(dateformat_date.parse(dateto));
-            e.setFromDate(dateformat_date.parse(datefrom));
-            e.setFromDatetime(dateformat_datetime.parse(datefrom + " "
-                    + timefrom));
-            e.setToDatetime(dateformat_datetime.parse(dateto + " " + timeto));
+            e.setEnd(dateformat_date.parse(dateto));
+            e.setStart(dateformat_date.parse(datefrom));
+            e
+                    .setStartTime(dateformat_datetime.parse(datefrom + " "
+                            + timefrom));
+            e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
             e.setStyleName(style);
             e.setFormat24h(format);
             events.add(e);

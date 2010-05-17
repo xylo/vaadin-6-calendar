@@ -32,6 +32,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Form;
 import com.vaadin.ui.FormFieldFactory;
@@ -548,6 +549,11 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
                 } else if (propertyId.equals("styleName")) {
                     return createStyleNameSelect();
+
+                } else if (propertyId.equals("start")) {
+                    return createDateField("Start date");
+                } else if (propertyId.equals("end")) {
+                    return createDateField("End date");
                 }
                 return null;
             }
@@ -555,6 +561,12 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
             private TextField createTextField(String caption) {
                 TextField f = new TextField(caption);
                 f.setNullRepresentation("");
+                return f;
+            }
+
+            private DateField createDateField(String caption) {
+                DateField f = new DateField(caption);
+                f.setResolution(DateField.RESOLUTION_MIN);
                 return f;
             }
 
@@ -574,8 +586,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
             }
         });
 
-        scheduleEventForm.setVisibleItemProperties(new Object[] { "caption",
-                "where", "description", "styleName" });
+        scheduleEventForm.setVisibleItemProperties(new Object[] { "start",
+                "end", "caption", "where", "description", "styleName" });
     }
 
     private Calendar.Event createNewEvent(Date startDate, Date endDate) {

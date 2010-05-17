@@ -129,16 +129,18 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         MonthEventLabel eventDiv = new MonthEventLabel();
-        if (e.getFromDate().compareTo(e.getToDate()) == 0) {
-            Date fromDatetime = e.getFromDatetime();
+        long rangeInMillis = e.getRangeInMilliseconds();
+
+        if (rangeInMillis < VCalendar.DAYINMILLIS && rangeInMillis != 0) {
+            Date fromDatetime = e.getStartTime();
             eventDiv.addStyleName("month-event short");
             eventDiv.addMouseDownHandler(this);
             eventDiv.addMouseUpHandler(this);
             eventDiv.setHTML(schedule.getTimeFormat().format(fromDatetime)
                     + " " + e.getCaption());
         } else {
-            Date from = e.getFromDate();
-            Date to = e.getToDate();
+            Date from = e.getStart();
+            Date to = e.getEnd();
             MonthGrid monthGrid = (MonthGrid) getParent();
             eventDiv.addMouseDownHandler(this);
             eventDiv.addMouseUpHandler(this);

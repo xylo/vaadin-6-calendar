@@ -6,13 +6,14 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class CalendarEvent {
     private int index;
     private String caption;
-    private Date fromDate, toDate;
+    private Date start, end;
     private String styleName;
-    private Date fromDatetime, toDatetime;
+    private Date startTime, endTime;
     private String description;
     private int slotIndex = -1;
     private boolean format24h;
@@ -24,40 +25,40 @@ public class CalendarEvent {
         return styleName;
     }
 
-    public Date getFromDate() {
-        return fromDate;
+    public Date getStart() {
+        return start;
     }
 
     public void setStyleName(String style) {
         this.styleName = style;
     }
 
-    public void setFromDate(Date fromDate) {
-        this.fromDate = fromDate;
+    public void setStart(Date start) {
+        this.start = start;
     }
 
-    public Date getToDate() {
-        return toDate;
+    public Date getEnd() {
+        return end;
     }
 
-    public void setToDate(Date toDate) {
-        this.toDate = toDate;
+    public void setEnd(Date end) {
+        this.end = end;
     }
 
-    public Date getFromDatetime() {
-        return fromDatetime;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setFromDatetime(Date fromDatetime) {
-        this.fromDatetime = fromDatetime;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public Date getToDatetime() {
-        return toDatetime;
+    public Date getEndTime() {
+        return endTime;
     }
 
-    public void setToDatetime(Date toDatetime) {
-        this.toDatetime = toDatetime;
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
     }
 
     public int getIndex() {
@@ -98,10 +99,38 @@ public class CalendarEvent {
 
     public String getTimeAsText() {
         if (format24h) {
-            return dateformat_date24.format(fromDatetime);
+            return dateformat_date24.format(startTime);
         } else {
-            return dateformat_date.format(fromDatetime);
+            return dateformat_date.format(startTime);
         }
     }
 
+    public long getRangeInMilliseconds() {
+        return getEndTime().getTime() - getStartTime().getTime();
+    }
+
+    public long getRangeInMinutes() {
+        return (getRangeInMilliseconds() / VCalendar.MINUTEINMILLIS);
+    }
+
+    public long getRangeInMinutesForDay(Date targetDay) {
+        if (isTimeOnDifferentDays()) {
+            // Time range is on different days. Calculate the second day's
+            // range.
+            long range = (getEndTime().getTime() - getEnd().getTime())
+                    / VCalendar.MINUTEINMILLIS;
+
+            if (getEnd().compareTo(targetDay) != 0) {
+                // Calculate first day's range.
+                return getRangeInMinutes() - range;
+            }
+
+            return range;
+        } else
+            return getRangeInMinutes();
+    }
+
+    public boolean isTimeOnDifferentDays() {
+        return getStart().compareTo(getEnd()) != 0;
+    }
 }

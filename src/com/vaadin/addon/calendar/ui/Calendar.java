@@ -51,9 +51,6 @@ public class Calendar extends AbstractComponent implements
 
     private static final long serialVersionUID = -1858262705387350736L;
 
-    public static final long HOURINMILLIS = 60 * 60 * 1000;
-    public static final long DAYINMILLIS = 24 * HOURINMILLIS;
-
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
      */
@@ -305,7 +302,7 @@ public class Calendar extends AbstractComponent implements
                     "Schedule cannot be painted without proper date ranges.");
         }
 
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / DAYINMILLIS);
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
         durationInDays++;
         if (durationInDays > 60) {
             throw new PaintException("Daterange is too big (max 60) = "
@@ -474,6 +471,7 @@ public class Calendar extends AbstractComponent implements
             try {
                 Date d1 = df_date.parse(dates[0]);
                 Date d2 = df_date.parse(dates[1]);
+
                 fireRangeSelect(d1, d2);
 
             } catch (ParseException e) {
@@ -547,7 +545,7 @@ public class Calendar extends AbstractComponent implements
 
     private void handleNavigation(Integer integer) {
         int index = integer;
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / DAYINMILLIS);
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
         durationInDays++;
         if (index == -1) {
             durationInDays = -durationInDays;
