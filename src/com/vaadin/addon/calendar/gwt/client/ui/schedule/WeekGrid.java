@@ -413,6 +413,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             if (eventRangeStart > -1) {
                 Element main = getElement();
                 if (eventRangeStart > eventRangeStop) {
+                    if (eventRangeStop <= -1)
+                        eventRangeStop = 0;
                     int temp = eventRangeStart;
                     eventRangeStart = eventRangeStop;
                     eventRangeStop = temp;
@@ -421,9 +423,15 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 NodeList<Node> nodes = main.getChildNodes();
                 int slot = (eventRangeStart - (eventRangeStart % 19)) / 19;
                 int slotEnd = (eventRangeStop - (eventRangeStop % 19)) / 19;
+                if (slotEnd > 47)
+                    slotEnd = 47;
+
                 int slotEndBeforeReserved = slotEnd;
                 for (int i = slot; i <= slotEnd; i++) {
                     Element c = (Element) nodes.getItem(i);
+                    if (c == null)
+                        continue;
+
                     c.removeClassName("daterange");
                     if (!reservedFound && c.getClassName().contains("reserved")) {
                         reservedFound = true;
@@ -844,13 +852,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     public void addEvent(CalendarEvent e) {
         int dateCount = content.getWidgetCount();
         Date from = e.getStart();
-        Date to = e.getEnd();
+        Date toTime = e.getEndTime();
         for (int i = 1; i < dateCount; i++) {
             DateCell dc = (DateCell) content.getWidget(i);
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
-            int comp2 = dcDate.compareTo(to);
-            if (comp >= 0 && comp2 <= 0) {
+            int comp2 = dcDate.compareTo(toTime);
+            if (comp >= 0 && comp2 < 0) {
                 // Same event may be over two DateCells if event's date
                 // range floats over one day. It can't float over two days,
                 // because event which range is over 24 hours, will be handled

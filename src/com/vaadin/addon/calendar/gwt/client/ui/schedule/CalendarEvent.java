@@ -130,7 +130,17 @@ public class CalendarEvent {
             return getRangeInMinutes();
     }
 
+    @SuppressWarnings("deprecation")
     public boolean isTimeOnDifferentDays() {
-        return getStart().compareTo(getEnd()) != 0;
+        if (getEndTime().getTime() - getStart().getTime() > VCalendar.DAYINMILLIS)
+            return true;
+
+        if (getStart().compareTo(getEnd()) != 0) {
+            if (getEndTime().getHours() == 0 && getEndTime().getMinutes() == 0) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }

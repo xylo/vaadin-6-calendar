@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
@@ -272,8 +273,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         calendarComponent.addListener(new RangeSelectListener() {
 
             public void rangeSelect(RangeSelectEvent event) {
-                showEventPopup(
-                        createNewEvent(event.getStart(), event.getEnd()), true);
+                handleRangeSelect(event);
             }
         });
 
@@ -431,6 +431,23 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         calendar.setTime(date);
         switchToDayView(calendar.get(GregorianCalendar.DATE), calendar
                 .get(GregorianCalendar.YEAR));
+    }
+
+    private void handleRangeSelect(RangeSelectEvent event) {
+        Date start = event.getStart();
+        Date end = event.getEnd();
+        if (!event.isMonthlyMode()
+                && event.getEnd().getTime() - event.getStart().getTime() == VCalendar.DAYINMILLIS) {
+            /*
+             * A whole day was selected in the weekly view. Lets create a
+             * full-day event by setting start and end dates to the same date
+             * with a zero length time range. Otherwise event would be shown as
+             * a two days long event because its start and end days would be
+             * different.
+             */
+            end = (Date) start.clone();
+        }
+        showEventPopup(createNewEvent(start, end), true);
     }
 
     private void applyEventMove(Calendar.Event event, Date newFromDatetime) {
@@ -591,6 +608,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     }
 
     private Calendar.Event createNewEvent(Date startDate, Date endDate) {
+
+        // We may want to do
         CalendarTestEvent event = new CalendarTestEvent("", startDate, endDate);
         event.setStyleName("color1");
         return event;

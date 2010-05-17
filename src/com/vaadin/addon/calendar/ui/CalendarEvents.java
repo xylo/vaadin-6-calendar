@@ -142,6 +142,11 @@ public interface CalendarEvents {
         private Date end;
 
         /**
+         * Defines the event's calendar view mode.
+         */
+        private boolean monthlyMode;
+
+        /**
          * RangeSelectEvent needs a start and end date.
          * 
          * @param source
@@ -150,11 +155,15 @@ public interface CalendarEvents {
          *            Start date.
          * @param end
          *            End date.
+         * @param monthlyMode
+         *            Calendar view mode.
          */
-        public RangeSelectEvent(Calendar source, Date start, Date end) {
+        public RangeSelectEvent(Calendar source, Date start, Date end,
+                boolean monthlyMode) {
             super(source);
             this.start = start;
             this.end = end;
+            this.monthlyMode = monthlyMode;
         }
 
         /**
@@ -173,6 +182,16 @@ public interface CalendarEvents {
          */
         public Date getEnd() {
             return end;
+        }
+
+        /**
+         * Gets the event's calendar view mode. Calendar can be be either in
+         * monthly or weekly mode, depending on the active date range.
+         * 
+         * @return Returns true when monthly view is active.
+         */
+        public boolean isMonthlyMode() {
+            return this.monthlyMode;
         }
     }
 

@@ -472,7 +472,7 @@ public class Calendar extends AbstractComponent implements
                 Date d1 = df_date.parse(dates[0]);
                 Date d2 = df_date.parse(dates[1]);
 
-                fireRangeSelect(d1, d2);
+                fireRangeSelect(d1, d2, true);
 
             } catch (ParseException e) {
                 // NOP
@@ -491,9 +491,8 @@ public class Calendar extends AbstractComponent implements
                     Date start = currentCalendar.getTime();
                     currentCalendar.add(java.util.Calendar.MINUTE, endMinutes
                             - startMinutes);
-                    currentCalendar.add(java.util.Calendar.MILLISECOND, -1);
                     Date end = currentCalendar.getTime();
-                    fireRangeSelect(start, end);
+                    fireRangeSelect(start, end, false);
                 } catch (ParseException e) {
                     // NOP
                 } catch (NumberFormatException e) {
@@ -583,8 +582,8 @@ public class Calendar extends AbstractComponent implements
         fireEvent(new DateClickEvent(this, d));
     }
 
-    protected void fireRangeSelect(Date from, Date to) {
-        fireEvent(new RangeSelectEvent(this, from, to));
+    protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
+        fireEvent(new RangeSelectEvent(this, from, to, monthlyMode));
     }
 
     /**
@@ -666,9 +665,10 @@ public class Calendar extends AbstractComponent implements
     /**
      * Event in the calendar. Customize your own event by implementing this
      * interface.<br/>
-     * <li>start, end and caption fields are mandatory. <li>In "allDay" events,
-     * starting and ending clock times are omitted in UI and only dates are
-     * shown.
+     * <li>Start, end and caption fields are mandatory. <li>In "allDay" events
+     * longer than one day, starting and ending clock times are omitted in UI
+     * and only dates are shown.<li>An event with a same start and end date with
+     * zero length time range will be considered as a single "allDay" event.
      */
     public interface Event {
 

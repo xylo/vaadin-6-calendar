@@ -85,9 +85,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
                     started = true;
                 }
 
-                // heigth =
-                // Integer.parseInt(dc.getElement().getStyle().getHeight().substring(0,
-                // ));
             } else if (started) {
                 break;
             }
