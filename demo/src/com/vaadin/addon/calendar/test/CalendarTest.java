@@ -84,11 +84,15 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
     private Button hideWeekendsButton;
 
+    private Button readOnlyButton;
+
     private Window scheduleEventPopup;
 
     private final Form scheduleEventForm = new Form();
 
     private Button deleteEventButton;
+
+    private Button applyEventButton;
 
     private Mode viewMode = Mode.MONTH;
 
@@ -117,6 +121,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     private Layout initLayout(Window w) {
         initNavigationButtons();
         initHideWeekEndButton();
+        initReadOnlyButtonButton();
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
@@ -143,18 +148,20 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         HorizontalLayout controlPanel = new HorizontalLayout();
         controlPanel.setSpacing(true);
         controlPanel.setMargin(true);
-        controlPanel.setWidth("90%");
+        controlPanel.setWidth("100%");
         controlPanel.addComponent(localeSelect);
         controlPanel.addComponent(timeZoneSelect);
         controlPanel.addComponent(formatSelect);
         controlPanel.addComponent(hideWeekendsButton);
+        controlPanel.addComponent(readOnlyButton);
         controlPanel.setComponentAlignment(timeZoneSelect,
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(formatSelect, Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(localeSelect, Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(hideWeekendsButton,
                 Alignment.MIDDLE_LEFT);
-
+        controlPanel.setComponentAlignment(readOnlyButton,
+                Alignment.MIDDLE_LEFT);
         layout.addComponent(controlPanel);
         layout.addComponent(hl);
         layout.addComponent(calendarComponent);
@@ -208,6 +215,20 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
             public void buttonClick(ClickEvent event) {
                 calendarComponent.setHideWeekends((Boolean) event.getButton()
+                        .getValue());
+            }
+        });
+    }
+
+    private void initReadOnlyButtonButton() {
+        readOnlyButton = new Button("Switch read-only mode");
+        readOnlyButton.setSwitchMode(true);
+        readOnlyButton.addListener(new ClickListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            public void buttonClick(ClickEvent event) {
+                calendarComponent.setReadOnly((Boolean) event.getButton()
                         .getValue());
             }
         });
@@ -484,7 +505,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         layout.addComponent(scheduleEventForm);
 
-        Button apply = new Button("Apply", new ClickListener() {
+        applyEventButton = new Button("Apply", new ClickListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -520,7 +541,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
         buttons.addComponent(deleteEventButton);
-        buttons.addComponent(apply);
+        buttons.addComponent(applyEventButton);
         buttons.addComponent(cancel);
         layout.addComponent(buttons);
         layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
@@ -537,6 +558,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
             scheduleEventPopup.setCaption("Edit event");
 
         deleteEventButton.setVisible(!newEvent);
+        deleteEventButton.setEnabled(!calendarComponent.isReadOnly());
+        applyEventButton.setEnabled(!calendarComponent.isReadOnly());
     }
 
     private void updateCalendarEventForm(Calendar.Event event) {
@@ -609,7 +632,6 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
     private Calendar.Event createNewEvent(Date startDate, Date endDate) {
 
-        // We may want to do
         CalendarTestEvent event = new CalendarTestEvent("", startDate, endDate);
         event.setStyleName("color1");
         return event;
@@ -683,19 +705,14 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         calendar.add(GregorianCalendar.MONTH, 1);
         calendar.add(GregorianCalendar.DATE, -1);
-        resetTime(true);
-        calendarComponent.setEndDate(calendar.getTime());
+        resetCalendarTime(true);
     }
 
     private void rollWeek(int direction) {
         calendar.add(GregorianCalendar.WEEK_OF_YEAR, direction);
         calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
                 .getFirstDayOfWeek());
-        resetTime(false);
-        calendarComponent.setStartDate(calendar.getTime());
-
-        updateCaptionLabel();
-
+        resetCalendarTime(false);
         resetTime(true);
         calendar.add(GregorianCalendar.DATE, 6);
         calendarComponent.setEndDate(calendar.getTime());
@@ -703,13 +720,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
     private void rollDate(int direction) {
         calendar.add(GregorianCalendar.DATE, direction);
-        resetTime(false);
-        calendarComponent.setStartDate(calendar.getTime());
-
-        updateCaptionLabel();
-
-        resetTime(true);
-        calendarComponent.setEndDate(calendar.getTime());
+        resetCalendarTime(false);
+        resetCalendarTime(true);
     }
 
     private void updateCaptionLabel() {
@@ -720,9 +732,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     }
 
     /*
-     * Switch the Calendar component's start and end dates to range to the
-     * target week only. (sample range: 04.01.2010 00:00.000 - 10.01.2010
-     * 23:59.999)
+     * Switch the Calendar component's start and end date range to the target
+     * week only. (sample range: 04.01.2010 00:00.000 - 10.01.2010 23:59.999)
      */
     public void switchToWeekView(int week, int year) {
         viewMode = Mode.WEEK;
@@ -733,20 +744,15 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         calendar.set(GregorianCalendar.WEEK_OF_YEAR, week);
         calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
                 .getFirstDayOfWeek());
-        resetTime(false);
-        calendarComponent.setStartDate(calendar.getTime());
-
-        updateCaptionLabel();
-
+        resetCalendarTime(false);
         resetTime(true);
         calendar.add(GregorianCalendar.DATE, 6);
         calendarComponent.setEndDate(calendar.getTime());
     }
 
     /*
-     * Switch the Calendar component's start and end dates to range to the
-     * target month only. (sample range: 01.01.2010 00:00.000 - 31.01.2010
-     * 23:59.999)
+     * Switch the Calendar component's start and end date range to the target
+     * month only. (sample range: 01.01.2010 00:00.000 - 31.01.2010 23:59.999)
      */
     public void switchToMonthView() {
         viewMode = Mode.MONTH;
@@ -760,14 +766,12 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         calendar.add(GregorianCalendar.MONTH, 1);
         calendar.add(GregorianCalendar.DATE, -1);
-        resetTime(true);
-        calendarComponent.setEndDate(calendar.getTime());
+        resetCalendarTime(true);
     }
 
     /*
-     * Switch the Calendar component's start and end dates to range to the
-     * target day only. (sample range: 01.01.2010 00:00.000 - 01.01.2010
-     * 23:59.999)
+     * Switch the Calendar component's start and end date range to the target
+     * day only. (sample range: 01.01.2010 00:00.000 - 01.01.2010 23:59.999)
      */
     public void switchToDayView(int date, int year) {
         viewMode = Mode.DAY;
@@ -776,13 +780,18 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         calendar.set(GregorianCalendar.YEAR, year);
         calendar.set(GregorianCalendar.DATE, date);
-        resetTime(false);
-        calendarComponent.setStartDate(calendar.getTime());
+        resetCalendarTime(false);
+        resetCalendarTime(true);
+    }
 
-        updateCaptionLabel();
-
-        resetTime(true);
-        calendarComponent.setEndDate(calendar.getTime());
+    private void resetCalendarTime(boolean resetEndTime) {
+        resetTime(resetEndTime);
+        if (resetEndTime) {
+            calendarComponent.setEndDate(calendar.getTime());
+        } else {
+            calendarComponent.setStartDate(calendar.getTime());
+            updateCaptionLabel();
+        }
     }
 
     /*
