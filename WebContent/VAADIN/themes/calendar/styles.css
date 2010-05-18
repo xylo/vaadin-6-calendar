@@ -1,43 +1,3 @@
-@import url(../runo/styles.css);
-
-/** General stuff here */
-.v-app {
-	background-color:#fff; 
-}
-.v-form fieldset {
-	border:none;	
-}
-/* Global font styles */
-.v-generated-body .v-app,
-.v-generated-body .v-window,
-.v-generated-body .v-popupview-popup,
-.v-generated-body .v-tooltip,
-.v-generated-body .v-app input,
-.v-generated-body .v-app select,
-.v-generated-body .v-app button,
-.v-generated-body .v-app textarea,
-.v-generated-body .v-window input,
-.v-generated-body .v-window select,
-.v-generated-body .v-window button,
-.v-generated-body .v-window textarea,
-.v-generated-body .v-popupview-popup input,
-.v-generated-body .v-popupview-popup select,
-.v-generated-body .v-popupview-popup button,
-.v-generated-body .v-popupview-popup textarea,
-.v-generated-body .v-filterselect-suggestpopup,
-.v-generated-body .v-datefield-popup,
-.v-generated-body .v-contextmenu,
-.v-generated-body .v-menubar-submenu {
-	font-family: Verdana, sans-serif;
-	font-size: 12px;
-	line-height: normal;
-	color: #4f4f4f;
-}
-/** Schedule */
-.v-app-ScheduleTestWeekly,
-	.v-app-ScheduleTestMonthly  {
-	background-color:#fff;
-}
 .v-calendar {
 	background-color:#F1EFEC;
 }
@@ -63,7 +23,7 @@
 }
 .v-calendar-header-daily .gwt-Label.next {
 	background: #757575 url(../runo/icons/16/arrow-right.png) no-repeat center 0;
-}right
+}
 .v-calendar-header-daily .today {
 	text-decoration:underline;
 }
@@ -268,19 +228,4 @@
 	background-color:red;
 	height:2px;	
 	z-index:9999;
-}
-/** END - Schedule */
-
-/** Customized phase colors*/
-.v-calendar .color1 {
-	background-color:#9effae;
-}
-.v-calendar .color2 {
-	background-color:#8ac2ff;
-}
-.v-calendar .color3 {
-	background-color:#ff949b;
-}
-.v-calendar .color4 {
-	background-color:#ffc67a;
 }

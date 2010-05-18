@@ -659,7 +659,17 @@ public class Calendar extends AbstractComponent implements
      * data source.
      */
     public interface EventProvider {
-        public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate);
+        /**
+         * Gets all available events in the target date range between startDate
+         * and endDate.
+         * 
+         * @param startDate
+         *            Start date
+         * @param endDate
+         *            End date
+         * @return List of events
+         */
+        public List<Calendar.Event> getEvents(Date startDate, Date endDate);
     }
 
     /**

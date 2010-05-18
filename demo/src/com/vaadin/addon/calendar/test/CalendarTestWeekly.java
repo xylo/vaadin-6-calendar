@@ -9,8 +9,8 @@ import java.util.TimeZone;
 
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
+import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -35,7 +35,7 @@ public class CalendarTestWeekly extends Application implements EventProvider {
         Window w = new Window();
         setMainWindow(w);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        setTheme("calendar");
+        setTheme("calendartest");
 
         calendarComponent = new Calendar(this);
         for (String s : TimeZone.getAvailableIDs()) {

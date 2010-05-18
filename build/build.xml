@@ -229,11 +229,11 @@
                 </patternset>
             </fileset>
 
-        	<!-- Include the built widget set and themes. -->
+        	<!-- Include the built widget set and theme. -->
         	<fileset dir="WebContent">
                 <patternset>
                     <include name="VAADIN/widgetsets/${addon.widgetset}/**/*" />
-                	<include name="VAADIN/themes/**/*" />
+                	<include name="VAADIN/themes/calendar/**/*" />
                 </patternset>
             </fileset>
         </jar>
@@ -267,6 +267,11 @@
 			<classes dir="${result.classes}" includes="**/test/**"/>
 			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
 			<lib file="${jar.path}" />
+			<fileset dir="WebContent">
+				<patternset>
+					<include name="VAADIN/themes/calendartest/**/*" />
+				</patternset>
+			</fileset>
 		</war>
 	</target>
 	

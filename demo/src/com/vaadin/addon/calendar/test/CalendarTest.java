@@ -60,8 +60,13 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         MONTH, WEEK, DAY;
     }
 
+    /**
+     * This Gregorian calendar is used to control dates and time inside of this
+     * test application.
+     */
     private GregorianCalendar calendar;
 
+    /** Target calendar component that this test application is made for. */
     private Calendar calendarComponent;
 
     private Date currentMonthsFirstDate;
@@ -102,7 +107,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     public void init() {
         Window w = new Window();
         setMainWindow(w);
-        setTheme("calendar");
+        setTheme("calendartest");
 
         // Set default Locale for this application
         setLocale(Locale.getDefault());
@@ -221,7 +226,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     }
 
     private void initReadOnlyButtonButton() {
-        readOnlyButton = new Button("Switch read-only mode");
+        readOnlyButton = new Button("Read-only mode");
         readOnlyButton.setSwitchMode(true);
         readOnlyButton.addListener(new ClickListener() {
 

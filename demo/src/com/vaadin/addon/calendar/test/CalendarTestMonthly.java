@@ -8,8 +8,8 @@ import java.util.List;
 
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
+import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -32,7 +32,7 @@ public class CalendarTestMonthly extends Application implements EventProvider {
     public void init() {
         Window w = new Window();
         setMainWindow(w);
-        setTheme("calendar");
+        setTheme("calendartest");
 
         calendarComponent = new Calendar(this);
         calendarComponent.setTimeFormat(TimeFormat.Format24H);
