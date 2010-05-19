@@ -135,7 +135,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         HorizontalLayout hl = new HorizontalLayout();
         hl.setWidth("100%");
         hl.setSpacing(true);
-        hl.setMargin(true);
+        hl.setMargin(false, false, true, false);
         hl.addComponent(prevButton);
         hl.addComponent(captionLabel);
         hl.addComponent(monthButton);
@@ -152,7 +152,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         HorizontalLayout controlPanel = new HorizontalLayout();
         controlPanel.setSpacing(true);
-        controlPanel.setMargin(true);
+        controlPanel.setMargin(false, false, true, false);
         controlPanel.setWidth("100%");
         controlPanel.addComponent(localeSelect);
         controlPanel.addComponent(timeZoneSelect);
@@ -397,16 +397,18 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
     private void updateCalendarTimeZone(Object timezoneId) {
         TimeZone tz = null;
-        if (!DEFAULT_ITEMID.equals(timezoneId))
+        if (!DEFAULT_ITEMID.equals(timezoneId)) {
             tz = TimeZone.getTimeZone((String) timezoneId);
+        }
         calendarComponent.setTimeZone(tz);
         calendar.setTimeZone(calendarComponent.getTimeZone());
     }
 
     private void updateCalendarFormat(Object format) {
         TimeFormat calFormat = null;
-        if (format instanceof TimeFormat)
+        if (format instanceof TimeFormat) {
             calFormat = (TimeFormat) format;
+        }
         calendarComponent.setTimeFormat(calFormat);
     }
 
@@ -414,8 +416,9 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         String country = l.getDisplayCountry(getLocale());
         String language = l.getDisplayLanguage(getLocale());
         StringBuilder caption = new StringBuilder(country);
-        if (caption.length() != 0)
+        if (caption.length() != 0) {
             caption.append(", ");
+        }
         caption.append(language);
         return caption.toString();
     }
@@ -488,8 +491,9 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     }
 
     private void showEventPopup(Calendar.Event event, boolean newEvent) {
-        if (event == null)
+        if (event == null) {
             return;
+        }
 
         updateCalendarEventPopup(newEvent);
         updateCalendarEventForm(event);
@@ -557,10 +561,11 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
             createCalendarEventPopup();
         }
 
-        if (newEvent)
+        if (newEvent) {
             scheduleEventPopup.setCaption("New event");
-        else
+        } else {
             scheduleEventPopup.setCaption("Edit event");
+        }
 
         deleteEventButton.setVisible(!newEvent);
         deleteEventButton.setEnabled(!calendarComponent.isReadOnly());
@@ -645,8 +650,9 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     /* Removes the event from the data source and requests repaint. */
     private void deleteCalendarEvent() {
         Calendar.Event event = getFormCalendarEvent();
-        if (dataSource.contains(event))
+        if (dataSource.contains(event)) {
             dataSource.remove(event);
+        }
         getMainWindow().removeWindow(scheduleEventPopup);
         calendarComponent.requestRepaint();
     }
@@ -655,8 +661,9 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
     private void commitCalendarEvent() {
         scheduleEventForm.commit();
         Calendar.Event event = getFormCalendarEvent();
-        if (!dataSource.contains(event))
+        if (!dataSource.contains(event)) {
             dataSource.add(event);
+        }
 
         getMainWindow().removeWindow(scheduleEventPopup);
         calendarComponent.requestRepaint();

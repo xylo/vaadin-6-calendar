@@ -811,11 +811,12 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 todaybar.setClassName("v-calendar-current-time");
                 getElement().appendChild(todaybar);
             }
-            int h = (23 - today.getHours());
-            int m = (60 - today.getMinutes());
+            // FIXME measure pixel size from the DOM
+            int h = today.getHours();
+            int m = today.getMinutes();
             int mInPx = (int) (((double) 38 / 60) * m);
-            int px = ((h * 38) + mInPx);
-            todaybar.getStyle().setTop(-px, Unit.PX);
+            int px = (h * 38) + mInPx;
+            todaybar.getStyle().setTop(px, Unit.PX);
         }
 
         @SuppressWarnings("deprecation")
