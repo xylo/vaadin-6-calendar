@@ -40,13 +40,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     private int width = 0;
     private int height = 0;
     private HorizontalPanel content;
-    private VCalendar schedule;
+    private VCalendar calendar;
     private boolean readOnly;
     private boolean format24h;
     private Timebar timebar;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
-        schedule = parent;
+        this.calendar = parent;
         this.format24h = format24h;
         setStylePrimaryName("v-calendar-week-wrapper");
         content = new HorizontalPanel();
@@ -55,7 +55,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         content.add(timebar);
         addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
-                schedule.getClient().updateVariable(schedule.getPID(),
+                calendar.getClient().updateVariable(calendar.getPID(),
                         "scroll", getScrollPosition(), false);
             }
         });
@@ -714,7 +714,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                             / dateCellWidth;
                 }
                 int dayOffset = relativeX / dateCellWidth;
-                dayOffset = dayOffset * dateCellWidth;
+                // FIXME measure the 50 pixels from the DOM (or use
+                // WeekGrid.Timebar.getOffsetWidth())
+                dayOffset = dayOffset * dateCellWidth + 50;
                 if (relativeX < 0 || relativeX >= getDatesWidth()) {
                     return;
                 }
@@ -742,23 +744,19 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 boolean eventStartAtDifferentDay = from.getDate() != to
                         .getDate();
                 if (eventStartAtDifferentDay) {
-                    long minutesOnPrevDay = (getTargetDateByCurrentPosition()
-                            .getTime() - from.getTime())
+                    long minutesOnPrevDay = (getTargetDateByCurrentPosition(
+                            dayOffset).getTime() - from.getTime())
                             / VCalendar.MINUTEINMILLIS;
                     startFromMinutes = -1 * minutesOnPrevDay;
                 }
                 updatePosition(startFromMinutes, range);
-                // FIXME measure the 50 pixels from the DOM (or use
-                // WeekGrid.Timebar.getOffsetWidth())
-                s.setLeft(dayOffset + 50, Unit.PX);
+
+                s.setLeft(dayOffset, Unit.PX);
             }
 
-            private Date getTargetDateByCurrentPosition() {
-                Style s = getElement().getStyle();
+            private Date getTargetDateByCurrentPosition(int left) {
                 DateCell dateCell = (DateCell) getParent();
                 WeekGrid wk = (WeekGrid) dateCell.getParent().getParent();
-                int left = Integer.parseInt(s.getLeft().substring(0,
-                        s.getLeft().length() - 2));
                 int datesWidth = wk.width - 67;
                 int count = wk.content.getWidgetCount();
                 int cellWidth = datesWidth / (count - 1);
@@ -897,9 +895,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 + dateformat_date.format(se.getStart()) + "-"
                 + dateformat_time.format(se.getStartTime());
 
-        if (schedule.getClient().hasEventListeners(schedule,
+        if (calendar.getClient().hasEventListeners(calendar,
                 CalendarEventId.EVENTMOVE)) {
-            schedule.getClient().updateVariable(schedule.getPID(),
+            calendar.getClient().updateVariable(calendar.getPID(),
                     CalendarEventId.EVENTMOVE, eventMove, true);
         }
     }
