@@ -14,16 +14,16 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 /**
  * A class representing a single cell within the calendar in month-view
  */
-public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
+public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         MouseDownHandler, MouseOverHandler, NativePreviewHandler {
 
     private final VCalendar schedule;
@@ -32,8 +32,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     private int intHeight;
     private HTML bottomspacer;
     private Label caption;
-    private static final int LINEHEIGHT = 18;
-    private static final int EVENTHEIGHT = 14;
+    private static int EVENTHEIGHT = -1;
     private static final int BORDERPADDINGHEIGHT = 1;
     private CalendarEvent[] events = new CalendarEvent[10];
     private int cell;
@@ -51,17 +50,20 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         this.schedule = schedule;
         this.row = row;
         this.cell = cell;
-        setStyleName("v-calendar-monthly-day");
+        setStylePrimaryName("v-calendar-month-day");
         caption = new Label();
         bottomspacer = new HTML();
-        bottomspacer.setStyleName("bottomspacer");
-        caption.setStyleName("daycaption");
-        caption.setHeight(LINEHEIGHT + "px");
-        caption.setHorizontalAlignment(ALIGN_RIGHT);
-        caption.addMouseDownHandler(this);
-        caption.addMouseUpHandler(this);
+        bottomspacer.setStyleName("v-calendar-bottom-spacer");
+        caption.setStyleName("v-calendar-day-number");
         add(caption);
         add(bottomspacer);
+        caption.addMouseDownHandler(this);
+        caption.addMouseUpHandler(this);
+    }
+
+    @Override
+    public void onLoad() {
+        EVENTHEIGHT = bottomspacer.getOffsetHeight();
     }
 
     public boolean isEnabled() {
@@ -71,9 +73,9 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (!enabled) {
-            addStyleName("disabled");
+            addStyleDependentName("disabled");
         } else {
-            removeStyleName("disabled");
+            removeStyleDependentName("disabled");
         }
 
     }
@@ -83,7 +85,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
         int dateOfMonth = date.getDate();
         if (monthNameVisible) {
             caption.setText(dateOfMonth + " "
-                    + this.schedule.getMonthNames()[date.getMonth()]);
+                    + schedule.getMonthNames()[date.getMonth()]);
         } else {
             caption.setText("" + dateOfMonth);
         }
@@ -91,16 +93,17 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     }
 
     public Date getDate() {
-        return this.date;
+        return date;
     }
 
     public void setHeightPX(int px) {
-        this.intHeight = px - BORDERPADDINGHEIGHT;
+        intHeight = px - BORDERPADDINGHEIGHT;
         while (getWidgetCount() > 1) {
             remove(1);
         }
         // How many events can be shown in UI
-        int slots = (intHeight - (2 * LINEHEIGHT)) / EVENTHEIGHT;
+        int slots = (intHeight - caption.getOffsetHeight() - EVENTHEIGHT)
+                / EVENTHEIGHT;
         if (slots > 10) {
             slots = 10;
         }
@@ -109,7 +112,7 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
             CalendarEvent e = events[i];
             if (e == null) {
                 HTML slot = new HTML();
-                slot.addStyleName("spacer");
+                slot.setStyleName("v-calendar-spacer");
                 add(slot);
             } else {
                 eventsAdded++;
@@ -117,52 +120,58 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
             }
         }
         int remainingSpace = intHeight
-                - ((slots * EVENTHEIGHT) + (2 * LINEHEIGHT));
-        bottomspacer.setHeight(remainingSpace + LINEHEIGHT + "px");
+                - ((slots * EVENTHEIGHT) + EVENTHEIGHT + caption
+                        .getOffsetHeight());
+        bottomspacer.setHeight(remainingSpace + EVENTHEIGHT + "px");
         add(bottomspacer);
 
         int more = eventCount - eventsAdded;
         if (more > 0) {
             bottomspacer.setText("+ " + more);
+        } else {
+            bottomspacer.setText("");
         }
     }
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         MonthEventLabel eventDiv = new MonthEventLabel();
+        eventDiv.addStyleDependentName("month");
+
         long rangeInMillis = e.getRangeInMilliseconds();
 
         if (rangeInMillis < VCalendar.DAYINMILLIS && rangeInMillis != 0) {
             Date fromDatetime = e.getStartTime();
-            eventDiv.addStyleName("month-event short");
             eventDiv.addMouseDownHandler(this);
             eventDiv.addMouseUpHandler(this);
-            eventDiv.setHTML(schedule.getTimeFormat().format(fromDatetime)
+            eventDiv.setText(schedule.getTimeFormat().format(fromDatetime)
                     + " " + e.getCaption());
+            if (e.getStyleName() != null) {
+                eventDiv.addStyleDependentName(e.getStyleName());
+            }
         } else {
             Date from = e.getStart();
             Date to = e.getEnd();
             MonthGrid monthGrid = (MonthGrid) getParent();
             eventDiv.addMouseDownHandler(this);
             eventDiv.addMouseUpHandler(this);
-            if (e.getStyleName().length() > 0) {
-                eventDiv.addStyleName("month-event " + e.getStyleName());
-            } else {
-                eventDiv.addStyleName("month-event");
-            }
             int fromCompareToDate = from.compareTo(date);
             int toCompareToDate = to.compareTo(date);
+            eventDiv.addStyleDependentName("all-day");
             if (fromCompareToDate == 0) {
-                eventDiv.addStyleName("event-start");
-                eventDiv.setHTML(e.getCaption());
+                eventDiv.addStyleDependentName("start");
+                eventDiv.setText(e.getCaption());
             } else if (fromCompareToDate < 0 && cell == 0) {
-                eventDiv.addStyleName("event-continue-left");
-                eventDiv.setHTML(e.getCaption());
+                eventDiv.addStyleDependentName("continued-from");
+                eventDiv.setText(e.getCaption());
             }
             if (toCompareToDate == 0) {
-                eventDiv.addStyleName("event-end");
+                eventDiv.addStyleDependentName("end");
             } else if (toCompareToDate > 0
                     && (cell + 1) == monthGrid.getCellCount(row)) {
-                eventDiv.addStyleName("event-continue-right");
+                eventDiv.addStyleDependentName("continued-to");
+            }
+            if (e.getStyleName() != null) {
+                eventDiv.addStyleDependentName(e.getStyleName() + "-all-day");
             }
         }
         return eventDiv;
@@ -186,10 +195,10 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
 
     @SuppressWarnings("deprecation")
     public void setMonthNameVisible(boolean b) {
-        this.monthNameVisible = b;
+        monthNameVisible = b;
         int dateOfMonth = date.getDate();
         caption.setText(dateOfMonth + " "
-                + this.schedule.getMonthNames()[date.getMonth()]);
+                + schedule.getMonthNames()[date.getMonth()]);
     }
 
     @Override
@@ -281,14 +290,16 @@ public class SimpleDayCell extends VerticalPanel implements MouseUpHandler,
     }
 
     public static class MonthEventLabel extends HTML {
-
+        public MonthEventLabel() {
+            setStylePrimaryName("v-calendar-event");
+        }
     }
 
     public void setToday(boolean today) {
         if (today) {
-            addStyleName("today");
+            addStyleDependentName("today");
         } else {
-            removeStyleName("today");
+            removeStyleDependentName("today");
         }
     }
 

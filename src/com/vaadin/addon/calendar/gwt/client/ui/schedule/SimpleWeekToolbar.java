@@ -14,10 +14,10 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private VCalendar schedule;
 
     public SimpleWeekToolbar(VCalendar parent) {
-        this.schedule = parent;
+        schedule = parent;
         setCellSpacing(0);
         setCellPadding(0);
-        setStyleName("v-calendar-weektoolbar");
+        setStyleName("v-calendar-week-numbers");
     }
 
     public void addWeek(int week, int year) {
@@ -31,18 +31,28 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
 
     public void updateCellHeights() {
         int rowCount = getRowCount();
-        if (rowCount == 0)
+        if (rowCount == 0) {
             return;
+        }
         int cellheight = (height / rowCount) - 1;
-        if (cellheight < 1)
-            cellheight = 1;
+        int remainder = height % rowCount;
+        if (cellheight < 0) {
+            cellheight = 0;
+        }
         for (int i = 0; i < rowCount; i++) {
-            getCellFormatter().setHeight(i, 0, cellheight + "px");
+            if (remainder > 0) {
+                getWidget(i, 0).setHeight(cellheight + 1 + "px");
+            } else {
+                getWidget(i, 0).setHeight(cellheight + "px");
+            }
+            getWidget(i, 0).getElement().getStyle().setProperty("lineHeight",
+                    cellheight + "px");
+            remainder--;
         }
     }
 
     public void setHeightPX(int intHeight) {
-        this.height = intHeight;
+        height = intHeight;
         updateCellHeights();
     }
 
@@ -68,11 +78,13 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
 
     static class WeekLabel extends Label {
         private int week;
+        private int year;
 
         public WeekLabel(String string, int week2, int year2) {
             super(string);
-            this.week = week2;
-            this.year = year2;
+            setStylePrimaryName("v-calendar-week-number");
+            week = week2;
+            year = year2;
         }
 
         public int getWeek() {
@@ -90,7 +102,5 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
         public void setYear(int year) {
             this.year = year;
         }
-
-        private int year;
     }
 }

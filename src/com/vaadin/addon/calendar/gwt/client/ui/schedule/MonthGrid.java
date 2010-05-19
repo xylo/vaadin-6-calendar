@@ -10,8 +10,6 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class MonthGrid extends Grid {
 
-    private static final int BORDERHEIGHT = 1;
-    private static final int BORDERWIDTH = 1;
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
     private VCalendar schedule;
@@ -20,22 +18,22 @@ public class MonthGrid extends Grid {
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
-        this.schedule = parent;
+        schedule = parent;
         setCellSpacing(0);
         setCellPadding(0);
-        setStyleName("v-calendar-month");
+        setStylePrimaryName("v-calendar-month");
     }
 
     public void setSelectionEnd(SimpleDayCell simpleDayCell) {
         if (simpleDayCell.isEnabled()) {
-            this.selectionEnd = simpleDayCell;
+            selectionEnd = simpleDayCell;
         }
         updateSelection();
     }
 
     public void setSelectionStart(SimpleDayCell simpleDayCell) {
         if (simpleDayCell.isEnabled() && !rangeSelectDisabled && !readOnly) {
-            this.selectionStart = simpleDayCell;
+            selectionStart = simpleDayCell;
         }
 
     }
@@ -53,20 +51,16 @@ public class MonthGrid extends Grid {
                     Date d = sdc.getDate();
                     if (startDate.compareTo(d) <= 0
                             && endDate.compareTo(d) >= 0) {
-                        selectDay(sdc, true);
+                        sdc.addStyleDependentName("selected");
                     } else if (startDate.compareTo(d) >= 0
                             && endDate.compareTo(d) <= 0) {
-                        selectDay(sdc, true);
+                        sdc.addStyleDependentName("selected");
                     } else {
-                        selectDay(sdc, false);
+                        sdc.removeStyleDependentName("selected");
                     }
                 }
             }
         }
-    }
-
-    private void selectDay(SimpleDayCell sdc, boolean b) {
-        setStyleName(sdc.getElement(), "selected", b);
     }
 
     public void setSelectionReady() {
@@ -97,30 +91,25 @@ public class MonthGrid extends Grid {
         if (totalWidthPX > 0 && totalHeightPX > 0) {
             int rows = getRowCount();
             int cells = getCellCount(0);
-            int testW = totalWidthPX - (0);
-            int cellWidth = testW / cells;
-            int remainder = testW % cells;
+            int cellWidth = (totalWidthPX / cells) - 1;
+            int remainder = totalWidthPX % cells;
             // Division for cells might not be even. Distribute it evenly to
             // will whole space.
-            String cellWidth2 = (cellWidth + 1) + "px";
-            String cellwidth = cellWidth + "px";
             int heightPX = totalHeightPX;
             int cellHeight = heightPX / rows;
             int heightRemainder = heightPX % rows;
-            int cellHeight2 = cellHeight + 1;
 
             for (int i = 0; i < rows; i++) {
-                int rowRemainder = remainder;
                 for (int j = 0; j < cells; j++) {
                     SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
-                    if (rowRemainder > 0) {
-                        sdc.setWidth(cellWidth2);
-                        rowRemainder--;
+                    if (remainder > 0) {
+                        sdc.setWidth(cellWidth + 1 + "px");
+                        remainder--;
                     } else {
-                        sdc.setWidth(cellwidth);
+                        sdc.setWidth(cellWidth + "px");
                     }
                     if (heightRemainder > 0) {
-                        sdc.setHeightPX(cellHeight2);
+                        sdc.setHeightPX(cellHeight + 1);
                     } else {
                         sdc.setHeightPX(cellHeight);
                     }
@@ -142,6 +131,6 @@ public class MonthGrid extends Grid {
     }
 
     public boolean isReadOnly() {
-        return this.readOnly;
+        return readOnly;
     }
 }

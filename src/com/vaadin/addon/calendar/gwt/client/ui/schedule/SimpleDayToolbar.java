@@ -6,23 +6,19 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class SimpleDayToolbar extends HorizontalPanel {
     private int width = 0;
-    protected static final int BORDERHEIGHT = 0;
-    protected static final int BORDERWIDTH = 0;
 
     public SimpleDayToolbar() {
         setStylePrimaryName("v-calendar-header-month");
-        setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT - BORDERWIDTH + "px");
     }
 
     public void setDayNames(String[] dayNames) {
-        this.clear();
+        clear();
         for (int i = 0; i < dayNames.length; i++) {
             Label l = new Label(dayNames[i]);
-            l.setHorizontalAlignment(ALIGN_CENTER);
+            l.setStylePrimaryName("v-calendar-header-day");
             add(l);
         }
         updateCellWidth();

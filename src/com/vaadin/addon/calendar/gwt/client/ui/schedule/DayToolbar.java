@@ -2,6 +2,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -11,17 +12,16 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private int width = 0;
     protected static final int MARGINLEFT = 50;
     protected static final int MARGINRIGHT = 20;
-    protected Label backLabel;
-    protected Label nextLabel;
+    protected Button backLabel;
+    protected Button nextLabel;
 
     public DayToolbar() {
-        setStylePrimaryName("v-calendar-header-daily");
-        setHeight(VCalendar.MONTHLY_DAYTOOLBARHEIGHT + "px");
-        backLabel = new Label("");
-        backLabel.addStyleName("back");
-        nextLabel = new Label("");
+        setStylePrimaryName("v-calendar-header-week");
+        backLabel = new Button("&laquo;");
+        backLabel.setStylePrimaryName("v-calendar-back");
+        nextLabel = new Button("&raquo;");
         nextLabel.addClickHandler(this);
-        nextLabel.addStyleName("next");
+        nextLabel.setStylePrimaryName("v-calendar-next");
         backLabel.addClickHandler(this);
         setBorderWidth(0);
         setSpacing(0);
@@ -62,9 +62,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             String extraClass) {
         DayLabel l = new DayLabel(dayName + " " + localized_date_format);
         l.setDate(date);
-        l.setHorizontalAlignment(ALIGN_CENTER);
         if (extraClass != null) {
-            l.addStyleName(extraClass);
+            l.addStyleDependentName(extraClass);
         }
         add(l);
     }
@@ -82,6 +81,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
         public DayLabel(String string) {
             super(string);
+            setStylePrimaryName("v-calendar-header-day");
             addClickHandler(this);
         }
 

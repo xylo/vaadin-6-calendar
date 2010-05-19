@@ -3,15 +3,11 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class WeeklyLongEvents extends HorizontalPanel {
-
-    private static final int MARGINLEFT = 50;
 
     public static final int EVENT_HEIGTH = 15;
 
@@ -23,7 +19,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     public WeeklyLongEvents() {
         setStylePrimaryName("v-calendar-weekly-longevents");
-        getElement().getStyle().setProperty("marginLeft", MARGINLEFT + "px");
     }
 
     public void addDate(Date d) {
@@ -33,7 +28,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     public void setWidthPX(int width) {
-        this.width = width - (MARGINLEFT + 16);
+        this.width = width;
         if (getWidgetCount() == 0) {
             return;
         }
@@ -59,34 +54,29 @@ public class WeeklyLongEvents extends HorizontalPanel {
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(to);
-            Element eventElement = dc.getElement(e.getSlotIndex());
+            DateCell event = dc.getDateCell(e.getSlotIndex());
+            event.setStylePrimaryName("v-calendar-event");
             if (comp >= 0 && comp2 <= 0) {
+                event.addStyleDependentName("all-day");
                 if (comp == 0) {
-                    setStyleName(eventElement, "cell-start", true);
+                    event.addStyleDependentName("start");
                 }
                 if (comp2 == 0) {
-                    setStyleName(eventElement, "cell-end", true);
+                    event.addStyleDependentName("end");
                 }
-
                 if (!started && comp > 0 && comp2 <= 0) {
-                    setStyleName(eventElement, "cell-continue-left", true);
-                } else if (comp > 0 && comp2 <= 0) {
-                    setStyleName(eventElement, "cell", true);
+                    event.addStyleDependentName("continued-from");
                 } else if (i == (dateCount - 1)) {
-                    setStyleName(eventElement, "cell-continue-right", true);
+                    event.addStyleDependentName("continued-to");
                 }
-
-                String extraStyle = e.getStyleName();
+                final String extraStyle = e.getStyleName();
                 if (extraStyle != null && extraStyle.length() > 0) {
-                    setStyleName(eventElement, extraStyle, true);
+                    event.addStyleDependentName(extraStyle + "-all-day");
                 }
                 if (!started) {
-                    eventElement.setInnerText(e.getCaption());
+                    event.setText(e.getCaption());
                     started = true;
                 }
-
-            } else if (started) {
-                break;
             }
         }
     }
@@ -114,23 +104,34 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     public void updateCellWidths() {
-        if (this.width > 0) {
+        if (width > 0) {
             int cells = getWidgetCount();
             int cellWidth = width / cells;
             for (int i = 0; i < cells; i++) {
                 DateCellContainer dc = (DateCellContainer) getWidget(i);
-                dc.setWidth(cellWidth + "px");
+                dc.setWidth(cellWidth
+                        - DateCellContainer.measureBorderWidth(dc) + "px");
             }
         }
 
     }
 
-    public int calculateHeigth() {
-        return getRowCount() * (EVENT_HEIGTH + EVENT_MARGIN);
-    }
-
-    public static class DateCellContainer extends VerticalPanel {
+    public static class DateCellContainer extends FlowPanel {
         private Date date;
+
+        private static int borderWidth = -1;
+
+        public static int measureBorderWidth(DateCellContainer dc) {
+            if (borderWidth == -1) {
+                borderWidth = dc.getOffsetWidth()
+                        - dc.getElement().getClientWidth();
+            }
+            return borderWidth;
+        }
+
+        public DateCellContainer() {
+            setStylePrimaryName("v-calendar-datecell");
+        }
 
         public void setDate(Date date) {
             this.date = date;
@@ -140,13 +141,13 @@ public class WeeklyLongEvents extends HorizontalPanel {
             return date;
         }
 
-        public Element getElement(int slotIndex) {
-            return ((DateCell) getChildren().get(slotIndex)).getEventElement();
+        public DateCell getDateCell(int slotIndex) {
+            return (DateCell) getChildren().get(slotIndex);
         }
 
         public void addEmptyEventCells(int eventCount) {
             for (int i = 0; i < eventCount; i++) {
-                add(new DateCell());
+                addEmptyEventCell();
             }
         }
 
@@ -157,21 +158,14 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     public static class DateCell extends HTML {
         private Date date;
-        private Element event;
 
         public DateCell() {
-            Element e = getElement();
-            event = DOM.createDiv();
-            setStyleName(event, "cell");
-            e.appendChild(event);
+            // setStylePrimaryName("v-calendar-event");
+            // addStyleDependentName("all-day");
         }
 
         public void setDate(Date date) {
             this.date = date;
-        }
-
-        public Element getEventElement() {
-            return event;
         }
 
         public Date getDate() {
