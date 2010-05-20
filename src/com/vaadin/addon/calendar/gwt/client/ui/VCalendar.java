@@ -25,6 +25,7 @@ public class VCalendar extends Composite implements Paintable {
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * 60 * 1000;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;
+    public static final long WEEKINMILLIS = 7 * DAYINMILLIS;
 
     private String PID;
     private boolean hideWeekends;
@@ -186,30 +187,104 @@ public class VCalendar extends Composite implements Paintable {
 
     private void updateEventsToMonthGrid(ArrayList<CalendarEvent> events) {
         for (CalendarEvent e : events) {
-            Date when = e.getStart();
-            Date to = e.getEnd();
-            boolean eventAdded = false;
-            boolean inProgress = false; // Event adding has started
-            for (int row = 0; row < monthGrid.getRowCount(); row++) {
-                if (eventAdded) {
+            addEventToMonthGrid(e, false);
+        }
+    }
+
+    private void addEventToMonthGrid(CalendarEvent e, boolean renderImmediately) {
+        Date when = e.getStart();
+        Date to = e.getEnd();
+        boolean eventAdded = false;
+        boolean inProgress = false; // Event adding has started
+        boolean eventMoving = false;
+        List<SimpleDayCell> dayCells = new ArrayList<SimpleDayCell>();
+        for (int row = 0; row < monthGrid.getRowCount(); row++) {
+            if (eventAdded) {
+                break;
+            }
+            for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
+                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
+                        cell);
+                if (isEventInDay(when, to, sdc.getDate())) {
+                    if (!eventMoving)
+                        eventMoving = sdc.getMoveEvent() != null;
+                    dayCells.add(sdc);
+                    inProgress = true;
+                    continue;
+                } else if (inProgress) {
+                    eventAdded = true;
+                    inProgress = false;
                     break;
                 }
+            }
+        }
+
+        if (e.getSlotIndex() == -1) {
+            // Update slot index
+            int newSlot = -1;
+            for (SimpleDayCell sdc : dayCells) {
+                int slot = sdc.getEventCount();
+                if (slot > newSlot)
+                    newSlot = slot;
+            }
+            newSlot++;
+
+            for (int i = 0; i < newSlot; i++) {
+                // check for empty slot
+                if (isSlotEmpty(e, i, dayCells)) {
+                    newSlot = i;
+                    break;
+                }
+            }
+            e.setSlotIndex(newSlot);
+        }
+
+        for (SimpleDayCell sdc : dayCells) {
+            sdc.addScheduleEvent(e);
+        }
+
+        if (renderImmediately)
+            reDrawAllMonthEvents(!eventMoving);
+    }
+
+    private void reDrawAllMonthEvents(boolean clearCells) {
+        for (int row = 0; row < monthGrid.getRowCount(); row++) {
+            for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
+                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
+                        cell);
+                sdc.reDraw(clearCells);
+            }
+        }
+    }
+
+    private boolean isSlotEmpty(CalendarEvent addedEvent, int slotIndex,
+            List<SimpleDayCell> cells) {
+        for (SimpleDayCell sdc : cells) {
+            CalendarEvent e = sdc.getCalendarEvent(slotIndex);
+            if (e != null && !e.equals(addedEvent))
+                return false;
+        }
+        return true;
+    }
+
+    public void removeMonthEvent(CalendarEvent target,
+            boolean repaintImmediately) {
+        if (target != null && target.getSlotIndex() >= 0) {
+            // Remove event
+            for (int row = 0; row < monthGrid.getRowCount(); row++) {
                 for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
                     SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(
                             row, cell);
-                    if (isEventInDay(when, to, sdc.getDate())) {
-                        sdc.addScheduleEvent(e);
-                        inProgress = true;
-                        continue;
-                    } else if (inProgress) {
-                        eventAdded = true;
-                        inProgress = false;
-                        break;
-                    }
+                    sdc.removeEvent(target, repaintImmediately);
                 }
             }
-
         }
+    }
+
+    public void updateEventToMonthGrid(CalendarEvent changedEvent) {
+        removeMonthEvent(changedEvent, true);
+        changedEvent.setSlotIndex(-1);
+        addEventToMonthGrid(changedEvent, true);
     }
 
     private boolean isEventInDay(Date eventWhen, Date eventTo, Date gridDate) {
@@ -400,4 +475,11 @@ public class VCalendar extends Composite implements Paintable {
         return PID;
     }
 
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public MonthGrid getMonthGrid() {
+        return monthGrid;
+    }
 }

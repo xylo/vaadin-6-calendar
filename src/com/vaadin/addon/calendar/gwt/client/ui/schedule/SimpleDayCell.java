@@ -2,15 +2,20 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -24,9 +29,10 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
-        MouseDownHandler, MouseOverHandler, NativePreviewHandler {
+        MouseDownHandler, MouseOverHandler, MouseMoveHandler,
+        NativePreviewHandler {
 
-    private final VCalendar schedule;
+    private final VCalendar calendar;
     private Date date;
     private boolean enabled = true;
     private int intHeight;
@@ -46,8 +52,20 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     private boolean labelMouseDown;
     private int eventCount = 0;
 
-    public SimpleDayCell(VCalendar schedule, int row, int cell) {
-        this.schedule = schedule;
+    private int startX = -1;
+    private int startY = -1;
+    private int startYrelative;
+    private int startXrelative;
+    private Date startDateFrom;
+    private Date startDateTo;
+    private int prevDayDiff = 0;
+    private int prevWeekDiff = 0;
+    private HandlerRegistration moveRegistration;
+    private CalendarEvent moveEvent;
+    private Widget clickedWidget;
+
+    public SimpleDayCell(VCalendar calendar, int row, int cell) {
+        this.calendar = calendar;
         this.row = row;
         this.cell = cell;
         setStylePrimaryName("v-calendar-month-day");
@@ -85,7 +103,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         int dateOfMonth = date.getDate();
         if (monthNameVisible) {
             caption.setText(dateOfMonth + " "
-                    + schedule.getMonthNames()[date.getMonth()]);
+                    + calendar.getMonthNames()[date.getMonth()]);
         } else {
             caption.setText("" + dateOfMonth);
         }
@@ -96,11 +114,23 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         return date;
     }
 
-    public void setHeightPX(int px) {
+    public void reDraw(boolean clear) {
+        setHeightPX(this.intHeight + BORDERPADDINGHEIGHT, clear);
+    }
+
+    /*
+     * Events and whole cell content are drawn by this method. By the
+     * clear-argument, you can choose to clear all old content. Notice that
+     * clearing will also remove all element's event handlers.
+     */
+    public void setHeightPX(int px, boolean clear) {
         intHeight = px - BORDERPADDINGHEIGHT;
-        while (getWidgetCount() > 1) {
-            remove(1);
+        if (clear) {
+            while (getWidgetCount() > 1) {
+                remove(1);
+            }
         }
+
         // How many events can be shown in UI
         int slots = (intHeight - caption.getOffsetHeight() - EVENTHEIGHT)
                 / EVENTHEIGHT;
@@ -111,19 +141,33 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         for (int i = 0; i < slots; i++) {
             CalendarEvent e = events[i];
             if (e == null) {
+                // Empty slot
                 HTML slot = new HTML();
                 slot.setStyleName("v-calendar-spacer");
-                add(slot);
+                if (!clear) {
+                    remove(i + 1);
+                    insert(slot, i + 1);
+                } else
+                    add(slot);
             } else {
+                // Event slot
                 eventsAdded++;
-                add(createMonthEventLabel(e));
+                if (!clear) {
+                    Widget w = getWidget(i + 1);
+                    if (!(w instanceof MonthEventLabel)) {
+                        remove(i + 1);
+                        insert(createMonthEventLabel(e), i + 1);
+                    }
+                } else
+                    add(createMonthEventLabel(e));
             }
         }
         int remainingSpace = intHeight
                 - ((slots * EVENTHEIGHT) + EVENTHEIGHT + caption
                         .getOffsetHeight());
         bottomspacer.setHeight(remainingSpace + EVENTHEIGHT + "px");
-        add(bottomspacer);
+        if (clear)
+            add(bottomspacer);
 
         int more = eventCount - eventsAdded;
         if (more > 0) {
@@ -134,26 +178,32 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
+        long rangeInMillis = e.getRangeInMilliseconds();
+        boolean timeEvent = rangeInMillis < VCalendar.DAYINMILLIS
+                && rangeInMillis != 0;
+        Date fromDatetime = e.getStartTime();
+
+        // Create a new MonthEventLabel
         MonthEventLabel eventDiv = new MonthEventLabel();
         eventDiv.addStyleDependentName("month");
+        eventDiv.addMouseDownHandler(this);
+        eventDiv.addMouseUpHandler(this);
 
-        long rangeInMillis = e.getRangeInMilliseconds();
-
-        if (rangeInMillis < VCalendar.DAYINMILLIS && rangeInMillis != 0) {
-            Date fromDatetime = e.getStartTime();
-            eventDiv.addMouseDownHandler(this);
-            eventDiv.addMouseUpHandler(this);
-            eventDiv.setText(schedule.getTimeFormat().format(fromDatetime)
-                    + " " + e.getCaption());
+        if (timeEvent) {
             if (e.getStyleName() != null) {
                 eventDiv.addStyleDependentName(e.getStyleName());
             }
+            eventDiv.setHTML(calendar.getTimeFormat().format(fromDatetime)
+                    + " " + e.getCaption());
         } else {
             Date from = e.getStart();
             Date to = e.getEnd();
             MonthGrid monthGrid = (MonthGrid) getParent();
-            eventDiv.addMouseDownHandler(this);
-            eventDiv.addMouseUpHandler(this);
+            if (e.getStyleName().length() > 0) {
+                eventDiv.addStyleName("month-event " + e.getStyleName());
+            } else {
+                eventDiv.addStyleName("month-event");
+            }
             int fromCompareToDate = from.compareTo(date);
             int toCompareToDate = to.compareTo(date);
             eventDiv.addStyleDependentName("all-day");
@@ -174,6 +224,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                 eventDiv.addStyleDependentName(e.getStyleName() + "-all-day");
             }
         }
+
         return eventDiv;
     }
 
@@ -198,7 +249,11 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         monthNameVisible = b;
         int dateOfMonth = date.getDate();
         caption.setText(dateOfMonth + " "
-                + schedule.getMonthNames()[date.getMonth()]);
+                + calendar.getMonthNames()[date.getMonth()]);
+    }
+
+    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+        return addDomHandler(handler, MouseMoveEvent.getType());
     }
 
     @Override
@@ -221,39 +276,62 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
     public void onMouseUp(MouseUpEvent event) {
         Widget w = (Widget) event.getSource();
-        if (w == bottomspacer && monthEventMouseDown) {
+        if (moveRegistration != null) {
+            Event.releaseCapture(getElement());
+            moveRegistration.removeHandler();
+        }
 
-        } else if (w instanceof MonthEventLabel && monthEventMouseDown) {
-            MonthEventLabel me = (MonthEventLabel) w;
-            int index = getWidgetIndex(me);
-            CalendarEvent e = events[index - 1];
-            if (schedule.getClient().hasEventListeners(schedule,
+        if (w == bottomspacer && monthEventMouseDown) {
+            GWT.log("Mouse up over bottomspacer");
+
+        } else if (clickedWidget instanceof MonthEventLabel
+                && monthEventMouseDown) {
+
+            int endX = event.getClientX();
+            int endY = event.getClientY();
+            int xDiff = startX - endX;
+            int yDiff = startY - endY;
+            startX = -1;
+            startY = -1;
+            prevDayDiff = 0;
+            prevWeekDiff = 0;
+
+            if (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3) {
+                eventMoved(moveEvent);
+
+            } else if (calendar.getClient().hasEventListeners(calendar,
                     CalendarEventId.EVENTCLICK)) {
-                schedule.getClient().updateVariable(schedule.getPID(),
-                        CalendarEventId.EVENTCLICK, e.getIndex(), true);
+                calendar.getClient().updateVariable(calendar.getPID(),
+                        CalendarEventId.EVENTCLICK, moveEvent.getIndex(), true);
             }
-            event.stopPropagation();
+
+            moveEvent = null;
         } else if (w == this) {
             MonthGrid grid = (MonthGrid) getParent();
             grid.setSelectionReady();
+
         } else if (w instanceof Label && labelMouseDown) {
-            String clickedDate = schedule.getDateFormat().format(date);
-            if (schedule.getClient().hasEventListeners(schedule,
+            String clickedDate = calendar.getDateFormat().format(date);
+            if (calendar.getClient().hasEventListeners(calendar,
                     CalendarEventId.DATECLICK)) {
-                schedule.getClient().updateVariable(schedule.getPID(),
+                calendar.getClient().updateVariable(calendar.getPID(),
                         CalendarEventId.DATECLICK, clickedDate, true);
             }
-            event.stopPropagation();
         }
         monthEventMouseDown = false;
         labelMouseDown = false;
+        clickedWidget = null;
     }
 
     public void onMouseDown(MouseDownEvent event) {
         Widget w = (Widget) event.getSource();
+        clickedWidget = w;
         if (w == bottomspacer || w instanceof MonthEventLabel) {
             monthEventMouseDown = true;
-            event.stopPropagation();
+
+            if (w instanceof MonthEventLabel)
+                startCalendarEventDrag(event, (MonthEventLabel) w);
+
         } else if (w == this) {
             MonthGrid grid = (MonthGrid) getParent();
             if (!grid.isReadOnly()) {
@@ -262,14 +340,145 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
             }
         } else if (w instanceof Label) {
             labelMouseDown = true;
-            event.stopPropagation();
         }
+        event.stopPropagation();
     }
 
     public void onMouseOver(MouseOverEvent event) {
         event.preventDefault();
         MonthGrid grid = (MonthGrid) getParent();
         grid.setSelectionEnd(this);
+    }
+
+    public void onMouseMove(MouseMoveEvent event) {
+        if (clickedWidget instanceof MonthEventLabel && !monthEventMouseDown
+                || (startY < 0 && startX < 0)) {
+            return;
+        }
+
+        MonthEventLabel w = (MonthEventLabel) clickedWidget;
+
+        if (calendar.isReadOnly()) {
+            Event.releaseCapture(getElement());
+            monthEventMouseDown = false;
+            startY = -1;
+            startX = -1;
+            return;
+        }
+
+        int currentY = event.getClientY();
+        int currentX = event.getClientX();
+        int moveY = (currentY - startY);
+        int moveX = (currentX - startX);
+        if ((moveY < 5 && moveY > -6) && (moveX < 5 && moveX > -6)) {
+            return;
+        }
+
+        int dateCellWidth = getWidth();
+        int dateCellHeigth = getHeigth();
+
+        Element parent = getParent().getElement();
+        int relativeX = event.getRelativeX(parent);
+        int relativeY = event.getRelativeY(parent);
+        int weekDiff = 0;
+        if (moveY > 0) {
+            weekDiff = (startYrelative + moveY) / dateCellHeigth;
+        } else {
+            weekDiff = (moveY - (dateCellHeigth - startYrelative))
+                    / dateCellHeigth;
+        }
+
+        int dayDiff = 0;
+        if (moveX >= 0) {
+            dayDiff = (startXrelative + moveX) / dateCellWidth;
+        } else {
+            dayDiff = (moveX - (dateCellWidth - startXrelative))
+                    / dateCellWidth;
+        }
+        int dayOffset = relativeX / dateCellWidth;
+        dayOffset = dayOffset * dateCellWidth;
+        // Check boundaries
+        if (relativeY < 0
+                || relativeY >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
+                || relativeX < 0
+                || relativeX >= (calendar.getMonthGrid().getColumnCount() * dateCellWidth)) {
+            return;
+        }
+
+        GWT.log("Event moving delta: " + weekDiff + " weeks " + dayDiff
+                + " days" + " (" + getCell() + "," + getRow() + ")");
+
+        CalendarEvent e = moveEvent;
+        if (e == null)
+            e = getEventByWidget(w);
+
+        Date from = e.getStart();
+        Date to = e.getEnd();
+        long duration = to.getTime() - from.getTime();
+
+        long daysMs = dayDiff * VCalendar.DAYINMILLIS;
+        long weeksMs = weekDiff * VCalendar.WEEKINMILLIS;
+        from.setTime(startDateFrom.getTime() + weeksMs + daysMs);
+        to.setTime((long) (from.getTime() + duration));
+        e.setStart(from);
+        e.setEnd(to);
+        e.setStartTime(new Date(from.getTime()));
+        e.setEndTime(new Date(to.getTime()));
+
+        updateDragPosition(w, dayDiff, weekDiff);
+    }
+
+    private void eventMoved(CalendarEvent e) {
+        calendar.updateEventToMonthGrid(e);
+
+        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
+        String eventMove = e.getIndex() + ":"
+                + dateformat_date.format(e.getStart()) + "-00-00";
+
+        if (calendar.getClient().hasEventListeners(calendar,
+                CalendarEventId.EVENTMOVE)) {
+            calendar.getClient().updateVariable(calendar.getPID(),
+                    CalendarEventId.EVENTMOVE, eventMove, true);
+        }
+    }
+
+    public void startCalendarEventDrag(MouseDownEvent event, MonthEventLabel w) {
+        moveRegistration = addMouseMoveHandler(this);
+        startX = event.getClientX();
+        startY = event.getClientY();
+        startYrelative = event.getRelativeY(w.getParent().getElement())
+                % getHeigth();
+        startXrelative = event.getRelativeX(w.getParent().getElement())
+                % getWidth();
+
+        CalendarEvent e = getEventByWidget(w);
+        startDateFrom = (Date) e.getStartTime().clone();
+        startDateTo = (Date) e.getEndTime().clone();
+
+        Event.setCapture(getElement());
+        GWT.log("Start drag");
+    }
+
+    public void updateDragPosition(MonthEventLabel w, int dayDiff, int weekDiff) {
+        // Draw event to its new position only when position has changed
+        if (dayDiff == prevDayDiff && weekDiff == prevWeekDiff)
+            return;
+
+        prevDayDiff = dayDiff;
+        prevWeekDiff = weekDiff;
+
+        CalendarEvent e = null;
+        if (moveEvent != null) {
+            e = moveEvent;
+        } else {
+            CalendarEvent draggedEvent = getEventByWidget(w);
+            calendar.removeMonthEvent(draggedEvent, true);
+            e = draggedEvent;
+            e.setSlotIndex(-1);
+            moveEvent = e;
+        }
+
+        calendar.updateEventToMonthGrid(e);
     }
 
     public int getRow() {
@@ -283,8 +492,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     public void onPreviewNativeEvent(NativePreviewEvent event) {
 
         if (event.getTypeInt() == Event.ONMOUSEDOWN
-                && DOM.isOrHasChild(getElement(), (Element) Element.as(event
-                        .getNativeEvent().getEventTarget()))) {
+                && DOM.isOrHasChild(getElement(),
+                        (com.google.gwt.user.client.Element) Element.as(event
+                                .getNativeEvent().getEventTarget()))) {
             event.getNativeEvent().preventDefault();
         }
     }
@@ -295,6 +505,16 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         }
     }
 
+    public int getHeigth() {
+        return this.intHeight + BORDERPADDINGHEIGHT;
+    }
+
+    public int getWidth() {
+        Style s = getElement().getStyle();
+        String width = s.getWidth();
+        return Integer.parseInt(width.substring(0, width.length() - 2));
+    }
+
     public void setToday(boolean today) {
         if (today) {
             addStyleDependentName("today");
@@ -303,8 +523,38 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         }
     }
 
-    public CalendarEvent getScheduleEvent(int i) {
+    public void removeEvent(CalendarEvent targetEvent, boolean reDrawImmediately) {
+        int slot = targetEvent.getSlotIndex();
+        if (slot < 0)
+            return;
+
+        CalendarEvent e = getCalendarEvent(slot);
+        if (targetEvent.equals(e)) {
+            events[slot] = null;
+            eventCount--;
+            if (reDrawImmediately)
+                reDraw(moveEvent == null);
+        }
+    }
+
+    private CalendarEvent getEventByWidget(MonthEventLabel eventWidget) {
+        int index = getWidgetIndex(eventWidget);
+        return getCalendarEvent(index - 1);
+    }
+
+    public CalendarEvent getCalendarEvent(int i) {
         return events[i];
     }
 
+    public CalendarEvent[] getEvents() {
+        return events;
+    }
+
+    public int getEventCount() {
+        return eventCount;
+    }
+
+    public CalendarEvent getMoveEvent() {
+        return moveEvent;
+    }
 }

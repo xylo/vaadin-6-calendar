@@ -12,13 +12,13 @@ public class MonthGrid extends Grid {
 
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
-    private VCalendar schedule;
+    private VCalendar calendar;
     private boolean rangeSelectDisabled;
     private boolean readOnly;
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
-        schedule = parent;
+        this.calendar = parent;
         setCellSpacing(0);
         setCellPadding(0);
         setStylePrimaryName("v-calendar-month");
@@ -74,11 +74,11 @@ public class MonthGrid extends Grid {
                 endDate = temp;
             }
 
-            value = schedule.getDateFormat().format(startDate) + "TO"
-                    + schedule.getDateFormat().format(endDate);
-            if (schedule.getClient().hasEventListeners(schedule,
+            value = calendar.getDateFormat().format(startDate) + "TO"
+                    + calendar.getDateFormat().format(endDate);
+            if (calendar.getClient().hasEventListeners(calendar,
                     CalendarEventId.RANGESELECT)) {
-                schedule.getClient().updateVariable(schedule.getPID(),
+                calendar.getClient().updateVariable(calendar.getPID(),
                         CalendarEventId.RANGESELECT, value, true);
             }
 
@@ -109,9 +109,9 @@ public class MonthGrid extends Grid {
                         sdc.setWidth(cellWidth + "px");
                     }
                     if (heightRemainder > 0) {
-                        sdc.setHeightPX(cellHeight + 1);
+                        sdc.setHeightPX(cellHeight + 1, true);
                     } else {
-                        sdc.setHeightPX(cellHeight);
+                        sdc.setHeightPX(cellHeight, true);
                     }
                 }
                 heightRemainder--;
