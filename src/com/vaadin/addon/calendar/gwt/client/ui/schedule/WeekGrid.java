@@ -324,7 +324,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             int count = getWidgetCount();
             DayEvent target = (DayEvent) getWidget(targetIndex);
             int top = target.getTop();
-            int bottom = top + target.getOffsetHeight();
+            int bottom = top + target.getOffsetHeight() - 1;
 
             for (int i = 0; i < count; i++) {
                 if (targetIndex == i) {
@@ -333,7 +333,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 DayEvent d = (DayEvent) getWidget(i);
                 int nextTop = d.getTop();
-                int nextBottom = nextTop + d.getOffsetHeight();
+                int nextBottom = nextTop + d.getOffsetHeight() - 1;
                 if (doOverlap(top, bottom, nextTop, nextBottom)) {
                     g.add(i);
 
@@ -570,7 +570,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     long durationInMinutes) {
                 top = (int) ((((double) HOUR_IN_PX / 60)) * startFromMinutes);
                 getElement().getStyle().setTop(top, Unit.PX);
-                if (durationInMinutes > 30) {
+                if (durationInMinutes > 0) {
                     int heightMinutes = (int) (((double) HOUR_IN_PX / 60) * durationInMinutes);
                     setHeight(heightMinutes);
                     updateCaptions(true);
@@ -612,31 +612,29 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             }
 
             public void onMouseDown(MouseDownEvent event) {
-                EventTarget et = event.getNativeEvent().getEventTarget();
-                Element e = Element.as(et);
                 moveRegistration = addMouseMoveHandler(this);
+                Widget parent = getParent().getParent();
+                WeekGrid wk = (WeekGrid) parent.getParent();
                 startX = event.getClientX();
                 startY = event.getClientY();
                 startYrelative = event.getRelativeY(caption) % HALFHOUR_IN_PX;
                 startXrelative = (event.getRelativeX(getParent().getParent()
-                        .getParent().getElement()) - 50)
+                        .getParent().getElement()) - wk.timebar
+                        .getOffsetWidth())
                         % getDateCellWidth();
                 mouseMoveStarted = false;
                 Style s = getElement().getStyle();
                 startDatetimeFrom = (Date) calendarEvent.getStartTime().clone();
                 startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
                 s.setZIndex(1000);
-                if (e == caption || e == eventContent) {
-                    Event.setCapture(getElement());
-                } else if (e == getElement()) {
-                    Event.setCapture(getElement());
-                }
+                Event.setCapture(getElement());
                 event.getNativeEvent().stopPropagation();
             }
 
             public void onMouseUp(MouseUpEvent event) {
                 Event.releaseCapture(getElement());
-                moveRegistration.removeHandler();
+                if (moveRegistration != null)
+                    moveRegistration.removeHandler();
                 int endX = event.getClientX();
                 int endY = event.getClientY();
                 int xDiff = startX - endX;
@@ -695,9 +693,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 }
 
                 Widget parent = getParent().getParent();
-                // FIXME measure the 50 pixels from the DOM (or use
-                // WeekGrid.Timebar.getOffsetWidth())
-                int relativeX = event.getRelativeX(parent.getElement()) - 50;
+                WeekGrid wk = (WeekGrid) parent.getParent();
+                int relativeX = event.getRelativeX(parent.getElement())
+                        - wk.timebar.getOffsetWidth();
                 int halfHourDiff = 0;
                 if (moveY > 0) {
                     halfHourDiff = (startYrelative + moveY) / HALFHOUR_IN_PX;
@@ -713,10 +711,10 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     dayDiff = (moveX - (dateCellWidth - startXrelative))
                             / dateCellWidth;
                 }
+
                 int dayOffset = relativeX / dateCellWidth;
-                // FIXME measure the 50 pixels from the DOM (or use
-                // WeekGrid.Timebar.getOffsetWidth())
-                dayOffset = dayOffset * dateCellWidth + 50;
+                dayOffset = dayOffset * dateCellWidth
+                        + wk.timebar.getOffsetWidth();
                 if (relativeX < 0 || relativeX >= getDatesWidth()) {
                     return;
                 }
@@ -757,11 +755,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private Date getTargetDateByCurrentPosition(int left) {
                 DateCell dateCell = (DateCell) getParent();
                 WeekGrid wk = (WeekGrid) dateCell.getParent().getParent();
-                int datesWidth = wk.width - 67;
-                int count = wk.content.getWidgetCount();
-                int cellWidth = datesWidth / (count - 1);
                 DateCell newParent = (DateCell) wk.content
-                        .getWidget((left / cellWidth) + 1);
+                        .getWidget((left / getDateCellWidth()) + 1);
                 Date targetDate = newParent.getDate();
                 return targetDate;
             }
@@ -879,7 +874,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         Style s = dayEvent.getElement().getStyle();
         int left = Integer.parseInt(s.getLeft().substring(0,
                 s.getLeft().length() - 2));
-        int datesWidth = width - 67;
+        int datesWidth = width;
         int count = content.getWidgetCount();
         int cellWidth = datesWidth / (count - 1);
         DateCell previousParent = (DateCell) dayEvent.getParent();

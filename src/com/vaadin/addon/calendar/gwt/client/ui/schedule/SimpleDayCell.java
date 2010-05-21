@@ -301,8 +301,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
             } else if (calendar.getClient().hasEventListeners(calendar,
                     CalendarEventId.EVENTCLICK)) {
+                CalendarEvent e = getEventByWidget((MonthEventLabel) clickedWidget);
                 calendar.getClient().updateVariable(calendar.getPID(),
-                        CalendarEventId.EVENTCLICK, moveEvent.getIndex(), true);
+                        CalendarEventId.EVENTCLICK, e.getIndex(), true);
             }
 
             moveEvent = null;
