@@ -396,8 +396,6 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
             dayDiff = (moveX - (dateCellWidth - startXrelative))
                     / dateCellWidth;
         }
-        int dayOffset = relativeX / dateCellWidth;
-        dayOffset = dayOffset * dateCellWidth;
         // Check boundaries
         if (relativeY < 0
                 || relativeY >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)

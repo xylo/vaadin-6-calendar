@@ -240,7 +240,7 @@ public class SimpleCalTest extends Application {
         w.setSizeFull();
     }
 
-    public class MyEventProvider implements Calendar.EventProvider {
+    public static class MyEventProvider implements Calendar.EventProvider {
 
         private List<Event> events = new ArrayList<Event>();
 
@@ -264,7 +264,7 @@ public class SimpleCalTest extends Application {
         }
     }
 
-    public class MyEvent implements Calendar.Event {
+    public static class MyEvent implements Calendar.Event {
 
         private String caption;
         private Date start;

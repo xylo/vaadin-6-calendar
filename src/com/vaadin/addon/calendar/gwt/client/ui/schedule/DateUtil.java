@@ -5,18 +5,6 @@ import java.util.Date;
 public class DateUtil {
 
     /**
-     * Return week for given date without using Calendar.
-     * 
-     * @param d
-     * @return
-     */
-    public static int getWeek(Date d) {
-        Date onejan = new Date(1970, 0, 1);
-        return (int) Math.ceil((((d.getTime() - onejan.getTime()) / 86400000)
-                + onejan.getDay() + 1) / 7);
-    }
-
-    /**
      * Checks if dates are same day without checking datetimes.
      * 
      * @param date1
