@@ -121,6 +121,63 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         w.setContent(initLayout(w));
         w.setSizeFull();
+
+        addInitialEvents();
+    }
+
+    private void addInitialEvents() {
+        Date originalDate = calendar.getTime();
+
+        // Add a event that last a whole week
+        Date start = calendarComponent.getFirstDateForWeek(new Date());
+        Date end = calendarComponent.getLastDateForWeek(new Date());
+        CalendarTestEvent event = new CalendarTestEvent("Whole week event",
+                start, end);
+        event.setStyleName("color4");
+        dataSource.add(event);
+
+        // Add a allday event
+        calendar.setTime(start);
+        calendar.add(GregorianCalendar.DATE, 3);
+        start = calendar.getTime();
+        end = start;
+        event = new CalendarTestEvent("Allday event", start, end);
+        event.setDescription("Some description.");
+        event.setStyleName("color3");
+        dataSource.add(event);
+
+        calendar.add(GregorianCalendar.DATE, -2);
+        calendar.set(GregorianCalendar.HOUR_OF_DAY, 9);
+        calendar.set(GregorianCalendar.MINUTE, 30);
+        start = calendar.getTime();
+        calendar.add(GregorianCalendar.HOUR_OF_DAY, 5);
+        calendar.set(GregorianCalendar.MINUTE, 0);
+        end = calendar.getTime();
+        event = new CalendarTestEvent("Appointment", start, end);
+        event.setWhere("Office");
+        event.setStyleName("color1");
+        dataSource.add(event);
+
+        calendar.add(GregorianCalendar.DATE, 1);
+        calendar.set(GregorianCalendar.HOUR_OF_DAY, 11);
+        calendar.set(GregorianCalendar.MINUTE, 0);
+        start = calendar.getTime();
+        calendar.add(GregorianCalendar.HOUR_OF_DAY, 8);
+        end = calendar.getTime();
+        event = new CalendarTestEvent("Training", start, end);
+        event.setStyleName("color2");
+        dataSource.add(event);
+
+        calendar.add(GregorianCalendar.DATE, 4);
+        calendar.set(GregorianCalendar.HOUR_OF_DAY, 9);
+        calendar.set(GregorianCalendar.MINUTE, 0);
+        start = calendar.getTime();
+        calendar.add(GregorianCalendar.HOUR_OF_DAY, 9);
+        end = calendar.getTime();
+        event = new CalendarTestEvent("Free time", start, end);
+        dataSource.add(event);
+
+        calendar.setTime(originalDate);
     }
 
     private Layout initLayout(Window w) {
