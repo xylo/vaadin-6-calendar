@@ -60,7 +60,7 @@ public class Calendar extends AbstractComponent implements
     }
 
     /** Defines weekend days visibility. */
-    private boolean hideWeekends = true;
+    private boolean hideWeekends = false;
 
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
@@ -243,7 +243,7 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
-     * Returns status of weekend days visibility.
+     * Returns status of weekend days visibility. Default is false.
      * 
      * @return True when weekends are hidden. False when not.
      */
@@ -620,7 +620,7 @@ public class Calendar extends AbstractComponent implements
      *            Target date
      * @return Date that is first date in same week that given date is.
      */
-    private Date getFirstDateForWeek(Date date) {
+    public Date getFirstDateForWeek(Date date) {
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
         currentCalendar.setTime(date);
         while (firstDayOfWeek != currentCalendar
@@ -638,7 +638,7 @@ public class Calendar extends AbstractComponent implements
      *            Target date
      * @return Date that is last date in same week that given date is.
      */
-    private Date getLastDateForWeek(Date date) {
+    public Date getLastDateForWeek(Date date) {
         currentCalendar.setTime(date);
         currentCalendar.add(java.util.Calendar.DATE, 1);
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
@@ -714,7 +714,7 @@ public class Calendar extends AbstractComponent implements
          * Gets style name of event. In the client, style name will be set to
          * the event's element class name and can be styled by
          * CSS.</br></br>Styling example:</br> <code>Java code: </br>
-         * event.setStyleName("color1");</br></br>CSS:</br>.v-calendar .color1 {</br>
+         * event.setStyleName("color1");</br></br>CSS:</br>.v-calendar-event-color1 {</br>
          * &nbsp;&nbsp;&nbsp;background-color: #9effae;</br>}</code>
          * 
          * @return Style name.

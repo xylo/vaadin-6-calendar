@@ -136,7 +136,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     getElement().appendChild(e);
                 }
             } else {
-                String[] ampm = dts.getAmPmStrings();
+                // FIXME Use dts.getAmPmStrings(); and make sure that
+                // DateTimeService has a some Locale set.
+                String[] ampm = new String[] { "AM", "PM" };
                 for (int i = 1; i < 13; i++) {
                     e = DOM.createDiv();
                     setStyleName(e, "v-calendar-time");
