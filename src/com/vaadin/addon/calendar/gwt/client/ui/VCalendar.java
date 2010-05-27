@@ -1,6 +1,9 @@
 package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -134,7 +137,7 @@ public class VCalendar extends Composite implements Paintable {
         weekToolbar.updateCellHeights();
         outer.add(monthGrid, DockPanel.CENTER);
         ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
-        updateEventsToMonthGrid(events);
+        updateEventsToMonthGrid(events, false);
         recalculateHeights();
     }
 
@@ -185,10 +188,12 @@ public class VCalendar extends Composite implements Paintable {
         }
     }
 
-    private void updateEventsToMonthGrid(ArrayList<CalendarEvent> events) {
-        for (CalendarEvent e : events) {
+    private void updateEventsToMonthGrid(Collection<CalendarEvent> events,
+            boolean drawImmediately) {
+        for (CalendarEvent e : sortEventsByDuration(events)) {
             addEventToMonthGrid(e, false);
         }
+
     }
 
     private void addEventToMonthGrid(CalendarEvent e, boolean renderImmediately) {
@@ -198,6 +203,7 @@ public class VCalendar extends Composite implements Paintable {
         boolean inProgress = false; // Event adding has started
         boolean eventMoving = false;
         List<SimpleDayCell> dayCells = new ArrayList<SimpleDayCell>();
+        List<SimpleDayCell> timeCells = new ArrayList<SimpleDayCell>();
         for (int row = 0; row < monthGrid.getRowCount(); row++) {
             if (eventAdded) {
                 break;
@@ -208,7 +214,11 @@ public class VCalendar extends Composite implements Paintable {
                 if (isEventInDay(when, to, sdc.getDate())) {
                     if (!eventMoving)
                         eventMoving = sdc.getMoveEvent() != null;
-                    dayCells.add(sdc);
+                    long d = e.getRangeInMilliseconds();
+                    if (d > 0 && d < VCalendar.DAYINMILLIS)
+                        timeCells.add(sdc);
+                    else
+                        dayCells.add(sdc);
                     inProgress = true;
                     continue;
                 } else if (inProgress) {
@@ -219,10 +229,28 @@ public class VCalendar extends Composite implements Paintable {
             }
         }
 
+        updateEventSlotIndex(e, dayCells);
+        updateEventSlotIndex(e, timeCells);
+
+        for (SimpleDayCell sdc : dayCells) {
+            sdc.addCalendarEvent(e);
+        }
+        for (SimpleDayCell sdc : timeCells) {
+            sdc.addCalendarEvent(e);
+        }
+
+        if (renderImmediately)
+            reDrawAllMonthEvents(!eventMoving);
+    }
+
+    private void updateEventSlotIndex(CalendarEvent e, List<SimpleDayCell> cells) {
+        if (cells.isEmpty())
+            return;
+
         if (e.getSlotIndex() == -1) {
             // Update slot index
             int newSlot = -1;
-            for (SimpleDayCell sdc : dayCells) {
+            for (SimpleDayCell sdc : cells) {
                 int slot = sdc.getEventCount();
                 if (slot > newSlot)
                     newSlot = slot;
@@ -231,20 +259,13 @@ public class VCalendar extends Composite implements Paintable {
 
             for (int i = 0; i < newSlot; i++) {
                 // check for empty slot
-                if (isSlotEmpty(e, i, dayCells)) {
+                if (isSlotEmpty(e, i, cells)) {
                     newSlot = i;
                     break;
                 }
             }
             e.setSlotIndex(newSlot);
         }
-
-        for (SimpleDayCell sdc : dayCells) {
-            sdc.addScheduleEvent(e);
-        }
-
-        if (renderImmediately)
-            reDrawAllMonthEvents(!eventMoving);
     }
 
     private void reDrawAllMonthEvents(boolean clearCells) {
@@ -285,6 +306,34 @@ public class VCalendar extends Composite implements Paintable {
         removeMonthEvent(changedEvent, true);
         changedEvent.setSlotIndex(-1);
         addEventToMonthGrid(changedEvent, true);
+    }
+
+    private CalendarEvent[] sortEventsByDuration(
+            Collection<CalendarEvent> events) {
+        CalendarEvent[] sorted = events
+                .toArray(new CalendarEvent[events.size()]);
+        Arrays.sort(sorted, new Comparator<CalendarEvent>() {
+
+            public int compare(CalendarEvent o1, CalendarEvent o2) {
+                Long d1 = o1.getRangeInMilliseconds();
+                Long d2 = o2.getRangeInMilliseconds();
+                if (!d1.equals(0L) && !d2.equals(0L))
+                    return d2.compareTo(d1);
+
+                if (d2.equals(0L) && d1.equals(0L))
+                    return 0;
+                else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS)
+                    return -1;
+                else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS)
+                    return 1;
+                else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS)
+                    return 1;
+                else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS)
+                    return -1;
+                return d2.compareTo(d1);
+            }
+        });
+        return sorted;
     }
 
     private boolean isEventInDay(Date eventWhen, Date eventTo, Date gridDate) {
