@@ -32,14 +32,16 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         MouseDownHandler, MouseOverHandler, MouseMoveHandler,
         NativePreviewHandler {
 
+    private static int BOTTOMSPACERHEIGHT = -1;
+    private static int EVENTHEIGHT = -1;
+    private static final int BORDERPADDINGHEIGHT = 1;
+
     private final VCalendar calendar;
     private Date date;
     private boolean enabled = true;
     private int intHeight;
     private HTML bottomspacer;
     private Label caption;
-    private static int EVENTHEIGHT = -1;
-    private static final int BORDERPADDINGHEIGHT = 1;
     private CalendarEvent[] events = new CalendarEvent[10];
     private int cell;
     private int row;
@@ -63,6 +65,8 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     private HandlerRegistration moveRegistration;
     private CalendarEvent moveEvent;
     private Widget clickedWidget;
+    private HandlerRegistration bottomSpacerMouseDownHandler;
+    private boolean scrollable = false;
 
     public SimpleDayCell(VCalendar calendar, int row, int cell) {
         this.calendar = calendar;
@@ -71,7 +75,8 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         setStylePrimaryName("v-calendar-month-day");
         caption = new Label();
         bottomspacer = new HTML();
-        bottomspacer.setStyleName("v-calendar-bottom-spacer");
+        bottomspacer.setStyleName("v-calendar-bottom-spacer-empty");
+        bottomspacer.setWidth(3 + "em");
         caption.setStyleName("v-calendar-day-number");
         add(caption);
         add(bottomspacer);
@@ -81,7 +86,8 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
     @Override
     public void onLoad() {
-        EVENTHEIGHT = bottomspacer.getOffsetHeight();
+        BOTTOMSPACERHEIGHT = bottomspacer.getOffsetHeight();
+        EVENTHEIGHT = BOTTOMSPACERHEIGHT;
     }
 
     public boolean isEnabled() {
@@ -132,10 +138,21 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         }
 
         // How many events can be shown in UI
-        int slots = (intHeight - caption.getOffsetHeight() - EVENTHEIGHT)
-                / EVENTHEIGHT;
-        if (slots > 10) {
-            slots = 10;
+        int slots = 0;
+        if (scrollable) {
+            for (int i = 0; i < events.length; i++) {
+                if (events[i] != null)
+                    slots = i + 1;
+            }
+            setHeight(intHeight + "px"); // Fixed height
+        } else {
+            // Dynamic height by the content
+            DOM.removeElementAttribute(getElement(), "height");
+            slots = (intHeight - caption.getOffsetHeight() - BOTTOMSPACERHEIGHT)
+                    / EVENTHEIGHT;
+            if (slots > 10) {
+                slots = 10;
+            }
         }
         int eventsAdded = 0;
         for (int i = 0; i < slots; i++) {
@@ -163,17 +180,34 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
             }
         }
         int remainingSpace = intHeight
-                - ((slots * EVENTHEIGHT) + EVENTHEIGHT + caption
+                - ((slots * EVENTHEIGHT) + BOTTOMSPACERHEIGHT + caption
                         .getOffsetHeight());
-        bottomspacer.setHeight(remainingSpace + EVENTHEIGHT + "px");
+        int newHeight = remainingSpace + BOTTOMSPACERHEIGHT;
+        if (newHeight < 0) // Height fix for IE
+            newHeight = EVENTHEIGHT;
+        bottomspacer.setHeight(newHeight + "px");
         if (clear)
             add(bottomspacer);
 
         int more = eventCount - eventsAdded;
         if (more > 0) {
+            if (bottomSpacerMouseDownHandler == null)
+                bottomSpacerMouseDownHandler = bottomspacer
+                        .addMouseDownHandler(this);
+            bottomspacer.setStyleName("v-calendar-bottom-spacer");
             bottomspacer.setText("+ " + more);
         } else {
-            bottomspacer.setText("");
+            if (!scrollable && bottomSpacerMouseDownHandler != null) {
+                bottomSpacerMouseDownHandler.removeHandler();
+                bottomSpacerMouseDownHandler = null;
+            }
+
+            if (scrollable) {
+                bottomspacer.setText("[ - ]");
+            } else {
+                bottomspacer.setStyleName("v-calendar-bottom-spacer-empty");
+                bottomspacer.setText("");
+            }
         }
     }
 
@@ -228,6 +262,16 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         }
 
         return eventDiv;
+    }
+
+    private void setUnlimitedCellHeight() {
+        scrollable = true;
+        addStyleDependentName("scrollable");
+    }
+
+    private void setLimitedCellHeight() {
+        scrollable = false;
+        removeStyleDependentName("scrollable");
     }
 
     public void addCalendarEvent(CalendarEvent e) {
@@ -331,13 +375,21 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     public void onMouseDown(MouseDownEvent event) {
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
-        if (w == bottomspacer || w instanceof MonthEventLabel) {
+        if (w == bottomspacer) {
+            if (scrollable) {
+                setLimitedCellHeight();
+            } else {
+                setUnlimitedCellHeight();
+            }
+            reDraw(true);
+
+        } else if (w instanceof MonthEventLabel) {
             monthEventMouseDown = true;
 
             if (w instanceof MonthEventLabel)
                 startCalendarEventDrag(event, (MonthEventLabel) w);
 
-        } else if (w == this) {
+        } else if (w == this && !scrollable) {
             MonthGrid grid = (MonthGrid) getParent();
             if (!grid.isReadOnly()) {
                 grid.setSelectionStart(this);
@@ -473,18 +525,11 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         prevDayDiff = dayDiff;
         prevWeekDiff = weekDiff;
 
-        CalendarEvent e = null;
-        if (moveEvent != null) {
-            e = moveEvent;
-        } else {
-            CalendarEvent draggedEvent = getEventByWidget(w);
-            calendar.removeMonthEvent(draggedEvent, true);
-            e = draggedEvent;
-            e.setSlotIndex(-1);
-            moveEvent = e;
+        if (moveEvent == null) {
+            moveEvent = getEventByWidget(w);
         }
 
-        calendar.updateEventToMonthGrid(e);
+        calendar.updateEventToMonthGrid(moveEvent);
     }
 
     public int getRow() {
@@ -501,6 +546,11 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                 && DOM.isOrHasChild(getElement(),
                         (com.google.gwt.user.client.Element) Element.as(event
                                 .getNativeEvent().getEventTarget()))) {
+            if (scrollable
+                    && getElement().equals(
+                            event.getNativeEvent().getEventTarget()))
+                return; // Scrollbar click workaround
+
             event.getNativeEvent().preventDefault();
         }
     }

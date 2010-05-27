@@ -17,6 +17,7 @@ public class CalendarEvent {
     private String description;
     private int slotIndex = -1;
     private boolean format24h;
+    private int height = -1;
 
     DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a");
     DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm");
@@ -91,6 +92,14 @@ public class CalendarEvent {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public void setFormat24h(boolean format24h) {

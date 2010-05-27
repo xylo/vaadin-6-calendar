@@ -103,6 +103,10 @@
 	background-color: #fffee7;
 	}
 
+.v-calendar-month-day-scrollable {
+	overflow-y: scroll;
+	}
+	
 .v-calendar-day-number {
 	height: 18px;
 	line-height: 18px;
@@ -111,12 +115,24 @@
 	padding-right: 3px;
 	white-space: nowrap;
 	}
+	
+.v-calendar-day-number:hover {
+	cursor: pointer;
+	opacity: .6;
+	filter: alpha(opacity=60);
+	}
 
 .v-calendar-month .v-calendar-spacer,
-.v-calendar-month .v-calendar-bottom-spacer {
+.v-calendar-month .v-calendar-bottom-spacer,
+.v-calendar-month .v-calendar-bottom-spacer-empty {
 	/* Bottom spacer is used in GWT to measure the event height (offsetHeight) */
 	height: 15px;
 	font-size: 11px;
+	}
+.v-calendar-month .v-calendar-bottom-spacer:hover {
+	cursor: pointer;
+	opacity: .6;
+	filter: alpha(opacity=60);
 	}
 
 .v-calendar-event {
