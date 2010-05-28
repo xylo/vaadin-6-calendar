@@ -555,7 +555,8 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         updateCalendarEventPopup(newEvent);
         updateCalendarEventForm(event);
 
-        getMainWindow().addWindow(scheduleEventPopup);
+        if (!getMainWindow().getChildWindows().contains(scheduleEventPopup))
+            getMainWindow().addWindow(scheduleEventPopup);
     }
 
     /* Initializes a modal window to edit schedule event. */

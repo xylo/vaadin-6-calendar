@@ -296,6 +296,8 @@ public class VCalendar extends Composite implements Paintable {
                 for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
                     SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(
                             row, cell);
+                    if (sdc == null)
+                        return;
                     sdc.removeEvent(target, repaintImmediately);
                 }
             }

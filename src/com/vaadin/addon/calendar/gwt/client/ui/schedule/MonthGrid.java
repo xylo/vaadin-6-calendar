@@ -48,6 +48,8 @@ public class MonthGrid extends Grid {
             for (int row = 0; row < getRowCount(); row++) {
                 for (int cell = 0; cell < getCellCount(row); cell++) {
                     SimpleDayCell sdc = (SimpleDayCell) getWidget(row, cell);
+                    if (sdc == null)
+                        return;
                     Date d = sdc.getDate();
                     if (startDate.compareTo(d) <= 0
                             && endDate.compareTo(d) >= 0) {
