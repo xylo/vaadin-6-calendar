@@ -146,14 +146,14 @@ public class VCalendar extends Composite implements Paintable {
         Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
 
         monthGrid = null;
-        ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
+        Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
 
         weeklyLongEvents = new WeeklyLongEvents();
         if (weekGrid == null) {
             weekGrid = new WeekGrid(this, format);
         }
         updateWeekGrid(daysUidl.getChildCount(), daysUidl, today);
-        updateEventsToWeekGrid(events);
+        updateEventsToWeekGrid(sortEventsByDuration(events));
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
         outer.add(weekGrid, DockPanel.SOUTH);
@@ -165,7 +165,7 @@ public class VCalendar extends Composite implements Paintable {
         weekGrid.setScrollPosition(scroll);
     }
 
-    private void updateEventsToWeekGrid(ArrayList<CalendarEvent> events) {
+    private void updateEventsToWeekGrid(CalendarEvent[] events) {
         List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
         List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();
         long rangeInMillis = 0;
@@ -308,8 +308,7 @@ public class VCalendar extends Composite implements Paintable {
         addEventToMonthGrid(changedEvent, true);
     }
 
-    private CalendarEvent[] sortEventsByDuration(
-            Collection<CalendarEvent> events) {
+    public CalendarEvent[] sortEventsByDuration(Collection<CalendarEvent> events) {
         CalendarEvent[] sorted = events
                 .toArray(new CalendarEvent[events.size()]);
         Arrays.sort(sorted, new Comparator<CalendarEvent>() {
@@ -317,11 +316,16 @@ public class VCalendar extends Composite implements Paintable {
             public int compare(CalendarEvent o1, CalendarEvent o2) {
                 Long d1 = o1.getRangeInMilliseconds();
                 Long d2 = o2.getRangeInMilliseconds();
-                if (!d1.equals(0L) && !d2.equals(0L))
-                    return d2.compareTo(d1);
+                int r = 0;
+                if (!d1.equals(0L) && !d2.equals(0L)) {
+                    r = d2.compareTo(d1);
+                    return (r == 0) ? ((Integer) o2.getIndex())
+                            .compareTo((Integer) o1.getIndex()) : r;
+                }
 
                 if (d2.equals(0L) && d1.equals(0L))
-                    return 0;
+                    return ((Integer) o2.getIndex()).compareTo((Integer) o1
+                            .getIndex());
                 else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS)
                     return -1;
                 else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS)
@@ -330,7 +334,9 @@ public class VCalendar extends Composite implements Paintable {
                     return 1;
                 else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS)
                     return -1;
-                return d2.compareTo(d1);
+                r = d2.compareTo(d1);
+                return (r == 0) ? ((Integer) o2.getIndex())
+                        .compareTo((Integer) o1.getIndex()) : r;
             }
         });
         return sorted;

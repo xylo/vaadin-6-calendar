@@ -2,7 +2,9 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -270,17 +272,73 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
         private void drawDayEvents(List<Group> groups) {
             for (Group g : groups) {
-                int eventWidth = ((width) / g.getItems().size());
-                int i = 0;
+                int col = 0;
+                int colCount = 0;
+                List<Integer> order = new ArrayList<Integer>();
+                Map<Integer, Integer> columns = new HashMap<Integer, Integer>();
+                for (Integer eventIndex : g.getItems()) {
+                    DayEvent d = (DayEvent) getWidget(eventIndex);
+                    d.setMoveWidth(width);
+
+                    int freeSpaceCol = findFreeColumnSpaceOnLeft(d.getTop(), d
+                            .getTop()
+                            + d.getOffsetHeight() - 1, order, columns);
+                    if (freeSpaceCol >= 0) {
+                        col = freeSpaceCol;
+                        columns.put(eventIndex, col);
+                        int newOrderindex = 0;
+                        for (Integer i : order) {
+                            if (columns.get(i) >= col) {
+                                newOrderindex = order.indexOf(i);
+                                break;
+                            }
+                        }
+                        order.add(newOrderindex, eventIndex);
+                    } else {
+                        // New column
+                        col = colCount++;
+                        columns.put(eventIndex, col);
+                        order.add(eventIndex);
+                    }
+                }
+
+                // Update widths and left position
+                int eventWidth = (width / colCount);
                 for (Integer index : g.getItems()) {
                     DayEvent d = (DayEvent) getWidget(index);
+                    d.getElement().getStyle().setMarginLeft(
+                            (eventWidth * columns.get(index)), Unit.PX);
                     d.setWidth(eventWidth + "px");
-                    d.setMoveWidth(width);
-                    d.getElement().getStyle().setMarginLeft((eventWidth * i),
-                            Unit.PX);
-                    i++;
                 }
             }
+        }
+
+        private int findFreeColumnSpaceOnLeft(int top, int bottom,
+                List<Integer> order, Map<Integer, Integer> columns) {
+            int freeSpot = -1;
+            int skipIndex = -1;
+            for (Integer eventIndex : order) {
+                int col = columns.get(eventIndex);
+                if (col == skipIndex)
+                    continue;
+
+                if (freeSpot != -1 && freeSpot != col) {
+                    // Free spot found
+                    return freeSpot;
+                }
+
+                DayEvent d = (DayEvent) getWidget(eventIndex);
+
+                if (doOverlap(top, bottom, d.getTop(), d.getTop()
+                        + d.getOffsetHeight() - 1)) {
+                    skipIndex = col;
+                    freeSpot = -1;
+                } else {
+                    freeSpot = col;
+                }
+            }
+
+            return freeSpot;
         }
 
         private boolean doOverlap(int top, int bottom, int nextTop,
@@ -290,7 +348,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             boolean isFullyInside = top >= nextTop && bottom <= nextBottom;
             boolean isInsideFromTopSide = bottom <= nextBottom
                     && bottom >= nextTop;
-            boolean isFullyOverlapping = top < nextTop && bottom > nextBottom;
+            boolean isFullyOverlapping = top <= nextTop && bottom >= nextBottom;
             return isInsideFromBottomSide || isFullyInside
                     || isInsideFromTopSide || isFullyOverlapping;
         }
@@ -386,13 +444,20 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         public void addEvent(DayEvent dayEvent) {
             Element main = getElement();
             int index = 0;
+            List<CalendarEvent> events = new ArrayList<CalendarEvent>();
             for (; index < getWidgetCount(); index++) {
                 DayEvent dc = (DayEvent) getWidget(index);
                 dc.setReadOnly(readOnly);
-                if (dc.calendarEvent.getStartTime().getTime() > dayEvent.calendarEvent
-                        .getStartTime().getTime()) {
+                events.add(dc.getCalendarEvent());
+            }
+            events.add(dayEvent.getCalendarEvent());
+
+            index = 0;
+            for (CalendarEvent e : weekgrid.calendar
+                    .sortEventsByDuration(events)) {
+                if (e.equals(dayEvent.getCalendarEvent()))
                     break;
-                }
+                index++;
             }
             this.insert(dayEvent, (com.google.gwt.user.client.Element) main,
                     index, true);
@@ -400,7 +465,6 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
         public void removeEvent(DayEvent dayEvent) {
             remove(dayEvent);
-            recalculateEventWidths();
         }
 
         public void onMouseDown(MouseDownEvent event) {
@@ -885,6 +949,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         CalendarEvent se = dayEvent.getCalendarEvent();
         previousParent.removeEvent(dayEvent);
         newParent.addEvent(dayEvent);
+        if (!previousParent.equals(newParent))
+            previousParent.recalculateEventWidths();
         newParent.recalculateEventWidths();
         DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
         DateTimeFormat dateformat_time = DateTimeFormat.getFormat("HH-mm");
