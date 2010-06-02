@@ -3,9 +3,15 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class WeeklyLongEvents extends HorizontalPanel {
 
@@ -17,13 +23,17 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     private int rowCount = 0;
 
-    public WeeklyLongEvents() {
+    private VCalendar calendar;
+
+    public WeeklyLongEvents(VCalendar calendar) {
         setStylePrimaryName("v-calendar-weekly-longevents");
+        this.calendar = calendar;
     }
 
     public void addDate(Date d) {
         DateCellContainer dcc = new DateCellContainer();
         dcc.setDate(d);
+        dcc.setCalendar(calendar);
         add(dcc);
     }
 
@@ -42,39 +52,40 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
     }
 
-    public void addEvent(CalendarEvent e) {
-        updateEventSlot(e);
+    public void addEvent(CalendarEvent calendarEvent) {
+        updateEventSlot(calendarEvent);
 
         int dateCount = getWidgetCount();
-        Date from = e.getStart();
-        Date to = e.getEnd();
+        Date from = calendarEvent.getStart();
+        Date to = calendarEvent.getEnd();
         boolean started = false;
         for (int i = 0; i < dateCount; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(to);
-            DateCell event = dc.getDateCell(e.getSlotIndex());
-            event.setStylePrimaryName("v-calendar-event");
+            DateCell eventLabel = dc.getDateCell(calendarEvent.getSlotIndex());
+            eventLabel.setEvent(calendarEvent);
+            eventLabel.setStylePrimaryName("v-calendar-event");
             if (comp >= 0 && comp2 <= 0) {
-                event.addStyleDependentName("all-day");
+                eventLabel.addStyleDependentName("all-day");
                 if (comp == 0) {
-                    event.addStyleDependentName("start");
+                    eventLabel.addStyleDependentName("start");
                 }
                 if (comp2 == 0) {
-                    event.addStyleDependentName("end");
+                    eventLabel.addStyleDependentName("end");
                 }
                 if (!started && comp > 0 && comp2 <= 0) {
-                    event.addStyleDependentName("continued-from");
+                    eventLabel.addStyleDependentName("continued-from");
                 } else if (i == (dateCount - 1)) {
-                    event.addStyleDependentName("continued-to");
+                    eventLabel.addStyleDependentName("continued-to");
                 }
-                final String extraStyle = e.getStyleName();
+                final String extraStyle = calendarEvent.getStyleName();
                 if (extraStyle != null && extraStyle.length() > 0) {
-                    event.addStyleDependentName(extraStyle + "-all-day");
+                    eventLabel.addStyleDependentName(extraStyle + "-all-day");
                 }
                 if (!started) {
-                    event.setText(e.getCaption());
+                    eventLabel.setText(calendarEvent.getCaption());
                     started = true;
                 }
             }
@@ -116,8 +127,14 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     }
 
-    public static class DateCellContainer extends FlowPanel {
+    public static class DateCellContainer extends FlowPanel implements
+            MouseDownHandler, MouseUpHandler {
+
         private Date date;
+
+        private Widget clickTargetWidget;
+
+        private VCalendar calendar;
 
         private static int borderWidth = -1;
 
@@ -127,6 +144,10 @@ public class WeeklyLongEvents extends HorizontalPanel {
                         - dc.getElement().getClientWidth();
             }
             return borderWidth;
+        }
+
+        public void setCalendar(VCalendar calendar) {
+            this.calendar = calendar;
         }
 
         public DateCellContainer() {
@@ -152,12 +173,35 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
 
         public void addEmptyEventCell() {
-            add(new DateCell());
+            DateCell dateCell = new DateCell();
+            dateCell.addMouseDownHandler(this);
+            dateCell.addMouseUpHandler(this);
+            add(dateCell);
+        }
+
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+            clickTargetWidget = (Widget) event.getSource();
+
+            event.stopPropagation();
+        }
+
+        @Override
+        public void onMouseUp(MouseUpEvent event) {
+            if (event.getSource() == clickTargetWidget
+                    && clickTargetWidget instanceof DateCell) {
+                CalendarEvent calendarEvent = ((DateCell) clickTargetWidget)
+                        .getEvent();
+                calendar.getClient().updateVariable(calendar.getPID(),
+                        CalendarEventId.EVENTCLICK, calendarEvent.getIndex(),
+                        true);
+            }
         }
     }
 
     public static class DateCell extends HTML {
         private Date date;
+        private CalendarEvent event;
 
         public DateCell() {
             // setStylePrimaryName("v-calendar-event");
@@ -170,6 +214,14 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
         public Date getDate() {
             return date;
+        }
+
+        public void setEvent(CalendarEvent event) {
+            this.event = event;
+        }
+
+        public CalendarEvent getEvent() {
+            return event;
         }
 
     }

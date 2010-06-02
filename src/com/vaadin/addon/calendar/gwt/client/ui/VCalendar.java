@@ -148,7 +148,7 @@ public class VCalendar extends Composite implements Paintable {
         monthGrid = null;
         Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
 
-        weeklyLongEvents = new WeeklyLongEvents();
+        weeklyLongEvents = new WeeklyLongEvents(this);
         if (weekGrid == null) {
             weekGrid = new WeekGrid(this, format);
         }

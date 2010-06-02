@@ -227,6 +227,10 @@ div.v-calendar-event-all-day {
 	margin-bottom: 1px;
 	}
 
+.v-calendar-weekly-longevents .v-calendar-event:hover {
+	text-decoration: underline;
+	}
+	
 .v-calendar-day-times {
 	border-right: 1px solid #ccc;	
 	}
