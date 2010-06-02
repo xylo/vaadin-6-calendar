@@ -46,7 +46,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     public void addEvents(List<CalendarEvent> events) {
-        addEmptyEventSlots(events.size());
+        // addEmptyEventSlots(events.size());
         for (CalendarEvent e : events) {
             addEvent(e);
         }
@@ -65,9 +65,10 @@ public class WeeklyLongEvents extends HorizontalPanel {
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(to);
             DateCell eventLabel = dc.getDateCell(calendarEvent.getSlotIndex());
-            eventLabel.setEvent(calendarEvent);
             eventLabel.setStylePrimaryName("v-calendar-event");
             if (comp >= 0 && comp2 <= 0) {
+                eventLabel.setEvent(calendarEvent);
+
                 eventLabel.addStyleDependentName("all-day");
                 if (comp == 0) {
                     eventLabel.addStyleDependentName("start");
@@ -96,10 +97,45 @@ public class WeeklyLongEvents extends HorizontalPanel {
         // TODO Now every event will be drawn to a new "line". Check if any
         // line has free space where this event could fit, and put it there.
         // Just updating the slotIndex should do the trick..
-        if (e.getSlotIndex() == -1) {
-            e.setSlotIndex(rowCount);
-            rowCount++;
+        // if (e.getSlotIndex() == -1) {
+        // e.setSlotIndex(rowCount);
+        // rowCount++;
+        // }
+
+        boolean foundFreeSlot = false;
+        int slot = 0;
+        while (!foundFreeSlot) {
+            if (isSlotFree(slot, e.getStart(), e.getEnd())) {
+                e.setSlotIndex(slot);
+                foundFreeSlot = true;
+
+            } else {
+                slot++;
+            }
         }
+    }
+
+    private boolean isSlotFree(int slot, Date start, Date end) {
+        int dateCount = getWidgetCount();
+
+        // Go over all dates this week
+        for (int i = 0; i < dateCount; i++) {
+            DateCellContainer dc = (DateCellContainer) getWidget(i);
+            Date dcDate = dc.getDate();
+            int comp = dcDate.compareTo(start);
+            int comp2 = dcDate.compareTo(end);
+
+            // check if the date is in the range we need
+            if (comp >= 0 && comp2 <= 0) {
+
+                // and that it has a free row
+                if (dc.hasEvent(slot)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void addEmptyEventSlots(int eventCount) {
@@ -162,7 +198,20 @@ public class WeeklyLongEvents extends HorizontalPanel {
             return date;
         }
 
+        public boolean hasEvent(int slotIndex) {
+
+            return hasDateCell(slotIndex)
+                    && ((DateCell) getChildren().get(slotIndex)).getEvent() != null;
+        }
+
+        public boolean hasDateCell(int slotIndex) {
+            return (getChildren().size() - 1) >= slotIndex;
+        }
+
         public DateCell getDateCell(int slotIndex) {
+            if (!hasDateCell(slotIndex)) {
+                addEmptyEventCells(slotIndex - (getChildren().size() - 1));
+            }
             return (DateCell) getChildren().get(slotIndex);
         }
 
