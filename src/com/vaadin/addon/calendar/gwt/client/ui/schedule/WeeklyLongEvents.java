@@ -46,7 +46,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     public void addEvents(List<CalendarEvent> events) {
-        // addEmptyEventSlots(events.size());
         for (CalendarEvent e : events) {
             addEvent(e);
         }
@@ -94,14 +93,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     private void updateEventSlot(CalendarEvent e) {
-        // TODO Now every event will be drawn to a new "line". Check if any
-        // line has free space where this event could fit, and put it there.
-        // Just updating the slotIndex should do the trick..
-        // if (e.getSlotIndex() == -1) {
-        // e.setSlotIndex(rowCount);
-        // rowCount++;
-        // }
-
         boolean foundFreeSlot = false;
         int slot = 0;
         while (!foundFreeSlot) {
@@ -128,7 +119,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
             // check if the date is in the range we need
             if (comp >= 0 && comp2 <= 0) {
 
-                // and that it has a free row
+                // check if the slot is taken
                 if (dc.hasEvent(slot)) {
                     return false;
                 }
@@ -136,14 +127,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
 
         return true;
-    }
-
-    private void addEmptyEventSlots(int eventCount) {
-        int dateCount = getWidgetCount();
-        for (int i = 0; i < dateCount; i++) {
-            DateCellContainer dc = (DateCellContainer) getWidget(i);
-            dc.addEmptyEventCells(eventCount);
-        }
     }
 
     public int getRowCount() {
@@ -199,7 +182,6 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
 
         public boolean hasEvent(int slotIndex) {
-
             return hasDateCell(slotIndex)
                     && ((DateCell) getChildren().get(slotIndex)).getEvent() != null;
         }
@@ -241,9 +223,12 @@ public class WeeklyLongEvents extends HorizontalPanel {
                     && clickTargetWidget instanceof DateCell) {
                 CalendarEvent calendarEvent = ((DateCell) clickTargetWidget)
                         .getEvent();
-                calendar.getClient().updateVariable(calendar.getPID(),
-                        CalendarEventId.EVENTCLICK, calendarEvent.getIndex(),
-                        true);
+                if (calendar.getClient().hasEventListeners(calendar,
+                        CalendarEventId.EVENTCLICK)) {
+                    calendar.getClient().updateVariable(calendar.getPID(),
+                            CalendarEventId.EVENTCLICK,
+                            calendarEvent.getIndex(), true);
+                }
             }
         }
     }
