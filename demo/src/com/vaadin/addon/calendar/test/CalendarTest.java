@@ -381,7 +381,6 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
 
         calendarComponent.addListener(new EventResizeListener() {
 
-            @Override
             public void eventResize(EventResize event) {
                 applyEventResize(event.getCalendarEvent(), event
                         .getNewStartTime(), event.getNewEndTime());

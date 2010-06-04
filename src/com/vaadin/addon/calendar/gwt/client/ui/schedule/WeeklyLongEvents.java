@@ -210,14 +210,12 @@ public class WeeklyLongEvents extends HorizontalPanel {
             add(dateCell);
         }
 
-        @Override
         public void onMouseDown(MouseDownEvent event) {
             clickTargetWidget = (Widget) event.getSource();
 
             event.stopPropagation();
         }
 
-        @Override
         public void onMouseUp(MouseUpEvent event) {
             if (event.getSource() == clickTargetWidget
                     && clickTargetWidget instanceof DateCell) {
