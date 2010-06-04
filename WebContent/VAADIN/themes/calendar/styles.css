@@ -1,5 +1,13 @@
 /** Calendar */
 
+/* Global resize style */
+.v-calendar-nresize DIV DIV {
+	cursor: n-resize !important;
+	}
+	
+.v-calendar-sresize DIV DIV {
+	cursor: s-resize !important;
+}
 
 /* Header bar */
 
@@ -293,3 +301,23 @@ div.v-calendar-event-all-day {
 	opacity: .6;
 	filter: alpha(opacity=60);
 	}
+	
+.v-calendar-event-resizetop {
+	position: absolute;
+	cursor: n-resize;
+	height: 5%;
+	min-height: 3px; 
+	top: 0;
+	width: 100%;
+	z-index: 1;
+	}
+
+.v-calendar-event-resizebottom {
+	position: absolute;
+	cursor: s-resize;
+	height: 5%;
+	min-height: 3px;
+	bottom: 0;
+	width: 100%;
+	z-index: 1;
+	}	

@@ -521,4 +521,84 @@ public interface CalendarEvents {
          */
         public void weekClick(WeekClick event);
     }
+
+    /**
+     * EventResize is sent when an event is resized
+     */
+    @SuppressWarnings("serial")
+    public class EventResize extends CalendarEvent {
+
+        public static final String EVENT_ID = CalendarEventId.EVENTRESIZE;
+
+        private Calendar.Event calendarEvent;
+
+        private Date startTime;
+
+        private Date endTime;
+
+        public EventResize(Calendar source, Calendar.Event event,
+                Date startTime, Date endTime) {
+            super(source);
+            this.calendarEvent = event;
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+
+        /**
+         * Get target calendar event.
+         * 
+         * @return Target calendar event.
+         */
+        public Calendar.Event getCalendarEvent() {
+            return calendarEvent;
+        }
+
+        /**
+         * @return the new start time
+         */
+        public Date getNewStartTime() {
+            return startTime;
+        }
+
+        /**
+         * @return the new end time
+         */
+        public Date getNewEndTime() {
+            return endTime;
+        }
+    }
+
+    /**
+     * Listener interface for calendar event resizing.
+     */
+    public interface EventResizeNotifier {
+
+        /**
+         * Add a EventResizeListener.
+         * 
+         * @param listener
+         *            EventResizeListener to be added
+         */
+        public void addListener(EventResizeListener listener);
+
+        /**
+         * Remove the EventResizeListener.
+         * 
+         * @param listener
+         *            EventResizeListener to be removed
+         * */
+        public void removeListener(EventResizeListener listener);
+    }
+
+    /**
+     * Listener for EventResizeEvent.
+     */
+    public interface EventResizeListener {
+
+        /** Trigger method for the EventResize. */
+        public static final Method eventResizeMethod = ReflectTools.findMethod(
+                EventResizeListener.class, "eventResize", EventResize.class);
+
+        void eventResize(EventResize event);
+    }
 }

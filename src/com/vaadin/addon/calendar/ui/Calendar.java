@@ -22,6 +22,8 @@ import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventResize;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventResizeListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
@@ -47,7 +49,7 @@ import com.vaadin.ui.ClientWidget;
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
         CalendarEvents.NavigationNotifier, CalendarEvents.EventMoveNotifier,
-        CalendarEvents.RangeSelectNotifier {
+        CalendarEvents.RangeSelectNotifier, CalendarEvents.EventResizeNotifier {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -86,14 +88,14 @@ public class Calendar extends AbstractComponent implements
      */
     private List<Calendar.Event> events;
 
-    /** Date format that will be used in the UIDL. */
+    /** Date format that will be used in the UIDL for dates. */
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
 
-    /** Time format that will be used in the UIDL. */
+    /** Time format that will be used in the UIDL for time. */
     protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
 
-    /** Date format that will be used in the UIDL for the move event. */
-    protected DateFormat df_time_move = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+    /** Date format that will be used in the UIDL for both date and time. */
+    protected DateFormat df_date_time = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 
     /**
      * Week view's scroll position. Client sends updates to this value so that
@@ -237,7 +239,7 @@ public class Calendar extends AbstractComponent implements
             if (zone == null)
                 zone = TimeZone.getDefault();
             currentCalendar.setTimeZone(zone);
-            df_time_move.setTimeZone(zone);
+            df_date_time.setTimeZone(zone);
             requestRepaint();
         }
     }
@@ -442,6 +444,11 @@ public class Calendar extends AbstractComponent implements
         if (variables.containsKey("navigation")) {
             handleNavigation((Integer) variables.get("navigation"));
         }
+
+        if (variables.containsKey(CalendarEventId.EVENTRESIZE) && !isReadOnly()) {
+            handleEventResize((String) variables
+                    .get(CalendarEventId.EVENTRESIZE));
+        }
     }
 
     private void handleEventMove(String message) {
@@ -451,7 +458,7 @@ public class Calendar extends AbstractComponent implements
                 int index = Integer.parseInt(splitted[0]);
 
                 try {
-                    Date d = df_time_move.parse(splitted[1]);
+                    Date d = df_date_time.parse(splitted[1]);
                     if (index >= 0 && index < events.size()
                             && events.get(index) != null) {
                         fireEventMove(index, d);
@@ -559,6 +566,25 @@ public class Calendar extends AbstractComponent implements
         fireNavigationEvent(index != -1);
     }
 
+    private void handleEventResize(String value) {
+        if (value != null && !"".equals(value)) {
+            try {
+                String[] values = value.split(",");
+                if (values.length == 3) {
+                    int eventIndex = Integer.parseInt(values[0]);
+                    Date newStartTime = df_date_time.parse(values[1]);
+                    Date newEndTime = df_date_time.parse(values[2]);
+
+                    fireEventResize(eventIndex, newStartTime, newEndTime);
+                }
+            } catch (NumberFormatException e) {
+                // NOOP
+            } catch (ParseException e) {
+                // NOOP
+            }
+        }
+    }
+
     protected void fireNavigationEvent(boolean forward) {
         if (forward)
             fireEvent(new ForwardEvent(this));
@@ -584,6 +610,10 @@ public class Calendar extends AbstractComponent implements
 
     protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
         fireEvent(new RangeSelectEvent(this, from, to, monthlyMode));
+    }
+
+    protected void fireEventResize(int index, Date startTime, Date endTime) {
+        fireEvent(new EventResize(this, events.get(index), startTime, endTime));
     }
 
     /**
@@ -747,6 +777,11 @@ public class Calendar extends AbstractComponent implements
                 WeekClickListener.weekClickMethod);
     }
 
+    public void addListener(EventResizeListener listener) {
+        addListener(EventResize.EVENT_ID, EventResize.class, listener,
+                EventResizeListener.eventResizeMethod);
+    }
+
     public void removeListener(ForwardListener listener) {
         removeListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener);
     }
@@ -787,4 +822,7 @@ public class Calendar extends AbstractComponent implements
                 listener);
     }
 
+    public void removeListener(EventResizeListener listener) {
+        removeListener(EventResize.EVENT_ID, EventResize.class, listener);
+    }
 }

@@ -2,6 +2,8 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+
 public class DateUtil {
 
     /**
@@ -21,4 +23,24 @@ public class DateUtil {
         return false;
     }
 
+    /**
+     * @param date
+     *            the date to format
+     * 
+     * @return given Date as String, for communicating to server-side
+     */
+    public static String formatClientSideDate(Date date) {
+        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
+        return dateformat_date.format(date);
+    }
+
+    /**
+     * @param date
+     *            the date to format
+     * @return given Date as String, for communicating to server-side
+     */
+    public static Object formatClientSideTime(Date date) {
+        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("HH-mm");
+        return dateformat_date.format(date);
+    }
 }

@@ -48,7 +48,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     private Timebar timebar;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
-        this.calendar = parent;
+        this.setCalendar(parent);
         this.format24h = format24h;
         setStylePrimaryName("v-calendar-week-wrapper");
         content = new HorizontalPanel();
@@ -57,8 +57,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         content.add(timebar);
         addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
-                calendar.getClient().updateVariable(calendar.getPID(),
-                        "scroll", getScrollPosition(), false);
+                getCalendar().getClient().updateVariable(
+                        getCalendar().getPID(), "scroll", getScrollPosition(),
+                        false);
             }
         });
         Event.addNativePreviewHandler(this);
@@ -419,7 +420,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         @SuppressWarnings("deprecation")
         public void addEvent(Date targetDay, CalendarEvent e) {
             Element main = getElement();
-            DayEvent de = new DayEvent(e);
+            DayEvent de = new DayEvent(weekgrid, e);
             de.setReadOnly(readOnly);
             Date fromDt = e.getStartTime();
             int h = fromDt.getHours();
@@ -453,8 +454,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             events.add(dayEvent.getCalendarEvent());
 
             index = 0;
-            for (CalendarEvent e : weekgrid.calendar
-                    .sortEventsByDuration(events)) {
+            for (CalendarEvent e : weekgrid.getCalendar().sortEventsByDuration(
+                    events)) {
                 if (e.equals(dayEvent.getCalendarEvent()))
                     break;
                 index++;
@@ -609,24 +610,45 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private int startYrelative;
             private int startXrelative;
             private boolean readOnly;
+            private WeekGrid weekGrid;
+            private com.google.gwt.user.client.Element topResizeBar;
+            private com.google.gwt.user.client.Element bottomResizeBar;
+            private Element clickTarget;
 
-            public DayEvent(CalendarEvent e2) {
+            public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
                 setStylePrimaryName("v-calendar-event");
-                setCalendarEvent(e2);
+                setCalendarEvent(event);
+
+                this.weekGrid = parent;
 
                 Style s = getElement().getStyle();
-                if (e2.getStyleName().length() > 0) {
-                    addStyleDependentName(e2.getStyleName());
+                if (event.getStyleName().length() > 0) {
+                    addStyleDependentName(event.getStyleName());
                 }
                 s.setPosition(Position.ABSOLUTE);
 
                 caption = DOM.createDiv();
                 caption.addClassName("v-calendar-event-caption");
                 getElement().appendChild(caption);
+
                 eventContent = DOM.createDiv();
                 eventContent.addClassName("v-calendar-event-content");
                 getElement().appendChild(eventContent);
+
+                VCalendar calendar = weekGrid.getCalendar();
+                if (calendar.getClient().hasEventListeners(calendar,
+                        CalendarEventId.EVENTRESIZE)) {
+                    topResizeBar = DOM.createDiv();
+                    bottomResizeBar = DOM.createDiv();
+
+                    topResizeBar.addClassName("v-calendar-event-resizetop");
+                    bottomResizeBar
+                            .addClassName("v-calendar-event-resizebottom");
+
+                    getElement().appendChild(topResizeBar);
+                    getElement().appendChild(bottomResizeBar);
+                }
 
                 addMouseDownHandler(this);
                 addMouseUpHandler(this);
@@ -635,15 +657,17 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             public void updatePosition(long startFromMinutes,
                     long durationInMinutes) {
                 top = (int) ((((double) HOUR_IN_PX / 60)) * startFromMinutes);
+
                 getElement().getStyle().setTop(top, Unit.PX);
                 if (durationInMinutes > 0) {
                     int heightMinutes = (int) (((double) HOUR_IN_PX / 60) * durationInMinutes);
                     setHeight(heightMinutes);
-                    updateCaptions(true);
                 } else {
                     setHeight(-1);
-                    updateCaptions(false);
                 }
+
+                boolean multiRowCaption = (durationInMinutes > 30);
+                updateCaptions(multiRowCaption);
             }
 
             public int getTop() {
@@ -678,14 +702,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             }
 
             public void onMouseDown(MouseDownEvent event) {
+                clickTarget = Element.as(event.getNativeEvent()
+                        .getEventTarget());
                 moveRegistration = addMouseMoveHandler(this);
-                Widget parent = getParent().getParent();
-                WeekGrid wk = (WeekGrid) parent.getParent();
                 startX = event.getClientX();
                 startY = event.getClientY();
                 startYrelative = event.getRelativeY(caption) % HALFHOUR_IN_PX;
-                startXrelative = (event.getRelativeX(getParent().getParent()
-                        .getParent().getElement()) - wk.timebar
+                startXrelative = (event.getRelativeX(weekGrid.getElement()) - weekGrid.timebar
                         .getOffsetWidth())
                         % getDateCellWidth();
                 mouseMoveStarted = false;
@@ -695,6 +718,11 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 s.setZIndex(1000);
                 Event.setCapture(getElement());
                 event.getNativeEvent().stopPropagation();
+
+                // make sure the right cursor is always displayed
+                if (clickTargetsResize()) {
+                    addGlobalResizeStyle();
+                }
             }
 
             public void onMouseUp(MouseUpEvent event) {
@@ -710,25 +738,38 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 mouseMoveStarted = false;
                 Style s = getElement().getStyle();
                 s.setZIndex(1);
-                if (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3) {
-                    DateCell parent = (DateCell) getParent();
-                    WeekGrid wk = (WeekGrid) parent.getParent().getParent();
-                    wk.eventMoved(this);
-                } else {
-                    EventTarget et = event.getNativeEvent().getEventTarget();
-                    Element e = Element.as(et);
-                    if (e == caption || e == eventContent) {
-                        DateCell parent = (DateCell) getParent();
-                        VCalendar wk = (VCalendar) parent.getParent()
-                                .getParent().getParent().getParent();
+                if (!clickTargetsResize()) {
+                    if (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3) {
+                        weekGrid.eventMoved(this);
+                    } else {
+                        EventTarget et = event.getNativeEvent()
+                                .getEventTarget();
+                        Element e = Element.as(et);
+                        if (e == caption || e == eventContent) {
 
-                        if (wk.getClient().hasEventListeners(wk,
-                                CalendarEventId.EVENTCLICK)) {
-                            wk.getClient().updateVariable(wk.getPID(),
-                                    CalendarEventId.EVENTCLICK,
-                                    calendarEvent.getIndex(), true);
+                            VCalendar calendar = weekGrid.getCalendar();
+
+                            if (calendar.getClient().hasEventListeners(
+                                    calendar, CalendarEventId.EVENTCLICK)) {
+                                calendar.getClient().updateVariable(
+                                        calendar.getPID(),
+                                        CalendarEventId.EVENTCLICK,
+                                        calendarEvent.getIndex(), true);
+                            }
+                        } else if (e == getElement()) {
                         }
-                    } else if (e == getElement()) {
+                    }
+
+                } else { // click targeted resize bar
+                    removeGlobalResizeStyle();
+
+                    VCalendar calendar = weekGrid.getCalendar();
+
+                    if (calendar.getClient().hasEventListeners(calendar,
+                            CalendarEventId.EVENTRESIZE)) {
+                        calendar.getClient().updateVariable(calendar.getPID(),
+                                CalendarEventId.EVENTRESIZE,
+                                buildResizeString(calendarEvent), true);
                     }
                 }
             }
@@ -738,11 +779,12 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 if (startY < 0 && startX < 0) {
                     return;
                 }
-                if (readOnly) {
+                if (isReadOnly()) {
                     Event.releaseCapture(getElement());
                     mouseMoveStarted = false;
                     startY = -1;
                     startX = -1;
+                    removeGlobalResizeStyle();
                     return;
                 }
                 int currentY = event.getClientY();
@@ -759,9 +801,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 }
 
                 Widget parent = getParent().getParent();
-                WeekGrid wk = (WeekGrid) parent.getParent();
                 int relativeX = event.getRelativeX(parent.getElement())
-                        - wk.timebar.getOffsetWidth();
+                        - weekGrid.timebar.getOffsetWidth();
                 int halfHourDiff = 0;
                 if (moveY > 0) {
                     halfHourDiff = (startYrelative + moveY) / HALFHOUR_IN_PX;
@@ -780,7 +821,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 int dayOffset = relativeX / dateCellWidth;
                 dayOffset = dayOffset * dateCellWidth
-                        + wk.timebar.getOffsetWidth();
+                        + weekGrid.timebar.getOffsetWidth();
                 if (relativeX < 0 || relativeX >= getDatesWidth()) {
                     return;
                 }
@@ -791,31 +832,121 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 Date to = calendarEvent.getEndTime();
                 long duration = to.getTime() - from.getTime();
 
-                long daysMs = dayDiff * VCalendar.DAYINMILLIS;
-                from.setTime(startDatetimeFrom.getTime() + daysMs);
-                from.setTime(from.getTime()
-                        + ((long) halfHourInMilliSeconds * halfHourDiff));
-                to.setTime((from.getTime() + duration));
-                calendarEvent.setStartTime(from);
-                calendarEvent.setEndTime(to);
-                calendarEvent.setStart(new Date(from.getTime()));
-                calendarEvent.setEnd(new Date(to.getTime()));
+                if (!clickTargetsResize()) {
+                    long daysMs = dayDiff * VCalendar.DAYINMILLIS;
+                    from.setTime(startDatetimeFrom.getTime() + daysMs);
+                    from.setTime(from.getTime()
+                            + ((long) halfHourInMilliSeconds * halfHourDiff));
+                    to.setTime((from.getTime() + duration));
+                    calendarEvent.setStartTime(from);
+                    calendarEvent.setEndTime(to);
+                    calendarEvent.setStart(new Date(from.getTime()));
+                    calendarEvent.setEnd(new Date(to.getTime()));
 
-                // Set new position for the event
-                long startFromMinutes = (from.getHours() * 60)
-                        + from.getMinutes();
-                long range = calendarEvent.getRangeInMinutes();
-                boolean eventStartAtDifferentDay = from.getDate() != to
-                        .getDate();
-                if (eventStartAtDifferentDay) {
-                    long minutesOnPrevDay = (getTargetDateByCurrentPosition(
-                            dayOffset).getTime() - from.getTime())
-                            / VCalendar.MINUTEINMILLIS;
-                    startFromMinutes = -1 * minutesOnPrevDay;
+                    // Set new position for the event
+                    long startFromMinutes = (from.getHours() * 60)
+                            + from.getMinutes();
+                    long range = calendarEvent.getRangeInMinutes();
+                    boolean eventStartAtDifferentDay = from.getDate() != to
+                            .getDate();
+                    if (eventStartAtDifferentDay) {
+                        long minutesOnPrevDay = (getTargetDateByCurrentPosition(
+                                dayOffset).getTime() - from.getTime())
+                                / VCalendar.MINUTEINMILLIS;
+                        startFromMinutes = -1 * minutesOnPrevDay;
+                    }
+                    updatePosition(startFromMinutes, range);
+
+                    s.setLeft(dayOffset, Unit.PX);
+
+                } else if (clickTarget == topResizeBar) {
+                    long oldStartTime = startDatetimeFrom.getTime();
+                    long newStartTime = oldStartTime
+                            + ((long) halfHourInMilliSeconds * halfHourDiff);
+
+                    if (!isTimeRangeTooSmall(newStartTime, startDatetimeTo
+                            .getTime())) {
+                        newStartTime = startDatetimeTo.getTime()
+                                - getMinTimeRange();
+                    }
+
+                    from.setTime(newStartTime);
+
+                    calendarEvent.setStartTime(from);
+
+                    // Set new position for the event
+                    long startFromMinutes = (from.getHours() * 60)
+                            + from.getMinutes();
+                    long range = calendarEvent.getRangeInMinutes();
+
+                    updatePosition(startFromMinutes, range);
+
+                } else if (clickTarget == bottomResizeBar) {
+                    long oldEndTime = startDatetimeTo.getTime();
+                    long newEndTime = oldEndTime
+                            + ((long) halfHourInMilliSeconds * halfHourDiff);
+
+                    if (!isTimeRangeTooSmall(startDatetimeFrom.getTime(),
+                            newEndTime)) {
+                        newEndTime = startDatetimeFrom.getTime()
+                                + getMinTimeRange();
+                    }
+
+                    to.setTime(newEndTime);
+
+                    calendarEvent.setEndTime(to);
+
+                    // Set new position for the event
+                    long startFromMinutes = (startDatetimeFrom.getHours() * 60)
+                            + startDatetimeFrom.getMinutes();
+                    long range = calendarEvent.getRangeInMinutes();
+
+                    updatePosition(startFromMinutes, range);
                 }
-                updatePosition(startFromMinutes, range);
 
-                s.setLeft(dayOffset, Unit.PX);
+            }
+
+            /**
+             * Check if the given time range is too small for events
+             * 
+             * @param start
+             * @param end
+             * @return
+             */
+            private boolean isTimeRangeTooSmall(long start, long end) {
+                return (end - start) >= getMinTimeRange();
+            }
+
+            /**
+             * @return the minimum amount of ms that an event must last when
+             *         resized
+             */
+            private long getMinTimeRange() {
+                return VCalendar.MINUTEINMILLIS * 30;
+            }
+
+            /**
+             * Build the string for sending resize events to server
+             * 
+             * @param event
+             * @return
+             */
+            private String buildResizeString(CalendarEvent event) {
+                StringBuilder buffer = new StringBuilder();
+                buffer.append(event.getIndex());
+                buffer.append(",");
+                buffer.append(DateUtil.formatClientSideDate(event.getStart()));
+                buffer.append("-");
+                buffer.append(DateUtil.formatClientSideTime(event
+                        .getStartTime()));
+                buffer.append(",");
+                buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
+                buffer.append("-");
+                buffer
+                        .append(DateUtil.formatClientSideTime(event
+                                .getEndTime()));
+
+                return buffer.toString();
             }
 
             private Date getTargetDateByCurrentPosition(int left) {
@@ -838,6 +969,27 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private int getDatesWidth() {
                 WeekGrid wk = (WeekGrid) getParent().getParent().getParent();
                 return wk.getInternalWidth();
+            }
+
+            /**
+             * @return true if the current mouse movement is resizing
+             */
+            private boolean clickTargetsResize() {
+                return clickTarget == topResizeBar
+                        || clickTarget == bottomResizeBar;
+            }
+
+            private void addGlobalResizeStyle() {
+                if (clickTarget == topResizeBar) {
+                    weekGrid.getCalendar().addStyleDependentName("nresize");
+                } else if (clickTarget == bottomResizeBar) {
+                    weekGrid.getCalendar().addStyleDependentName("sresize");
+                }
+            }
+
+            private void removeGlobalResizeStyle() {
+                weekGrid.getCalendar().removeStyleDependentName("nresize");
+                weekGrid.getCalendar().removeStyleDependentName("sresize");
             }
 
             public void setCalendarEvent(CalendarEvent calendarEvent) {
@@ -958,9 +1110,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 + dateformat_date.format(se.getStart()) + "-"
                 + dateformat_time.format(se.getStartTime());
 
-        if (calendar.getClient().hasEventListeners(calendar,
+        if (getCalendar().getClient().hasEventListeners(getCalendar(),
                 CalendarEventId.EVENTMOVE)) {
-            calendar.getClient().updateVariable(calendar.getPID(),
+            getCalendar().getClient().updateVariable(getCalendar().getPID(),
                     CalendarEventId.EVENTMOVE, eventMove, true);
         }
     }
@@ -1028,6 +1180,21 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 dc.setDateColor(styleName);
             }
         }
+    }
+
+    /**
+     * @param calendar
+     *            the calendar to set
+     */
+    public void setCalendar(VCalendar calendar) {
+        this.calendar = calendar;
+    }
+
+    /**
+     * @return the calendar
+     */
+    public VCalendar getCalendar() {
+        return calendar;
     }
 
 }

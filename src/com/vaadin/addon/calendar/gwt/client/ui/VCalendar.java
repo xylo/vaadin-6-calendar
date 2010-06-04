@@ -358,6 +358,7 @@ public class VCalendar extends Composite implements Paintable {
         ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
         for (int i = 0; i < eventCount; i++) {
             UIDL eventUIDL = childUIDL.getChildUIDL(i);
+
             int index = eventUIDL.getIntAttribute("i");
             String caption = eventUIDL.getStringAttribute("caption");
             String datefrom = eventUIDL.getStringAttribute("dfrom");
@@ -366,7 +367,9 @@ public class VCalendar extends Composite implements Paintable {
             String timeto = eventUIDL.getStringAttribute("tto");
             String desc = eventUIDL.getStringAttribute("desc");
             String style = eventUIDL.getStringAttribute("extracss");
+
             CalendarEvent e = new CalendarEvent();
+
             e.setCaption(caption);
             e.setDescription(desc);
             e.setIndex(index);
@@ -378,6 +381,7 @@ public class VCalendar extends Composite implements Paintable {
             e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
             e.setStyleName(style);
             e.setFormat24h(format);
+
             events.add(e);
         }
         return events;

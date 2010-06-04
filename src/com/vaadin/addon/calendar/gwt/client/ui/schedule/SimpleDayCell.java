@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
@@ -486,14 +485,17 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     private void eventMoved(CalendarEvent e) {
         calendar.updateEventToMonthGrid(e);
 
-        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
-        String eventMove = e.getIndex() + ":"
-                + dateformat_date.format(e.getStart()) + "-00-00";
-
         if (calendar.getClient().hasEventListeners(calendar,
                 CalendarEventId.EVENTMOVE)) {
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(e.getIndex());
+            sb.append(":");
+            sb.append(DateUtil.formatClientSideDate(e.getStart()));
+            sb.append("-00-00");
+
             calendar.getClient().updateVariable(calendar.getPID(),
-                    CalendarEventId.EVENTMOVE, eventMove, true);
+                    CalendarEventId.EVENTMOVE, sb.toString(), true);
         }
     }
 

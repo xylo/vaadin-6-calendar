@@ -11,6 +11,7 @@ import java.util.TimeZone;
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.ui.Calendar.Event;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
@@ -19,6 +20,8 @@ import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventResize;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventResizeListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
@@ -146,7 +149,16 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
         event.setStyleName("color3");
         dataSource.add(event);
 
-        calendar.add(GregorianCalendar.DATE, -2);
+        // Add a second allday event
+        calendar.add(GregorianCalendar.DATE, 1);
+        start = calendar.getTime();
+        end = start;
+        event = new CalendarTestEvent("Second allday event", start, end);
+        event.setDescription("Some description.");
+        event.setStyleName("color2");
+        dataSource.add(event);
+
+        calendar.add(GregorianCalendar.DATE, -3);
         calendar.set(GregorianCalendar.HOUR_OF_DAY, 9);
         calendar.set(GregorianCalendar.MINUTE, 30);
         start = calendar.getTime();
@@ -366,6 +378,16 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
                 applyEventMove(event.getCalendarEvent(), event.getNewStart());
             }
         });
+
+        calendarComponent.addListener(new EventResizeListener() {
+
+            @Override
+            public void eventResize(EventResize event) {
+                applyEventResize(event.getCalendarEvent(), event
+                        .getNewStartTime(), event.getNewEndTime());
+            }
+
+        });
     }
 
     private Select createTimeZoneSelect() {
@@ -544,6 +566,14 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
             e.setStart(newFromDatetime);
             e.setEnd(new Date(newFromDatetime.getTime() + length));
             calendarComponent.requestRepaint();
+        }
+    }
+
+    private void applyEventResize(Event event, Date newStartTime,
+            Date newEndTime) {
+        if (event instanceof CalendarTestEvent) {
+            ((CalendarTestEvent) event).setStart(newStartTime);
+            ((CalendarTestEvent) event).setEnd(newEndTime);
         }
     }
 

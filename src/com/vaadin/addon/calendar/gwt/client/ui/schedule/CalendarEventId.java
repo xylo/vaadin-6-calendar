@@ -13,4 +13,5 @@ public class CalendarEventId {
     public static final String DATECLICK = "dateClick";
     public static final String WEEKCLICK = "weekClick";
     public static final String EVENTCLICK = "eventClick";
+    public static final String EVENTRESIZE = "eventResize";
 }
