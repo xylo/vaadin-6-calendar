@@ -233,7 +233,7 @@
         	<fileset dir="WebContent">
                 <patternset>
                     <include name="VAADIN/widgetsets/${addon.widgetset}/**/*" />
-                	<include name="VAADIN/themes/calendar/**/*" />
+                	<!--<include name="VAADIN/themes/calendar/**/*" />-->
                 </patternset>
             </fileset>
         </jar>
