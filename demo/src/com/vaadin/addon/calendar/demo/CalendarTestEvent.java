@@ -1,4 +1,4 @@
-package com.vaadin.addon.calendar.test;
+package com.vaadin.addon.calendar.demo;
 
 import java.util.Date;
 
@@ -7,7 +7,7 @@ import com.vaadin.addon.calendar.ui.Calendar;
 /**
  * Test Calendar.Event implementation.
  * 
- * @see com.vaadin.addon.calendar.ui.Calendar.Event
+ * @see com.vaadin.addon.calendar.test.ui.Calendar.Event
  */
 public class CalendarTestEvent implements Calendar.Event {
 
@@ -28,7 +28,7 @@ public class CalendarTestEvent implements Calendar.Event {
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getStart()
+     * @see com.vaadin.addon.calendar.test.ui.Calendar.Event#getStart()
      */
     public Date getStart() {
         return start;
@@ -41,7 +41,7 @@ public class CalendarTestEvent implements Calendar.Event {
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getEnd()
+     * @see com.vaadin.addon.calendar.test.ui.Calendar.Event#getEnd()
      */
     public Date getEnd() {
         return end;
@@ -54,7 +54,7 @@ public class CalendarTestEvent implements Calendar.Event {
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getCaption()
+     * @see com.vaadin.addon.calendar.test.ui.Calendar.Event#getCaption()
      */
     public String getCaption() {
         return caption;
@@ -75,7 +75,7 @@ public class CalendarTestEvent implements Calendar.Event {
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getDescription()
+     * @see com.vaadin.addon.calendar.test.ui.Calendar.Event#getDescription()
      */
     public String getDescription() {
         return description;
@@ -96,7 +96,7 @@ public class CalendarTestEvent implements Calendar.Event {
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.addon.calendar.ui.Calendar.Event#getStyleName()
+     * @see com.vaadin.addon.calendar.test.ui.Calendar.Event#getStyleName()
      */
     public String getStyleName() {
         return styleName;

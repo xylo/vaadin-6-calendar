@@ -218,24 +218,19 @@
                 <patternset>
                     <include name="${src.package.dir}/**/*" />
                 	<exclude name="**/test/**" />
+                	<exclude name="**/demo/**" />
                 </patternset>
-            </fileset>
+            </fileset> 
 
         	<!-- Especially all the widget set source files are required. -->
         	<fileset dir="src">
                 <patternset>
-                    <include name="${src.package.dir}/gwt/**/*" />
+                	<include name="${src.package.dir}/**/*" />
+                	<exclude name="**/demo/**" />
                 	<exclude name="**/test/**" />
                 </patternset>
             </fileset>
-
-        	<!-- Include the built widget set and theme. -->
-        	<fileset dir="WebContent">
-                <patternset>
-                    <include name="VAADIN/widgetsets/${addon.widgetset}/**/*" />
-                	<!--<include name="VAADIN/themes/calendar/**/*" />-->
-                </patternset>
-            </fileset>
+        	
         </jar>
 	</target>		
 

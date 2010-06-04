@@ -13,18 +13,18 @@
  */
 
 /* For month view */
-.v-calendar-event-color1 {
+.v-calendar .v-calendar-event-color1 {
 	color: #4f8324;
 	}
-.v-calendar-event-color1-all-day {
+.v-calendar .v-calendar-event-color1-all-day {
 	background-color: #61c114;
 	}
 
 /* For week/day view */
-.v-calendar-event-color1 .v-calendar-event-caption {
+.v-calendar .v-calendar-event-color1 .v-calendar-event-caption {
 	color: #4f8324;
 	}
-.v-calendar-event-color1 .v-calendar-event-content {
+.v-calendar .v-calendar-event-color1 .v-calendar-event-content {
 	border-color: #61c114;
 	background-color: #daff70;
 	}
@@ -35,18 +35,18 @@
  */
 
 /* For month view */
-.v-calendar-event-color2 {
+.v-calendar .v-calendar-event-color2 {
 	color: #1c4b8b;
 	}
-.v-calendar-event-color2-all-day {
+.v-calendar .v-calendar-event-color2-all-day {
 	background-color: #0a56bc;
 	}
 
 /* For week/day view */
-.v-calendar-event-color2 .v-calendar-event-caption {
+.v-calendar .v-calendar-event-color2 .v-calendar-event-caption {
 	color: #1c4b8b;
 	}
-.v-calendar-event-color2 .v-calendar-event-content {
+.v-calendar .v-calendar-event-color2 .v-calendar-event-content {
 	border-color: #0a56bc;
 	background-color: #529bff;
 	}
@@ -57,18 +57,18 @@
  */
 
 /* For month view */
-.v-calendar-event-color3 {
+.v-calendar .v-calendar-event-color3 {
 	color: #831d1d;
 	}
-.v-calendar-event-color3-all-day {
+.v-calendar .v-calendar-event-color3-all-day {
 	background-color: #bd1a1a;
 	}
 
 /* For week/day view */
-.v-calendar-event-color3 .v-calendar-event-caption {
+.v-calendar .v-calendar-event-color3 .v-calendar-event-caption {
 	color: #831d1d;
 	}
-.v-calendar-event-color3 .v-calendar-event-content {
+.v-calendar .v-calendar-event-color3 .v-calendar-event-content {
 	border-color: #bd1a1a;
 	background-color: #ff9d9d;
 	}
@@ -79,18 +79,18 @@
  */
 
 /* For month view */
-.v-calendar-event-color4 {
+.v-calendar .v-calendar-event-color4 {
 	color: #8b5923;
 	}
-.v-calendar-event-color4-all-day {
+.v-calendar .v-calendar-event-color4-all-day {
 	background-color: #cd6a00;
 	}
 
 /* For week/day view */
-.v-calendar-event-color4 .v-calendar-event-caption {
+.v-calendar .v-calendar-event-color4 .v-calendar-event-caption {
 	color: #8b5923;
 	}
-.v-calendar-event-color4 .v-calendar-event-content {
+.v-calendar .v-calendar-event-color4 .v-calendar-event-content {
 	border-color: #cd6a00;
 	background-color: #faa345;
 	}

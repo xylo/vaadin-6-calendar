@@ -1,4 +1,4 @@
-package com.vaadin.addon.calendar;
+package com.vaadin.addon.calendar.test;
 
 import java.util.ArrayList;
 import java.util.Date;

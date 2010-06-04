@@ -1,4 +1,4 @@
-package com.vaadin.addon.calendar.test;
+package com.vaadin.addon.calendar.demo;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
@@ -919,7 +919,7 @@ public class CalendarTest extends Application implements Calendar.EventProvider 
      * (non-Javadoc)
      * 
      * @see
-     * com.vaadin.addon.calendar.ui.Calendar.EventProvider#getEvents(java.util
+     * com.vaadin.addon.calendar.test.ui.Calendar.EventProvider#getEvents(java.util
      * .Date, java.util.Date)
      */
     public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {

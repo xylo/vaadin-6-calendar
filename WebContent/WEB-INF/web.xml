@@ -15,7 +15,7 @@
       <description>
   		Vaadin application class to start</description>
       <param-name>application</param-name>
-      <param-value>com.vaadin.addon.calendar.test.CalendarTest</param-value>
+      <param-value>com.vaadin.addon.calendar.demo.CalendarTest</param-value>
     </init-param>
     <init-param>
       <description>
