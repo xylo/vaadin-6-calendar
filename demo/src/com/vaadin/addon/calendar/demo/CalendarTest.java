@@ -1,26 +1,22 @@
 package com.vaadin.addon.calendar.demo;
 
 import java.text.DateFormatSymbols;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.BasicEvent;
+import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
-import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
@@ -57,8 +53,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
 /** Calendar component test application */
-public class CalendarTest extends Application implements CalendarEventProvider,
-        CalendarComponentEvents.EventChangeNotifier {
+public class CalendarTest extends Application {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -109,9 +104,7 @@ public class CalendarTest extends Application implements CalendarEventProvider,
 
     private Mode viewMode = Mode.MONTH;
 
-    private List<CalendarEvent> dataSource = new ArrayList<CalendarEvent>();
-
-    private List<CalendarComponentEvents.EventChangeListener> changeListeners = new LinkedList<CalendarComponentEvents.EventChangeListener>();
+    private BasicEventProvider dataSource;
 
     private Button addNewEvent;
 
@@ -143,29 +136,28 @@ public class CalendarTest extends Application implements CalendarEventProvider,
         // Add a event that last a whole week
         Date start = calendarComponent.getFirstDateForWeek(new Date());
         Date end = calendarComponent.getLastDateForWeek(new Date());
-        CalendarTestEvent event = new CalendarTestEvent("Whole week event",
-                start, end);
+        CalendarTestEvent event = getNewEvent("Whole week event", start, end);
         event.setStyleName("color4");
-        dataSource.add(event);
+        dataSource.addEvent(event);
 
         // Add a allday event
         calendar.setTime(start);
         calendar.add(GregorianCalendar.DATE, 3);
         start = calendar.getTime();
         end = start;
-        event = new CalendarTestEvent("Allday event", start, end);
+        event = getNewEvent("Allday event", start, end);
         event.setDescription("Some description.");
         event.setStyleName("color3");
-        dataSource.add(event);
+        dataSource.addEvent(event);
 
         // Add a second allday event
         calendar.add(GregorianCalendar.DATE, 1);
         start = calendar.getTime();
         end = start;
-        event = new CalendarTestEvent("Second allday event", start, end);
+        event = getNewEvent("Second allday event", start, end);
         event.setDescription("Some description.");
         event.setStyleName("color2");
-        dataSource.add(event);
+        dataSource.addEvent(event);
 
         calendar.add(GregorianCalendar.DATE, -3);
         calendar.set(GregorianCalendar.HOUR_OF_DAY, 9);
@@ -174,10 +166,10 @@ public class CalendarTest extends Application implements CalendarEventProvider,
         calendar.add(GregorianCalendar.HOUR_OF_DAY, 5);
         calendar.set(GregorianCalendar.MINUTE, 0);
         end = calendar.getTime();
-        event = new CalendarTestEvent("Appointment", start, end);
+        event = getNewEvent("Appointment", start, end);
         event.setWhere("Office");
         event.setStyleName("color1");
-        dataSource.add(event);
+        dataSource.addEvent(event);
 
         calendar.add(GregorianCalendar.DATE, 1);
         calendar.set(GregorianCalendar.HOUR_OF_DAY, 11);
@@ -185,9 +177,9 @@ public class CalendarTest extends Application implements CalendarEventProvider,
         start = calendar.getTime();
         calendar.add(GregorianCalendar.HOUR_OF_DAY, 8);
         end = calendar.getTime();
-        event = new CalendarTestEvent("Training", start, end);
+        event = getNewEvent("Training", start, end);
         event.setStyleName("color2");
-        dataSource.add(event);
+        dataSource.addEvent(event);
 
         calendar.add(GregorianCalendar.DATE, 4);
         calendar.set(GregorianCalendar.HOUR_OF_DAY, 9);
@@ -195,8 +187,8 @@ public class CalendarTest extends Application implements CalendarEventProvider,
         start = calendar.getTime();
         calendar.add(GregorianCalendar.HOUR_OF_DAY, 9);
         end = calendar.getTime();
-        event = new CalendarTestEvent("Free time", start, end);
-        dataSource.add(event);
+        event = getNewEvent("Free time", start, end);
+        dataSource.addEvent(event);
 
         calendar.setTime(originalDate);
     }
@@ -336,7 +328,9 @@ public class CalendarTest extends Application implements CalendarEventProvider,
     }
 
     private void initCalendar() {
-        calendarComponent = new Calendar(this);
+        dataSource = new BasicEventProvider();
+
+        calendarComponent = new Calendar(dataSource);
         calendarComponent.setHideWeekends(false);
         calendarComponent.setLocale(getLocale());
         calendarComponent.setImmediate(true);
@@ -585,22 +579,20 @@ public class CalendarTest extends Application implements CalendarEventProvider,
     }
 
     private void applyEventMove(CalendarEvent event, Date newFromDatetime) {
-        if (event instanceof CalendarTestEvent) {
-            CalendarTestEvent e = (CalendarTestEvent) event;
+        if (event instanceof BasicEvent) {
+            BasicEvent e = (BasicEvent) event;
             /* Update event dates */
             long length = e.getEnd().getTime() - e.getStart().getTime();
             e.setStart(newFromDatetime);
             e.setEnd(new Date(newFromDatetime.getTime() + length));
-
-            fireEventChange();
         }
     }
 
     private void applyEventResize(CalendarEvent event, Date newStartTime,
             Date newEndTime) {
-        if (event instanceof CalendarTestEvent) {
-            ((CalendarTestEvent) event).setStart(newStartTime);
-            ((CalendarTestEvent) event).setEnd(newEndTime);
+        if (event instanceof BasicEvent) {
+            ((BasicEvent) event).setStart(newStartTime);
+            ((BasicEvent) event).setEnd(newEndTime);
         }
     }
 
@@ -757,41 +749,32 @@ public class CalendarTest extends Application implements CalendarEventProvider,
 
     private CalendarEvent createNewEvent(Date startDate, Date endDate) {
 
-        CalendarTestEvent event = new CalendarTestEvent("", startDate, endDate);
+        BasicEvent event = new BasicEvent();
+        event.setCaption("");
+        event.setStart(startDate);
+        event.setEnd(endDate);
         event.setStyleName("color1");
         return event;
     }
 
     /* Removes the event from the data source and fires change event. */
     private void deleteCalendarEvent() {
-        CalendarEvent event = getFormCalendarEvent();
-        if (dataSource.contains(event)) {
-            dataSource.remove(event);
+        BasicEvent event = getFormCalendarEvent();
+        if (dataSource.containsEvent(event)) {
+            dataSource.removeEvent(event);
         }
         getMainWindow().removeWindow(scheduleEventPopup);
-        fireEventChange();
     }
 
     /* Adds/updates the event in the data source and fires change event. */
     private void commitCalendarEvent() {
         scheduleEventForm.commit();
-        CalendarEvent event = getFormCalendarEvent();
-        if (!dataSource.contains(event)) {
-            dataSource.add(event);
+        BasicEvent event = getFormCalendarEvent();
+        if (!dataSource.containsEvent(event)) {
+            dataSource.addEvent(event);
         }
-
-        // we have to fire on all changes, whether the event is new or not
-        fireEventChange();
 
         getMainWindow().removeWindow(scheduleEventPopup);
-    }
-
-    private void fireEventChange() {
-        CalendarComponentEvents.EventChange changeEvent = new CalendarComponentEvents.EventChange(
-                this);
-        for (CalendarComponentEvents.EventChangeListener listener : changeListeners) {
-            listener.eventChange(changeEvent);
-        }
     }
 
     private void discardCalendarEvent() {
@@ -800,11 +783,11 @@ public class CalendarTest extends Application implements CalendarEventProvider,
     }
 
     @SuppressWarnings("unchecked")
-    private CalendarEvent getFormCalendarEvent() {
+    private BasicEvent getFormCalendarEvent() {
         BeanItem<CalendarEvent> item = (BeanItem<CalendarEvent>) scheduleEventForm
                 .getItemDataSource();
         CalendarEvent event = item.getBean();
-        return event;
+        return (BasicEvent) event;
     }
 
     private void nextMonth() {
@@ -866,6 +849,15 @@ public class CalendarTest extends Application implements CalendarEventProvider,
         String month = s.getShortMonths()[calendar.get(GregorianCalendar.MONTH)];
         captionLabel.setValue(month + " "
                 + calendar.get(GregorianCalendar.YEAR));
+    }
+
+    private CalendarTestEvent getNewEvent(String caption, Date start, Date end) {
+        CalendarTestEvent event = new CalendarTestEvent();
+        event.setCaption(caption);
+        event.setStart(start);
+        event.setEnd(end);
+
+        return event;
     }
 
     /*
@@ -951,54 +943,5 @@ public class CalendarTest extends Application implements CalendarEventProvider,
             calendar.set(GregorianCalendar.SECOND, 0);
             calendar.set(GregorianCalendar.MILLISECOND, 0);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.test.ui.CalendarEventProvider#getEvents(java
-     * .util .Date, java.util.Date)
-     */
-    public List<CalendarEvent> getEvents(Date fromStartDate, Date toEndDate) {
-        ArrayList<CalendarEvent> activeEvents = new ArrayList<CalendarEvent>();
-
-        for (CalendarEvent ev : dataSource) {
-            long from = fromStartDate.getTime();
-            long to = toEndDate.getTime();
-
-            long f = ev.getStart().getTime();
-            long t = ev.getEnd().getTime();
-            // Select only events that overlaps with fromStartDate and
-            // toEndDate.
-            if ((f <= to && f >= from) || (t >= from && t <= to)
-                    || (f <= from && t >= to)) {
-                activeEvents.add(ev);
-            }
-        }
-        return activeEvents;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeNotifier#addListener
-     * (com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeListener)
-     */
-    public void addListener(EventChangeListener listener) {
-        changeListeners.add(listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeNotifier#
-     * removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeListener)
-     */
-    public void removeListener(EventChangeListener listener) {
-        changeListeners.remove(listener);
-
     }
 }

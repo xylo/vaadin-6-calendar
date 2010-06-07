@@ -17,7 +17,8 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 
-public class CalendarTestMonthly extends Application implements CalendarEventProvider {
+public class CalendarTestMonthly extends Application implements
+        CalendarEventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -118,8 +119,8 @@ public class CalendarTestMonthly extends Application implements CalendarEventPro
 
         List<CalendarEvent> e = new ArrayList<CalendarEvent>();
 
-        CalendarTestEvent event = new CalendarTestEvent("Phase1",
-                fromStartDate, calendar.getTime());
+        CalendarTestEvent event = getNewEvent("Phase1", fromStartDate, calendar
+                .getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);
@@ -128,7 +129,7 @@ public class CalendarTestMonthly extends Application implements CalendarEventPro
         Date d = calendar.getTime();
         calendar.add(GregorianCalendar.DATE, 3);
         Date d2 = calendar.getTime();
-        event = new CalendarTestEvent("Phase2", d, d2);
+        event = getNewEvent("Phase2", d, d2);
         event.setStyleName("color2");
         e.add(event);
 
@@ -136,14 +137,14 @@ public class CalendarTestMonthly extends Application implements CalendarEventPro
         d = calendar.getTime();
         calendar.add(GregorianCalendar.DATE, 10);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Phase3", d, d2);
+        event = getNewEvent("Phase3", d, d2);
         event.setStyleName("color3");
         e.add(event);
         calendar.add(GregorianCalendar.DATE, -1);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.DATE, 3);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Phase4", d, d2);
+        event = getNewEvent("Phase4", d, d2);
         event.setStyleName("color4");
         e.add(event);
 
@@ -152,71 +153,80 @@ public class CalendarTestMonthly extends Application implements CalendarEventPro
         d = calendar.getTime();
         calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 1", d, d2);
+        event = getNewEvent("Session 1", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 2", d, d2);
+        event = getNewEvent("Session 2", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 3", d, d2);
+        event = getNewEvent("Session 3", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 4", d, d2);
+        event = getNewEvent("Session 4", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 5", d, d2);
+        event = getNewEvent("Session 5", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 6", d, d2);
+        event = getNewEvent("Session 6", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.MINUTE, 30);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.MINUTE, 30);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 7", d, d2);
-        e.add(event);
-
-        calendar.add(GregorianCalendar.HOUR, 1);
-        d = calendar.getTime();
-        calendar.add(GregorianCalendar.HOUR, 1);
-        d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 8", d, d2);
-
-        calendar.add(GregorianCalendar.HOUR, 1);
-        d = calendar.getTime();
-        calendar.add(GregorianCalendar.HOUR, 1);
-        d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 9", d, d2);
+        event = getNewEvent("Session 7", d, d2);
         e.add(event);
 
         calendar.add(GregorianCalendar.HOUR, 1);
         d = calendar.getTime();
         calendar.add(GregorianCalendar.HOUR, 1);
         d2 = calendar.getTime();
-        event = new CalendarTestEvent("Session 10", d, d2);
+        event = getNewEvent("Session 8", d, d2);
+
+        calendar.add(GregorianCalendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(GregorianCalendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = getNewEvent("Session 9", d, d2);
+        e.add(event);
+
+        calendar.add(GregorianCalendar.HOUR, 1);
+        d = calendar.getTime();
+        calendar.add(GregorianCalendar.HOUR, 1);
+        d2 = calendar.getTime();
+        event = getNewEvent("Session 10", d, d2);
         e.add(event);
         e.add(event);
         return e;
+    }
+
+    private CalendarTestEvent getNewEvent(String caption, Date start, Date end) {
+        CalendarTestEvent event = new CalendarTestEvent();
+        event.setCaption(caption);
+        event.setStart(start);
+        event.setEnd(end);
+
+        return event;
     }
 }

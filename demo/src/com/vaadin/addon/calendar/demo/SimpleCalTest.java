@@ -1,14 +1,13 @@
 package com.vaadin.addon.calendar.demo;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.BasicEvent;
+import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
-import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -114,7 +113,7 @@ public class SimpleCalTest extends Application {
         cal.addListener(new EventClickListener() {
 
             public void eventClick(EventClick event) {
-                MyEvent e = (MyEvent) event.getCalendarEvent();
+                CalendarEvent e = event.getCalendarEvent();
                 getMainWindow().showNotification("Event clicked",
                         e.getCaption(), Notification.POSITION_CENTERED);
             }
@@ -124,7 +123,7 @@ public class SimpleCalTest extends Application {
         cal.addListener(new EventMoveListener() {
 
             public void eventMove(MoveEvent event) {
-                MyEvent calEvent = ((MyEvent) event.getCalendarEvent());
+                BasicEvent calEvent = (BasicEvent) event.getCalendarEvent();
                 long duration = calEvent.getEnd().getTime()
                         - calEvent.getStart().getTime();
                 calEvent.setStart(event.getNewStart());
@@ -138,7 +137,7 @@ public class SimpleCalTest extends Application {
         cal.addListener(new RangeSelectListener() {
 
             public void rangeSelect(RangeSelectEvent event) {
-                MyEvent myEvent = new MyEvent("", event.getStart(), event
+                BasicEvent myEvent = getNewEvent("", event.getStart(), event
                         .getEnd());
 
                 // Create popup window and add a form in it.
@@ -152,7 +151,7 @@ public class SimpleCalTest extends Application {
                 w.center();
 
                 // Wrap the calendar event to a BeanItem and pass it to the form
-                final BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(
+                final BeanItem<BasicEvent> item = new BeanItem<BasicEvent>(
                         myEvent);
 
                 final Form form = new Form();
@@ -241,72 +240,31 @@ public class SimpleCalTest extends Application {
         w.setSizeFull();
     }
 
-    public static class MyEventProvider implements CalendarEventProvider {
+    private CalendarTestEvent getNewEvent(String caption, Date start, Date end) {
+        CalendarTestEvent event = new CalendarTestEvent();
+        event.setCaption(caption);
+        event.setStart(start);
+        event.setEnd(end);
 
-        private List<CalendarEvent> events = new ArrayList<CalendarEvent>();
+        return event;
+    }
+
+    public static class MyEventProvider extends BasicEventProvider {
 
         public MyEventProvider() {
-            events = new ArrayList<CalendarEvent>();
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(new Date());
 
             Date start = cal.getTime();
             cal.add(GregorianCalendar.HOUR, 5);
             Date end = cal.getTime();
-            events.add(new MyEvent("My event", start, end));
-        }
+            BasicEvent event = new BasicEvent();
+            event.setCaption("My Event");
+            event.setStart(start);
+            event.setEnd(end);
 
-        public void addEvent(CalendarEvent myEvent) {
-            events.add(myEvent);
-        }
-
-        public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
-            return events;
+            addEvent(event);
         }
     }
 
-    public static class MyEvent implements CalendarEvent {
-
-        private String caption;
-        private Date start;
-        private Date end;
-
-        public MyEvent(String caption, Date start, Date end) {
-            this.caption = caption;
-            this.start = start;
-            this.end = end;
-        }
-
-        public String getCaption() {
-            return caption;
-        }
-
-        public void setCaption(String caption) {
-            this.caption = caption;
-        }
-
-        public Date getEnd() {
-            return end;
-        }
-
-        public void setEnd(Date end) {
-            this.end = end;
-        }
-
-        public Date getStart() {
-            return start;
-        }
-
-        public void setStart(Date start) {
-            this.start = start;
-        }
-
-        public String getStyleName() {
-            return null;
-        }
-
-        public String getDescription() {
-            return null;
-        }
-    }
 }

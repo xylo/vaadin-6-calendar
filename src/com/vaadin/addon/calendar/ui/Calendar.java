@@ -15,14 +15,14 @@ import java.util.TimeZone;
 
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
+import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
+import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChange;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeNotifier;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
@@ -56,7 +56,7 @@ public class Calendar extends AbstractComponent implements
         CalendarComponentEvents.EventMoveNotifier,
         CalendarComponentEvents.RangeSelectNotifier,
         CalendarComponentEvents.EventResizeNotifier,
-        CalendarComponentEvents.EventChangeListener {
+        CalendarEventProvider.EventSetChangeListener {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -773,18 +773,19 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            the calendarEventProvider to set
      */
-    public void setCalendarEventProvider(CalendarEventProvider calendarEventProvider) {
+    public void setCalendarEventProvider(
+            CalendarEventProvider calendarEventProvider) {
         // remove old listener
-        if (getCalendarEventProvider() instanceof EventChangeNotifier) {
-            ((EventChangeNotifier) getCalendarEventProvider())
+        if (getCalendarEventProvider() instanceof EventSetChangeNotifier) {
+            ((EventSetChangeNotifier) getCalendarEventProvider())
                     .removeListener(this);
         }
 
         this.calendarEventProvider = calendarEventProvider;
 
         // add new listener
-        if (calendarEventProvider instanceof EventChangeNotifier) {
-            ((EventChangeNotifier) calendarEventProvider).addListener(this);
+        if (calendarEventProvider instanceof EventSetChangeNotifier) {
+            ((EventSetChangeNotifier) calendarEventProvider).addListener(this);
         }
     }
 
@@ -802,7 +803,7 @@ public class Calendar extends AbstractComponent implements
      * com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeListener#eventChange
      * (com.vaadin.addon.calendar.ui.CalendarEvents.EventChange)
      */
-    public void eventChange(EventChange changeEvent) {
+    public void eventSetChange(EventSetChange changeEvent) {
         // sanity check
         if (calendarEventProvider == changeEvent.getProvider()) {
             requestRepaint();

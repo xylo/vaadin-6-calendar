@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 import com.vaadin.addon.calendar.event.CalendarEvent;
-import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
@@ -602,45 +601,4 @@ public interface CalendarComponentEvents {
         void eventResize(EventResize event);
     }
 
-    /**
-     * Event to signal that the set of events have changed and the calendar
-     * should refresh its view from the
-     * {@link com.vaadin.addon.calendar.ui.Calendar.CalendarEventProvider CalendarEventProvider}
-     * .
-     * 
-     */
-    public class EventChange {
-
-        private CalendarEventProvider source;
-
-        public EventChange(CalendarEventProvider source) {
-            this.source = source;
-        }
-
-        /**
-         * @return the
-         *         {@link com.vaadin.addon.calendar.ui.Calendar.CalendarEventProvider
-         *         CalendarEventProvider} that has changed
-         */
-        public CalendarEventProvider getProvider() {
-            return source;
-        }
-    }
-
-    /**
-     * Listener for EventChange events.
-     */
-    public interface EventChangeListener {
-        public void eventChange(EventChange changeEvent);
-    }
-
-    /**
-     * Notifier interface for EventChange events.
-     */
-    public interface EventChangeNotifier {
-
-        void addListener(EventChangeListener listener);
-
-        void removeListener(EventChangeListener listener);
-    }
 }

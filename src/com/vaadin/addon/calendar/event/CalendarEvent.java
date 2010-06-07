@@ -50,4 +50,46 @@ public interface CalendarEvent {
      * @return Style name.
      */
     public String getStyleName();
+
+    /**
+     * Event to signal that an event has changed.
+     */
+    public class EventChange {
+
+        private CalendarEvent source;
+
+        public EventChange(CalendarEvent source) {
+            this.source = source;
+        }
+
+        /**
+         * @return the {@link com.vaadin.addon.calendar.event.CalendarEvent
+         *         CalendarEvent} that has changed
+         */
+        public CalendarEvent getCalendarEvent() {
+            return source;
+        }
+    }
+
+    /**
+     * Listener for EventSetChange events.
+     */
+    public interface EventChangeListener {
+
+        /**
+         * Called when an Event has changed.
+         */
+        public void eventChange(EventChange changeEvent);
+    }
+
+    /**
+     * Notifier interface for EventChange events.
+     */
+    public interface EventChangeNotifier {
+
+        void addListener(EventChangeListener listener);
+
+        void removeListener(EventChangeListener listener);
+    }
+
 }
