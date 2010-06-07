@@ -19,6 +19,8 @@ import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventChange;
+import com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeNotifier;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
@@ -49,7 +51,8 @@ import com.vaadin.ui.ClientWidget;
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
         CalendarEvents.NavigationNotifier, CalendarEvents.EventMoveNotifier,
-        CalendarEvents.RangeSelectNotifier, CalendarEvents.EventResizeNotifier {
+        CalendarEvents.RangeSelectNotifier, CalendarEvents.EventResizeNotifier,
+        CalendarEvents.EventChangeListener {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -80,7 +83,7 @@ public class Calendar extends AbstractComponent implements
     protected Date endDate = null;
 
     /** Event provider. */
-    protected EventProvider calendarEventProvider;
+    private EventProvider calendarEventProvider;
 
     /**
      * Internal buffer for the events that are retrieved from the event
@@ -116,7 +119,7 @@ public class Calendar extends AbstractComponent implements
      *            Event provider.
      */
     public Calendar(EventProvider calendarEventProvider) {
-        this.calendarEventProvider = calendarEventProvider;
+        this.setCalendarEventProvider(calendarEventProvider);
         setSizeFull();
     }
 
@@ -365,7 +368,7 @@ public class Calendar extends AbstractComponent implements
 
         target.endTag("days");
 
-        events = calendarEventProvider.getEvents(firstDateToShow,
+        events = getCalendarEventProvider().getEvents(firstDateToShow,
                 lastDateToShow);
         target.startTag("events");
         if (events != null) {
@@ -683,6 +686,46 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
+     * @param calendarEventProvider
+     *            the calendarEventProvider to set
+     */
+    public void setCalendarEventProvider(EventProvider calendarEventProvider) {
+        // remove old listener
+        if (getCalendarEventProvider() instanceof EventChangeNotifier) {
+            ((EventChangeNotifier) getCalendarEventProvider())
+                    .removeListener(this);
+        }
+
+        this.calendarEventProvider = calendarEventProvider;
+
+        // add new listener
+        if (calendarEventProvider instanceof EventChangeNotifier) {
+            ((EventChangeNotifier) calendarEventProvider).addListener(this);
+        }
+    }
+
+    /**
+     * @return the calendarEventProvider
+     */
+    public EventProvider getCalendarEventProvider() {
+        return calendarEventProvider;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeListener#eventChange
+     * (com.vaadin.addon.calendar.ui.CalendarEvents.EventChange)
+     */
+    public void eventChange(EventChange changeEvent) {
+        // sanity check
+        if (calendarEventProvider == changeEvent.getProvider()) {
+            requestRepaint();
+        }
+    }
+
+    /**
      * Interface for querying events. Calendar component must have EventProvider
      * implementation. This interface may be dropped in future versions. In
      * future calendar may require DateContainer or some similar container as a
@@ -782,6 +825,17 @@ public class Calendar extends AbstractComponent implements
                 EventResizeListener.eventResizeMethod);
     }
 
+    public void addListener(RangeSelectListener listener) {
+        addListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
+                listener, RangeSelectListener.rangeSelectMethod);
+
+    }
+
+    public void addListener(EventMoveListener listener) {
+        addListener(MoveEvent.EVENT_ID, MoveEvent.class, listener,
+                EventMoveListener.eventMoveMethod);
+    }
+
     public void removeListener(ForwardListener listener) {
         removeListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener);
     }
@@ -802,19 +856,8 @@ public class Calendar extends AbstractComponent implements
         removeListener(WeekClick.EVENT_ID, WeekClick.class, listener);
     }
 
-    public void addListener(EventMoveListener listener) {
-        addListener(MoveEvent.EVENT_ID, MoveEvent.class, listener,
-                EventMoveListener.eventMoveMethod);
-    }
-
     public void removeListener(EventMoveListener listener) {
         removeListener(MoveEvent.EVENT_ID, MoveEvent.class, listener);
-    }
-
-    public void addListener(RangeSelectListener listener) {
-        addListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
-                listener, RangeSelectListener.rangeSelectMethod);
-
     }
 
     public void removeListener(RangeSelectListener listener) {
