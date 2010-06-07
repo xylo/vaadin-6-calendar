@@ -69,7 +69,8 @@
 
         <mkdir dir="${result.classes}"/>
         
-		<javac destdir="${result.classes}" target="1.5" source="1.5">
+		 <javac destdir="${result.classes}" target="1.5" source="1.5"> 
+		 <!-- <javac destdir="${result.classes}" target="1.5" source="1.5" debug="true"> -->
 			<src path="src" />
 			<src path="${test.src.base}" />
 			<src path="${demo.src.base}" />

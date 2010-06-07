@@ -682,10 +682,11 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 if (h == -1) {
                     getElement().getStyle().setProperty("height", "");
                     eventContent.getStyle().setProperty("height", "");
+                } else {
+                    getElement().getStyle().setHeight(h, Unit.PX);
+                    // FIXME measure the border height (2px) from the DOM
+                    eventContent.getStyle().setHeight(h - 2, Unit.PX);
                 }
-                getElement().getStyle().setHeight(h, Unit.PX);
-                // FIXME measure the border height (2px) from the DOM
-                eventContent.getStyle().setHeight(h - 2, Unit.PX);
             }
 
             /**

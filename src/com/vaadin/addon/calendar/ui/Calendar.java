@@ -111,9 +111,17 @@ public class Calendar extends AbstractComponent implements
             .getDateInstance();
 
     /**
+     * <p>
      * Construct a Vaadin Calendar with event provider. Event provider is
      * obligatory, because calendar component will query active events through
      * it.
+     * </p>
+     * 
+     * <p>
+     * By default, Vaadin Calendar will show dates from the start of the current
+     * week to the end of the current week. Use {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)} to change this.
+     * </p>
      * 
      * @param calendarEventProvider
      *            Event provider.
@@ -180,10 +188,12 @@ public class Calendar extends AbstractComponent implements
     public void setLocale(Locale l) {
         weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
                 .getDateInstance(SimpleDateFormat.SHORT, l);
-        if (timezone != null)
+        if (timezone != null) {
             currentCalendar = new GregorianCalendar(timezone, l);
-        else
+
+        } else {
             currentCalendar = new GregorianCalendar(l);
+        }
 
         super.setLocale(l);
     }
@@ -302,9 +312,31 @@ public class Calendar extends AbstractComponent implements
     @Override
     public void paintContent(PaintTarget target) throws PaintException {
 
-        if (startDate == null || endDate == null) {
-            throw new PaintException(
-                    "Schedule cannot be painted without proper date ranges.");
+        // Make sure we have a up-to-date locale
+        setLocale(getLocale());
+
+        // If only one is null, throw exception
+        // If both are null, set defaults
+        if (startDate == null ^ endDate == null) {
+            String message = "Schedule cannot be painted without a proper date range.\n";
+            if (startDate == null) {
+                throw new PaintException(message
+                        + "You must set a start date using setStartDate(Date).");
+
+            } else {
+                throw new PaintException(message
+                        + "You must set an end date using setEndDate(Date).");
+            }
+
+        } else if (startDate == null && endDate == null) {
+            // set defaults
+            currentCalendar.setTime(new Date());
+            currentCalendar.set(GregorianCalendar.DAY_OF_WEEK, currentCalendar
+                    .getFirstDayOfWeek());
+            startDate = currentCalendar.getTime();
+
+            currentCalendar.add(GregorianCalendar.DAY_OF_WEEK, 6);
+            endDate = currentCalendar.getTime();
         }
 
         int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
