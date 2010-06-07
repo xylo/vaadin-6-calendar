@@ -441,7 +441,8 @@ public class Calendar extends AbstractComponent implements
     protected void paintEvent(int i, PaintTarget target) throws PaintException {
         CalendarEvent e = events.get(i);
         target.addAttribute("i", i);
-        target.addAttribute("caption", e.getCaption());
+        target.addAttribute("caption", (e.getCaption() == null ? "" : e
+                .getCaption()));
         target.addAttribute("dfrom", df_date.format(e.getStart()));
         target.addAttribute("dto", df_date.format(e.getEnd()));
         target.addAttribute("tfrom", df_time.format(e.getStart()));

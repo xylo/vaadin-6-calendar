@@ -264,6 +264,12 @@ public class SimpleCalTest extends Application {
             event.setEnd(end);
 
             addEvent(event);
+
+            // test empty caption event
+            BasicEvent event2 = new BasicEvent();
+            event2.setStart(start);
+            event2.setEnd(end);
+            addEvent(event2);
         }
     }
 
