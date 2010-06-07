@@ -3,6 +3,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.terminal.gwt.client.Util;
 
 public class WeeklyLongEvents extends HorizontalPanel {
 
@@ -159,8 +161,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
         public static int measureBorderWidth(DateCellContainer dc) {
             if (borderWidth == -1) {
-                borderWidth = dc.getOffsetWidth()
-                        - dc.getElement().getClientWidth();
+                borderWidth = Util.measureHorizontalBorder(dc.getElement());
             }
             return borderWidth;
         }
