@@ -3,15 +3,16 @@ package com.vaadin.addon.calendar.ui;
 import java.lang.reflect.Method;
 import java.util.Date;
 
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
-import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
 
 /**
  * interface for all source component events.
  */
-public interface CalendarEvents {
+public interface CalendarComponentEvents {
 
     /**
      * Listener interface for source event drag & drops.
@@ -40,12 +41,12 @@ public interface CalendarEvents {
      * position.
      */
     @SuppressWarnings("serial")
-    public class MoveEvent extends CalendarEvent {
+    public class MoveEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.EVENTMOVE;
 
         /** Index for the moved Schedule.Event. */
-        private Calendar.Event calendarEvent;
+        private CalendarEvent calendarEvent;
 
         /** New starting date for the moved Calendar.Event. */
         private Date newStart;
@@ -55,12 +56,12 @@ public interface CalendarEvents {
          * 
          * @param source
          *            Calendar component.
-         * @param calendarEvent
+         * @param CalendarComponentEvent
          *            Target source event.
          * @param newStart
          *            Target source event's new start date.
          */
-        public MoveEvent(Calendar source, Calendar.Event calendarEvent,
+        public MoveEvent(Calendar source, CalendarEvent calendarEvent,
                 Date newStart) {
             super(source);
 
@@ -73,7 +74,7 @@ public interface CalendarEvents {
          * 
          * @return Target source event.
          */
-        public Calendar.Event getCalendarEvent() {
+        public CalendarEvent getCalendarEvent() {
             return calendarEvent;
         }
 
@@ -132,7 +133,7 @@ public interface CalendarEvents {
      * mouse.
      */
     @SuppressWarnings("serial")
-    public class RangeSelectEvent extends CalendarEvent {
+    public class RangeSelectEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.RANGESELECT;
 
@@ -301,7 +302,7 @@ public interface CalendarEvents {
      * ForwardEvent is sent when source's forward navigation button is clicked.
      */
     @SuppressWarnings("serial")
-    public class ForwardEvent extends CalendarEvent {
+    public class ForwardEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.FORWARD;
 
@@ -337,7 +338,7 @@ public interface CalendarEvents {
      * clicked.
      */
     @SuppressWarnings("serial")
-    public class BackwardEvent extends CalendarEvent {
+    public class BackwardEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.BACKWARD;
 
@@ -372,7 +373,7 @@ public interface CalendarEvents {
      * DateClickEvent is sent when source's date is clicked.
      */
     @SuppressWarnings("serial")
-    public class DateClickEvent extends CalendarEvent {
+    public class DateClickEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.DATECLICK;
 
@@ -415,15 +416,15 @@ public interface CalendarEvents {
      * EventClick is sent when source's event is clicked.
      */
     @SuppressWarnings("serial")
-    public class EventClick extends CalendarEvent {
+    public class EventClick extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.EVENTCLICK;
 
         /** Clicked source event. */
-        private Calendar.Event calendarEvent;
+        private CalendarEvent calendarEvent;
 
         /** Target source event is needed for the EventClick. */
-        public EventClick(Calendar source, Calendar.Event calendarEvent) {
+        public EventClick(Calendar source, CalendarEvent calendarEvent) {
             super(source);
             this.calendarEvent = calendarEvent;
         }
@@ -433,7 +434,7 @@ public interface CalendarEvents {
          * 
          * @return Clicked source event.
          */
-        public Calendar.Event getCalendarEvent() {
+        public CalendarEvent getCalendarEvent() {
             return calendarEvent;
         }
     }
@@ -458,7 +459,7 @@ public interface CalendarEvents {
      * WeekClick is sent when source's week is clicked.
      */
     @SuppressWarnings("serial")
-    public class WeekClick extends CalendarEvent {
+    public class WeekClick extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.WEEKCLICK;
 
@@ -525,20 +526,20 @@ public interface CalendarEvents {
      * EventResize is sent when an event is resized
      */
     @SuppressWarnings("serial")
-    public class EventResize extends CalendarEvent {
+    public class EventResize extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.EVENTRESIZE;
 
-        private Calendar.Event calendarEvent;
+        private CalendarEvent calendarEvent;
 
         private Date startTime;
 
         private Date endTime;
 
-        public EventResize(Calendar source, Calendar.Event event,
+        public EventResize(Calendar source, CalendarEvent calendarEvent,
                 Date startTime, Date endTime) {
             super(source);
-            this.calendarEvent = event;
+            this.calendarEvent = calendarEvent;
             this.startTime = startTime;
             this.endTime = endTime;
         }
@@ -548,7 +549,7 @@ public interface CalendarEvents {
          * 
          * @return Target source event.
          */
-        public Calendar.Event getCalendarEvent() {
+        public CalendarEvent getCalendarEvent() {
             return calendarEvent;
         }
 
@@ -604,24 +605,24 @@ public interface CalendarEvents {
     /**
      * Event to signal that the set of events have changed and the calendar
      * should refresh its view from the
-     * {@link com.vaadin.addon.calendar.ui.Calendar.EventProvider EventProvider}
+     * {@link com.vaadin.addon.calendar.ui.Calendar.CalendarEventProvider CalendarEventProvider}
      * .
      * 
      */
     public class EventChange {
 
-        private EventProvider source;
+        private CalendarEventProvider source;
 
-        public EventChange(EventProvider source) {
+        public EventChange(CalendarEventProvider source) {
             this.source = source;
         }
 
         /**
          * @return the
-         *         {@link com.vaadin.addon.calendar.ui.Calendar.EventProvider
-         *         EventProvider} that has changed
+         *         {@link com.vaadin.addon.calendar.ui.Calendar.CalendarEventProvider
+         *         CalendarEventProvider} that has changed
          */
-        public EventProvider getProvider() {
+        public CalendarEventProvider getProvider() {
             return source;
         }
     }

@@ -2,14 +2,14 @@ package com.vaadin.addon.calendar.demo;
 
 import java.util.Date;
 
-import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.event.CalendarEvent;
 
 /**
  * Test Calendar.Event implementation.
  * 
  * @see com.vaadin.addon.calendar.test.ui.Calendar.Event
  */
-public class CalendarTestEvent implements Calendar.Event {
+public class CalendarTestEvent implements CalendarEvent {
 
     private Date start;
     private Date end;

@@ -4,9 +4,9 @@ import com.vaadin.ui.Component;
 
 /** All Calendar events extends this class. */
 @SuppressWarnings("serial")
-public class CalendarEvent extends Component.Event {
+public class CalendarComponentEvent extends Component.Event {
 
-    public CalendarEvent(Component source) {
+    public CalendarComponentEvent(Component source) {
         super(source);
     }
 

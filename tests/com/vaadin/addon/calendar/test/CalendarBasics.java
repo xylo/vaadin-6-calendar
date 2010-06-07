@@ -6,17 +6,19 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
 
 public class CalendarBasics {
 
     @Test
     public void dummy() {
-        Calendar s = new Calendar(new Calendar.EventProvider() {
+        Calendar s = new Calendar(new CalendarEventProvider() {
 
-            public List<Calendar.Event> getEvents(Date fromStartDate,
+            public List<CalendarEvent> getEvents(Date fromStartDate,
                     Date toEndDate) {
-                return new ArrayList<Calendar.Event>();
+                return new ArrayList<CalendarEvent>();
             }
 
         });

@@ -7,23 +7,24 @@ import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.Event;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
@@ -151,7 +152,7 @@ public class SimpleCalTest extends Application {
                 w.center();
 
                 // Wrap the calendar event to a BeanItem and pass it to the form
-                final BeanItem<Calendar.Event> item = new BeanItem<Calendar.Event>(
+                final BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(
                         myEvent);
 
                 final Form form = new Form();
@@ -240,12 +241,12 @@ public class SimpleCalTest extends Application {
         w.setSizeFull();
     }
 
-    public static class MyEventProvider implements Calendar.EventProvider {
+    public static class MyEventProvider implements CalendarEventProvider {
 
-        private List<Event> events = new ArrayList<Event>();
+        private List<CalendarEvent> events = new ArrayList<CalendarEvent>();
 
         public MyEventProvider() {
-            events = new ArrayList<Event>();
+            events = new ArrayList<CalendarEvent>();
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(new Date());
 
@@ -255,16 +256,16 @@ public class SimpleCalTest extends Application {
             events.add(new MyEvent("My event", start, end));
         }
 
-        public void addEvent(Event myEvent) {
+        public void addEvent(CalendarEvent myEvent) {
             events.add(myEvent);
         }
 
-        public List<Event> getEvents(Date startDate, Date endDate) {
+        public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
             return events;
         }
     }
 
-    public static class MyEvent implements Calendar.Event {
+    public static class MyEvent implements CalendarEvent {
 
         private String caption;
         private Date start;

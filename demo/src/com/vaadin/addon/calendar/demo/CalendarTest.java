@@ -10,28 +10,29 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.CalendarEvents;
-import com.vaadin.addon.calendar.ui.Calendar.Event;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventResize;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventResizeListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -56,8 +57,8 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
 /** Calendar component test application */
-public class CalendarTest extends Application implements
-        Calendar.EventProvider, CalendarEvents.EventChangeNotifier {
+public class CalendarTest extends Application implements CalendarEventProvider,
+        CalendarComponentEvents.EventChangeNotifier {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -108,9 +109,9 @@ public class CalendarTest extends Application implements
 
     private Mode viewMode = Mode.MONTH;
 
-    private List<Calendar.Event> dataSource = new ArrayList<Calendar.Event>();
+    private List<CalendarEvent> dataSource = new ArrayList<CalendarEvent>();
 
-    private List<CalendarEvents.EventChangeListener> changeListeners = new LinkedList<CalendarEvents.EventChangeListener>();
+    private List<CalendarComponentEvents.EventChangeListener> changeListeners = new LinkedList<CalendarComponentEvents.EventChangeListener>();
 
     private Button addNewEvent;
 
@@ -583,7 +584,7 @@ public class CalendarTest extends Application implements
         showEventPopup(createNewEvent(start, end), true);
     }
 
-    private void applyEventMove(Calendar.Event event, Date newFromDatetime) {
+    private void applyEventMove(CalendarEvent event, Date newFromDatetime) {
         if (event instanceof CalendarTestEvent) {
             CalendarTestEvent e = (CalendarTestEvent) event;
             /* Update event dates */
@@ -595,7 +596,7 @@ public class CalendarTest extends Application implements
         }
     }
 
-    private void applyEventResize(Event event, Date newStartTime,
+    private void applyEventResize(CalendarEvent event, Date newStartTime,
             Date newEndTime) {
         if (event instanceof CalendarTestEvent) {
             ((CalendarTestEvent) event).setStart(newStartTime);
@@ -603,7 +604,7 @@ public class CalendarTest extends Application implements
         }
     }
 
-    private void showEventPopup(Calendar.Event event, boolean newEvent) {
+    private void showEventPopup(CalendarEvent event, boolean newEvent) {
         if (event == null) {
             return;
         }
@@ -686,10 +687,10 @@ public class CalendarTest extends Application implements
         applyEventButton.setEnabled(!calendarComponent.isReadOnly());
     }
 
-    private void updateCalendarEventForm(Calendar.Event event) {
-        // Lets create a Calendar.Event BeanItem and pass it to the form's data
+    private void updateCalendarEventForm(CalendarEvent event) {
+        // Lets create a CalendarEvent BeanItem and pass it to the form's data
         // source.
-        BeanItem<Calendar.Event> item = new BeanItem<Calendar.Event>(event);
+        BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(event);
         scheduleEventForm.setWriteThrough(false);
         scheduleEventForm.setItemDataSource(item);
         scheduleEventForm.setFormFieldFactory(new FormFieldFactory() {
@@ -754,7 +755,7 @@ public class CalendarTest extends Application implements
                 "end", "caption", "where", "description", "styleName" });
     }
 
-    private Calendar.Event createNewEvent(Date startDate, Date endDate) {
+    private CalendarEvent createNewEvent(Date startDate, Date endDate) {
 
         CalendarTestEvent event = new CalendarTestEvent("", startDate, endDate);
         event.setStyleName("color1");
@@ -763,7 +764,7 @@ public class CalendarTest extends Application implements
 
     /* Removes the event from the data source and fires change event. */
     private void deleteCalendarEvent() {
-        Calendar.Event event = getFormCalendarEvent();
+        CalendarEvent event = getFormCalendarEvent();
         if (dataSource.contains(event)) {
             dataSource.remove(event);
         }
@@ -774,7 +775,7 @@ public class CalendarTest extends Application implements
     /* Adds/updates the event in the data source and fires change event. */
     private void commitCalendarEvent() {
         scheduleEventForm.commit();
-        Calendar.Event event = getFormCalendarEvent();
+        CalendarEvent event = getFormCalendarEvent();
         if (!dataSource.contains(event)) {
             dataSource.add(event);
         }
@@ -786,9 +787,9 @@ public class CalendarTest extends Application implements
     }
 
     private void fireEventChange() {
-        CalendarEvents.EventChange changeEvent = new CalendarEvents.EventChange(
+        CalendarComponentEvents.EventChange changeEvent = new CalendarComponentEvents.EventChange(
                 this);
-        for (CalendarEvents.EventChangeListener listener : changeListeners) {
+        for (CalendarComponentEvents.EventChangeListener listener : changeListeners) {
             listener.eventChange(changeEvent);
         }
     }
@@ -799,10 +800,10 @@ public class CalendarTest extends Application implements
     }
 
     @SuppressWarnings("unchecked")
-    private Calendar.Event getFormCalendarEvent() {
-        BeanItem<Calendar.Event> item = (BeanItem<Calendar.Event>) scheduleEventForm
+    private CalendarEvent getFormCalendarEvent() {
+        BeanItem<CalendarEvent> item = (BeanItem<CalendarEvent>) scheduleEventForm
                 .getItemDataSource();
-        Calendar.Event event = item.getBean();
+        CalendarEvent event = item.getBean();
         return event;
     }
 
@@ -956,13 +957,13 @@ public class CalendarTest extends Application implements
      * (non-Javadoc)
      * 
      * @see
-     * com.vaadin.addon.calendar.test.ui.Calendar.EventProvider#getEvents(java
+     * com.vaadin.addon.calendar.test.ui.CalendarEventProvider#getEvents(java
      * .util .Date, java.util.Date)
      */
-    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
-        ArrayList<Calendar.Event> activeEvents = new ArrayList<Calendar.Event>();
+    public List<CalendarEvent> getEvents(Date fromStartDate, Date toEndDate) {
+        ArrayList<CalendarEvent> activeEvents = new ArrayList<CalendarEvent>();
 
-        for (Calendar.Event ev : dataSource) {
+        for (CalendarEvent ev : dataSource) {
             long from = fromStartDate.getTime();
             long to = toEndDate.getTime();
 

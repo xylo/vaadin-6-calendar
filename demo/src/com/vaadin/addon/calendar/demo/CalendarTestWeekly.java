@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -21,7 +22,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
-public class CalendarTestWeekly extends Application implements EventProvider {
+public class CalendarTestWeekly extends Application implements CalendarEventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -123,10 +124,10 @@ public class CalendarTestWeekly extends Application implements EventProvider {
         vl.setExpandRatio(calendarComponent, 1);
     }
 
-    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
+    public List<CalendarEvent> getEvents(Date fromStartDate, Date toEndDate) {
         calendar.setTime(fromStartDate);
         calendar.add(GregorianCalendar.DATE, 1);
-        ArrayList<Calendar.Event> e = new ArrayList<Calendar.Event>();
+        ArrayList<CalendarEvent> e = new ArrayList<CalendarEvent>();
         CalendarTestEvent event = new CalendarTestEvent("Phase1",
                 fromStartDate, calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");

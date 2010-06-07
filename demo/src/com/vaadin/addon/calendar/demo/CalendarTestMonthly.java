@@ -7,8 +7,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import com.vaadin.Application;
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.Calendar.EventProvider;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -16,7 +17,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 
-public class CalendarTestMonthly extends Application implements EventProvider {
+public class CalendarTestMonthly extends Application implements CalendarEventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -105,17 +106,17 @@ public class CalendarTestMonthly extends Application implements EventProvider {
         vl.setExpandRatio(calendarComponent, 1);
     }
 
-    public List<Calendar.Event> getEvents(Date fromStartDate, Date toEndDate) {
+    public List<CalendarEvent> getEvents(Date fromStartDate, Date toEndDate) {
         // return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
         return getEventsOverlappingForMonthlyTest(fromStartDate, toEndDate);
     }
 
-    private List<Calendar.Event> getEventsOverlappingForMonthlyTest(
+    private List<CalendarEvent> getEventsOverlappingForMonthlyTest(
             Date fromStartDate, Date toEndDate) {
         calendar.setTime(fromStartDate);
         calendar.add(GregorianCalendar.DATE, 5);
 
-        List<Calendar.Event> e = new ArrayList<Calendar.Event>();
+        List<CalendarEvent> e = new ArrayList<CalendarEvent>();
 
         CalendarTestEvent event = new CalendarTestEvent("Phase1",
                 fromStartDate, calendar.getTime());

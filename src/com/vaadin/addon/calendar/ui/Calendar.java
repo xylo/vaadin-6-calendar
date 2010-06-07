@@ -13,26 +13,28 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.BackwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.DateClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventChange;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventChangeNotifier;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventResize;
-import com.vaadin.addon.calendar.ui.CalendarEvents.EventResizeListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.MoveEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarEvents.RangeSelectListener;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChange;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeNotifier;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -50,9 +52,11 @@ import com.vaadin.ui.ClientWidget;
  */
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
-        CalendarEvents.NavigationNotifier, CalendarEvents.EventMoveNotifier,
-        CalendarEvents.RangeSelectNotifier, CalendarEvents.EventResizeNotifier,
-        CalendarEvents.EventChangeListener {
+        CalendarComponentEvents.NavigationNotifier,
+        CalendarComponentEvents.EventMoveNotifier,
+        CalendarComponentEvents.RangeSelectNotifier,
+        CalendarComponentEvents.EventResizeNotifier,
+        CalendarComponentEvents.EventChangeListener {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -83,13 +87,13 @@ public class Calendar extends AbstractComponent implements
     protected Date endDate = null;
 
     /** Event provider. */
-    private EventProvider calendarEventProvider;
+    private CalendarEventProvider calendarEventProvider;
 
     /**
      * Internal buffer for the events that are retrieved from the event
      * provider.
      */
-    private List<Calendar.Event> events;
+    private List<CalendarEvent> events;
 
     /** Date format that will be used in the UIDL for dates. */
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
@@ -126,7 +130,7 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            Event provider.
      */
-    public Calendar(EventProvider calendarEventProvider) {
+    public Calendar(CalendarEventProvider calendarEventProvider) {
         this.setCalendarEventProvider(calendarEventProvider);
         setSizeFull();
     }
@@ -435,7 +439,7 @@ public class Calendar extends AbstractComponent implements
      *            PaintTarget
      */
     protected void paintEvent(int i, PaintTarget target) throws PaintException {
-        Calendar.Event e = events.get(i);
+        CalendarEvent e = events.get(i);
         target.addAttribute("i", i);
         target.addAttribute("caption", e.getCaption());
         target.addAttribute("dfrom", df_date.format(e.getStart()));
@@ -769,7 +773,7 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            the calendarEventProvider to set
      */
-    public void setCalendarEventProvider(EventProvider calendarEventProvider) {
+    public void setCalendarEventProvider(CalendarEventProvider calendarEventProvider) {
         // remove old listener
         if (getCalendarEventProvider() instanceof EventChangeNotifier) {
             ((EventChangeNotifier) getCalendarEventProvider())
@@ -787,7 +791,7 @@ public class Calendar extends AbstractComponent implements
     /**
      * @return the calendarEventProvider
      */
-    public EventProvider getCalendarEventProvider() {
+    public CalendarEventProvider getCalendarEventProvider() {
         return calendarEventProvider;
     }
 
@@ -803,76 +807,6 @@ public class Calendar extends AbstractComponent implements
         if (calendarEventProvider == changeEvent.getProvider()) {
             requestRepaint();
         }
-    }
-
-    /**
-     * Interface for querying events. Calendar component must have EventProvider
-     * implementation. This interface may be dropped in future versions. In
-     * future calendar may require DateContainer or some similar container as a
-     * data source.
-     */
-    public interface EventProvider {
-        /**
-         * Gets all available events in the target date range between startDate
-         * and endDate.
-         * 
-         * @param startDate
-         *            Start date
-         * @param endDate
-         *            End date
-         * @return List of events
-         */
-        public List<Calendar.Event> getEvents(Date startDate, Date endDate);
-    }
-
-    /**
-     * Event in the calendar. Customize your own event by implementing this
-     * interface.<br/>
-     * <li>Start, end and caption fields are mandatory. <li>In "allDay" events
-     * longer than one day, starting and ending clock times are omitted in UI
-     * and only dates are shown.<li>An event with a same start and end date with
-     * zero length time range will be considered as a single "allDay" event.
-     */
-    public interface Event {
-
-        /**
-         * Gets start date of event.
-         * 
-         * @return Start date.
-         */
-        public Date getStart();
-
-        /**
-         * Get end date of event.
-         * 
-         * @return End date;
-         */
-        public Date getEnd();
-
-        /**
-         * Gets caption of event.
-         * 
-         * @return Caption text
-         */
-        public String getCaption();
-
-        /**
-         * Gets description of event.
-         * 
-         * @return Description text.
-         */
-        public String getDescription();
-
-        /**
-         * Gets style name of event. In the client, style name will be set to
-         * the event's element class name and can be styled by
-         * CSS.</br></br>Styling example:</br> <code>Java code: </br>
-         * event.setStyleName("color1");</br></br>CSS:</br>.v-calendar-event-color1 {</br>
-         * &nbsp;&nbsp;&nbsp;background-color: #9effae;</br>}</code>
-         * 
-         * @return Style name.
-         */
-        public String getStyleName();
     }
 
     public void addListener(ForwardListener listener) {
@@ -895,7 +829,7 @@ public class Calendar extends AbstractComponent implements
                 EventClickListener.eventClickMethod);
     }
 
-    public void addListener(CalendarEvents.WeekClickListener listener) {
+    public void addListener(WeekClickListener listener) {
         addListener(WeekClick.EVENT_ID, WeekClick.class, listener,
                 WeekClickListener.weekClickMethod);
     }
