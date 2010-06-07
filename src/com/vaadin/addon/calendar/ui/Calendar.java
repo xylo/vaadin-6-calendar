@@ -367,13 +367,22 @@ public class Calendar extends AbstractComponent implements
 
         Date firstDateToShow = null;
         Date lastDateToShow = null;
-        // If more than week, use monthly view and get startweek and endweek.
-        // Example if views daterange is from tuesday to next weeks
+
+        // If the duration is more than week, use monthly view and get startweek
+        // and endweek. Example if views daterange is from tuesday to next weeks
         // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
         // monday
+
+        // If the duration is one day, we expand the start and end to cover the
+        // whole day.
         if (durationInDays > 7) {
             firstDateToShow = getFirstDateForWeek(startDate);
             lastDateToShow = getLastDateForWeek(endDate);
+
+        } else if (durationInDays == 1) {
+            firstDateToShow = getStartOfDay(startDate);
+            lastDateToShow = getEndOfDay(endDate);
+
         } else {
             firstDateToShow = (Date) startDate.clone();
             lastDateToShow = (Date) endDate.clone();
@@ -714,6 +723,45 @@ public class Calendar extends AbstractComponent implements
             currentCalendar.add(java.util.Calendar.DATE, 1);
         }
         currentCalendar.add(java.util.Calendar.DATE, -1);
+        return currentCalendar.getTime();
+    }
+
+    /**
+     * Get the end time of the day for the given date
+     * 
+     * @param date
+     * @return
+     */
+    public Date getEndOfDay(Date date) {
+        currentCalendar.setTime(date);
+        currentCalendar.set(GregorianCalendar.MILLISECOND, currentCalendar
+                .getActualMaximum(GregorianCalendar.MILLISECOND));
+        currentCalendar.set(GregorianCalendar.SECOND, currentCalendar
+                .getActualMaximum(GregorianCalendar.SECOND));
+        currentCalendar.set(GregorianCalendar.MINUTE, currentCalendar
+                .getActualMaximum(GregorianCalendar.MINUTE));
+        currentCalendar.set(GregorianCalendar.HOUR, currentCalendar
+                .getActualMaximum(GregorianCalendar.HOUR));
+        currentCalendar.set(GregorianCalendar.HOUR_OF_DAY, currentCalendar
+                .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
+
+        return currentCalendar.getTime();
+    }
+
+    /**
+     * Get the start time of the day for the given date
+     * 
+     * @param date
+     * @return
+     */
+    public Date getStartOfDay(Date date) {
+        currentCalendar.setTime(date);
+        currentCalendar.set(GregorianCalendar.MILLISECOND, 0);
+        currentCalendar.set(GregorianCalendar.SECOND, 0);
+        currentCalendar.set(GregorianCalendar.MINUTE, 0);
+        currentCalendar.set(GregorianCalendar.HOUR, 0);
+        currentCalendar.set(GregorianCalendar.HOUR_OF_DAY, 0);
+
         return currentCalendar.getTime();
     }
 
