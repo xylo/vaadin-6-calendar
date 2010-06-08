@@ -203,12 +203,6 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         @Override
-        public void onBrowserEvent(Event event) {
-            super.onBrowserEvent(event);
-
-        }
-
-        @Override
         protected void onUnload() {
             super.onUnload();
         }
@@ -616,6 +610,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private com.google.gwt.user.client.Element bottomResizeBar;
             private Element clickTarget;
             private Integer eventIndex;
+            private boolean eventMoveAllowed;
 
             public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
@@ -657,6 +652,9 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 sinkEvents(VTooltip.TOOLTIP_EVENTS);
                 eventIndex = event.getIndex();
+
+                eventMoveAllowed = calendar.getClient().hasEventListeners(
+                        calendar, CalendarEventId.EVENTMOVE);
             }
 
             @Override
@@ -720,20 +718,24 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             public void onMouseDown(MouseDownEvent event) {
                 clickTarget = Element.as(event.getNativeEvent()
                         .getEventTarget());
-                moveRegistration = addMouseMoveHandler(this);
-                startX = event.getClientX();
-                startY = event.getClientY();
-                startYrelative = event.getRelativeY(caption) % HALFHOUR_IN_PX;
-                startXrelative = (event.getRelativeX(weekGrid.getElement()) - weekGrid.timebar
-                        .getOffsetWidth())
-                        % getDateCellWidth();
-                mouseMoveStarted = false;
-                Style s = getElement().getStyle();
-                startDatetimeFrom = (Date) calendarEvent.getStartTime().clone();
-                startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
-                s.setZIndex(1000);
-                Event.setCapture(getElement());
-                event.getNativeEvent().stopPropagation();
+                if (eventMoveAllowed || clickTargetsResize()) {
+                    moveRegistration = addMouseMoveHandler(this);
+                    startX = event.getClientX();
+                    startY = event.getClientY();
+                    startYrelative = event.getRelativeY(caption)
+                            % HALFHOUR_IN_PX;
+                    startXrelative = (event.getRelativeX(weekGrid.getElement()) - weekGrid.timebar
+                            .getOffsetWidth())
+                            % getDateCellWidth();
+                    mouseMoveStarted = false;
+                    Style s = getElement().getStyle();
+                    startDatetimeFrom = (Date) calendarEvent.getStartTime()
+                            .clone();
+                    startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
+                    s.setZIndex(1000);
+                    Event.setCapture(getElement());
+                    event.getNativeEvent().stopPropagation();
+                }
 
                 // make sure the right cursor is always displayed
                 if (clickTargetsResize()) {
@@ -848,7 +850,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 Date to = calendarEvent.getEndTime();
                 long duration = to.getTime() - from.getTime();
 
-                if (!clickTargetsResize()) {
+                if (!clickTargetsResize() && eventMoveAllowed) {
                     long daysMs = dayDiff * VCalendar.DAYINMILLIS;
                     from.setTime(startDatetimeFrom.getTime() + daysMs);
                     from.setTime(from.getTime()

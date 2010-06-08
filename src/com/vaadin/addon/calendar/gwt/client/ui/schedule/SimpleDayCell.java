@@ -67,6 +67,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     private Widget clickedWidget;
     private HandlerRegistration bottomSpacerMouseDownHandler;
     private boolean scrollable = false;
+    private boolean eventMoveAllowed;
 
     public SimpleDayCell(VCalendar calendar, int row, int cell) {
         this.calendar = calendar;
@@ -82,6 +83,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         add(bottomspacer);
         caption.addMouseDownHandler(this);
         caption.addMouseUpHandler(this);
+
+        eventMoveAllowed = calendar.getClient().hasEventListeners(calendar,
+                CalendarEventId.EVENTMOVE);
     }
 
     @Override
@@ -385,7 +389,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
             }
             reDraw(true);
 
-        } else if (w instanceof MonthEventLabel) {
+        } else if (w instanceof MonthEventLabel && eventMoveAllowed) {
             monthEventMouseDown = true;
 
             if (w instanceof MonthEventLabel)

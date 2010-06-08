@@ -646,6 +646,9 @@ public class Calendar extends AbstractComponent implements
 
     protected void fireEventMove(int index, Date newFromDatetime) {
         fireEvent(new MoveEvent(this, events.get(index), newFromDatetime));
+
+        // make sure the result of the move event is painted back
+        requestRepaint();
     }
 
     protected void fireWeekClick(int week, int year) {
@@ -666,6 +669,9 @@ public class Calendar extends AbstractComponent implements
 
     protected void fireEventResize(int index, Date startTime, Date endTime) {
         fireEvent(new EventResize(this, events.get(index), startTime, endTime));
+
+        // make sure the result of the resize event is painted back
+        requestRepaint();
     }
 
     /**
