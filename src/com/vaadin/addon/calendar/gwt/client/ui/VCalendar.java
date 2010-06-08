@@ -21,6 +21,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.TooltipInfo;
 import com.vaadin.terminal.gwt.client.UIDL;
 
 public class VCalendar extends Composite implements Paintable {
@@ -365,7 +366,7 @@ public class VCalendar extends Composite implements Paintable {
             String dateto = eventUIDL.getStringAttribute("dto");
             String timefrom = eventUIDL.getStringAttribute("tfrom");
             String timeto = eventUIDL.getStringAttribute("tto");
-            String desc = eventUIDL.getStringAttribute("desc");
+            String desc = eventUIDL.getStringAttribute("description");
             String style = eventUIDL.getStringAttribute("extracss");
 
             CalendarEvent e = new CalendarEvent();
@@ -383,8 +384,25 @@ public class VCalendar extends Composite implements Paintable {
             e.setFormat24h(format);
 
             events.add(e);
+
+            registerEventToolTip(e);
         }
         return events;
+    }
+
+    /**
+     * Register the description of the event as a tooltip for this paintable.
+     * This way, any event displaying widget can use the event index as a key to
+     * display the tooltip.
+     */
+    private void registerEventToolTip(CalendarEvent e) {
+        if (e.getDescription() != null && !"".equals(e.getDescription())) {
+            TooltipInfo info = new TooltipInfo(e.getDescription());
+            client.registerTooltip(this, e.getIndex(), info);
+
+        } else {
+            client.registerTooltip(this, e.getIndex(), null);
+        }
     }
 
     @SuppressWarnings("deprecation")

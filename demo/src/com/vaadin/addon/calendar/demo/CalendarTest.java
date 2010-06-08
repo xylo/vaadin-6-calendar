@@ -138,6 +138,7 @@ public class CalendarTest extends Application {
         Date end = calendarComponent.getLastDateForWeek(new Date());
         CalendarTestEvent event = getNewEvent("Whole week event", start, end);
         event.setStyleName("color4");
+        event.setDescription("Description for the whole week event.");
         dataSource.addEvent(event);
 
         // Add a allday event
@@ -169,6 +170,8 @@ public class CalendarTest extends Application {
         event = getNewEvent("Appointment", start, end);
         event.setWhere("Office");
         event.setStyleName("color1");
+        event
+                .setDescription("A longer description, which should display correctly.");
         dataSource.addEvent(event);
 
         calendar.add(GregorianCalendar.DATE, 1);

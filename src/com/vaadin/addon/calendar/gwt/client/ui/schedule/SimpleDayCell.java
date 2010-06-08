@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.terminal.gwt.client.VTooltip;
 
 /**
  * A class representing a single cell within the calendar in month-view
@@ -221,6 +222,8 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         eventDiv.addStyleDependentName("month");
         eventDiv.addMouseDownHandler(this);
         eventDiv.addMouseUpHandler(this);
+        eventDiv.setCalendar(calendar);
+        eventDiv.setEventIndex(e.getIndex());
 
         if (timeEvent) {
             eventDiv.setTimeSpecificEvent(true);
@@ -560,9 +563,20 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     public static class MonthEventLabel extends HTML {
 
         private boolean timeSpecificEvent = false;
+        private Integer eventIndex;
+        private VCalendar calendar;
 
         public MonthEventLabel() {
             setStylePrimaryName("v-calendar-event");
+            sinkEvents(VTooltip.TOOLTIP_EVENTS);
+        }
+
+        public void setEventIndex(int index) {
+            eventIndex = index;
+        }
+
+        public void setCalendar(VCalendar calendar) {
+            this.calendar = calendar;
         }
 
         public boolean isTimeSpecificEvent() {
@@ -571,6 +585,15 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
         public void setTimeSpecificEvent(boolean timeSpecificEvent) {
             this.timeSpecificEvent = timeSpecificEvent;
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+            if (calendar.getClient() != null) {
+                calendar.getClient().handleTooltipEvent(event, calendar,
+                        eventIndex);
+            }
         }
     }
 

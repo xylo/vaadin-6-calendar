@@ -36,6 +36,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.terminal.gwt.client.DateTimeService;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.VTooltip;
 
 public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
@@ -614,6 +615,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private com.google.gwt.user.client.Element topResizeBar;
             private com.google.gwt.user.client.Element bottomResizeBar;
             private Element clickTarget;
+            private Integer eventIndex;
 
             public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
@@ -652,6 +654,19 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 addMouseDownHandler(this);
                 addMouseUpHandler(this);
+
+                sinkEvents(VTooltip.TOOLTIP_EVENTS);
+                eventIndex = event.getIndex();
+            }
+
+            @Override
+            public void onBrowserEvent(Event event) {
+                super.onBrowserEvent(event);
+                VCalendar calendar = weekGrid.getCalendar();
+                if (calendar.getClient() != null) {
+                    calendar.getClient().handleTooltipEvent(event, calendar,
+                            eventIndex);
+                }
             }
 
             public void updatePosition(long startFromMinutes,

@@ -3,17 +3,18 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.VTooltip;
 
 public class WeeklyLongEvents extends HorizontalPanel {
 
@@ -69,6 +70,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
             eventLabel.setStylePrimaryName("v-calendar-event");
             if (comp >= 0 && comp2 <= 0) {
                 eventLabel.setEvent(calendarEvent);
+                eventLabel.setCalendar(calendar);
 
                 eventLabel.addStyleDependentName("all-day");
                 if (comp == 0) {
@@ -234,11 +236,21 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     public static class DateCell extends HTML {
         private Date date;
-        private CalendarEvent event;
+        private CalendarEvent calendarEvent;
+        private VCalendar calendar;
 
         public DateCell() {
-            // setStylePrimaryName("v-calendar-event");
-            // addStyleDependentName("all-day");
+            sinkEvents(VTooltip.TOOLTIP_EVENTS);
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+
+            if (calendar.getClient() != null) {
+                calendar.getClient().handleTooltipEvent(event, calendar,
+                        calendarEvent.getIndex());
+            }
         }
 
         public void setDate(Date date) {
@@ -250,12 +262,19 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
 
         public void setEvent(CalendarEvent event) {
-            this.event = event;
+            this.calendarEvent = event;
         }
 
         public CalendarEvent getEvent() {
-            return event;
+            return calendarEvent;
         }
 
+        public void setCalendar(VCalendar calendar) {
+            this.calendar = calendar;
+        }
+
+        public VCalendar getCalendar() {
+            return calendar;
+        }
     }
 }
