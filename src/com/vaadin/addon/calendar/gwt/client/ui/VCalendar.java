@@ -26,6 +26,27 @@ import com.vaadin.terminal.gwt.client.UIDL;
 
 public class VCalendar extends Composite implements Paintable {
 
+    public static final String ATTR_WEEK = "w";
+    public static final String ATTR_DOW = "dow";
+    public static final String ATTR_FDATE = "fdate";
+    public static final String ATTR_DATE = "date";
+    public static final String ATTR_STYLE = "extracss";
+    public static final String ATTR_DESCRIPTION = "desc";
+    public static final String ATTR_TIMETO = "tto";
+    public static final String ATTR_TIMEFROM = "tfrom";
+    public static final String ATTR_DATETO = "dto";
+    public static final String ATTR_DATEFROM = "dfrom";
+    public static final String ATTR_CAPTION = "caption";
+    public static final String ATTR_INDEX = "i";
+    public static final String ATTR_SCROLL = "scroll";
+    public static final String ATTR_FDOW = "fdow";
+    public static final String ATTR_NOW = "now";
+    public static final String ATTR_READONLY = "readonly";
+    public static final String ATTR_HIDE_WEEKENDS = "hideWeekends";
+    public static final String ATTR_MONTH_NAMES = "mNames";
+    public static final String ATTR_DAY_NAMES = "dNames";
+    public static final String ATTR_FORMAT24H = "format24h";
+
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * 60 * 1000;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;
@@ -90,12 +111,12 @@ public class VCalendar extends Composite implements Paintable {
         // user interaction later
         this.client = client;
         PID = uidl.getId();
-        format = uidl.getBooleanAttribute("format24h");
-        dayNames = uidl.getStringArrayAttribute("dayNames");
-        monthNames = uidl.getStringArrayAttribute("monthNames");
-        hideWeekends = uidl.getBooleanAttribute("hideWeekends");
-        if (uidl.hasAttribute("readonly")) {
-            readOnly = uidl.getBooleanAttribute("readonly");
+        format = uidl.getBooleanAttribute(ATTR_FORMAT24H);
+        dayNames = uidl.getStringArrayAttribute(ATTR_DAY_NAMES);
+        monthNames = uidl.getStringArrayAttribute(ATTR_MONTH_NAMES);
+        hideWeekends = uidl.getBooleanAttribute(ATTR_HIDE_WEEKENDS);
+        if (uidl.hasAttribute(ATTR_READONLY)) {
+            readOnly = uidl.getBooleanAttribute(ATTR_READONLY);
         }
 
         UIDL daysUidl = uidl.getChildUIDL(0);
@@ -114,8 +135,9 @@ public class VCalendar extends Composite implements Paintable {
     }
 
     private void updateMonthView(UIDL uidl, UIDL daysUidl) {
-        int firstDayOfWeek = uidl.getIntAttribute("fdow");
-        Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
+        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
+        Date today = dateformat_datetime.parse(uidl
+                .getStringAttribute(ATTR_NOW));
 
         if (hideWeekends) {
             nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
@@ -143,8 +165,9 @@ public class VCalendar extends Composite implements Paintable {
     }
 
     private void updateWeekView(UIDL uidl, UIDL daysUidl) {
-        int scroll = uidl.getIntVariable("scroll");
-        Date today = dateformat_datetime.parse(uidl.getStringAttribute("now"));
+        int scroll = uidl.getIntVariable(ATTR_SCROLL);
+        Date today = dateformat_datetime.parse(uidl
+                .getStringAttribute(ATTR_NOW));
 
         monthGrid = null;
         Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
@@ -360,14 +383,14 @@ public class VCalendar extends Composite implements Paintable {
         for (int i = 0; i < eventCount; i++) {
             UIDL eventUIDL = childUIDL.getChildUIDL(i);
 
-            int index = eventUIDL.getIntAttribute("i");
-            String caption = eventUIDL.getStringAttribute("caption");
-            String datefrom = eventUIDL.getStringAttribute("dfrom");
-            String dateto = eventUIDL.getStringAttribute("dto");
-            String timefrom = eventUIDL.getStringAttribute("tfrom");
-            String timeto = eventUIDL.getStringAttribute("tto");
-            String desc = eventUIDL.getStringAttribute("description");
-            String style = eventUIDL.getStringAttribute("extracss");
+            int index = eventUIDL.getIntAttribute(ATTR_INDEX);
+            String caption = eventUIDL.getStringAttribute(ATTR_CAPTION);
+            String datefrom = eventUIDL.getStringAttribute(ATTR_DATEFROM);
+            String dateto = eventUIDL.getStringAttribute(ATTR_DATETO);
+            String timefrom = eventUIDL.getStringAttribute(ATTR_TIMEFROM);
+            String timeto = eventUIDL.getStringAttribute(ATTR_TIMETO);
+            String desc = eventUIDL.getStringAttribute(ATTR_DESCRIPTION);
+            String style = eventUIDL.getStringAttribute(ATTR_STYLE);
 
             CalendarEvent e = new CalendarEvent();
 
@@ -418,10 +441,11 @@ public class VCalendar extends Composite implements Paintable {
         weekGrid.setReadOnly(readOnly);
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
-            String date = dayUidl.getStringAttribute("date");
-            String localized_date_format = dayUidl.getStringAttribute("fdate");
+            String date = dayUidl.getStringAttribute(ATTR_DATE);
+            String localized_date_format = dayUidl
+                    .getStringAttribute(ATTR_FDATE);
             Date d = dateformat_date.parse(date);
-            int dayOfWeek = dayUidl.getIntAttribute("dow");
+            int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
             if (hideWeekends && (dayOfWeek == 1 || dayOfWeek == 7)) {
                 continue;
             }
@@ -452,10 +476,10 @@ public class VCalendar extends Composite implements Paintable {
         int pos = 0;
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
-            String date = dayUidl.getStringAttribute("date");
+            String date = dayUidl.getStringAttribute(ATTR_DATE);
             Date d = dateformat_date.parse(date);
-            int dayOfWeek = dayUidl.getIntAttribute("dow");
-            int week = dayUidl.getIntAttribute("w");
+            int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
+            int week = dayUidl.getIntAttribute(ATTR_WEEK);
             if (hideWeekends && (dayOfWeek == 1 || dayOfWeek == 7)) {
                 continue;
             }

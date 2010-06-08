@@ -59,8 +59,8 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
                 getCalendar().getClient().updateVariable(
-                        getCalendar().getPID(), "scroll", getScrollPosition(),
-                        false);
+                        getCalendar().getPID(), VCalendar.ATTR_SCROLL,
+                        getScrollPosition(), false);
             }
         });
         Event.addNativePreviewHandler(this);
@@ -177,7 +177,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         private int eventRangeStart = -1;
         private int eventRangeStop = -1;
         private WeekGrid weekgrid;
-        private boolean readOnly = false;
+        private boolean isReadOnly = false;
 
         public DateCell(WeekGrid parent) {
             weekgrid = parent;
@@ -422,7 +422,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         public void addEvent(Date targetDay, CalendarEvent e) {
             Element main = getElement();
             DayEvent de = new DayEvent(weekgrid, e);
-            de.setReadOnly(readOnly);
+            de.setReadOnly(isReadOnly);
             Date fromDt = e.getStartTime();
             int h = fromDt.getHours();
             int m = fromDt.getMinutes();
@@ -449,7 +449,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             List<CalendarEvent> events = new ArrayList<CalendarEvent>();
             for (; index < getWidgetCount(); index++) {
                 DayEvent dc = (DayEvent) getWidget(index);
-                dc.setReadOnly(readOnly);
+                dc.setReadOnly(isReadOnly);
                 events.add(dc.getCalendarEvent());
             }
             events.add(dayEvent.getCalendarEvent());
@@ -471,7 +471,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
         public void onMouseDown(MouseDownEvent event) {
             Element e = Element.as(event.getNativeEvent().getEventTarget());
-            if (e.getClassName().contains("reserved") || readOnly) {
+            if (e.getClassName().contains("reserved") || isReadOnly) {
                 eventRangeStart = -1;
             } else {
                 eventRangeStart = event.getY();
@@ -1073,11 +1073,11 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         }
 
         public void setReadOnly(boolean readOnly) {
-            this.readOnly = readOnly;
+            this.isReadOnly = readOnly;
         }
 
         public boolean isReadOnly() {
-            return readOnly;
+            return isReadOnly;
         }
 
         public void setDateColor(String styleName) {

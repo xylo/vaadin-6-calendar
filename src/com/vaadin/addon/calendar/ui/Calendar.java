@@ -350,13 +350,14 @@ public class Calendar extends AbstractComponent implements
                     + durationInDays);
         }
 
-        target.addAttribute("format24h",
+        target.addAttribute(VCalendar.ATTR_FORMAT24H,
                 getTimeFormat() == TimeFormat.Format24H);
-        target.addAttribute("dayNames", getDayNamesShort());
-        target.addAttribute("monthNames", getMonthNamesShort());
-        target.addAttribute("fdow", currentCalendar.getFirstDayOfWeek());
-        target.addAttribute("readonly", isReadOnly());
-        target.addAttribute("hideWeekends", isHideWeekends());
+        target.addAttribute(VCalendar.ATTR_DAY_NAMES, getDayNamesShort());
+        target.addAttribute(VCalendar.ATTR_MONTH_NAMES, getMonthNamesShort());
+        target.addAttribute(VCalendar.ATTR_FDOW, currentCalendar
+                .getFirstDayOfWeek());
+        target.addAttribute(VCalendar.ATTR_READONLY, isReadOnly());
+        target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
         // Use same timezone in all dates this component handles.
         // Show "now"-marker in browser within given timezone.
         Date now = new Date();
@@ -366,7 +367,7 @@ public class Calendar extends AbstractComponent implements
         // Reset time zones for custom date formats
         df_date.setTimeZone(currentCalendar.getTimeZone());
         df_time.setTimeZone(currentCalendar.getTimeZone());
-        target.addAttribute("now", df_date.format(now) + " "
+        target.addAttribute(VCalendar.ATTR_NOW, df_date.format(now) + " "
                 + df_time.format(now));
 
         Date firstDateToShow = null;
@@ -399,13 +400,13 @@ public class Calendar extends AbstractComponent implements
         // support date localization properly.
         while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
             target.startTag("day");
-            target.addAttribute("date", df_date.format(currentCalendar
-                    .getTime()));
-            target.addAttribute("fdate", weeklyCaptionFormat
+            target.addAttribute(VCalendar.ATTR_DATE, df_date
                     .format(currentCalendar.getTime()));
-            target.addAttribute("dow", currentCalendar
+            target.addAttribute(VCalendar.ATTR_FDATE, weeklyCaptionFormat
+                    .format(currentCalendar.getTime()));
+            target.addAttribute(VCalendar.ATTR_DOW, currentCalendar
                     .get(java.util.Calendar.DAY_OF_WEEK));
-            target.addAttribute("w", currentCalendar
+            target.addAttribute(VCalendar.ATTR_WEEK, currentCalendar
                     .get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
             currentCalendar.add(java.util.Calendar.DATE, 1);
@@ -424,7 +425,7 @@ public class Calendar extends AbstractComponent implements
             }
         }
         target.endTag("events");
-        target.addVariable(this, "scroll", scrollTop);
+        target.addVariable(this, VCalendar.ATTR_SCROLL, scrollTop);
         target.addVariable(this, "navigation", 0);
         super.paintContent(target);
     }
@@ -440,17 +441,19 @@ public class Calendar extends AbstractComponent implements
      */
     protected void paintEvent(int i, PaintTarget target) throws PaintException {
         CalendarEvent e = events.get(i);
-        target.addAttribute("i", i);
-        target.addAttribute("caption", (e.getCaption() == null ? "" : e
-                .getCaption()));
-        target.addAttribute("dfrom", df_date.format(e.getStart()));
-        target.addAttribute("dto", df_date.format(e.getEnd()));
-        target.addAttribute("tfrom", df_time.format(e.getStart()));
-        target.addAttribute("tto", df_time.format(e.getEnd()));
-        target.addAttribute("description", e.getDescription() == null ? "" : e
-                .getDescription());
-        target.addAttribute("extracss", e.getStyleName() == null ? "" : e
-                .getStyleName());
+        target.addAttribute(VCalendar.ATTR_INDEX, i);
+        target.addAttribute(VCalendar.ATTR_CAPTION,
+                (e.getCaption() == null ? "" : e.getCaption()));
+        target.addAttribute(VCalendar.ATTR_DATEFROM, df_date.format(e
+                .getStart()));
+        target.addAttribute(VCalendar.ATTR_DATETO, df_date.format(e.getEnd()));
+        target.addAttribute(VCalendar.ATTR_TIMEFROM, df_time.format(e
+                .getStart()));
+        target.addAttribute(VCalendar.ATTR_TIMETO, df_time.format(e.getEnd()));
+        target.addAttribute(VCalendar.ATTR_DESCRIPTION,
+                e.getDescription() == null ? "" : e.getDescription());
+        target.addAttribute(VCalendar.ATTR_STYLE, e.getStyleName() == null ? ""
+                : e.getStyleName());
     }
 
     /*
@@ -482,8 +485,8 @@ public class Calendar extends AbstractComponent implements
             handleWeekClick((String) variables.get(CalendarEventId.WEEKCLICK));
         }
 
-        if (variables.containsKey("scroll")) {
-            handleScroll(variables.get("scroll").toString());
+        if (variables.containsKey(VCalendar.ATTR_SCROLL)) {
+            handleScroll(variables.get(VCalendar.ATTR_SCROLL).toString());
         }
 
         if (variables.containsKey(CalendarEventId.EVENTMOVE) && !isReadOnly()) {

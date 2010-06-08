@@ -46,10 +46,10 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     private int cell;
     private int row;
     private boolean monthNameVisible;
-    private HandlerRegistration registration;
-    private HandlerRegistration registration2;
-    private HandlerRegistration registration3;
-    private HandlerRegistration registration4;
+    private HandlerRegistration mouseUpRegistration;
+    private HandlerRegistration mouseDownRegistration;
+    private HandlerRegistration mouseOverRegistration;
+    private HandlerRegistration nativePreviewRegistration;
     private boolean monthEventMouseDown;
     private boolean labelMouseDown;
     private int eventCount = 0;
@@ -307,18 +307,18 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     @Override
     protected void onAttach() {
         super.onAttach();
-        registration = addDomHandler(this, MouseUpEvent.getType());
-        registration2 = addDomHandler(this, MouseDownEvent.getType());
-        registration3 = addDomHandler(this, MouseOverEvent.getType());
-        registration4 = Event.addNativePreviewHandler(this);
+        mouseUpRegistration = addDomHandler(this, MouseUpEvent.getType());
+        mouseDownRegistration = addDomHandler(this, MouseDownEvent.getType());
+        mouseOverRegistration = addDomHandler(this, MouseOverEvent.getType());
+        nativePreviewRegistration = Event.addNativePreviewHandler(this);
     }
 
     @Override
     protected void onDetach() {
-        registration.removeHandler();
-        registration2.removeHandler();
-        registration3.removeHandler();
-        registration4.removeHandler();
+        mouseUpRegistration.removeHandler();
+        mouseDownRegistration.removeHandler();
+        mouseOverRegistration.removeHandler();
+        nativePreviewRegistration.removeHandler();
         super.onDetach();
     }
 
