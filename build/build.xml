@@ -266,6 +266,7 @@
 			<fileset dir="WebContent">
 				<patternset>
 					<include name="VAADIN/themes/calendartest/**/*" />
+					<include name="VAADIN/widgetsets/com.vaadin.addon.calendar.gwt.CalendarWidgetset/**/*" />
 				</patternset>
 			</fileset>
 		</war>
