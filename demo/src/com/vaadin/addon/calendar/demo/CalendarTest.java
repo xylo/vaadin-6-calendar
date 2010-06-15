@@ -337,6 +337,9 @@ public class CalendarTest extends Application {
         calendarComponent.setHideWeekends(false);
         calendarComponent.setLocale(getLocale());
         calendarComponent.setImmediate(true);
+        // calendarComponent.setHeight("400px");
+        // calendarComponent.setWidth("600px");
+        calendarComponent.setSizeFull();
 
         Date today = new Date();
         calendar = new GregorianCalendar(getLocale());

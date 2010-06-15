@@ -247,7 +247,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
 
-            if (calendar.getClient() != null) {
+            if (calendar != null && calendar.getClient() != null) {
                 calendar.getClient().handleTooltipEvent(event, calendar,
                         calendarEvent.getIndex());
             }

@@ -34,7 +34,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
-    private static final int BORDERPADDINGHEIGHT = 1;
+    private static final int BORDERPADDINGSIZE = 1;
 
     private final VCalendar calendar;
     private Date date;
@@ -125,7 +125,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public void reDraw(boolean clear) {
-        setHeightPX(this.intHeight + BORDERPADDINGHEIGHT, clear);
+        setHeightPX(this.intHeight + BORDERPADDINGSIZE, clear);
     }
 
     /*
@@ -134,7 +134,13 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
      * clearing will also remove all element's event handlers.
      */
     public void setHeightPX(int px, boolean clear) {
-        intHeight = px - BORDERPADDINGHEIGHT;
+        // measure from DOM if needed
+        if (px < 0) {
+            intHeight = getOffsetHeight() - BORDERPADDINGSIZE;
+        } else {
+            intHeight = px - BORDERPADDINGSIZE;
+        }
+
         if (clear) {
             while (getWidgetCount() > 1) {
                 remove(1);
@@ -158,6 +164,12 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                 slots = 10;
             }
         }
+
+        updateEvents(slots, clear);
+
+    }
+
+    public void updateEvents(int slots, boolean clear) {
         int eventsAdded = 0;
         for (int i = 0; i < slots; i++) {
             CalendarEvent e = events[i];
@@ -602,13 +614,18 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public int getHeigth() {
-        return this.intHeight + BORDERPADDINGHEIGHT;
+        return this.intHeight + BORDERPADDINGSIZE;
     }
 
     public int getWidth() {
         Style s = getElement().getStyle();
         String width = s.getWidth();
-        return Integer.parseInt(width.substring(0, width.length() - 2));
+
+        if (!"".equals(width)) {
+            return Integer.parseInt(width.substring(0, width.length() - 2));
+        } else {
+            return getOffsetWidth() - BORDERPADDINGSIZE;
+        }
     }
 
     public void setToday(boolean today) {

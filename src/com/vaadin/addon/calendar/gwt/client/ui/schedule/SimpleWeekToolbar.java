@@ -12,6 +12,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;
     private VCalendar schedule;
+    private boolean isHeightUndefined;
 
     public SimpleWeekToolbar(VCalendar parent) {
         schedule = parent;
@@ -30,40 +31,54 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     }
 
     public void updateCellHeights() {
-        int rowCount = getRowCount();
-        if (rowCount == 0) {
-            return;
-        }
-        int cellheight = (height / rowCount) - 1;
-        int remainder = height % rowCount;
-        if (cellheight < 0) {
-            cellheight = 0;
-        }
-        for (int i = 0; i < rowCount; i++) {
-            if (remainder > 0) {
-                getWidget(i, 0).setHeight(cellheight + 1 + "px");
-            } else {
-                getWidget(i, 0).setHeight(cellheight + "px");
+        if (!isHeightUndefined()) {
+            int rowCount = getRowCount();
+            if (rowCount == 0) {
+                return;
             }
-            getWidget(i, 0).getElement().getStyle().setProperty("lineHeight",
-                    cellheight + "px");
-            remainder--;
+            int cellheight = (height / rowCount) - 1;
+            int remainder = height % rowCount;
+            if (cellheight < 0) {
+                cellheight = 0;
+            }
+            for (int i = 0; i < rowCount; i++) {
+                if (remainder > 0) {
+                    getWidget(i, 0).setHeight(cellheight + 1 + "px");
+                } else {
+                    getWidget(i, 0).setHeight(cellheight + "px");
+                }
+                getWidget(i, 0).getElement().getStyle().setProperty(
+                        "lineHeight", cellheight + "px");
+                remainder--;
+            }
+        } else {
+            for (int i = 0; i < getRowCount(); i++) {
+                getWidget(i, 0).setHeight("");
+                getWidget(i, 0).getElement().getStyle().setProperty(
+                        "lineHeight", "");
+            }
         }
     }
 
     public void setHeightPX(int intHeight) {
         height = intHeight;
+        setHeightUndefined(intHeight == -1);
         updateCellHeights();
     }
 
-    @Override
-    protected void onLoad() {
-        super.onLoad();
+    public boolean isHeightUndefined() {
+        return isHeightUndefined;
     }
 
-    @Override
-    protected void onUnload() {
-        super.onUnload();
+    public void setHeightUndefined(boolean isHeightUndefined) {
+        this.isHeightUndefined = isHeightUndefined;
+
+        if (isHeightUndefined) {
+            addStyleDependentName("sized");
+
+        } else {
+            removeStyleDependentName("sized");
+        }
     }
 
     public void onClick(ClickEvent event) {

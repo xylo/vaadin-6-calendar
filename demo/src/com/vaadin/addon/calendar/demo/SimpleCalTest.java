@@ -54,6 +54,8 @@ public class SimpleCalTest extends Application {
         setTheme("calendartest");
 
         final Calendar cal = new Calendar(provider);
+        cal.setSizeUndefined();
+
         cal.setLocale(Locale.US);
 
         cal.setStartDate(new Date());
@@ -80,8 +82,28 @@ public class SimpleCalTest extends Application {
                         - cal.getStartDate().getTime();
                 if (currentCalDateRange < VCalendar.DAYINMILLIS) {
                     // Change the date range to the current week
-                    cal.setStartDate(cal.getFirstDateForWeek(event.getDate()));
-                    cal.setEndDate(cal.getLastDateForWeek(event.getDate()));
+                    GregorianCalendar gc = new GregorianCalendar(cal
+                            .getTimeZone(), cal.getLocale());
+
+                    gc.set(GregorianCalendar.DAY_OF_WEEK, gc
+                            .getFirstDayOfWeek());
+                    gc.set(GregorianCalendar.HOUR_OF_DAY, 0);
+                    gc.set(GregorianCalendar.MINUTE, 0);
+                    gc.set(GregorianCalendar.SECOND, 0);
+                    gc.set(GregorianCalendar.MILLISECOND, 0);
+                    cal.setStartDate(gc.getTime());
+
+                    gc.add(GregorianCalendar.DATE, 6);
+                    gc.set(GregorianCalendar.HOUR_OF_DAY, gc
+                            .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
+                    gc.set(GregorianCalendar.MINUTE, gc
+                            .getActualMaximum(GregorianCalendar.MINUTE));
+                    gc.set(GregorianCalendar.SECOND, gc
+                            .getActualMaximum(GregorianCalendar.SECOND));
+                    gc.set(GregorianCalendar.MILLISECOND, gc
+                            .getActualMaximum(GregorianCalendar.MILLISECOND));
+                    cal.setEndDate(gc.getTime());
+
                 } else {
                     // Change the date range to the clicked day
                     cal.setStartDate(event.getDate());
@@ -106,6 +128,14 @@ public class SimpleCalTest extends Application {
                 gc.set(GregorianCalendar.MILLISECOND, 0);
                 cal.setStartDate(gc.getTime());
                 gc.add(GregorianCalendar.DATE, 6);
+                gc.set(GregorianCalendar.HOUR_OF_DAY, gc
+                        .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
+                gc.set(GregorianCalendar.MINUTE, gc
+                        .getActualMaximum(GregorianCalendar.MINUTE));
+                gc.set(GregorianCalendar.SECOND, gc
+                        .getActualMaximum(GregorianCalendar.SECOND));
+                gc.set(GregorianCalendar.MILLISECOND, gc
+                        .getActualMaximum(GregorianCalendar.MILLISECOND));
                 cal.setEndDate(gc.getTime());
             }
         });
@@ -129,7 +159,6 @@ public class SimpleCalTest extends Application {
                 calEvent.setStart(event.getNewStart());
                 calEvent.setEnd(new Date(event.getNewStart().getTime()
                         + duration));
-                event.getComponent().requestRepaint();
             }
         });
 
@@ -231,13 +260,9 @@ public class SimpleCalTest extends Application {
         });
 
         VerticalLayout layout = new VerticalLayout();
-        layout.setSizeFull();
-        layout.setMargin(true);
         layout.addComponent(monthViewButton);
         layout.addComponent(cal);
-        layout.setExpandRatio(cal, 1);
         w.setContent(layout);
-        w.setSizeFull();
     }
 
     private CalendarTestEvent getNewEvent(String caption, Date start, Date end) {

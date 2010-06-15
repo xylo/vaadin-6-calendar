@@ -60,8 +60,8 @@ public class VCalendar extends Composite implements Paintable {
     private DockPanel outer = new DockPanel();
     private int rows;
     private ApplicationConnection client;
-    private String height = "";
-    private String width = "";
+    private String height = null;
+    private String width = null;
     private SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
     private DayToolbar dayToolbar = new DayToolbar();
     private SimpleWeekToolbar weekToolbar;
@@ -81,6 +81,10 @@ public class VCalendar extends Composite implements Paintable {
             .getFormat("HH:mm");
 
     private boolean readOnly = false;
+
+    private boolean isHeightUndefined = false;
+
+    private boolean isWidthUndefined = false;
 
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
@@ -162,6 +166,7 @@ public class VCalendar extends Composite implements Paintable {
         ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
         updateEventsToMonthGrid(events, false);
         recalculateHeights();
+        recalculateWidths();
     }
 
     private void updateWeekView(UIDL uidl, UIDL daysUidl) {
@@ -181,12 +186,18 @@ public class VCalendar extends Composite implements Paintable {
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
         outer.add(weekGrid, DockPanel.SOUTH);
-        weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
-                - dayToolbar.getOffsetHeight());
+        if (!isHeightUndefined) {
+            weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
+                    - dayToolbar.getOffsetHeight());
+        } else {
+            weekGrid.setHeightPX(intHeight);
+        }
         weekGrid.setWidthPX(intWidth);
         dayToolbar.updateCellWidths();
         weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
         weekGrid.setScrollPosition(scroll);
+        recalculateHeights();
+        recalculateWidths();
     }
 
     private void updateEventsToWeekGrid(CalendarEvent[] events) {
@@ -437,6 +448,7 @@ public class VCalendar extends Composite implements Paintable {
         }
         dayToolbar.clear();
         dayToolbar.addBackButton();
+        dayToolbar.setSized(isHeightUndefined);
         weekGrid.clearDates();
         weekGrid.setReadOnly(readOnly);
         for (int i = 0; i < daysCount; i++) {
@@ -472,6 +484,8 @@ public class VCalendar extends Composite implements Paintable {
         int columns = (hideWeekends == true ? 5 : 7);
         monthGrid = new MonthGrid(this, rows, columns);
         monthGrid.setReadOnly(readOnly);
+        monthGrid.setHeightPX(intHeight);
+        monthGrid.setWidthPX(intWidth);
         weekToolbar.removeAllRows();
         int pos = 0;
         for (int i = 0; i < daysCount; i++) {
@@ -507,46 +521,87 @@ public class VCalendar extends Composite implements Paintable {
 
     @Override
     public void setHeight(String newHeight) {
-        if (!height.equals(newHeight)) {
+        if (!newHeight.equals(height)) {
             height = newHeight;
-            intHeight = Integer.parseInt(newHeight.substring(0, newHeight
-                    .length() - 2));
-            super.setHeight(intHeight + "px");
+            isHeightUndefined = "".equals(height);
+
+            if (!isHeightUndefined) {
+                intHeight = Integer.parseInt(newHeight.substring(0, newHeight
+                        .length() - 2));
+            } else {
+                intHeight = -1;
+            }
+
+            super.setHeight(height);
             recalculateHeights();
         }
     }
 
     private void recalculateHeights() {
-        if (monthGrid != null) {
-            monthGrid.updateCellSizes(intWidth - weekToolbar.getOffsetWidth(),
-                    intHeight - nameToolbar.getOffsetHeight());
-            weekToolbar.setHeightPX(intHeight - nameToolbar.getOffsetHeight());
-        } else if (weekGrid != null) {
-            weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
-                    - dayToolbar.getOffsetHeight());
+        if (!isHeightUndefined) {
+            if (monthGrid != null) {
+                monthGrid.updateCellSizes(intWidth
+                        - weekToolbar.getOffsetWidth(), intHeight
+                        - nameToolbar.getOffsetHeight());
+                weekToolbar.setHeightPX(intHeight
+                        - nameToolbar.getOffsetHeight());
+
+            } else if (weekGrid != null) {
+                weekGrid.setHeightPX(intHeight
+                        - weeklyLongEvents.getOffsetHeight()
+                        - dayToolbar.getOffsetHeight());
+            }
+        } else {
+            if (weekGrid != null) {
+                weekGrid.setHeightPX(intHeight);
+            }
+
+            if (monthGrid != null) {
+                monthGrid.setHeightPX(intHeight);
+                monthGrid.updateCellSizes(-1, -1);
+                weekToolbar.setHeightPX(intHeight);
+            }
         }
     }
 
     private void recalculateWidths() {
-        outer.setWidth(intWidth + "px");
-        super.setWidth(intWidth + "px");
-        nameToolbar.setWidthPX(intWidth);
-        dayToolbar.setWidthPX(intWidth);
-        if (monthGrid != null) {
-            monthGrid.updateCellSizes(intWidth - weekToolbar.getOffsetWidth(),
-                    intHeight - nameToolbar.getOffsetHeight());
-        } else if (weekGrid != null) {
-            weekGrid.setWidthPX(intWidth);
-            weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
+        if (!isWidthUndefined) {
+            outer.setWidth(intWidth + "px");
+            super.setWidth(intWidth + "px");
+            nameToolbar.setWidthPX(intWidth);
+            dayToolbar.setWidthPX(intWidth);
+
+            if (monthGrid != null) {
+                monthGrid.updateCellSizes(intWidth
+                        - weekToolbar.getOffsetWidth(), intHeight
+                        - nameToolbar.getOffsetHeight());
+            } else if (weekGrid != null) {
+                weekGrid.setWidthPX(intWidth);
+                weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
+            }
+
+        } else {
+            dayToolbar.setWidthPX(intWidth);
+            nameToolbar.setWidthPX(intWidth);
+
+            if (monthGrid != null) {
+                monthGrid.setWidthPX(intWidth);
+            }
         }
     }
 
     @Override
     public void setWidth(String newWidth) {
-        if (!width.equals(newWidth)) {
+        if (!newWidth.equals(width)) {
             width = newWidth;
-            intWidth = Integer.parseInt(newWidth.substring(0,
-                    newWidth.length() - 2));
+            isWidthUndefined = "".equals(width);
+
+            if (!isWidthUndefined) {
+                intWidth = Integer.parseInt(newWidth.substring(0, newWidth
+                        .length() - 2));
+            } else {
+                intWidth = -1;
+            }
             recalculateWidths();
         }
     }
@@ -584,5 +639,44 @@ public class VCalendar extends Composite implements Paintable {
 
     public MonthGrid getMonthGrid() {
         return monthGrid;
+    }
+
+    /**
+     * Calculates correct size for all cells (size / amount of cells ) and
+     * distributes any overflow over all the cells.
+     * 
+     * @param totalSize
+     *            the total amount of size reserved for all cells
+     * @param numberOfCells
+     *            the number of cells
+     * @param sizeModifier
+     *            a modifier which is applied to all cells before distributing
+     *            the overflow
+     * @return an integer array that contains the correct size for each cell
+     */
+    public static int[] distributeSize(int totalSize, int numberOfCells,
+            int sizeModifier) {
+        int[] cellSizes = new int[numberOfCells];
+        int startingSize = totalSize / numberOfCells;
+        int cellSizeOverFlow = totalSize % numberOfCells;
+
+        for (int i = 0; i < numberOfCells; i++) {
+            cellSizes[i] = startingSize + sizeModifier;
+        }
+
+        // distribute size overflow amongst all slots
+        int j = 0;
+        while (cellSizeOverFlow > 0) {
+            cellSizes[j]++;
+            cellSizeOverFlow--;
+            j++;
+            if (j >= numberOfCells) {
+                j = 0;
+            }
+        }
+
+        // cellSizes[numberOfCells - 1] += cellSizeOverFlow;
+
+        return cellSizes;
     }
 }

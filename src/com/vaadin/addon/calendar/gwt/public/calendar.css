@@ -19,7 +19,7 @@
 .v-calendar-header-week {
 	border-bottom: 1px solid #c1c1c1;
 	}
-
+	
 .v-calendar-header-day {
 	text-align: center;
 	color: #666;
@@ -37,6 +37,8 @@
 	color: #444;
 	}
 
+
+	
 .v-calendar-header-month td:first-child {
 	padding-left: 19px; /* Same as VCalendar.MONTHLY_WEEKTOOLBARWIDTH - .v-calendar-week-numbers border */
 	}
@@ -81,7 +83,7 @@
 	width: 20px;
 	border-right: 1px solid #ccc;
 	}
-
+	
 .v-calendar-week-number {
 	border: none;
 	background: transparent;
@@ -198,27 +200,24 @@ div.v-calendar-event-all-day {
 
 
 /* Week/day view */
-
 .v-calendar-week-wrapper {
 	position: relative;
-	overflow-x: hidden !important;
 	}
-
+	
 .v-calendar-times {
-	width: 50px;
-	border-right: 1px solid #ccc;
+	width: 51px;
+	
 	}
 
 .v-calendar-time {
-	width: 42px;
-	height: 38px;
 	padding: 0 8px 7px 0;
 	margin-top: -7px;
 	text-align: right;
 	font-size: 11px;
 	color: #666;
+	border-right: 1px solid #ccc;
 	}
-
+	
 .v-calendar-weekly-longevents {
 	border-left: 1px solid #ccc;
 	border-bottom: 2px solid #bbb;
@@ -243,13 +242,12 @@ div.v-calendar-event-all-day {
 	border-right: 1px solid #ccc;	
 	}
 
-.v-calendar-day-times .v-halfhour,
-.v-calendar-day-times .v-halfhour-even {
+.v-calendar-day-times .v-slot,
+.v-calendar-day-times .v-slot-even {
 	border-bottom: 1px solid #ccc;
-	height: 18px;
 	}
 
-.v-calendar-day-times .v-halfhour-even {
+.v-calendar-day-times .v-slot-even {
 	border-bottom-color: #eee;	
 	}
 
@@ -321,3 +319,45 @@ div.v-calendar-event-all-day {
 	width: 100%;
 	z-index: 1;
 	}	
+	
+/** Sizes for undefined Calendar **/
+.v-calendar-month-sizedheight .v-calendar-month-day {
+	height: 100px;
+	}
+
+.v-calendar-month-sizedwidth .v-calendar-month-day {
+	width: 100px;
+	}
+
+.v-calendar-header-month-sized .v-calendar-header-day {
+	width: 101px;
+	}
+	
+.v-calendar-header-month-sized td:first-child {
+	padding-left: 21px;
+	}
+
+.v-calendar-header-day-sized {
+	width: 200px;
+	}
+	
+.v-calendar-week-numbers-sized .v-calendar-week-number {
+	height: 100px;
+	line-height: 100px;
+	}
+	
+.v-calendar-week-wrapper-sized {
+	height: 400px;
+	overflow-x: hidden !important;
+	}
+	
+.v-calendar-times-sized .v-calendar-time {
+	width: 42px;
+	height: 38px;
+	}
+	
+.v-calendar-day-times-sized .v-slot,
+.v-calendar-day-times-sized .v-slot-even {
+	height: 18px;
+	width: 200px;
+	}

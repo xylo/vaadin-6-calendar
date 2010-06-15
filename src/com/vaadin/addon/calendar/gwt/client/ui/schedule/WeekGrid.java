@@ -1,11 +1,13 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Node;
@@ -30,15 +32,16 @@ import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.terminal.gwt.client.DateTimeService;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 
-public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
+public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     private int width = 0;
     private int height = 0;
@@ -47,28 +50,62 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     private boolean readOnly;
     private boolean format24h;
     private Timebar timebar;
+    private Panel wrapper;
+    private int[] cellHeights;
+    private int slotInMinutes = 30;
+    private int dateCellBorder;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         this.setCalendar(parent);
         this.format24h = format24h;
-        setStylePrimaryName("v-calendar-week-wrapper");
         content = new HorizontalPanel();
-        setWidget(content);
         timebar = new Timebar(format24h);
         content.add(timebar);
-        addScrollHandler(new ScrollHandler() {
-            public void onScroll(ScrollEvent event) {
-                getCalendar().getClient().updateVariable(
-                        getCalendar().getPID(), VCalendar.ATTR_SCROLL,
-                        getScrollPosition(), false);
-            }
-        });
+
+        wrapper = new SimplePanel();
+        wrapper.setStylePrimaryName("v-calendar-week-wrapper");
+        wrapper.add(content);
+
+        setWidget(wrapper);
+
         Event.addNativePreviewHandler(this);
     }
 
-    @Override
-    protected void onLoad() {
-        super.onLoad();
+    private void setScroll(boolean isScrollEnabled) {
+        if (isScrollEnabled && !(isScrollable())) {
+            wrapper.remove(content);
+
+            final ScrollPanel scrollPanel = new ScrollPanel();
+            scrollPanel.setStylePrimaryName("v-calendar-week-wrapper");
+            scrollPanel.setWidget(content);
+
+            scrollPanel.addScrollHandler(new ScrollHandler() {
+                public void onScroll(ScrollEvent event) {
+                    getCalendar().getClient().updateVariable(
+                            getCalendar().getPID(), VCalendar.ATTR_SCROLL,
+                            scrollPanel.getScrollPosition(), false);
+                }
+            });
+
+            setWidget(scrollPanel);
+            wrapper = scrollPanel;
+
+        } else if (!isScrollEnabled && (isScrollable())) {
+            wrapper.remove(content);
+
+            SimplePanel simplePanel = new SimplePanel();
+            simplePanel.setStylePrimaryName("v-calendar-week-wrapper");
+            simplePanel.setWidget(content);
+
+            setWidget(simplePanel);
+            wrapper = simplePanel;
+        }
+    }
+
+    public void setScrollPosition(int scrollPosition) {
+        if (isScrollable()) {
+            ((ScrollPanel) wrapper).setScrollPosition(scrollPosition);
+        }
     }
 
     public int getInternalWidth() {
@@ -79,19 +116,48 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         DateCell dc = new DateCell(this);
         dc.setDate(d);
         dc.setReadOnly(readOnly);
+        dc.setSized(isScrollable());
         content.add(dc);
     }
 
+    private boolean isScrollable() {
+        return (wrapper instanceof ScrollPanel);
+    }
+
     public void setWidthPX(int width) {
-        this.width = width - timebar.getOffsetWidth()
-                - Util.getNativeScrollbarSize();
-        updateCellWidths();
+        if (isScrollable()) {
+            updateCellWidths();
+
+            // Otherwise the scroll wrapper is somehow too narrow = horizontal
+            // scroll
+            wrapper.setWidth(content.getOffsetWidth()
+                    + Util.getNativeScrollbarSize() + "px");
+
+            this.width = content.getOffsetWidth() - timebar.getOffsetWidth();
+
+        } else {
+            this.width = width - timebar.getOffsetWidth();
+            updateCellWidths();
+        }
     }
 
     public void setHeightPX(int intHeight) {
         height = intHeight;
-        if (height > 0) {
+
+        setScroll(height <= -1);
+
+        // if not scrollable, use any height given
+        if (!isScrollable() && height > 0) {
             setHeight(height + "px");
+            timebar.setHeightPX(height);
+            wrapper.setHeight(height + "px");
+            wrapper.removeStyleDependentName("sized");
+            updateCellHeights();
+
+        } else if (isScrollable()) {
+            updateCellHeights();
+            wrapper.addStyleDependentName("sized");
+            timebar.setHeightPX(height);
         }
     }
 
@@ -102,19 +168,267 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
     }
 
     public void updateCellWidths() {
-        int count = content.getWidgetCount();
-        int datesWidth = width;
-        if (datesWidth > 0 && count > 1) {
-            int cellWidth = datesWidth / (count - 1);
-            int cellWidthMinusBorder = cellWidth - 1;
-            for (int i = 1; i < count; i++) {
-                DateCell dc = (DateCell) content.getWidget(i);
-                dc.setWidthPX(cellWidthMinusBorder);
+        if (!isScrollable()) {
+            int count = content.getWidgetCount();
+            int datesWidth = width;
+            if (datesWidth > 0 && count > 1) {
+                int cellWidth = datesWidth / (count - 1);
+                int cellWidthMinusBorder = cellWidth - 1;
+                for (int i = 1; i < count; i++) {
+                    DateCell dc = (DateCell) content.getWidget(i);
+                    dc.setWidthPX(cellWidthMinusBorder);
+                }
+            }
+
+        } else {
+            int count = content.getWidgetCount();
+            if (count > 1) {
+                for (int i = 1; i < count; i++) {
+                    DateCell dc = (DateCell) content.getWidget(i);
+                    dc.setSized(isScrollable());
+                }
             }
         }
     }
 
+    public void updateCellHeights() {
+        if (!isScrollable()) {
+            int count = content.getWidgetCount();
+            if (count > 1) {
+                DateCell first = (DateCell) content.getWidget(1);
+                dateCellBorder = first.getSlotBorder();
+                cellHeights = VCalendar.distributeSize(height, 48,
+                        -dateCellBorder);
+                for (int i = 1; i < count; i++) {
+                    DateCell dc = (DateCell) content.getWidget(i);
+                    dc.setHeightPX(height, cellHeights);
+                }
+            }
+
+        } else {
+            int count = content.getWidgetCount();
+            if (count > 1) {
+                DateCell first = (DateCell) content.getWidget(1);
+                dateCellBorder = first.getSlotBorder();
+                int dateHeight = (first.getOffsetHeight() / 48)
+                        - dateCellBorder;
+                cellHeights = new int[48];
+                Arrays.fill(cellHeights, dateHeight);
+
+                for (int i = 1; i < count; i++) {
+                    DateCell dc = (DateCell) content.getWidget(i);
+                    dc.setSized(isScrollable());
+
+                }
+            }
+        }
+    }
+
+    public void addEvent(CalendarEvent e) {
+        int dateCount = content.getWidgetCount();
+        Date from = e.getStart();
+        Date toTime = e.getEndTime();
+        for (int i = 1; i < dateCount; i++) {
+            DateCell dc = (DateCell) content.getWidget(i);
+            Date dcDate = dc.getDate();
+            int comp = dcDate.compareTo(from);
+            int comp2 = dcDate.compareTo(toTime);
+            if (comp >= 0 && comp2 < 0) {
+                // Same event may be over two DateCells if event's date
+                // range floats over one day. It can't float over two days,
+                // because event which range is over 24 hours, will be handled
+                // as a "fullDay" event.
+                dc.addEvent(dcDate, e);
+            }
+        }
+    }
+
+    public int getPixelLengthFor(int startFromMinutes, int durationInMinutes) {
+        int pixelLength = 0;
+        int currentSlot = 0;
+        // calculate full slots to event
+        int slotsTillEvent = startFromMinutes / slotInMinutes;
+        int startOverFlowTime = slotInMinutes
+                - (startFromMinutes % slotInMinutes);
+        if (startOverFlowTime == slotInMinutes) {
+            startOverFlowTime = 0;
+            currentSlot = slotsTillEvent;
+        } else {
+            currentSlot = slotsTillEvent + 1;
+        }
+
+        int durationInSlots = 0;
+        int endOverFlowTime = 0;
+
+        if (startOverFlowTime > 0) {
+            durationInSlots = (durationInMinutes - startOverFlowTime)
+                    / slotInMinutes;
+            endOverFlowTime = (durationInMinutes - startOverFlowTime)
+                    % slotInMinutes;
+
+        } else {
+            durationInSlots = durationInMinutes / slotInMinutes;
+            endOverFlowTime = durationInMinutes % slotInMinutes;
+        }
+
+        // calculate slot overflow at start
+        if (startOverFlowTime > 0 && currentSlot < cellHeights.length) {
+            int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
+            pixelLength += (int) (((double) lastSlotHeight / (double) slotInMinutes) * startOverFlowTime);
+        }
+
+        // calculate length in full slots
+        int lastFullSlot = currentSlot + durationInSlots;
+        for (; currentSlot < lastFullSlot && currentSlot < cellHeights.length; currentSlot++) {
+            pixelLength += cellHeights[currentSlot] + dateCellBorder;
+        }
+
+        // calculate overflow at end
+        if (endOverFlowTime > 0 && currentSlot < cellHeights.length) {
+            int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
+            pixelLength += (int) (((double) lastSlotHeight / (double) slotInMinutes) * endOverFlowTime);
+        }
+
+        return pixelLength;
+    }
+
+    public int getPixelTopFor(int startFromMinutes) {
+        int pixelsToTop = 0;
+        int slotIndex = 0;
+
+        // calculate full slots to event
+        int slotsTillEvent = startFromMinutes / slotInMinutes;
+        int overFlowTime = startFromMinutes % slotInMinutes;
+        if (slotsTillEvent > 0) {
+            for (slotIndex = 0; slotIndex < slotsTillEvent; slotIndex++) {
+                pixelsToTop += cellHeights[slotIndex] + dateCellBorder;
+            }
+        }
+
+        // calculate lengths less than one slot
+        if (overFlowTime > 0) {
+            int lastSlotHeight = cellHeights[slotIndex] + dateCellBorder;
+            pixelsToTop += ((double) lastSlotHeight / (double) slotInMinutes)
+                    * overFlowTime;
+        }
+
+        return pixelsToTop;
+    }
+
+    public void eventMoved(DayEvent dayEvent) {
+        Style s = dayEvent.getElement().getStyle();
+        int left = Integer.parseInt(s.getLeft().substring(0,
+                s.getLeft().length() - 2));
+        int datesWidth = width;
+        int count = content.getWidgetCount();
+        int cellWidth = datesWidth / (count - 1);
+        DateCell previousParent = (DateCell) dayEvent.getParent();
+        DateCell newParent = (DateCell) content
+                .getWidget((left / cellWidth) + 1);
+        CalendarEvent se = dayEvent.getCalendarEvent();
+        previousParent.removeEvent(dayEvent);
+        newParent.addEvent(dayEvent);
+        if (!previousParent.equals(newParent))
+            previousParent.recalculateEventWidths();
+        newParent.recalculateEventWidths();
+        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
+        DateTimeFormat dateformat_time = DateTimeFormat.getFormat("HH-mm");
+        String eventMove = se.getIndex() + ":"
+                + dateformat_date.format(se.getStart()) + "-"
+                + dateformat_time.format(se.getStartTime());
+
+        if (getCalendar().getClient().hasEventListeners(getCalendar(),
+                CalendarEventId.EVENTMOVE)) {
+            getCalendar().getClient().updateVariable(getCalendar().getPID(),
+                    CalendarEventId.EVENTMOVE, eventMove, true);
+        }
+    }
+
+    public void setToday(Date todayDate, Date todayTimestamp) {
+        int count = content.getWidgetCount();
+        if (count > 1) {
+            for (int i = 1; i < count; i++) {
+                DateCell dc = (DateCell) content.getWidget(i);
+                if (dc.getDate().getTime() == todayDate.getTime()) {
+                    dc.setToday(todayTimestamp);
+                }
+            }
+        }
+    }
+
+    public void onPreviewNativeEvent(NativePreviewEvent event) {
+        if (event.getTypeInt() == Event.ONMOUSEDOWN
+                && DOM.isOrHasChild(getElement(),
+                        (com.google.gwt.user.client.Element) Element.as(event
+                                .getNativeEvent().getEventTarget()))) {
+            event.getNativeEvent().preventDefault();
+        }
+    }
+
+    public void addReservedEvent(ReservedCalendarEvent e) {
+        int dateCount = content.getWidgetCount();
+        Date from = e.getFromDate();
+        Date to = e.getToDate();
+        for (int i = 1; i < dateCount; i++) {
+            DateCell dc = (DateCell) content.getWidget(i);
+            Date dcDate = dc.getDate();
+            int comp = dcDate.compareTo(from);
+            int comp2 = dcDate.compareTo(to);
+            if (comp >= 0 && comp2 <= 0) {
+                dc.addReservedEvent(e);
+            }
+        }
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public boolean isFormat24h() {
+        return format24h;
+    }
+
+    public void setFormat24h(boolean format24h) {
+        this.format24h = format24h;
+    }
+
+    public Timebar getTimeBar() {
+        return timebar;
+    }
+
+    public void setDateColor(Date when, Date to, String styleName) {
+        int dateCount = content.getWidgetCount();
+        for (int i = 1; i < dateCount; i++) {
+            DateCell dc = (DateCell) content.getWidget(i);
+            Date dcDate = dc.getDate();
+            int comp = dcDate.compareTo(when);
+            int comp2 = dcDate.compareTo(to);
+            if (comp >= 0 && comp2 <= 0) {
+                dc.setDateColor(styleName);
+            }
+        }
+    }
+
+    /**
+     * @param calendar
+     *            the calendar to set
+     */
+    public void setCalendar(VCalendar calendar) {
+        this.calendar = calendar;
+    }
+
+    /**
+     * @return the calendar
+     */
+    public VCalendar getCalendar() {
+        return calendar;
+    }
+
     public static class Timebar extends HTML {
+
+        private int height;
+
+        private int verticalPadding = 7; // FIXME measure this from DOM
 
         public Timebar(boolean format24h) {
             createTimeBar(format24h);
@@ -168,6 +482,44 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 getElement().removeChild(getElement().getChild(0));
             }
         }
+
+        public void setHeightPX(int pixelHeight) {
+            this.height = pixelHeight;
+
+            if (pixelHeight > -1) {
+                // as the negative margins on children pulls the whole element
+                // upwards, we must compensate. otherwise the element would be
+                // too short
+                super.setHeight((height + verticalPadding) + "px");
+                removeStyleDependentName("sized");
+                updateChildHeights();
+
+            } else {
+                addStyleDependentName("sized");
+                updateChildHeights();
+            }
+        }
+
+        private void updateChildHeights() {
+            int childCount = getElement().getChildCount();
+
+            if (height != -1) {
+
+                // 23 hours + first is empty
+                int[] cellHeights = VCalendar.distributeSize(height, 24, 0);
+
+                for (int i = 0; i < childCount; i++) {
+                    Element e = (Element) getElement().getChild(i);
+                    e.getStyle().setHeight(cellHeights[i], Unit.PX);
+                }
+
+            } else {
+                for (int i = 0; i < childCount; i++) {
+                    Element e = (Element) getElement().getChild(i);
+                    e.getStyle().setProperty("height", "");
+                }
+            }
+        }
     }
 
     public static class DateCell extends ComplexPanel implements
@@ -178,6 +530,14 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
         private int eventRangeStop = -1;
         private WeekGrid weekgrid;
         private boolean isReadOnly = false;
+        private int height;
+        private Element[] slotElements;
+        private int[] slotElementHeights;
+        private int startingSlotHeight;
+        private Date today;
+        private Element todaybar;
+
+        // private double slotHeight;
 
         public DateCell(WeekGrid parent) {
             weekgrid = parent;
@@ -188,18 +548,47 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             addHandler(this, MouseUpEvent.getType());
             addHandler(this, MouseMoveEvent.getType());
 
+            slotElements = new Element[48];
+            slotElementHeights = new int[48];
+
             for (int i = 0; i < 48; i++) {
                 Element e = DOM.createDiv();
                 if (i % 2 == 0) {
-                    setStyleName(e, "v-halfhour-even");
+                    setStyleName(e, "v-slot-even");
                 } else {
-                    setStyleName(e, "v-halfhour");
+                    setStyleName(e, "v-slot");
                 }
                 e.setInnerHTML("&nbsp;");
                 Event.sinkEvents(e, Event.MOUSEEVENTS);
                 mainElement.appendChild(e);
+                slotElements[i] = e;
             }
             Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
+        }
+
+        /**
+         * @param isSized
+         *            if true, this DateCell is sized with CSS and not via
+         *            {@link #setWidthPX(int)}
+         */
+        public void setSized(boolean isSized) {
+            if (isSized) {
+                addStyleDependentName("sized");
+
+                width = getOffsetWidth()
+                        - Util.measureHorizontalBorder(getElement());
+                recalculateEventWidths();
+
+                // recalc heights&size for events. all other height sizes come
+                // from css
+                startingSlotHeight = slotElements[0].getOffsetHeight();
+                recalculateEventPositions();
+
+                recalculateTimeBarPosition();
+
+            } else {
+                removeStyleDependentName("sized");
+            }
         }
 
         @Override
@@ -215,6 +604,34 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             width = cellWidth;
             setWidth(cellWidth + "px");
             recalculateEventWidths();
+        }
+
+        public void setHeightPX(int height, int[] cellHeights) {
+            this.height = height;
+            this.slotElementHeights = cellHeights;
+            setHeight(height + "px");
+            recalculateCellHeights();
+            recalculateEventPositions();
+            if (today != null) {
+                recalculateTimeBarPosition();
+            }
+        }
+
+        // date methods are not depricated in GWT
+        @SuppressWarnings("deprecation")
+        private void recalculateTimeBarPosition() {
+            int h = today.getHours();
+            int m = today.getMinutes();
+            int pixelTop = weekgrid.getPixelTopFor(m + 60 * h);
+            todaybar.getStyle().setTop(pixelTop, Unit.PX);
+        }
+
+        private void recalculateEventPositions() {
+            for (int i = 0; i < getWidgetCount(); i++) {
+                DayEvent dayEvent = (DayEvent) getWidget(i);
+                updatePositionFor(dayEvent, getDate(), dayEvent
+                        .getCalendarEvent());
+            }
         }
 
         public void recalculateEventWidths() {
@@ -266,6 +683,33 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             drawDayEvents(groups);
         }
 
+        private void recalculateCellHeights() {
+            startingSlotHeight = height / 48;
+            //
+            // // account for borders
+            // int border = getSlotBorder();
+            //
+            // // startingSlotHeight = startingSlotHeight - border;
+            //
+            // slotElementHeights = VCalendar.distributeSize(height, 48,
+            // -border);
+
+            for (int i = 0; i < slotElements.length; i++) {
+                slotElements[i].getStyle().setHeight(slotElementHeights[i],
+                        Unit.PX);
+            }
+        }
+
+        public int getSlotHeight() {
+            return startingSlotHeight;
+        }
+
+        public int getSlotBorder() {
+            return Util
+                    .measureVerticalBorder((com.google.gwt.user.client.Element) slotElements[0]);
+
+        }
+
         private void drawDayEvents(List<Group> groups) {
             for (Group g : groups) {
                 int col = 0;
@@ -305,6 +749,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     d.getElement().getStyle().setMarginLeft(
                             (eventWidth * columns.get(index)), Unit.PX);
                     d.setWidth(eventWidth + "px");
+                    d.setSlotHeightInPX(getSlotHeight());
                 }
             }
         }
@@ -412,19 +857,30 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             return date;
         }
 
-        @SuppressWarnings("deprecation")
-        public void addEvent(Date targetDay, CalendarEvent e) {
+        public void addEvent(Date targetDay, CalendarEvent calendarEvent) {
             Element main = getElement();
-            DayEvent de = new DayEvent(weekgrid, e);
-            de.setReadOnly(isReadOnly);
-            Date fromDt = e.getStartTime();
+            DayEvent dayEvent = new DayEvent(weekgrid, calendarEvent);
+            dayEvent.setSlotHeightInPX(getSlotHeight());
+            dayEvent.setReadOnly(isReadOnly);
+
+            if (startingSlotHeight > 0) {
+                updatePositionFor(dayEvent, targetDay, calendarEvent);
+            }
+
+            add(dayEvent, (com.google.gwt.user.client.Element) main);
+        }
+
+        @SuppressWarnings("deprecation")
+        private void updatePositionFor(DayEvent dayEvent, Date targetDay,
+                CalendarEvent calendarEvent) {
+            Date fromDt = calendarEvent.getStartTime();
             int h = fromDt.getHours();
             int m = fromDt.getMinutes();
-            long range = e.getRangeInMinutesForDay(targetDay);
+            long range = calendarEvent.getRangeInMinutesForDay(targetDay);
 
-            boolean onDifferentDays = e.isTimeOnDifferentDays();
+            boolean onDifferentDays = calendarEvent.isTimeOnDifferentDays();
             if (onDifferentDays) {
-                if (e.getEnd().compareTo(targetDay) == 0) {
+                if (calendarEvent.getEnd().compareTo(targetDay) == 0) {
                     // Current day slot is for the end date. Lets fix also the
                     // start & end times.
                     h = 0;
@@ -433,14 +889,16 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             }
 
             int startFromMinutes = (h * 60) + m;
-            de.updatePosition(startFromMinutes, range);
-            add(de, (com.google.gwt.user.client.Element) main);
+            dayEvent.updatePosition(startFromMinutes, range);
         }
 
         public void addEvent(DayEvent dayEvent) {
             Element main = getElement();
             int index = 0;
             List<CalendarEvent> events = new ArrayList<CalendarEvent>();
+
+            // events are the only widgets in this panel
+            // slots are just elements
             for (; index < getWidgetCount(); index++) {
                 DayEvent dc = (DayEvent) getWidget(index);
                 dc.setReadOnly(isReadOnly);
@@ -493,11 +951,13 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 // FIXME measure all hardcoded pixels from the DOM or at least
                 // use a shared constant (I believe the 19px is the same as
                 // HALFHOUR_IN_PX)
-                int slot = (eventRangeStart - (eventRangeStart % 19)) / 19;
-                int slotEnd = (eventRangeStop - (eventRangeStop % 19)) / 19;
+                int slot = (int) ((((double) eventRangeStart - ((double) eventRangeStart % getSlotHeight())) / getSlotHeight()));
+                int slotEnd = (int) (((double) eventRangeStop - ((double) eventRangeStop % getSlotHeight())) / getSlotHeight());
                 if (slotEnd > 47) {
                     slotEnd = 47;
                 }
+
+                GWT.log("Slot start " + slot + " slot end " + slotEnd);
 
                 int slotEndBeforeReserved = slotEnd;
                 for (int i = slot; i <= slotEnd; i++) {
@@ -516,8 +976,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
                 int startMinutes = slot * 30;
                 int endMinutes = (slotEndBeforeReserved + 1) * 30;
-                VCalendar schedule = (VCalendar) weekgrid.getParent()
-                        .getParent();
+                VCalendar schedule = weekgrid.getCalendar();
                 Date currentDate = getDate();
                 String yr = (currentDate.getYear() + 1900) + "-"
                         + (currentDate.getMonth() + 1) + "-"
@@ -551,7 +1010,7 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Element c = (Element) nodes.getItem(i);
                     int elemStart = c.getOffsetTop();
-                    int elemStop = elemStart + DayEvent.HALFHOUR_IN_PX;
+                    int elemStop = elemStart + (int) getSlotHeight();
                     if (elemStart >= fromY && elemStart <= toY) {
                         c.addClassName("v-daterange");
                     } else if (elemStop >= fromY && elemStop <= toY) {
@@ -563,6 +1022,67 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     }
                 }
             }
+        }
+
+        @SuppressWarnings("deprecation")
+        public void setToday(Date today) {
+            this.today = today;
+            addStyleDependentName("today");
+            Element lastChild = (Element) getElement().getLastChild();
+            if (lastChild.getClassName().equals("v-calendar-current-time")) {
+                todaybar = lastChild;
+            } else {
+                todaybar = DOM.createDiv();
+                todaybar.setClassName("v-calendar-current-time");
+                getElement().appendChild(todaybar);
+            }
+
+            // position is calculated later, when we know the cell heights
+            // // FIXME measure pixel size from the DOM
+            // int h = today.getHours();
+            // int m = today.getMinutes();
+            // // int mInPx = (int) (((double) 38 / 60) * m);
+            // // int px = (h * 38) + mInPx;
+            // int pixelTop = weekgrid.getPixelTopFor(m + 60 * h);
+            // todaybar.getStyle().setTop(pixelTop, Unit.PX);
+        }
+
+        @SuppressWarnings("deprecation")
+        public void addReservedEvent(ReservedCalendarEvent e) {
+            Element main = getElement();
+            Date fromDt = e.getFromDatetime();
+            Date toDt = e.getToDatetime();
+            int h = fromDt.getHours();
+            int m = fromDt.getMinutes();
+            int slot = h * 2;
+            if (m >= 30) {
+                slot += 1;
+            }
+            h = toDt.getHours();
+            m = toDt.getMinutes();
+
+            int slotEnd = h * 2;
+            if (m > 0 && m <= 30) {
+                slotEnd += 1;
+            } else if (m > 30) {
+                slotEnd += 2;
+            }
+            for (int i = slot; i < slotEnd; i++) {
+                Element slotelement = Element.as(main.getChild(i));
+                slotelement.addClassName("reserved");
+            }
+        }
+
+        public void setReadOnly(boolean readOnly) {
+            this.isReadOnly = readOnly;
+        }
+
+        public boolean isReadOnly() {
+            return isReadOnly;
+        }
+
+        public void setDateColor(String styleName) {
+            this.setStyleName("v-calendar-datecell " + styleName);
         }
 
         private static class Group {
@@ -594,9 +1114,6 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private int startX = -1;
             private String moveWidth;
             public static final int halfHourInMilliSeconds = 1800 * 1000;
-            // FIXME measure from the DOM
-            public static final int HALFHOUR_IN_PX = 19;
-            public static final int HOUR_IN_PX = HALFHOUR_IN_PX * 2;
             private Date startDatetimeFrom;
             private Date startDatetimeTo;
             private boolean mouseMoveStarted;
@@ -611,6 +1128,10 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             private Element clickTarget;
             private Integer eventIndex;
             private boolean eventMoveAllowed;
+            private int slotHeight;
+
+            // private int slotHeight;
+            // private int doubleSlotHeight;
 
             public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
@@ -657,6 +1178,15 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                         calendar, CalendarEventId.EVENTMOVE);
             }
 
+            // public void setSlotHeightInPX(int slotHeight) {
+            // this.slotHeight = slotHeight;
+            // doubleSlotHeight = 2 * slotHeight;
+            // }
+
+            public void setSlotHeightInPX(int slotHeight) {
+                this.slotHeight = slotHeight;
+            }
+
             @Override
             public void onBrowserEvent(Event event) {
                 super.onBrowserEvent(event);
@@ -669,11 +1199,19 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
 
             public void updatePosition(long startFromMinutes,
                     long durationInMinutes) {
-                top = (int) ((((double) HOUR_IN_PX / 60)) * startFromMinutes);
+                if (startFromMinutes < 0) {
+                    startFromMinutes = 0;
+                }
+                // top = (int) ((((double) doubleSlotHeight / 60)) *
+                // startFromMinutes);
+                top = weekGrid.getPixelTopFor((int) startFromMinutes);
 
                 getElement().getStyle().setTop(top, Unit.PX);
                 if (durationInMinutes > 0) {
-                    int heightMinutes = (int) (((double) HOUR_IN_PX / 60) * durationInMinutes);
+                    // int heightMinutes = (int) (((double) doubleSlotHeight /
+                    // 60) * durationInMinutes);
+                    int heightMinutes = weekGrid.getPixelLengthFor(
+                            (int) startFromMinutes, (int) durationInMinutes);
                     setHeight(heightMinutes);
                 } else {
                     setHeight(-1);
@@ -722,11 +1260,16 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     moveRegistration = addMouseMoveHandler(this);
                     startX = event.getClientX();
                     startY = event.getClientY();
-                    startYrelative = event.getRelativeY(caption)
-                            % HALFHOUR_IN_PX;
-                    startXrelative = (event.getRelativeX(weekGrid.getElement()) - weekGrid.timebar
-                            .getOffsetWidth())
-                            % getDateCellWidth();
+                    try {
+                        startYrelative = (int) ((double) event
+                                .getRelativeY(caption) % slotHeight);
+                        startXrelative = (event.getRelativeX(weekGrid
+                                .getElement()) - weekGrid.timebar
+                                .getOffsetWidth())
+                                % getDateCellWidth();
+                    } catch (Exception e) {
+                        GWT.log("foo", e);
+                    }
                     mouseMoveStarted = false;
                     Style s = getElement().getStyle();
                     startDatetimeFrom = (Date) calendarEvent.getStartTime()
@@ -818,14 +1361,15 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
                     mouseMoveStarted = true;
                 }
 
-                Widget parent = getParent().getParent();
+                HorizontalPanel parent = (HorizontalPanel) getParent()
+                        .getParent();
                 int relativeX = event.getRelativeX(parent.getElement())
                         - weekGrid.timebar.getOffsetWidth();
                 int halfHourDiff = 0;
                 if (moveY > 0) {
-                    halfHourDiff = (startYrelative + moveY) / HALFHOUR_IN_PX;
+                    halfHourDiff = (startYrelative + moveY) / slotHeight;
                 } else {
-                    halfHourDiff = (moveY - startYrelative) / HALFHOUR_IN_PX;
+                    halfHourDiff = (moveY - startYrelative) / slotHeight;
                 }
 
                 int dateCellWidth = getDateCellWidth();
@@ -968,25 +1512,21 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             }
 
             private Date getTargetDateByCurrentPosition(int left) {
-                DateCell dateCell = (DateCell) getParent();
-                WeekGrid wk = (WeekGrid) dateCell.getParent().getParent();
-                DateCell newParent = (DateCell) wk.content
+                DateCell newParent = (DateCell) weekGrid.content
                         .getWidget((left / getDateCellWidth()) + 1);
                 Date targetDate = newParent.getDate();
                 return targetDate;
             }
 
             private int getDateCellWidth() {
-                WeekGrid wk = (WeekGrid) getParent().getParent().getParent();
-                int count = wk.content.getWidgetCount() - 1;
-                int cellWidth = wk.getInternalWidth() / count;
+                int count = weekGrid.content.getWidgetCount() - 1;
+                int cellWidth = weekGrid.getInternalWidth() / count;
                 return cellWidth;
             }
 
             /* Returns total width of all date cells. */
             private int getDatesWidth() {
-                WeekGrid wk = (WeekGrid) getParent().getParent().getParent();
-                return wk.getInternalWidth();
+                return weekGrid.getInternalWidth();
             }
 
             /**
@@ -1027,192 +1567,6 @@ public class WeekGrid extends ScrollPanel implements NativePreviewHandler {
             }
 
         }
-
-        @SuppressWarnings("deprecation")
-        public void setToday(Date today) {
-            addStyleDependentName("today");
-            Element lastChild = (Element) getElement().getLastChild();
-            Element todaybar = null;
-            if (lastChild.getClassName().equals("v-calendar-current-time")) {
-                todaybar = lastChild;
-            } else {
-                todaybar = DOM.createDiv();
-                todaybar.setClassName("v-calendar-current-time");
-                getElement().appendChild(todaybar);
-            }
-            // FIXME measure pixel size from the DOM
-            int h = today.getHours();
-            int m = today.getMinutes();
-            int mInPx = (int) (((double) 38 / 60) * m);
-            int px = (h * 38) + mInPx;
-            todaybar.getStyle().setTop(px, Unit.PX);
-        }
-
-        @SuppressWarnings("deprecation")
-        public void addReservedEvent(ReservedCalendarEvent e) {
-            Element main = getElement();
-            Date fromDt = e.getFromDatetime();
-            Date toDt = e.getToDatetime();
-            int h = fromDt.getHours();
-            int m = fromDt.getMinutes();
-            int slot = h * 2;
-            if (m >= 30) {
-                slot += 1;
-            }
-            h = toDt.getHours();
-            m = toDt.getMinutes();
-
-            int slotEnd = h * 2;
-            if (m > 0 && m <= 30) {
-                slotEnd += 1;
-            } else if (m > 30) {
-                slotEnd += 2;
-            }
-            for (int i = slot; i < slotEnd; i++) {
-                Element slotelement = Element.as(main.getChild(i));
-                slotelement.addClassName("reserved");
-            }
-        }
-
-        public void setReadOnly(boolean readOnly) {
-            this.isReadOnly = readOnly;
-        }
-
-        public boolean isReadOnly() {
-            return isReadOnly;
-        }
-
-        public void setDateColor(String styleName) {
-            this.setStyleName("v-calendar-datecell " + styleName);
-        }
-    }
-
-    public void addEvent(CalendarEvent e) {
-        int dateCount = content.getWidgetCount();
-        Date from = e.getStart();
-        Date toTime = e.getEndTime();
-        for (int i = 1; i < dateCount; i++) {
-            DateCell dc = (DateCell) content.getWidget(i);
-            Date dcDate = dc.getDate();
-            int comp = dcDate.compareTo(from);
-            int comp2 = dcDate.compareTo(toTime);
-            if (comp >= 0 && comp2 < 0) {
-                // Same event may be over two DateCells if event's date
-                // range floats over one day. It can't float over two days,
-                // because event which range is over 24 hours, will be handled
-                // as a "fullDay" event.
-                dc.addEvent(dcDate, e);
-            }
-        }
-    }
-
-    public void eventMoved(DayEvent dayEvent) {
-        Style s = dayEvent.getElement().getStyle();
-        int left = Integer.parseInt(s.getLeft().substring(0,
-                s.getLeft().length() - 2));
-        int datesWidth = width;
-        int count = content.getWidgetCount();
-        int cellWidth = datesWidth / (count - 1);
-        DateCell previousParent = (DateCell) dayEvent.getParent();
-        DateCell newParent = (DateCell) content
-                .getWidget((left / cellWidth) + 1);
-        CalendarEvent se = dayEvent.getCalendarEvent();
-        previousParent.removeEvent(dayEvent);
-        newParent.addEvent(dayEvent);
-        if (!previousParent.equals(newParent))
-            previousParent.recalculateEventWidths();
-        newParent.recalculateEventWidths();
-        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
-        DateTimeFormat dateformat_time = DateTimeFormat.getFormat("HH-mm");
-        String eventMove = se.getIndex() + ":"
-                + dateformat_date.format(se.getStart()) + "-"
-                + dateformat_time.format(se.getStartTime());
-
-        if (getCalendar().getClient().hasEventListeners(getCalendar(),
-                CalendarEventId.EVENTMOVE)) {
-            getCalendar().getClient().updateVariable(getCalendar().getPID(),
-                    CalendarEventId.EVENTMOVE, eventMove, true);
-        }
-    }
-
-    public void setToday(Date todayDate, Date todayTimestamp) {
-        int count = content.getWidgetCount();
-        if (count > 1) {
-            for (int i = 1; i < count; i++) {
-                DateCell dc = (DateCell) content.getWidget(i);
-                if (dc.getDate().getTime() == todayDate.getTime()) {
-                    dc.setToday(todayTimestamp);
-                }
-            }
-        }
-    }
-
-    public void onPreviewNativeEvent(NativePreviewEvent event) {
-        if (event.getTypeInt() == Event.ONMOUSEDOWN
-                && DOM.isOrHasChild(getElement(),
-                        (com.google.gwt.user.client.Element) Element.as(event
-                                .getNativeEvent().getEventTarget()))) {
-            event.getNativeEvent().preventDefault();
-        }
-    }
-
-    public void addReservedEvent(ReservedCalendarEvent e) {
-        int dateCount = content.getWidgetCount();
-        Date from = e.getFromDate();
-        Date to = e.getToDate();
-        for (int i = 1; i < dateCount; i++) {
-            DateCell dc = (DateCell) content.getWidget(i);
-            Date dcDate = dc.getDate();
-            int comp = dcDate.compareTo(from);
-            int comp2 = dcDate.compareTo(to);
-            if (comp >= 0 && comp2 <= 0) {
-                dc.addReservedEvent(e);
-            }
-        }
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-    }
-
-    public boolean isFormat24h() {
-        return format24h;
-    }
-
-    public void setFormat24h(boolean format24h) {
-        this.format24h = format24h;
-    }
-
-    public Timebar getTimeBar() {
-        return timebar;
-    }
-
-    public void setDateColor(Date when, Date to, String styleName) {
-        int dateCount = content.getWidgetCount();
-        for (int i = 1; i < dateCount; i++) {
-            DateCell dc = (DateCell) content.getWidget(i);
-            Date dcDate = dc.getDate();
-            int comp = dcDate.compareTo(when);
-            int comp2 = dcDate.compareTo(to);
-            if (comp >= 0 && comp2 <= 0) {
-                dc.setDateColor(styleName);
-            }
-        }
-    }
-
-    /**
-     * @param calendar
-     *            the calendar to set
-     */
-    public void setCalendar(VCalendar calendar) {
-        this.calendar = calendar;
-    }
-
-    /**
-     * @return the calendar
-     */
-    public VCalendar getCalendar() {
-        return calendar;
     }
 
 }

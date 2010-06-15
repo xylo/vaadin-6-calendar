@@ -94,7 +94,7 @@ public class MonthGrid extends Grid {
             int rows = getRowCount();
             int cells = getCellCount(0);
             int cellWidth = (totalWidthPX / cells) - 1;
-            int remainder = totalWidthPX % cells;
+            int widthRemainder = totalWidthPX % cells;
             // Division for cells might not be even. Distribute it evenly to
             // will whole space.
             int heightPX = totalHeightPX;
@@ -104,9 +104,9 @@ public class MonthGrid extends Grid {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cells; j++) {
                     SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
-                    if (remainder > 0) {
+                    if (widthRemainder > 0) {
                         sdc.setWidth(cellWidth + 1 + "px");
-                        remainder--;
+                        widthRemainder--;
                     } else {
                         sdc.setWidth(cellWidth + "px");
                     }
@@ -117,6 +117,15 @@ public class MonthGrid extends Grid {
                     }
                 }
                 heightRemainder--;
+            }
+        } else {
+            int rows = getRowCount();
+            int cells = getCellCount(0);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cells; j++) {
+                    SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+                    sdc.setHeightPX(-1, true);
+                }
             }
         }
     }
@@ -134,5 +143,23 @@ public class MonthGrid extends Grid {
 
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    public void setHeightPX(int intHeight) {
+        if (intHeight == -1) {
+            addStyleDependentName("sizedheight");
+
+        } else {
+            removeStyleDependentName("sizedheight");
+        }
+    }
+
+    public void setWidthPX(int intWidth) {
+        if (intWidth == -1) {
+            addStyleDependentName("sizedwidth");
+
+        } else {
+            removeStyleDependentName("sizedwidth");
+        }
     }
 }

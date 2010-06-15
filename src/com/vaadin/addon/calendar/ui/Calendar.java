@@ -132,7 +132,6 @@ public class Calendar extends AbstractComponent implements
      */
     public Calendar(CalendarEventProvider calendarEventProvider) {
         this.setCalendarEventProvider(calendarEventProvider);
-        setSizeFull();
     }
 
     /**
