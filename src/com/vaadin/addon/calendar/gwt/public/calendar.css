@@ -100,6 +100,11 @@
 	opacity: 1;
 	}
 
+/* Otherwise IE7 has uneven cell widths */
+.v-ie7 .v-calendar-month {
+	table-layout: fixed;
+	}
+
 .v-calendar-month-day {
 	border-bottom: 1px solid #ccc;
 	border-right: 1px solid #ccc;
@@ -158,6 +163,7 @@
 	margin-bottom: 1px;
 	display: list-item;
 	list-style-position: inside;
+	list-style-type: none;
 	white-space: nowrap;
 	}
 
@@ -203,6 +209,10 @@ div.v-calendar-event-all-day {
 .v-calendar-week-wrapper {
 	position: relative;
 	}
+	
+/*.v-ie7 .v-calendar-week-wrapper TABLE{
+	table-layout: fixed;
+}*/
 	
 .v-calendar-times {
 	width: 51px;

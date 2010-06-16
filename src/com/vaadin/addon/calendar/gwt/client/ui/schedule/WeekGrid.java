@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
+import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.DateTimeService;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
@@ -56,7 +57,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int dateCellBorder;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
-        this.setCalendar(parent);
+        setCalendar(parent);
         this.format24h = format24h;
         content = new HorizontalPanel();
         timebar = new Timebar(format24h);
@@ -148,6 +149,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         // if not scrollable, use any height given
         if (!isScrollable() && height > 0) {
+
+            if (BrowserInfo.get().isIE7() || BrowserInfo.get().isIE6()) {
+                --height;
+            }
+
+            content.setHeight(height + "px");
             setHeight(height + "px");
             timebar.setHeightPX(height);
             wrapper.setHeight(height + "px");
@@ -177,6 +184,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
                     dc.setWidthPX(cellWidthMinusBorder);
+                    if (dc.isToday()) {
+                        dc.setTimeBarWidth(getOffsetWidth());
+                    }
                 }
             }
 
@@ -328,8 +338,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         CalendarEvent se = dayEvent.getCalendarEvent();
         previousParent.removeEvent(dayEvent);
         newParent.addEvent(dayEvent);
-        if (!previousParent.equals(newParent))
+        if (!previousParent.equals(newParent)) {
             previousParent.recalculateEventWidths();
+        }
         newParent.recalculateEventWidths();
         DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
         DateTimeFormat dateformat_time = DateTimeFormat.getFormat("HH-mm");
@@ -350,7 +361,11 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             for (int i = 1; i < count; i++) {
                 DateCell dc = (DateCell) content.getWidget(i);
                 if (dc.getDate().getTime() == todayDate.getTime()) {
-                    dc.setToday(todayTimestamp);
+                    if (isScrollable()) {
+                        dc.setToday(todayTimestamp, -1);
+                    } else {
+                        dc.setToday(todayTimestamp, getOffsetWidth());
+                    }
                 }
             }
         }
@@ -484,7 +499,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         public void setHeightPX(int pixelHeight) {
-            this.height = pixelHeight;
+            height = pixelHeight;
 
             if (pixelHeight > -1) {
                 // as the negative margins on children pulls the whole element
@@ -566,6 +581,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
         }
 
+        public void setTimeBarWidth(int timebarWidth) {
+            todaybar.getStyle().setWidth(timebarWidth, Unit.PX);
+        }
+
         /**
          * @param isSized
          *            if true, this DateCell is sized with CSS and not via
@@ -608,7 +627,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public void setHeightPX(int height, int[] cellHeights) {
             this.height = height;
-            this.slotElementHeights = cellHeights;
+            slotElementHeights = cellHeights;
             setHeight(height + "px");
             recalculateCellHeights();
             recalculateEventPositions();
@@ -694,9 +713,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             // slotElementHeights = VCalendar.distributeSize(height, 48,
             // -border);
 
+            boolean isIE6 = BrowserInfo.get().isIE6();
+
             for (int i = 0; i < slotElements.length; i++) {
                 slotElements[i].getStyle().setHeight(slotElementHeights[i],
                         Unit.PX);
+
+                if (isIE6) {
+                    slotElements[i].getStyle().setProperty("lineHeight",
+                            slotElementHeights[i] + "px");
+                }
             }
         }
 
@@ -760,8 +786,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int skipIndex = -1;
             for (Integer eventIndex : order) {
                 int col = columns.get(eventIndex);
-                if (col == skipIndex)
+                if (col == skipIndex) {
                     continue;
+                }
 
                 if (freeSpot != -1 && freeSpot != col) {
                     // Free spot found
@@ -909,8 +936,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             index = 0;
             for (CalendarEvent e : weekgrid.getCalendar().sortEventsByDuration(
                     events)) {
-                if (e.equals(dayEvent.getCalendarEvent()))
+                if (e.equals(dayEvent.getCalendarEvent())) {
                     break;
+                }
                 index++;
             }
             this.insert(dayEvent, (com.google.gwt.user.client.Element) main,
@@ -951,8 +979,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 // FIXME measure all hardcoded pixels from the DOM or at least
                 // use a shared constant (I believe the 19px is the same as
                 // HALFHOUR_IN_PX)
-                int slot = (int) ((((double) eventRangeStart - ((double) eventRangeStart % getSlotHeight())) / getSlotHeight()));
-                int slotEnd = (int) (((double) eventRangeStop - ((double) eventRangeStop % getSlotHeight())) / getSlotHeight());
+                int slot = (int) (((eventRangeStart - ((double) eventRangeStart % getSlotHeight())) / getSlotHeight()));
+                int slotEnd = (int) ((eventRangeStop - ((double) eventRangeStop % getSlotHeight())) / getSlotHeight());
                 if (slotEnd > 47) {
                     slotEnd = 47;
                 }
@@ -1010,7 +1038,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Element c = (Element) nodes.getItem(i);
                     int elemStart = c.getOffsetTop();
-                    int elemStop = elemStart + (int) getSlotHeight();
+                    int elemStop = elemStart + getSlotHeight();
                     if (elemStart >= fromY && elemStart <= toY) {
                         c.addClassName("v-daterange");
                     } else if (elemStop >= fromY && elemStop <= toY) {
@@ -1024,8 +1052,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
         }
 
-        @SuppressWarnings("deprecation")
-        public void setToday(Date today) {
+        public void setToday(Date today, int width) {
             this.today = today;
             addStyleDependentName("today");
             Element lastChild = (Element) getElement().getLastChild();
@@ -1037,14 +1064,11 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 getElement().appendChild(todaybar);
             }
 
+            if (width != -1) {
+                todaybar.getStyle().setWidth(width, Unit.PX);
+            }
+
             // position is calculated later, when we know the cell heights
-            // // FIXME measure pixel size from the DOM
-            // int h = today.getHours();
-            // int m = today.getMinutes();
-            // // int mInPx = (int) (((double) 38 / 60) * m);
-            // // int px = (h * 38) + mInPx;
-            // int pixelTop = weekgrid.getPixelTopFor(m + 60 * h);
-            // todaybar.getStyle().setTop(pixelTop, Unit.PX);
         }
 
         @SuppressWarnings("deprecation")
@@ -1074,7 +1098,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         public void setReadOnly(boolean readOnly) {
-            this.isReadOnly = readOnly;
+            isReadOnly = readOnly;
         }
 
         public boolean isReadOnly() {
@@ -1083,6 +1107,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public void setDateColor(String styleName) {
             this.setStyleName("v-calendar-datecell " + styleName);
+        }
+
+        public boolean isToday() {
+            return today != null;
         }
 
         private static class Group {
@@ -1118,7 +1146,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             private Date startDatetimeTo;
             private boolean mouseMoveStarted;
             private int top;
-            private int bufferInPX;
             private int startYrelative;
             private int startXrelative;
             private boolean readOnly;
@@ -1138,7 +1165,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 setStylePrimaryName("v-calendar-event");
                 setCalendarEvent(event);
 
-                this.weekGrid = parent;
+                weekGrid = parent;
 
                 Style s = getElement().getStyle();
                 if (event.getStyleName().length() > 0) {
@@ -1202,14 +1229,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 if (startFromMinutes < 0) {
                     startFromMinutes = 0;
                 }
-                // top = (int) ((((double) doubleSlotHeight / 60)) *
-                // startFromMinutes);
                 top = weekGrid.getPixelTopFor((int) startFromMinutes);
 
                 getElement().getStyle().setTop(top, Unit.PX);
                 if (durationInMinutes > 0) {
-                    // int heightMinutes = (int) (((double) doubleSlotHeight /
-                    // 60) * durationInMinutes);
                     int heightMinutes = weekGrid.getPixelLengthFor(
                             (int) startFromMinutes, (int) durationInMinutes);
                     setHeight(heightMinutes);
@@ -1288,8 +1311,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             public void onMouseUp(MouseUpEvent event) {
                 Event.releaseCapture(getElement());
-                if (moveRegistration != null)
+                if (moveRegistration != null) {
                     moveRegistration.removeHandler();
+                }
                 int endX = event.getClientX();
                 int endY = event.getClientY();
                 int xDiff = startX - endX;

@@ -7,6 +7,7 @@ import java.util.Date;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 public class MonthGrid extends Grid {
 
@@ -101,17 +102,21 @@ public class MonthGrid extends Grid {
             int cellHeight = heightPX / rows;
             int heightRemainder = heightPX % rows;
 
+            boolean isIE7 = BrowserInfo.get().isIE7();
+
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cells; j++) {
                     SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
-                    if (widthRemainder > 0) {
+                    if (widthRemainder > 0 && !isIE7) {
                         sdc.setWidth(cellWidth + 1 + "px");
                         widthRemainder--;
+
                     } else {
                         sdc.setWidth(cellWidth + "px");
                     }
                     if (heightRemainder > 0) {
                         sdc.setHeightPX(cellHeight + 1, true);
+
                     } else {
                         sdc.setHeightPX(cellHeight, true);
                     }
