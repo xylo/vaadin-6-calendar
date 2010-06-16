@@ -379,21 +379,20 @@ public class Calendar extends AbstractComponent implements
         // and endweek. Example if views daterange is from tuesday to next weeks
         // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
         // monday
-
-        // If the duration is one day, we expand the start and end to cover the
-        // whole day.
         if (durationInDays > 7) {
             firstDateToShow = getFirstDateForWeek(startDate);
             lastDateToShow = getLastDateForWeek(endDate);
-
-        } else if (durationInDays == 1) {
-            firstDateToShow = getStartOfDay(startDate);
-            lastDateToShow = getEndOfDay(endDate);
 
         } else {
             firstDateToShow = (Date) startDate.clone();
             lastDateToShow = (Date) endDate.clone();
         }
+
+        // Always expand to the start of the first day to the end of the last
+        // day
+        firstDateToShow = getStartOfDay(startDate);
+        lastDateToShow = getEndOfDay(endDate);
+
         currentCalendar.setTime(firstDateToShow);
 
         target.startTag("days");

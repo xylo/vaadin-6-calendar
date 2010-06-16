@@ -625,7 +625,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 startingSlotHeight = slotElements[0].getOffsetHeight();
                 recalculateEventPositions();
 
-                recalculateTimeBarPosition();
+                if (isToday()) {
+                    recalculateTimeBarPosition();
+                }
 
             } else {
                 removeStyleDependentName("sized");
