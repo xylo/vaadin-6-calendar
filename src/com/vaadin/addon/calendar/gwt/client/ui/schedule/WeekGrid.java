@@ -156,10 +156,11 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             content.setHeight(height + "px");
             setHeight(height + "px");
-            timebar.setHeightPX(height);
             wrapper.setHeight(height + "px");
             wrapper.removeStyleDependentName("sized");
             updateCellHeights();
+            timebar.setCellHeights(cellHeights);
+            timebar.setHeightPX(height);
 
         } else if (isScrollable()) {
             updateCellHeights();
@@ -445,8 +446,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         private int verticalPadding = 7; // FIXME measure this from DOM
 
+        private int[] slotCellHeights;
+
         public Timebar(boolean format24h) {
             createTimeBar(format24h);
+        }
+
+        public void setCellHeights(int[] cellHeights) {
+            slotCellHeights = cellHeights;
         }
 
         private void createTimeBar(boolean format24h) {
@@ -521,7 +528,22 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             if (height != -1) {
 
                 // 23 hours + first is empty
-                int[] cellHeights = VCalendar.distributeSize(height, 24, 0);
+                // we try to adjust the height of time labels to the distributed
+                // heights of the time slots
+                int slotsPerHour = slotCellHeights.length / 24;
+                int[] cellHeights = new int[slotCellHeights.length
+                        / slotsPerHour];
+
+                int slotHeightPosition = 0;
+                for (int i = 0; i < cellHeights.length; i++) {
+                    for (int j = slotHeightPosition; j < slotHeightPosition
+                            + slotsPerHour; j++) {
+                        cellHeights[i] += slotCellHeights[j] + 1;
+                        // 1px more for borders
+                        // FIXME measure from DOM
+                    }
+                    slotHeightPosition += slotsPerHour;
+                }
 
                 for (int i = 0; i < childCount; i++) {
                     Element e = (Element) getElement().getChild(i);
