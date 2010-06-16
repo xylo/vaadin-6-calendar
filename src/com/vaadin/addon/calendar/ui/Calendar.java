@@ -390,8 +390,8 @@ public class Calendar extends AbstractComponent implements
 
         // Always expand to the start of the first day to the end of the last
         // day
-        firstDateToShow = getStartOfDay(startDate);
-        lastDateToShow = getEndOfDay(endDate);
+        firstDateToShow = getStartOfDay(firstDateToShow);
+        lastDateToShow = getEndOfDay(lastDateToShow);
 
         currentCalendar.setTime(firstDateToShow);
 
