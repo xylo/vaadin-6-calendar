@@ -192,7 +192,7 @@ public interface CalendarComponentEvents {
          * @return Returns true when monthly view is active.
          */
         public boolean isMonthlyMode() {
-            return this.monthlyMode;
+            return monthlyMode;
         }
     }
 

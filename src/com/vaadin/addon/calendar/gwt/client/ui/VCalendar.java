@@ -247,13 +247,15 @@ public class VCalendar extends Composite implements Paintable {
                 SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
                         cell);
                 if (isEventInDay(when, to, sdc.getDate())) {
-                    if (!eventMoving)
+                    if (!eventMoving) {
                         eventMoving = sdc.getMoveEvent() != null;
+                    }
                     long d = e.getRangeInMilliseconds();
-                    if (d > 0 && d < VCalendar.DAYINMILLIS)
+                    if (d > 0 && d < VCalendar.DAYINMILLIS) {
                         timeCells.add(sdc);
-                    else
+                    } else {
                         dayCells.add(sdc);
+                    }
                     inProgress = true;
                     continue;
                 } else if (inProgress) {
@@ -274,21 +276,24 @@ public class VCalendar extends Composite implements Paintable {
             sdc.addCalendarEvent(e);
         }
 
-        if (renderImmediately)
+        if (renderImmediately) {
             reDrawAllMonthEvents(!eventMoving);
+        }
     }
 
     private void updateEventSlotIndex(CalendarEvent e, List<SimpleDayCell> cells) {
-        if (cells.isEmpty())
+        if (cells.isEmpty()) {
             return;
+        }
 
         if (e.getSlotIndex() == -1) {
             // Update slot index
             int newSlot = -1;
             for (SimpleDayCell sdc : cells) {
                 int slot = sdc.getEventCount();
-                if (slot > newSlot)
+                if (slot > newSlot) {
                     newSlot = slot;
+                }
             }
             newSlot++;
 
@@ -317,8 +322,9 @@ public class VCalendar extends Composite implements Paintable {
             List<SimpleDayCell> cells) {
         for (SimpleDayCell sdc : cells) {
             CalendarEvent e = sdc.getCalendarEvent(slotIndex);
-            if (e != null && !e.equals(addedEvent))
+            if (e != null && !e.equals(addedEvent)) {
                 return false;
+            }
         }
         return true;
     }
@@ -331,8 +337,9 @@ public class VCalendar extends Composite implements Paintable {
                 for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
                     SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(
                             row, cell);
-                    if (sdc == null)
+                    if (sdc == null) {
                         return;
+                    }
                     sdc.removeEvent(target, repaintImmediately);
                 }
             }
@@ -356,24 +363,24 @@ public class VCalendar extends Composite implements Paintable {
                 int r = 0;
                 if (!d1.equals(0L) && !d2.equals(0L)) {
                     r = d2.compareTo(d1);
-                    return (r == 0) ? ((Integer) o2.getIndex())
-                            .compareTo((Integer) o1.getIndex()) : r;
+                    return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
+                            .getIndex()) : r;
                 }
 
-                if (d2.equals(0L) && d1.equals(0L))
-                    return ((Integer) o2.getIndex()).compareTo((Integer) o1
-                            .getIndex());
-                else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS)
+                if (d2.equals(0L) && d1.equals(0L)) {
+                    return ((Integer) o2.getIndex()).compareTo(o1.getIndex());
+                } else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS) {
                     return -1;
-                else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS)
+                } else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS) {
                     return 1;
-                else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS)
+                } else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS) {
                     return 1;
-                else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS)
+                } else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS) {
                     return -1;
+                }
                 r = d2.compareTo(d1);
-                return (r == 0) ? ((Integer) o2.getIndex())
-                        .compareTo((Integer) o1.getIndex()) : r;
+                return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
+                        .getIndex()) : r;
             }
         });
         return sorted;

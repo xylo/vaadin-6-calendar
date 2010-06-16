@@ -125,7 +125,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public void reDraw(boolean clear) {
-        setHeightPX(this.intHeight + BORDERPADDINGSIZE, clear);
+        setHeightPX(intHeight + BORDERPADDINGSIZE, clear);
     }
 
     /*
@@ -151,8 +151,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         int slots = 0;
         if (scrollable) {
             for (int i = 0; i < events.length; i++) {
-                if (events[i] != null)
+                if (events[i] != null) {
                     slots = i + 1;
+                }
             }
             setHeight(intHeight + "px"); // Fixed height
         } else {
@@ -180,8 +181,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                 if (!clear) {
                     remove(i + 1);
                     insert(slot, i + 1);
-                } else
+                } else {
                     add(slot);
+                }
             } else {
                 // Event slot
                 eventsAdded++;
@@ -191,25 +193,29 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                         remove(i + 1);
                         insert(createMonthEventLabel(e), i + 1);
                     }
-                } else
+                } else {
                     add(createMonthEventLabel(e));
+                }
             }
         }
         int remainingSpace = intHeight
                 - ((slots * EVENTHEIGHT) + BOTTOMSPACERHEIGHT + caption
                         .getOffsetHeight());
         int newHeight = remainingSpace + BOTTOMSPACERHEIGHT;
-        if (newHeight < 0) // Height fix for IE
+        if (newHeight < 0) {
             newHeight = EVENTHEIGHT;
+        }
         bottomspacer.setHeight(newHeight + "px");
-        if (clear)
+        if (clear) {
             add(bottomspacer);
+        }
 
         int more = eventCount - eventsAdded;
         if (more > 0) {
-            if (bottomSpacerMouseDownHandler == null)
+            if (bottomSpacerMouseDownHandler == null) {
                 bottomSpacerMouseDownHandler = bottomspacer
                         .addMouseDownHandler(this);
+            }
             bottomspacer.setStyleName("v-calendar-bottom-spacer");
             bottomspacer.setText("+ " + more);
         } else {
@@ -404,8 +410,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         } else if (w instanceof MonthEventLabel && eventMoveAllowed) {
             monthEventMouseDown = true;
 
-            if (w instanceof MonthEventLabel)
+            if (w instanceof MonthEventLabel) {
                 startCalendarEventDrag(event, (MonthEventLabel) w);
+            }
 
         } else if (w == this && !scrollable) {
             MonthGrid grid = (MonthGrid) getParent();
@@ -482,8 +489,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                 + " days" + " (" + getCell() + "," + getRow() + ")");
 
         CalendarEvent e = moveEvent;
-        if (e == null)
+        if (e == null) {
             e = getEventByWidget(w);
+        }
 
         Date from = e.getStart();
         Date to = e.getEnd();
@@ -492,7 +500,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
         long daysMs = dayDiff * VCalendar.DAYINMILLIS;
         long weeksMs = weekDiff * VCalendar.WEEKINMILLIS;
         from.setTime(startDateFrom.getTime() + weeksMs + daysMs);
-        to.setTime((long) (from.getTime() + duration));
+        to.setTime((from.getTime() + duration));
         e.setStart(from);
         e.setEnd(to);
         e.setStartTime(new Date(from.getTime()));
@@ -519,8 +527,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public void startCalendarEventDrag(MouseDownEvent event, MonthEventLabel w) {
-        if (w.isTimeSpecificEvent())
+        if (w.isTimeSpecificEvent()) {
             return;
+        }
 
         moveRegistration = addMouseMoveHandler(this);
         startX = event.getClientX();
@@ -540,8 +549,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
     public void updateDragPosition(MonthEventLabel w, int dayDiff, int weekDiff) {
         // Draw event to its new position only when position has changed
-        if (dayDiff == prevDayDiff && weekDiff == prevWeekDiff)
+        if (dayDiff == prevDayDiff && weekDiff == prevWeekDiff) {
             return;
+        }
 
         prevDayDiff = dayDiff;
         prevWeekDiff = weekDiff;
@@ -569,8 +579,9 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
                                 .getNativeEvent().getEventTarget()))) {
             if (scrollable
                     && getElement().equals(
-                            event.getNativeEvent().getEventTarget()))
+                            event.getNativeEvent().getEventTarget())) {
                 return; // Scrollbar click workaround
+            }
 
             event.getNativeEvent().preventDefault();
         }
@@ -614,7 +625,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public int getHeigth() {
-        return this.intHeight + BORDERPADDINGSIZE;
+        return intHeight + BORDERPADDINGSIZE;
     }
 
     public int getWidth() {
@@ -639,15 +650,17 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     public boolean removeEvent(CalendarEvent targetEvent,
             boolean reDrawImmediately) {
         int slot = targetEvent.getSlotIndex();
-        if (slot < 0)
+        if (slot < 0) {
             return false;
+        }
 
         CalendarEvent e = getCalendarEvent(slot);
         if (targetEvent.equals(e)) {
             events[slot] = null;
             eventCount--;
-            if (reDrawImmediately)
+            if (reDrawImmediately) {
                 reDraw(moveEvent == null);
+            }
             return true;
         }
         return false;

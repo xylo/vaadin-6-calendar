@@ -241,8 +241,9 @@ public class SimpleCalTest extends Application {
 
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
-                if (currentCalDateRange > (VCalendar.DAYINMILLIS * 7))
+                if (currentCalDateRange > (VCalendar.DAYINMILLIS * 7)) {
                     return;
+                }
 
                 // Reset calendar's start time to the target month's first day.
                 gc.set(GregorianCalendar.DATE, gc

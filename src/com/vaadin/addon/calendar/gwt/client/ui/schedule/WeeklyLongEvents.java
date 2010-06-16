@@ -262,7 +262,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
 
         public void setEvent(CalendarEvent event) {
-            this.calendarEvent = event;
+            calendarEvent = event;
         }
 
         public CalendarEvent getEvent() {

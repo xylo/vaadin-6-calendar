@@ -19,7 +19,7 @@ public class MonthGrid extends Grid {
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
-        this.calendar = parent;
+        calendar = parent;
         setCellSpacing(0);
         setCellPadding(0);
         setStylePrimaryName("v-calendar-month");
@@ -49,8 +49,9 @@ public class MonthGrid extends Grid {
             for (int row = 0; row < getRowCount(); row++) {
                 for (int cell = 0; cell < getCellCount(row); cell++) {
                     SimpleDayCell sdc = (SimpleDayCell) getWidget(row, cell);
-                    if (sdc == null)
+                    if (sdc == null) {
                         return;
+                    }
                     Date d = sdc.getDate();
                     if (startDate.compareTo(d) <= 0
                             && endDate.compareTo(d) >= 0) {

@@ -610,8 +610,9 @@ public class CalendarTest extends Application {
         updateCalendarEventPopup(newEvent);
         updateCalendarEventForm(event);
 
-        if (!getMainWindow().getChildWindows().contains(scheduleEventPopup))
+        if (!getMainWindow().getChildWindows().contains(scheduleEventPopup)) {
             getMainWindow().addWindow(scheduleEventPopup);
+        }
     }
 
     /* Initializes a modal window to edit schedule event. */

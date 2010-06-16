@@ -31,7 +31,7 @@ public class CalendarEvent {
     }
 
     public void setStyleName(String style) {
-        this.styleName = style;
+        styleName = style;
     }
 
     public void setStart(Date start) {
@@ -135,14 +135,16 @@ public class CalendarEvent {
             }
 
             return range;
-        } else
+        } else {
             return getRangeInMinutes();
+        }
     }
 
     @SuppressWarnings("deprecation")
     public boolean isTimeOnDifferentDays() {
-        if (getEndTime().getTime() - getStart().getTime() > VCalendar.DAYINMILLIS)
+        if (getEndTime().getTime() - getStart().getTime() > VCalendar.DAYINMILLIS) {
             return true;
+        }
 
         if (getStart().compareTo(getEnd()) != 0) {
             if (getEndTime().getHours() == 0 && getEndTime().getMinutes() == 0) {

@@ -131,7 +131,7 @@ public class Calendar extends AbstractComponent implements
      *            Event provider.
      */
     public Calendar(CalendarEventProvider calendarEventProvider) {
-        this.setCalendarEventProvider(calendarEventProvider);
+        setCalendarEventProvider(calendarEventProvider);
     }
 
     /**
@@ -212,8 +212,9 @@ public class Calendar extends AbstractComponent implements
             SimpleDateFormat f = (SimpleDateFormat) SimpleDateFormat
                     .getTimeInstance(SimpleDateFormat.SHORT, getLocale());
             String p = f.toPattern();
-            if (p.indexOf("HH") != -1 || p.indexOf("H") != -1)
+            if (p.indexOf("HH") != -1 || p.indexOf("H") != -1) {
                 return TimeFormat.Format24H;
+            }
             return TimeFormat.Format12H;
         }
         return currentTimeFormat;
@@ -237,8 +238,9 @@ public class Calendar extends AbstractComponent implements
      * @return Component's Time zone
      */
     public TimeZone getTimeZone() {
-        if (timezone == null)
+        if (timezone == null) {
             return currentCalendar.getTimeZone();
+        }
         return timezone;
     }
 
@@ -252,8 +254,9 @@ public class Calendar extends AbstractComponent implements
     public void setTimeZone(TimeZone zone) {
         timezone = zone;
         if (!currentCalendar.getTimeZone().equals(zone)) {
-            if (zone == null)
+            if (zone == null) {
                 zone = TimeZone.getDefault();
+            }
             currentCalendar.setTimeZone(zone);
             df_date_time.setTimeZone(zone);
             requestRepaint();
@@ -637,10 +640,11 @@ public class Calendar extends AbstractComponent implements
     }
 
     protected void fireNavigationEvent(boolean forward) {
-        if (forward)
+        if (forward) {
             fireEvent(new ForwardEvent(this));
-        else
+        } else {
             fireEvent(new BackwardEvent(this));
+        }
     }
 
     protected void fireEventMove(int index, Date newFromDatetime) {
