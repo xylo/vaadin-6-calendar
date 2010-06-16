@@ -21,4 +21,4 @@ See the manual for installation instructions.
 License
 -------
 
-For licence information, please refer to licensing.txt
+For license information, please refer to licensing.txt included in the package.
