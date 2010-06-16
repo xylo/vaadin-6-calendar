@@ -1448,6 +1448,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     from.setTime(from.getTime()
                             + ((long) halfHourInMilliSeconds * halfHourDiff));
                     to.setTime((from.getTime() + duration));
+
                     calendarEvent.setStartTime(from);
                     calendarEvent.setEndTime(to);
                     calendarEvent.setStart(new Date(from.getTime()));
@@ -1483,6 +1484,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     from.setTime(newStartTime);
 
                     calendarEvent.setStartTime(from);
+                    calendarEvent.setStart(new Date(from.getTime()));
 
                     // Set new position for the event
                     long startFromMinutes = (from.getHours() * 60)
@@ -1505,6 +1507,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     to.setTime(newEndTime);
 
                     calendarEvent.setEndTime(to);
+                    calendarEvent.setEnd(new Date(to.getTime()));
 
                     // Set new position for the event
                     long startFromMinutes = (startDatetimeFrom.getHours() * 60)
