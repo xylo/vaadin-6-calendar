@@ -30,6 +30,8 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
 public class BasicEventProvider implements CalendarEventProvider,
         EventSetChangeNotifier, CalendarEvent.EventChangeListener {
 
+    private static final long serialVersionUID = 630145351104741918L;
+
     protected List<CalendarEvent> eventList = new ArrayList<CalendarEvent>();
 
     private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();

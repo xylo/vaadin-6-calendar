@@ -17,6 +17,8 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  */
 public class BasicEvent implements CalendarEvent, EventChangeNotifier {
 
+    private static final long serialVersionUID = -7164298377129791491L;
+
     private String caption;
     private String description;
     private Date end;

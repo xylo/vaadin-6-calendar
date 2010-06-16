@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.ui;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -11,12 +12,12 @@ import com.vaadin.tools.ReflectTools;
 /**
  * interface for all source component events.
  */
-public interface CalendarComponentEvents {
+public interface CalendarComponentEvents extends Serializable {
 
     /**
      * Listener interface for source event drag & drops.
      */
-    public interface EventMoveNotifier {
+    public interface EventMoveNotifier extends Serializable {
 
         /**
          * Add a EventMoveListener.
@@ -108,7 +109,7 @@ public interface CalendarComponentEvents {
     /**
      * Listener interface for day or time cell drag-marking with mouse.
      */
-    public interface RangeSelectNotifier {
+    public interface RangeSelectNotifier extends Serializable {
 
         /**
          * Add RangeSelectListener that listens for drag-marking.
@@ -215,7 +216,7 @@ public interface CalendarComponentEvents {
     }
 
     /** Listener interface for source navigation listening. */
-    public interface NavigationNotifier {
+    public interface NavigationNotifier extends Serializable {
         /**
          * Add a forward navigation listener.
          * 
@@ -570,7 +571,7 @@ public interface CalendarComponentEvents {
     /**
      * Listener interface for source event resizing.
      */
-    public interface EventResizeNotifier {
+    public interface EventResizeNotifier extends Serializable {
 
         /**
          * Add a EventResizeListener.
@@ -592,7 +593,7 @@ public interface CalendarComponentEvents {
     /**
      * Listener for EventResize event.
      */
-    public interface EventResizeListener {
+    public interface EventResizeListener extends Serializable {
 
         /** Trigger method for the EventResize. */
         public static final Method eventResizeMethod = ReflectTools.findMethod(

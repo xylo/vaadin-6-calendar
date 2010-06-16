@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.event;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
  * only dates are shown.<li>An event with a same start and end date with zero
  * length time range will be considered as a single "allDay" event.
  */
-public interface CalendarEvent {
+public interface CalendarEvent extends Serializable {
 
     /**
      * Gets start date of event.
@@ -54,7 +55,9 @@ public interface CalendarEvent {
     /**
      * Event to signal that an event has changed.
      */
-    public class EventChange {
+    public class EventChange implements Serializable {
+
+        private static final long serialVersionUID = 6847631666440007162L;
 
         private CalendarEvent source;
 
@@ -74,7 +77,7 @@ public interface CalendarEvent {
     /**
      * Listener for EventSetChange events.
      */
-    public interface EventChangeListener {
+    public interface EventChangeListener extends Serializable {
 
         /**
          * Called when an Event has changed.
@@ -85,7 +88,7 @@ public interface CalendarEvent {
     /**
      * Notifier interface for EventChange events.
      */
-    public interface EventChangeNotifier {
+    public interface EventChangeNotifier extends Serializable {
 
         void addListener(EventChangeListener listener);
 

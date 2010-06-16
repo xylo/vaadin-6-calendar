@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.event;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * versions. In future calendar may require DateContainer or some similar
  * container as a data source.
  */
-public interface CalendarEventProvider {
+public interface CalendarEventProvider extends Serializable {
     /**
      * Gets all available events in the target date range between startDate and
      * endDate.
@@ -29,7 +30,9 @@ public interface CalendarEventProvider {
      * CalendarEventProvider} .
      * 
      */
-    public class EventSetChange {
+    public class EventSetChange implements Serializable {
+
+        private static final long serialVersionUID = -8866008738947581269L;
 
         private CalendarEventProvider source;
 
@@ -50,7 +53,7 @@ public interface CalendarEventProvider {
     /**
      * Listener for EventSetChange events.
      */
-    public interface EventSetChangeListener {
+    public interface EventSetChangeListener extends Serializable {
 
         /**
          * Called when the set of Events has changed.
@@ -61,7 +64,7 @@ public interface CalendarEventProvider {
     /**
      * Notifier interface for EventSetChange events.
      */
-    public interface EventSetChangeNotifier {
+    public interface EventSetChangeNotifier extends Serializable {
 
         void addListener(EventSetChangeListener listener);
 
