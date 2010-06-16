@@ -21,7 +21,4 @@ See the manual for installation instructions.
 License
 -------
 
-Vaadin Calendar is distributed under the Commercial Vaadin Add-On License
-version 1.0.
-
-Please see the full text of the license at: http://vaadin.com/license/cval-1.0
+For licence information, please refer to licensing.txt
