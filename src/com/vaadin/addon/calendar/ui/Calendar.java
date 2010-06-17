@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
@@ -114,6 +115,15 @@ public class Calendar extends AbstractComponent implements
     private SimpleDateFormat weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
             .getDateInstance();
 
+    public Calendar() {
+        this(new BasicEventProvider());
+    }
+
+    public Calendar(String caption) {
+        this();
+        setCaption(caption);
+    }
+
     /**
      * <p>
      * Construct a Vaadin Calendar with event provider. Event provider is
@@ -130,8 +140,13 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            Event provider.
      */
-    public Calendar(CalendarEventProvider calendarEventProvider) {
-        setCalendarEventProvider(calendarEventProvider);
+    public Calendar(CalendarEventProvider eventProvider) {
+        setEventProvider(eventProvider);
+    }
+
+    public Calendar(String caption, CalendarEventProvider eventProvider) {
+        this(eventProvider);
+        setCaption(caption);
     }
 
     /**
@@ -415,8 +430,7 @@ public class Calendar extends AbstractComponent implements
 
         target.endTag("days");
 
-        events = getCalendarEventProvider().getEvents(firstDateToShow,
-                lastDateToShow);
+        events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
         target.startTag("events");
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
@@ -786,12 +800,10 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            the calendarEventProvider to set
      */
-    public void setCalendarEventProvider(
-            CalendarEventProvider calendarEventProvider) {
+    public void setEventProvider(CalendarEventProvider calendarEventProvider) {
         // remove old listener
-        if (getCalendarEventProvider() instanceof EventSetChangeNotifier) {
-            ((EventSetChangeNotifier) getCalendarEventProvider())
-                    .removeListener(this);
+        if (getEventProvider() instanceof EventSetChangeNotifier) {
+            ((EventSetChangeNotifier) getEventProvider()).removeListener(this);
         }
 
         this.calendarEventProvider = calendarEventProvider;
@@ -805,7 +817,7 @@ public class Calendar extends AbstractComponent implements
     /**
      * @return the calendarEventProvider
      */
-    public CalendarEventProvider getCalendarEventProvider() {
+    public CalendarEventProvider getEventProvider() {
         return calendarEventProvider;
     }
 
