@@ -5,15 +5,24 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Interface for querying events. Calendar component must have
- * CalendarEventProvider implementation. This interface may be dropped in future
- * versions. In future calendar may require DateContainer or some similar
- * container as a data source.
+ * Interface for querying events. The Vaadin Calendar always has a
+ * CalendarEventProvider set.
  */
 public interface CalendarEventProvider extends Serializable {
     /**
+     * <p>
      * Gets all available events in the target date range between startDate and
-     * endDate.
+     * endDate. The Vaadin Calendar queries the events from the range that is
+     * shown, which is not guaranteed to be the same as the date range that is
+     * set.
+     * </p>
+     * 
+     * <p>
+     * For example, if you set the date range to be monday 22.2.2010 - wednesday
+     * 24.2.2000, the used Event Provider will be queried for events between
+     * monday 22.2.2010 00:00 and sunday 28.2.2010 23:59. Generally you can
+     * expect the date range to be expanded to whole days and whole weeks.
+     * </p>
      * 
      * @param startDate
      *            Start date

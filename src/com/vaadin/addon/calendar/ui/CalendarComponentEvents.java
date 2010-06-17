@@ -10,12 +10,12 @@ import com.vaadin.event.ComponentEventListener;
 import com.vaadin.tools.ReflectTools;
 
 /**
- * interface for all source component events.
+ * Interface for all Vaadin Calendar events.
  */
 public interface CalendarComponentEvents extends Serializable {
 
     /**
-     * Listener interface for source event drag & drops.
+     * Listener interface for event drag & drops.
      */
     public interface EventMoveNotifier extends Serializable {
 
@@ -37,8 +37,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * MoveEvent is sent when existing source event is dragged to a new
-     * position.
+     * MoveEvent is sent when existing event is dragged to a new position.
      */
     @SuppressWarnings("serial")
     public class MoveEvent extends CalendarComponentEvent {
@@ -52,14 +51,14 @@ public interface CalendarComponentEvents extends Serializable {
         private Date newStart;
 
         /**
-         * MoveEvent needs the target source event and new start date.
+         * MoveEvent needs the target event and new start date.
          * 
          * @param source
          *            Calendar component.
          * @param CalendarComponentEvent
-         *            Target source event.
+         *            Target event.
          * @param newStart
-         *            Target source event's new start date.
+         *            Target event's new start date.
          */
         public MoveEvent(Calendar source, CalendarEvent calendarEvent,
                 Date newStart) {
@@ -70,9 +69,9 @@ public interface CalendarComponentEvents extends Serializable {
         }
 
         /**
-         * Get target source event.
+         * Get target event.
          * 
-         * @return Target source event.
+         * @return Target event.
          */
         public CalendarEvent getCalendarEvent() {
             return calendarEvent;
@@ -96,12 +95,12 @@ public interface CalendarComponentEvents extends Serializable {
                 EventMoveListener.class, "eventMove", MoveEvent.class);
 
         /**
-         * This method will be called when source event has been moved to a new
+         * This method will be called when event has been moved to a new
          * position.
          * 
          * @param event
          *            MoveEvent containing specific information of the new
-         *            position and target source event.
+         *            position and target event.
          */
         public void eventMove(MoveEvent event);
     }
@@ -144,7 +143,7 @@ public interface CalendarComponentEvents extends Serializable {
         private Date end;
 
         /**
-         * Defines the event's source view mode.
+         * Defines the event's view mode.
          */
         private boolean monthlyMode;
 
@@ -187,8 +186,8 @@ public interface CalendarComponentEvents extends Serializable {
         }
 
         /**
-         * Gets the event's source view mode. Calendar can be be either in
-         * monthly or weekly mode, depending on the active date range.
+         * Gets the event's view mode. Calendar can be be either in monthly or
+         * weekly mode, depending on the active date range.
          * 
          * @return Returns true when monthly view is active.
          */
@@ -215,7 +214,7 @@ public interface CalendarComponentEvents extends Serializable {
         public void rangeSelect(RangeSelectEvent event);
     }
 
-    /** Listener interface for source navigation listening. */
+    /** Listener interface for navigation listening. */
     public interface NavigationNotifier extends Serializable {
         /**
          * Add a forward navigation listener.
@@ -299,7 +298,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * ForwardEvent is sent when source's forward navigation button is clicked.
+     * ForwardEvent is sent when forward navigation button is clicked.
      */
     @SuppressWarnings("serial")
     public class ForwardEvent extends CalendarComponentEvent {
@@ -307,7 +306,7 @@ public interface CalendarComponentEvents extends Serializable {
         public static final String EVENT_ID = CalendarEventId.FORWARD;
 
         /**
-         * ForwardEvent needs only the source source component.
+         * ForwardEvent needs only the source component.
          * 
          * @param source
          *            Calendar component.
@@ -325,7 +324,7 @@ public interface CalendarComponentEvents extends Serializable {
                 ForwardListener.class, "forward", ForwardEvent.class);
 
         /**
-         * This method will be called when source date range is moved forward.
+         * This method will be called when date range is moved forward.
          * 
          * @param event
          *            ForwardEvent
@@ -334,8 +333,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * BackwardEvent is sent when source's backward navigation button is
-     * clicked.
+     * BackwardEvent is sent when backward navigation button is clicked.
      */
     @SuppressWarnings("serial")
     public class BackwardEvent extends CalendarComponentEvent {
@@ -361,7 +359,7 @@ public interface CalendarComponentEvents extends Serializable {
                 BackwardListener.class, "backward", BackwardEvent.class);
 
         /**
-         * This method will be called when source date range is moved backwards.
+         * This method will be called when date range is moved backwards.
          * 
          * @param event
          *            BackwardEvent
@@ -370,7 +368,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * DateClickEvent is sent when source's date is clicked.
+     * DateClickEvent is sent when a date is clicked.
      */
     @SuppressWarnings("serial")
     public class DateClickEvent extends CalendarComponentEvent {
@@ -404,7 +402,7 @@ public interface CalendarComponentEvents extends Serializable {
                 DateClickListener.class, "dateClick", DateClickEvent.class);
 
         /**
-         * This method will be called when source date is clicked.
+         * This method will be called when a date is clicked.
          * 
          * @param event
          *            DateClickEvent containing the target date.
@@ -413,7 +411,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * EventClick is sent when source's event is clicked.
+     * EventClick is sent when an event is clicked.
      */
     @SuppressWarnings("serial")
     public class EventClick extends CalendarComponentEvent {
@@ -430,9 +428,9 @@ public interface CalendarComponentEvents extends Serializable {
         }
 
         /**
-         * Get clicked source event.
+         * Get the clicked event.
          * 
-         * @return Clicked source event.
+         * @return Clicked event.
          */
         public CalendarEvent getCalendarEvent() {
             return calendarEvent;
@@ -447,7 +445,7 @@ public interface CalendarComponentEvents extends Serializable {
                 EventClickListener.class, "eventClick", EventClick.class);
 
         /**
-         * This method will be called when source event is clicked.
+         * This method will be called when an event is clicked.
          * 
          * @param event
          *            EventClick containing the target event.
@@ -456,7 +454,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * WeekClick is sent when source's week is clicked.
+     * WeekClick is sent when week is clicked.
      */
     @SuppressWarnings("serial")
     public class WeekClick extends CalendarComponentEvent {
@@ -514,7 +512,7 @@ public interface CalendarComponentEvents extends Serializable {
                 WeekClickListener.class, "weekClick", WeekClick.class);
 
         /**
-         * This method will be called when source's week is clicked.
+         * This method will be called when a week is clicked.
          * 
          * @param event
          *            WeekClick containing the target week and year.
@@ -545,9 +543,9 @@ public interface CalendarComponentEvents extends Serializable {
         }
 
         /**
-         * Get target source event.
+         * Get target event.
          * 
-         * @return Target source event.
+         * @return Target event.
          */
         public CalendarEvent getCalendarEvent() {
             return calendarEvent;
@@ -569,7 +567,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * Listener interface for source event resizing.
+     * Listener interface for event resizing.
      */
     public interface EventResizeNotifier extends Serializable {
 

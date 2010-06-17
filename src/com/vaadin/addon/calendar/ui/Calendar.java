@@ -42,14 +42,26 @@ import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.ClientWidget;
 
 /**
+ * <p>
  * Vaadin Calendar is for visualizing events in calendar. Only
  * {@link java.util.GregorianCalendar GregorianCalendar} is supported. Calendar
  * events can be visualized in the variable length view depending on the start
- * and end dates.<br/>
- * <li>You must set view's date range with <code>setStartDate</code> and
- * <code>setEndDate</code> methods, otherwise schedule will be empty <li>
- * Calendar has two kind of views: monthly and weekly view<li>If date range is
- * seven days long or smaller, weekly view is used.
+ * and end dates.
+ * <p/>
+ * 
+ * <li>You can set the viewable date range with {@link #setStartDate(Date)} and
+ * {@link #setEndDate(Date)} methods. Calendar has a default date range of one
+ * week</li>
+ * 
+ * <li>Calendar has two kind of views: monthly and weekly view</li>
+ * 
+ * <li>If date range is seven days long or smaller, weekly view is used.</li>
+ * 
+ * <li>Calendar queries its events by using a
+ * {@link com.vaadin.addon.calendar.event.CalendarEventProvider
+ * CalendarEventProvider}. By default, a
+ * {@link com.vaadin.addon.calendar.event.BasicEventProvider BasicEventProvider}
+ * is used.</li>
  */
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
@@ -94,7 +106,7 @@ public class Calendar extends AbstractComponent implements
      * Internal buffer for the events that are retrieved from the event
      * provider.
      */
-    private List<CalendarEvent> events;
+    protected List<CalendarEvent> events;
 
     /** Date format that will be used in the UIDL for dates. */
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
@@ -115,10 +127,20 @@ public class Calendar extends AbstractComponent implements
     private SimpleDateFormat weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
             .getDateInstance();
 
+    /**
+     * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
+     * Default date range is one week.
+     */
     public Calendar() {
         this(new BasicEventProvider());
     }
 
+    /**
+     * Construct a Vaadin Calendar with a BasicEventProvider and the provided
+     * caption. Default date range is one week.
+     * 
+     * @param caption
+     */
     public Calendar(String caption) {
         this();
         setCaption(caption);
@@ -138,12 +160,28 @@ public class Calendar extends AbstractComponent implements
      * </p>
      * 
      * @param calendarEventProvider
-     *            Event provider.
+     *            Event provider, cannot be null.
      */
     public Calendar(CalendarEventProvider eventProvider) {
         setEventProvider(eventProvider);
     }
 
+    /**
+     * <p>
+     * Construct a Vaadin Calendar with event provider and a caption. Event
+     * provider is obligatory, because calendar component will query active
+     * events through it.
+     * </p>
+     * 
+     * <p>
+     * By default, Vaadin Calendar will show dates from the start of the current
+     * week to the end of the current week. Use {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)} to change this.
+     * </p>
+     * 
+     * @param calendarEventProvider
+     *            Event provider, cannot be null.
+     */
     public Calendar(String caption, CalendarEventProvider eventProvider) {
         this(eventProvider);
         setCaption(caption);
@@ -159,7 +197,9 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
-     * Sets start date for the calendar.
+     * Sets start date for the calendar. This and {@link #setEndDate(Date)}
+     * control the range of dates visible on the component. The default range is
+     * one week.
      * 
      * @param date
      *            First visible date to show.
@@ -183,6 +223,9 @@ public class Calendar extends AbstractComponent implements
     /**
      * Sets end date for the calendar. Starting from startDate, only six weeks
      * will be shown if duration to endDate is longer than six weeks.
+     * 
+     * This and {@link #setStartDate(Date)} control the range of dates visible
+     * on the component. The default range is one week.
      * 
      * @param date
      *            Last visible date to show.
@@ -519,6 +562,9 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle an event move message from client.
+     */
     private void handleEventMove(String message) {
         if (message != null && message.length() > 10) {
             String[] splitted = message.split(":");
@@ -540,6 +586,9 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle a range select message from client.
+     */
     private void handleRangeSelect(String value) {
         if (value != null && value.length() > 14 && value.contains("TO")) {
             String[] dates = value.split("TO");
@@ -577,12 +626,18 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle an event click message from client.
+     */
     private void handleEventClick(Integer i) {
         if (i >= 0 && i < events.size() && events.get(i) != null) {
             fireEventClick(i);
         }
     }
 
+    /*
+     * Handle a date click message from client.
+     */
     private void handleDateClick(String message) {
         if (message != null && message.length() > 6) {
             try {
@@ -593,6 +648,9 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle a week message from client.
+     */
     private void handleWeekClick(String s) {
         if (s.length() > 0 && s.contains("w")) {
             String[] splitted = s.split("w");
@@ -608,6 +666,9 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle a scroll message from client.
+     */
     private void handleScroll(String varValue) {
         try {
             int i = Integer.parseInt(varValue);
@@ -617,6 +678,9 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * Handle a navigation message from client.
+     */
     private void handleNavigation(Integer integer) {
         int index = integer;
         int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
@@ -634,6 +698,9 @@ public class Calendar extends AbstractComponent implements
         fireNavigationEvent(index != -1);
     }
 
+    /*
+     * Handle an event resize message from client.
+     */
     private void handleEventResize(String value) {
         if (value != null && !"".equals(value)) {
             try {
@@ -797,10 +864,21 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
+     * Set the {@link com.vaadin.addon.calendar.event.CalendarEventProvider
+     * CalendarEventProvider} to be used with this calendar. The EventProvider
+     * is used to query for events to show, and must be non-null. By default a
+     * {@link com.vaadin.addon.calendar.event.BasicEventProvider
+     * BasicEventProvider} is used.
+     * 
      * @param calendarEventProvider
-     *            the calendarEventProvider to set
+     *            the calendarEventProvider to set. Cannot be null.
      */
     public void setEventProvider(CalendarEventProvider calendarEventProvider) {
+        if (calendarEventProvider == null) {
+            throw new IllegalArgumentException(
+                    "Calendar event provider cannot be null");
+        }
+
         // remove old listener
         if (getEventProvider() instanceof EventSetChangeNotifier) {
             ((EventSetChangeNotifier) getEventProvider()).removeListener(this);
@@ -815,7 +893,8 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
-     * @return the calendarEventProvider
+     * @return the {@link com.vaadin.addon.calendar.event.CalendarEventProvider
+     *         CalendarEventProvider} currently used
      */
     public CalendarEventProvider getEventProvider() {
         return calendarEventProvider;
@@ -835,76 +914,208 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener)
+     */
     public void addListener(ForwardListener listener) {
         addListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener,
                 ForwardListener.forwardMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener)
+     */
     public void addListener(BackwardListener listener) {
         addListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener,
                 BackwardListener.backwardMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener)
+     */
     public void addListener(DateClickListener listener) {
         addListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener,
                 DateClickListener.dateClickMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener)
+     */
     public void addListener(EventClickListener listener) {
         addListener(EventClick.EVENT_ID, EventClick.class, listener,
                 EventClickListener.eventClickMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener)
+     */
     public void addListener(WeekClickListener listener) {
         addListener(WeekClick.EVENT_ID, WeekClick.class, listener,
                 WeekClickListener.weekClickMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener
+     * )
+     */
     public void addListener(EventResizeListener listener) {
         addListener(EventResize.EVENT_ID, EventResize.class, listener,
                 EventResizeListener.eventResizeMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener
+     * )
+     */
     public void addListener(RangeSelectListener listener) {
         addListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
                 listener, RangeSelectListener.rangeSelectMethod);
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener)
+     */
     public void addListener(EventMoveListener listener) {
         addListener(MoveEvent.EVENT_ID, MoveEvent.class, listener,
                 EventMoveListener.eventMoveMethod);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener)
+     */
     public void removeListener(ForwardListener listener) {
         removeListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener)
+     */
     public void removeListener(BackwardListener listener) {
         removeListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener)
+     */
     public void removeListener(DateClickListener listener) {
         removeListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener)
+     */
     public void removeListener(EventClickListener listener) {
         removeListener(EventClick.EVENT_ID, EventClick.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener)
+     */
     public void removeListener(WeekClickListener listener) {
         removeListener(WeekClick.EVENT_ID, WeekClick.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener)
+     */
     public void removeListener(EventMoveListener listener) {
         removeListener(MoveEvent.EVENT_ID, MoveEvent.class, listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener
+     * )
+     */
     public void removeListener(RangeSelectListener listener) {
         removeListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
                 listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeNotifier
+     * #removeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener
+     * )
+     */
     public void removeListener(EventResizeListener listener) {
         removeListener(EventResize.EVENT_ID, EventResize.class, listener);
     }

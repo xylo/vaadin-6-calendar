@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
+ * <p>
  * Event in the calendar. Customize your own event by implementing this
- * interface.<br/>
- * <li>Start, end and caption fields are mandatory. <li>In "allDay" events
- * longer than one day, starting and ending clock times are omitted in UI and
- * only dates are shown.<li>An event with a same start and end date with zero
- * length time range will be considered as a single "allDay" event.
+ * interface.
+ * </p>
+ * 
+ * <li>Start and end fields are mandatory.</li>
+ * 
+ * <li>In "allDay" events longer than one day, starting and ending clock times
+ * are omitted in UI and only dates are shown.</li>
  */
 public interface CalendarEvent extends Serializable {
 
@@ -35,17 +38,22 @@ public interface CalendarEvent extends Serializable {
     public String getCaption();
 
     /**
-     * Gets description of event.
+     * Gets description of event. Shown as a tooltip over the event.
      * 
      * @return Description text.
      */
     public String getDescription();
 
     /**
+     * <p>
      * Gets style name of event. In the client, style name will be set to the
-     * event's element class name and can be styled by CSS.</br></br>Styling
-     * example:</br> <code>Java code: </br>
-     * event.setStyleName("color1");</br></br>CSS:</br>.v-calendar-event-color1 {</br>
+     * event's element class name and can be styled by CSS
+     * </p>
+     * Styling example:</br> <code>Java code: </br>
+     * event.setStyleName("color1");
+     * </br></br>
+     * CSS:</br>
+     * .v-calendar-event-color1 {</br>
      * &nbsp;&nbsp;&nbsp;background-color: #9effae;</br>}</code>
      * 
      * @return Style name.
