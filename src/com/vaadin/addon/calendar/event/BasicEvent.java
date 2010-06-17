@@ -26,6 +26,8 @@ public class BasicEvent implements CalendarEvent, EventChangeNotifier {
     private String styleName;
     private List<EventChangeListener> listeners = new ArrayList<EventChangeListener>();
 
+    private boolean isAllDay;
+
     // property getters from interface
 
     /*
@@ -73,6 +75,10 @@ public class BasicEvent implements CalendarEvent, EventChangeNotifier {
         return styleName;
     }
 
+    public boolean isAllDay() {
+        return isAllDay;
+    }
+
     // setters for properties
 
     public void setCaption(String caption) {
@@ -97,6 +103,15 @@ public class BasicEvent implements CalendarEvent, EventChangeNotifier {
 
     public void setStyleName(String styleName) {
         this.styleName = styleName;
+        fireEventChange();
+    }
+
+    /**
+     * @param isAllDay
+     *            the isAllDay to set
+     */
+    public void setAllDay(boolean isAllDay) {
+        this.isAllDay = isAllDay;
         fireEventChange();
     }
 

@@ -10,7 +10,6 @@ import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -30,11 +29,13 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
@@ -137,6 +138,7 @@ public class CalendarTest extends Application {
         Date start = calendarComponent.getFirstDateForWeek(new Date());
         Date end = calendarComponent.getLastDateForWeek(new Date());
         CalendarTestEvent event = getNewEvent("Whole week event", start, end);
+        event.setAllDay(true);
         event.setStyleName("color4");
         event.setDescription("Description for the whole week event.");
         dataSource.addEvent(event);
@@ -147,6 +149,7 @@ public class CalendarTest extends Application {
         start = calendar.getTime();
         end = start;
         event = getNewEvent("Allday event", start, end);
+        event.setAllDay(true);
         event.setDescription("Some description.");
         event.setStyleName("color3");
         dataSource.addEvent(event);
@@ -156,6 +159,7 @@ public class CalendarTest extends Application {
         start = calendar.getTime();
         end = start;
         event = getNewEvent("Second allday event", start, end);
+        event.setAllDay(true);
         event.setDescription("Some description.");
         event.setStyleName("color2");
         dataSource.addEvent(event);
@@ -529,6 +533,7 @@ public class CalendarTest extends Application {
     }
 
     private void updateCalendarLocale(Locale l) {
+        setLocale(l);
         calendarComponent.setLocale(l);
         calendar = new GregorianCalendar(l);
     }
@@ -570,17 +575,15 @@ public class CalendarTest extends Application {
     private void handleRangeSelect(RangeSelectEvent event) {
         Date start = event.getStart();
         Date end = event.getEnd();
-        if (!event.isMonthlyMode()
-                && event.getEnd().getTime() - event.getStart().getTime() == VCalendar.DAYINMILLIS) {
-            /*
-             * A whole day was selected in the weekly view. Lets create a
-             * full-day event by setting start and end dates to the same date
-             * with a zero length time range. Otherwise event would be shown as
-             * a two days long event because its start and end days would be
-             * different.
-             */
-            end = (Date) start.clone();
+
+        /*
+         * If a range of dates is selected in monthly mode, we want it to end at
+         * the end of the last day.
+         */
+        if (event.isMonthlyMode()) {
+            end = calendarComponent.getEndOfDay(end);
         }
+
         showEventPopup(createNewEvent(start, end), true);
     }
 
@@ -716,10 +719,38 @@ public class CalendarTest extends Application {
 
                 } else if (propertyId.equals("start")) {
                     return createDateField("Start date");
+
                 } else if (propertyId.equals("end")) {
                     return createDateField("End date");
+                } else if (propertyId.equals("allDay")) {
+                    CheckBox cb = createCheckBox("All-day");
+
+                    cb.addListener(new Property.ValueChangeListener() {
+
+                        private static final long serialVersionUID = -7104996493482558021L;
+
+                        public void valueChange(ValueChangeEvent event) {
+                            Object value = event.getProperty().getValue();
+                            if (value instanceof Boolean
+                                    && Boolean.TRUE.equals(value)) {
+                                setFormDateResolution(DateField.RESOLUTION_DAY);
+
+                            } else {
+                                setFormDateResolution(DateField.RESOLUTION_MIN);
+                            }
+                        }
+
+                    });
+
+                    return cb;
                 }
                 return null;
+            }
+
+            private CheckBox createCheckBox(String caption) {
+                CheckBox cb = new CheckBox(caption);
+                cb.setImmediate(true);
+                return cb;
             }
 
             private TextField createTextField(String caption) {
@@ -750,8 +781,22 @@ public class CalendarTest extends Application {
             }
         });
 
-        scheduleEventForm.setVisibleItemProperties(new Object[] { "start",
-                "end", "caption", "where", "description", "styleName" });
+        scheduleEventForm
+                .setVisibleItemProperties(new Object[] { "start", "end",
+                        "allDay", "caption", "where", "description",
+                        "styleName" });
+    }
+
+    private void setFormDateResolution(int resolution) {
+        if (scheduleEventForm.getField("start") != null
+                && scheduleEventForm.getField("end") != null) {
+            ((DateField) scheduleEventForm.getField("start"))
+                    .setResolution(resolution);
+            ((DateField) scheduleEventForm.getField("start")).requestRepaint();
+            ((DateField) scheduleEventForm.getField("end"))
+                    .setResolution(resolution);
+            ((DateField) scheduleEventForm.getField("end")).requestRepaint();
+        }
     }
 
     private CalendarEvent createNewEvent(Date startDate, Date endDate) {

@@ -235,8 +235,8 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         long rangeInMillis = e.getRangeInMilliseconds();
-        boolean timeEvent = rangeInMillis < VCalendar.DAYINMILLIS
-                && rangeInMillis != 0;
+        boolean timeEvent = rangeInMillis <= VCalendar.DAYINMILLIS
+                && !e.isAllDay();
         Date fromDatetime = e.getStartTime();
 
         // Create a new MonthEventLabel

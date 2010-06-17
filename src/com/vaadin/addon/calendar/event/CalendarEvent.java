@@ -53,6 +53,15 @@ public interface CalendarEvent extends Serializable {
     public String getStyleName();
 
     /**
+     * An all-day event typically does not occur at a specific time but targets
+     * a whole day or days. The rendering of all-day events differs from normal
+     * events.
+     * 
+     * @return true if this event is an all-day event, false otherwise
+     */
+    public boolean isAllDay();
+
+    /**
      * Event to signal that an event has changed.
      */
     public class EventChange implements Serializable {

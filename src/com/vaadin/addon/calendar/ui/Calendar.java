@@ -455,6 +455,7 @@ public class Calendar extends AbstractComponent implements
                 e.getDescription() == null ? "" : e.getDescription());
         target.addAttribute(VCalendar.ATTR_STYLE, e.getStyleName() == null ? ""
                 : e.getStyleName());
+        target.addAttribute(VCalendar.ATTR_ALLDAY, e.isAllDay());
     }
 
     /*

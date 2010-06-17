@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
@@ -21,6 +18,7 @@ public class CalendarEvent {
 
     DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a");
     DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm");
+    private boolean allDay;
 
     public String getStyleName() {
         return styleName;
@@ -104,6 +102,14 @@ public class CalendarEvent {
 
     public void setFormat24h(boolean format24h) {
         this.format24h = format24h;
+    }
+
+    public void setAllDay(boolean allDay) {
+        this.allDay = allDay;
+    }
+
+    public boolean isAllDay() {
+        return allDay;
     }
 
     public String getTimeAsText() {

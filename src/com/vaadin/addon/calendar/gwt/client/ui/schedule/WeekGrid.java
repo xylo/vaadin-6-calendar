@@ -931,7 +931,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             boolean onDifferentDays = calendarEvent.isTimeOnDifferentDays();
             if (onDifferentDays) {
-                if (calendarEvent.getEnd().compareTo(targetDay) == 0) {
+                if (calendarEvent.getStart().compareTo(targetDay) != 0) {
                     // Current day slot is for the end date. Lets fix also the
                     // start & end times.
                     h = 0;
@@ -1000,9 +1000,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 }
                 boolean reservedFound = false;
                 NodeList<Node> nodes = main.getChildNodes();
-                // FIXME measure all hardcoded pixels from the DOM or at least
-                // use a shared constant (I believe the 19px is the same as
-                // HALFHOUR_IN_PX)
+
                 int slot = (int) (((eventRangeStart - ((double) eventRangeStart % getSlotHeight())) / getSlotHeight()));
                 int slotEnd = (int) ((eventRangeStop - ((double) eventRangeStop % getSlotHeight())) / getSlotHeight());
                 if (slotEnd > 47) {

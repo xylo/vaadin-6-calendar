@@ -46,6 +46,7 @@ public class VCalendar extends Composite implements Paintable {
     public static final String ATTR_MONTH_NAMES = "mNames";
     public static final String ATTR_DAY_NAMES = "dNames";
     public static final String ATTR_FORMAT24H = "format24h";
+    public static final String ATTR_ALLDAY = "allday";
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * 60 * 1000;
@@ -203,10 +204,9 @@ public class VCalendar extends Composite implements Paintable {
     private void updateEventsToWeekGrid(CalendarEvent[] events) {
         List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
         List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();
-        long rangeInMillis = 0;
+
         for (CalendarEvent e : events) {
-            rangeInMillis = e.getRangeInMilliseconds();
-            if (rangeInMillis >= DAYINMILLIS || rangeInMillis == 0) {
+            if (e.isAllDay()) {
                 // Event is set on one "allDay" event or more than one.
                 allDayLong.add(e);
 
@@ -246,12 +246,14 @@ public class VCalendar extends Composite implements Paintable {
             for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
                 SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
                         cell);
-                if (isEventInDay(when, to, sdc.getDate())) {
+                if (isEventInDay(when, to, sdc.getDate())
+                        && isEventInDayWithTime(when, to, sdc.getDate(), e
+                                .getEndTime(), e.isAllDay())) {
                     if (!eventMoving) {
                         eventMoving = sdc.getMoveEvent() != null;
                     }
                     long d = e.getRangeInMilliseconds();
-                    if (d > 0 && d < VCalendar.DAYINMILLIS) {
+                    if ((d > 0 && d <= VCalendar.DAYINMILLIS) && !e.isAllDay()) {
                         timeCells.add(sdc);
                     } else {
                         dayCells.add(sdc);
@@ -279,6 +281,19 @@ public class VCalendar extends Composite implements Paintable {
         if (renderImmediately) {
             reDrawAllMonthEvents(!eventMoving);
         }
+    }
+
+    /*
+     * We must also handle the special case when the event lasts exactly for 24
+     * hours, thus spanning two days. That special case still should span one
+     * day when rendered.
+     */
+    @SuppressWarnings("deprecation")
+    // Date methods are not deprecated in GWT
+    private boolean isEventInDayWithTime(Date from, Date to, Date date,
+            Date endTime, boolean isAllDay) {
+        return (isAllDay || !(to.getDay() == date.getDay()
+                && from.getDay() != to.getDay() && endTime.getMinutes() == 0));
     }
 
     private void updateEventSlotIndex(CalendarEvent e, List<SimpleDayCell> cells) {
@@ -386,11 +401,16 @@ public class VCalendar extends Composite implements Paintable {
         return sorted;
     }
 
+    /*
+     * Check if the given event occurs at the given date.
+     */
     private boolean isEventInDay(Date eventWhen, Date eventTo, Date gridDate) {
         if (eventWhen.compareTo(gridDate) <= 0
                 && eventTo.compareTo(gridDate) >= 0) {
+
             return true;
         }
+
         return false;
     }
 
@@ -409,6 +429,7 @@ public class VCalendar extends Composite implements Paintable {
             String timeto = eventUIDL.getStringAttribute(ATTR_TIMETO);
             String desc = eventUIDL.getStringAttribute(ATTR_DESCRIPTION);
             String style = eventUIDL.getStringAttribute(ATTR_STYLE);
+            boolean allDay = eventUIDL.getBooleanAttribute(ATTR_ALLDAY);
 
             CalendarEvent e = new CalendarEvent();
 
@@ -423,6 +444,7 @@ public class VCalendar extends Composite implements Paintable {
             e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
             e.setStyleName(style);
             e.setFormat24h(format);
+            e.setAllDay(allDay);
 
             events.add(e);
 

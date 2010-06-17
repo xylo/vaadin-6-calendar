@@ -94,14 +94,6 @@ public class SimpleCalTest extends Application {
                     cal.setStartDate(gc.getTime());
 
                     gc.add(GregorianCalendar.DATE, 6);
-                    gc.set(GregorianCalendar.HOUR_OF_DAY, gc
-                            .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
-                    gc.set(GregorianCalendar.MINUTE, gc
-                            .getActualMaximum(GregorianCalendar.MINUTE));
-                    gc.set(GregorianCalendar.SECOND, gc
-                            .getActualMaximum(GregorianCalendar.SECOND));
-                    gc.set(GregorianCalendar.MILLISECOND, gc
-                            .getActualMaximum(GregorianCalendar.MILLISECOND));
                     cal.setEndDate(gc.getTime());
 
                 } else {
