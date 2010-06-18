@@ -1,13 +1,14 @@
 package com.vaadin.addon.calendar.demo;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.Application;
-import com.vaadin.addon.calendar.event.BasicEvent;
-import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -17,6 +18,8 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
@@ -52,11 +55,10 @@ public class SimpleCalTest extends Application {
         Window w = new Window();
         setMainWindow(w);
         setTheme("calendartest");
+        setLocale(Locale.US);
 
         final Calendar cal = new Calendar(provider);
-        cal.setSizeUndefined();
-
-        cal.setLocale(Locale.US);
+        cal.setSizeFull();
 
         cal.setStartDate(new Date());
         cal.setEndDate(new Date());
@@ -82,20 +84,8 @@ public class SimpleCalTest extends Application {
                         - cal.getStartDate().getTime();
                 if (currentCalDateRange < VCalendar.DAYINMILLIS) {
                     // Change the date range to the current week
-                    GregorianCalendar gc = new GregorianCalendar(cal
-                            .getTimeZone(), cal.getLocale());
-
-                    gc.set(GregorianCalendar.DAY_OF_WEEK, gc
-                            .getFirstDayOfWeek());
-                    gc.set(GregorianCalendar.HOUR_OF_DAY, 0);
-                    gc.set(GregorianCalendar.MINUTE, 0);
-                    gc.set(GregorianCalendar.SECOND, 0);
-                    gc.set(GregorianCalendar.MILLISECOND, 0);
-                    cal.setStartDate(gc.getTime());
-
-                    gc.add(GregorianCalendar.DATE, 6);
-                    cal.setEndDate(gc.getTime());
-
+                    cal.setStartDate(cal.getFirstDateForWeek(event.getDate()));
+                    cal.setEndDate(cal.getLastDateForWeek(event.getDate()));
                 } else {
                     // Change the date range to the clicked day
                     cal.setStartDate(event.getDate());
@@ -120,14 +110,6 @@ public class SimpleCalTest extends Application {
                 gc.set(GregorianCalendar.MILLISECOND, 0);
                 cal.setStartDate(gc.getTime());
                 gc.add(GregorianCalendar.DATE, 6);
-                gc.set(GregorianCalendar.HOUR_OF_DAY, gc
-                        .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
-                gc.set(GregorianCalendar.MINUTE, gc
-                        .getActualMaximum(GregorianCalendar.MINUTE));
-                gc.set(GregorianCalendar.SECOND, gc
-                        .getActualMaximum(GregorianCalendar.SECOND));
-                gc.set(GregorianCalendar.MILLISECOND, gc
-                        .getActualMaximum(GregorianCalendar.MILLISECOND));
                 cal.setEndDate(gc.getTime());
             }
         });
@@ -135,7 +117,7 @@ public class SimpleCalTest extends Application {
         cal.addListener(new EventClickListener() {
 
             public void eventClick(EventClick event) {
-                CalendarEvent e = event.getCalendarEvent();
+                MyEvent e = (MyEvent) event.getCalendarEvent();
                 getMainWindow().showNotification("Event clicked",
                         e.getCaption(), Notification.POSITION_CENTERED);
             }
@@ -145,12 +127,13 @@ public class SimpleCalTest extends Application {
         cal.addListener(new EventMoveListener() {
 
             public void eventMove(MoveEvent event) {
-                BasicEvent calEvent = (BasicEvent) event.getCalendarEvent();
+                MyEvent calEvent = ((MyEvent) event.getCalendarEvent());
                 long duration = calEvent.getEnd().getTime()
                         - calEvent.getStart().getTime();
                 calEvent.setStart(event.getNewStart());
                 calEvent.setEnd(new Date(event.getNewStart().getTime()
                         + duration));
+                event.getComponent().requestRepaint();
             }
         });
 
@@ -158,7 +141,7 @@ public class SimpleCalTest extends Application {
         cal.addListener(new RangeSelectListener() {
 
             public void rangeSelect(RangeSelectEvent event) {
-                BasicEvent myEvent = getNewEvent("", event.getStart(), event
+                MyEvent myEvent = new MyEvent("", event.getStart(), event
                         .getEnd());
 
                 // Create popup window and add a form in it.
@@ -172,7 +155,7 @@ public class SimpleCalTest extends Application {
                 w.center();
 
                 // Wrap the calendar event to a BeanItem and pass it to the form
-                final BeanItem<BasicEvent> item = new BeanItem<BasicEvent>(
+                final BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(
                         myEvent);
 
                 final Form form = new Form();
@@ -223,6 +206,16 @@ public class SimpleCalTest extends Application {
             }
         });
 
+        cal.addListener(new EventResizeListener() {
+
+            public void eventResize(EventResize event) {
+                MyEvent calendarEvent = (MyEvent) event.getCalendarEvent();
+                calendarEvent.setStart(event.getNewStartTime());
+                calendarEvent.setEnd(event.getNewEndTime());
+            }
+
+        });
+
         Button monthViewButton = new Button("Show month");
         monthViewButton.addListener(new ClickListener() {
 
@@ -253,42 +246,94 @@ public class SimpleCalTest extends Application {
         });
 
         VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
+        layout.setMargin(true);
         layout.addComponent(monthViewButton);
         layout.addComponent(cal);
+        layout.setExpandRatio(cal, 1);
         w.setContent(layout);
+        w.setSizeFull();
     }
 
-    private CalendarTestEvent getNewEvent(String caption, Date start, Date end) {
-        CalendarTestEvent event = new CalendarTestEvent();
-        event.setCaption(caption);
-        event.setStart(start);
-        event.setEnd(end);
+    public static class MyEventProvider implements CalendarEventProvider {
 
-        return event;
-    }
+        private static final long serialVersionUID = -3655982234130426761L;
 
-    public static class MyEventProvider extends BasicEventProvider {
+        private List<CalendarEvent> events = new ArrayList<CalendarEvent>();
 
         public MyEventProvider() {
+            events = new ArrayList<CalendarEvent>();
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(new Date());
 
             Date start = cal.getTime();
             cal.add(GregorianCalendar.HOUR, 5);
             Date end = cal.getTime();
-            BasicEvent event = new BasicEvent();
-            event.setCaption("My Event");
-            event.setStart(start);
-            event.setEnd(end);
+            events.add(new MyEvent("My event", start, end));
+        }
 
-            addEvent(event);
+        public void addEvent(CalendarEvent myEvent) {
+            events.add(myEvent);
+        }
 
-            // test empty caption event
-            BasicEvent event2 = new BasicEvent();
-            event2.setStart(start);
-            event2.setEnd(end);
-            addEvent(event2);
+        public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
+            return events;
         }
     }
 
+    public static class MyEvent implements CalendarEvent {
+
+        private static final long serialVersionUID = 6147099504819813059L;
+
+        private String caption;
+        private Date start;
+        private Date end;
+        private boolean allDay;
+
+        public MyEvent(String caption, Date start, Date end) {
+            this.caption = caption;
+            this.start = start;
+            this.end = end;
+        }
+
+        public String getCaption() {
+            return caption;
+        }
+
+        public void setCaption(String caption) {
+            this.caption = caption;
+        }
+
+        public Date getEnd() {
+            return end;
+        }
+
+        public void setEnd(Date end) {
+            this.end = end;
+        }
+
+        public Date getStart() {
+            return start;
+        }
+
+        public void setStart(Date start) {
+            this.start = start;
+        }
+
+        public String getStyleName() {
+            return null;
+        }
+
+        public String getDescription() {
+            return null;
+        }
+
+        public void setAllDay(boolean allDay) {
+            this.allDay = allDay;
+        }
+
+        public boolean isAllDay() {
+            return allDay;
+        }
+    }
 }
