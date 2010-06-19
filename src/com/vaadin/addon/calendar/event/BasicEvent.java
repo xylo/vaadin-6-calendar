@@ -15,7 +15,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  * setters for all required fields and fires events when this event is changed.
  * 
  */
-public class BasicEvent implements CalendarEvent, EventChangeNotifier {
+public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
 
     private static final long serialVersionUID = -7164298377129791491L;
 
@@ -106,10 +106,6 @@ public class BasicEvent implements CalendarEvent, EventChangeNotifier {
         fireEventChange();
     }
 
-    /**
-     * @param isAllDay
-     *            the isAllDay to set
-     */
     public void setAllDay(boolean isAllDay) {
         this.isAllDay = isAllDay;
         fireEventChange();
@@ -149,5 +145,4 @@ public class BasicEvent implements CalendarEvent, EventChangeNotifier {
             listener.eventChange(event);
         }
     }
-
 }

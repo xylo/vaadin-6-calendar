@@ -47,9 +47,10 @@ public class VCalendar extends Composite implements Paintable {
     public static final String ATTR_DAY_NAMES = "dNames";
     public static final String ATTR_FORMAT24H = "format24h";
     public static final String ATTR_ALLDAY = "allday";
+    public static final String ATTR_NAVIGATION = "navigation";
 
     public static final long MINUTEINMILLIS = 60 * 1000;
-    public static final long HOURINMILLIS = 60 * 60 * 1000;
+    public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;
     public static final long WEEKINMILLIS = 7 * DAYINMILLIS;
 

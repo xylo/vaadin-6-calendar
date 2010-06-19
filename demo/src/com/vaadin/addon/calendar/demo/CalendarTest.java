@@ -12,22 +12,15 @@ import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicDateClickHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -271,8 +264,12 @@ public class CalendarTest extends Application {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                switchToWeekView(calendar.get(GregorianCalendar.WEEK_OF_YEAR),
-                        calendar.get(GregorianCalendar.YEAR));
+                // simulate week click
+                WeekClickHandler handler = (WeekClickHandler) calendarComponent
+                        .getHandler(WeekClick.EVENT_ID);
+                handler.weekClick(new WeekClick(calendarComponent, calendar
+                        .get(GregorianCalendar.WEEK_OF_YEAR), calendar
+                        .get(GregorianCalendar.YEAR)));
             }
         });
 
@@ -366,57 +363,41 @@ public class CalendarTest extends Application {
     @SuppressWarnings("serial")
     private void addCalendarEventListeners() {
         // Register week clicks by changing the schedules start and end dates.
-        calendarComponent.addListener(new WeekClickListener() {
+        calendarComponent.setHandler(new BasicWeekClickHandler() {
 
+            @Override
             public void weekClick(WeekClick event) {
-                switchToWeekView(event.getWeek(), event.getYear());
+                // let BasicWeekClickHandler handle calendar dates, and update
+                // only the other parts of UI here
+                super.weekClick(event);
+                updateCaptionLabel();
+                switchToWeekView();
             }
         });
-        calendarComponent.addListener(new ForwardListener() {
 
-            public void forward(ForwardEvent event) {
-            }
-        });
-        calendarComponent.addListener(new BackwardListener() {
-
-            public void backward(BackwardEvent event) {
-            }
-        });
-        calendarComponent.addListener(new EventClickListener() {
+        calendarComponent.setHandler(new EventClickHandler() {
 
             public void eventClick(EventClick event) {
                 showEventPopup(event.getCalendarEvent(), false);
             }
         });
-        calendarComponent.addListener(new DateClickListener() {
 
+        calendarComponent.setHandler(new BasicDateClickHandler() {
+
+            @Override
             public void dateClick(DateClickEvent event) {
-                // Calendar start and end dates will be changed.
-                handleDateClick(event.getDate());
+                // let BasicDateClickHandler handle calendar dates, and update
+                // only the other parts of UI here
+                super.dateClick(event);
+                switchToDayView();
             }
         });
 
-        calendarComponent.addListener(new RangeSelectListener() {
+        calendarComponent.setHandler(new RangeSelectHandler() {
 
             public void rangeSelect(RangeSelectEvent event) {
                 handleRangeSelect(event);
             }
-        });
-
-        calendarComponent.addListener(new EventMoveListener() {
-
-            public void eventMove(MoveEvent event) {
-                applyEventMove(event.getCalendarEvent(), event.getNewStart());
-            }
-        });
-
-        calendarComponent.addListener(new EventResizeListener() {
-
-            public void eventResize(EventResize event) {
-                applyEventResize(event.getCalendarEvent(), event
-                        .getNewStartTime(), event.getNewEndTime());
-            }
-
         });
     }
 
@@ -566,12 +547,6 @@ public class CalendarTest extends Application {
         }
     }
 
-    private void handleDateClick(Date date) {
-        calendar.setTime(date);
-        switchToDayView(calendar.get(GregorianCalendar.DATE), calendar
-                .get(GregorianCalendar.YEAR));
-    }
-
     private void handleRangeSelect(RangeSelectEvent event) {
         Date start = event.getStart();
         Date end = event.getEnd();
@@ -581,28 +556,10 @@ public class CalendarTest extends Application {
          * the end of the last day.
          */
         if (event.isMonthlyMode()) {
-            end = calendarComponent.getEndOfDay(end);
+            end = Calendar.getEndOfDay(calendar, end);
         }
 
         showEventPopup(createNewEvent(start, end), true);
-    }
-
-    private void applyEventMove(CalendarEvent event, Date newFromDatetime) {
-        if (event instanceof BasicEvent) {
-            BasicEvent e = (BasicEvent) event;
-            /* Update event dates */
-            long length = e.getEnd().getTime() - e.getStart().getTime();
-            e.setStart(newFromDatetime);
-            e.setEnd(new Date(newFromDatetime.getTime() + length));
-        }
-    }
-
-    private void applyEventResize(CalendarEvent event, Date newStartTime,
-            Date newEndTime) {
-        if (event instanceof BasicEvent) {
-            ((BasicEvent) event).setStart(newStartTime);
-            ((BasicEvent) event).setEnd(newEndTime);
-        }
     }
 
     private void showEventPopup(CalendarEvent event, boolean newEvent) {
@@ -913,22 +870,12 @@ public class CalendarTest extends Application {
     }
 
     /*
-     * Switch the Calendar component's start and end date range to the target
-     * week only. (sample range: 04.01.2010 00:00.000 - 10.01.2010 23:59.999)
+     * Switch the view to week view.
      */
-    public void switchToWeekView(int week, int year) {
+    public void switchToWeekView() {
         viewMode = Mode.WEEK;
         weekButton.setVisible(false);
         monthButton.setVisible(true);
-
-        calendar.set(GregorianCalendar.YEAR, year);
-        calendar.set(GregorianCalendar.WEEK_OF_YEAR, week);
-        calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
-                .getFirstDayOfWeek());
-        resetCalendarTime(false);
-        resetTime(true);
-        calendar.add(GregorianCalendar.DATE, 6);
-        calendarComponent.setEndDate(calendar.getTime());
     }
 
     /*
@@ -951,18 +898,12 @@ public class CalendarTest extends Application {
     }
 
     /*
-     * Switch the Calendar component's start and end date range to the target
-     * day only. (sample range: 01.01.2010 00:00.000 - 01.01.2010 23:59.999)
+     * Switch to day view (week view with a single day visible).
      */
-    public void switchToDayView(int date, int year) {
+    public void switchToDayView() {
         viewMode = Mode.DAY;
         monthButton.setVisible(true);
         weekButton.setVisible(true);
-
-        calendar.set(GregorianCalendar.YEAR, year);
-        calendar.set(GregorianCalendar.DATE, date);
-        resetCalendarTime(false);
-        resetCalendarTime(true);
     }
 
     private void resetCalendarTime(boolean resetEndTime) {

@@ -115,12 +115,13 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         VCalendar w = (VCalendar) getParent().getParent();
         if (event.getSource() == nextLabel) {
             if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
-                w.getClient().updateVariable(w.getPID(), "navigation", 1, true);
+                w.getClient().updateVariable(w.getPID(),
+                        VCalendar.ATTR_NAVIGATION, true, true);
             }
         } else if (event.getSource() == backLabel) {
             if (w.getClient().hasEventListeners(w, CalendarEventId.BACKWARD)) {
-                w.getClient()
-                        .updateVariable(w.getPID(), "navigation", -1, true);
+                w.getClient().updateVariable(w.getPID(),
+                        VCalendar.ATTR_NAVIGATION, false, true);
             }
         }
     }

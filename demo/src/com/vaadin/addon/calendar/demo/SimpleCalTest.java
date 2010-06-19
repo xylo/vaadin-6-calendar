@@ -12,21 +12,21 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickHandler;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
@@ -64,19 +64,19 @@ public class SimpleCalTest extends Application {
         cal.setEndDate(new Date());
 
         // Enable backward navigation
-        cal.addListener(new BackwardListener() {
+        cal.setHandler(new BackwardHandler() {
             public void backward(BackwardEvent event) {
             }
         });
 
         // Enable forward navigation
-        cal.addListener(new ForwardListener() {
+        cal.setHandler(new ForwardHandler() {
             public void forward(ForwardEvent event) {
             }
         });
 
         // Add date click listener
-        cal.addListener(new DateClickListener() {
+        cal.setHandler(new DateClickHandler() {
 
             public void dateClick(DateClickEvent event) {
                 Calendar cal = event.getComponent();
@@ -94,7 +94,7 @@ public class SimpleCalTest extends Application {
             }
         });
 
-        cal.addListener(new WeekClickListener() {
+        cal.setHandler(new WeekClickHandler() {
 
             public void weekClick(WeekClick event) {
                 Calendar cal = event.getComponent();
@@ -114,7 +114,7 @@ public class SimpleCalTest extends Application {
             }
         });
 
-        cal.addListener(new EventClickListener() {
+        cal.setHandler(new EventClickHandler() {
 
             public void eventClick(EventClick event) {
                 MyEvent e = (MyEvent) event.getCalendarEvent();
@@ -124,7 +124,7 @@ public class SimpleCalTest extends Application {
         });
 
         // Add event move listener
-        cal.addListener(new EventMoveListener() {
+        cal.setHandler(new EventMoveHandler() {
 
             public void eventMove(MoveEvent event) {
                 MyEvent calEvent = ((MyEvent) event.getCalendarEvent());
@@ -138,7 +138,7 @@ public class SimpleCalTest extends Application {
         });
 
         // Add drag selection listener
-        cal.addListener(new RangeSelectListener() {
+        cal.setHandler(new RangeSelectHandler() {
 
             public void rangeSelect(RangeSelectEvent event) {
                 MyEvent myEvent = new MyEvent("", event.getStart(), event
@@ -206,7 +206,7 @@ public class SimpleCalTest extends Application {
             }
         });
 
-        cal.addListener(new EventResizeListener() {
+        cal.setHandler(new EventResizeHandler() {
 
             public void eventResize(EventResize event) {
                 MyEvent calendarEvent = (MyEvent) event.getCalendarEvent();

@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.ui;
 
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -7,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,21 +22,28 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickHandler;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicBackwardHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicDateClickHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicEventMoveHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicEventResizeHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicForwardHandler;
+import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
+import com.vaadin.event.ComponentEventListener;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -43,10 +51,8 @@ import com.vaadin.ui.ClientWidget;
 
 /**
  * <p>
- * Vaadin Calendar is for visualizing events in calendar. Only
- * {@link java.util.GregorianCalendar GregorianCalendar} is supported. Calendar
- * events can be visualized in the variable length view depending on the start
- * and end dates.
+ * Vaadin Calendar is for visualizing events in calendar. Calendar events can be
+ * visualized in the variable length view depending on the start and end dates.
  * <p/>
  * 
  * <li>You can set the viewable date range with {@link #setStartDate(Date)} and
@@ -87,8 +93,9 @@ public class Calendar extends AbstractComponent implements
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
 
-    /** Internal calendar data source. Always a GregorianCalendar. */
-    protected java.util.Calendar currentCalendar = new GregorianCalendar();
+    /** Internal calendar data source. */
+    protected java.util.Calendar currentCalendar = java.util.Calendar
+            .getInstance();
 
     /** Defines the component's active time zone. */
     protected TimeZone timezone;
@@ -127,12 +134,15 @@ public class Calendar extends AbstractComponent implements
     private SimpleDateFormat weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
             .getDateInstance();
 
+    /** Map from event ids to event handlers */
+    private Map<String, ComponentEventListener> handlers;
+
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
      * Default date range is one week.
      */
     public Calendar() {
-        this(new BasicEventProvider());
+        this(null, new BasicEventProvider());
     }
 
     /**
@@ -142,8 +152,7 @@ public class Calendar extends AbstractComponent implements
      * @param caption
      */
     public Calendar(String caption) {
-        this();
-        setCaption(caption);
+        this(caption, new BasicEventProvider());
     }
 
     /**
@@ -163,7 +172,7 @@ public class Calendar extends AbstractComponent implements
      *            Event provider, cannot be null.
      */
     public Calendar(CalendarEventProvider eventProvider) {
-        setEventProvider(eventProvider);
+        this(null, eventProvider);
     }
 
     /**
@@ -182,9 +191,28 @@ public class Calendar extends AbstractComponent implements
      * @param calendarEventProvider
      *            Event provider, cannot be null.
      */
+    // this is the constructor every other constuctor calls
     public Calendar(String caption, CalendarEventProvider eventProvider) {
-        this(eventProvider);
+        setEventProvider(eventProvider);
         setCaption(caption);
+
+        handlers = new HashMap<String, ComponentEventListener>();
+
+        setDefaultHandlers();
+    }
+
+    /**
+     * Set all the wanted default handlers here. This is always called after
+     * constructing this object. All other events have default handlers except
+     * range and event click.
+     */
+    protected void setDefaultHandlers() {
+        setHandler(new BasicBackwardHandler());
+        setHandler(new BasicForwardHandler());
+        setHandler(new BasicWeekClickHandler());
+        setHandler(new BasicDateClickHandler());
+        setHandler(new BasicEventMoveHandler());
+        setHandler(new BasicEventResizeHandler());
     }
 
     /**
@@ -250,10 +278,10 @@ public class Calendar extends AbstractComponent implements
         weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
                 .getDateInstance(SimpleDateFormat.SHORT, l);
         if (timezone != null) {
-            currentCalendar = new GregorianCalendar(timezone, l);
+            currentCalendar = java.util.Calendar.getInstance(timezone, l);
 
         } else {
-            currentCalendar = new GregorianCalendar(l);
+            currentCalendar = java.util.Calendar.getInstance(l);
         }
 
         super.setLocale(l);
@@ -319,6 +347,17 @@ public class Calendar extends AbstractComponent implements
             df_date_time.setTimeZone(zone);
             requestRepaint();
         }
+    }
+
+    /**
+     * Get the internally used Calendar instance. This is the currently used
+     * instance of {@link java.util.Calendar} but is bound to change during the
+     * lifetime of the component.
+     * 
+     * @return the currently used java calendar
+     */
+    public java.util.Calendar getInternalCalendar() {
+        return currentCalendar;
     }
 
     /**
@@ -395,11 +434,11 @@ public class Calendar extends AbstractComponent implements
         } else if (startDate == null && endDate == null) {
             // set defaults
             currentCalendar.setTime(new Date());
-            currentCalendar.set(GregorianCalendar.DAY_OF_WEEK, currentCalendar
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar
                     .getFirstDayOfWeek());
             startDate = currentCalendar.getTime();
 
-            currentCalendar.add(GregorianCalendar.DAY_OF_WEEK, 6);
+            currentCalendar.add(java.util.Calendar.DAY_OF_WEEK, 6);
             endDate = currentCalendar.getTime();
         }
 
@@ -448,8 +487,8 @@ public class Calendar extends AbstractComponent implements
 
         // Always expand to the start of the first day to the end of the last
         // day
-        firstDateToShow = getStartOfDay(firstDateToShow);
-        lastDateToShow = getEndOfDay(lastDateToShow);
+        firstDateToShow = getStartOfDay(currentCalendar, firstDateToShow);
+        lastDateToShow = getEndOfDay(currentCalendar, lastDateToShow);
 
         currentCalendar.setTime(firstDateToShow);
 
@@ -552,8 +591,8 @@ public class Calendar extends AbstractComponent implements
             handleEventMove(variables.get(CalendarEventId.EVENTMOVE).toString());
         }
 
-        if (variables.containsKey("navigation")) {
-            handleNavigation((Integer) variables.get("navigation"));
+        if (variables.containsKey(VCalendar.ATTR_NAVIGATION)) {
+            handleNavigation((Boolean) variables.get("navigation"));
         }
 
         if (variables.containsKey(CalendarEventId.EVENTRESIZE) && !isReadOnly()) {
@@ -681,21 +720,8 @@ public class Calendar extends AbstractComponent implements
     /*
      * Handle a navigation message from client.
      */
-    private void handleNavigation(Integer integer) {
-        int index = integer;
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
-        durationInDays++;
-        if (index == -1) {
-            durationInDays = -durationInDays;
-        }
-        currentCalendar.setTime(startDate);
-        currentCalendar.add(java.util.Calendar.DATE, durationInDays);
-        startDate = currentCalendar.getTime();
-        currentCalendar.setTime(endDate);
-        currentCalendar.add(java.util.Calendar.DATE, durationInDays);
-        endDate = currentCalendar.getTime();
-        requestRepaint();
-        fireNavigationEvent(index != -1);
+    private void handleNavigation(Boolean forward) {
+        fireNavigationEvent(forward);
     }
 
     /*
@@ -825,42 +851,54 @@ public class Calendar extends AbstractComponent implements
     }
 
     /**
-     * Get the end time of the day for the given date
+     * Calculates the end time of the day using the given calendar and date
      * 
      * @param date
-     * @return
+     * @param calendar
+     *            the calendar instance to be used in the calculation. The given
+     *            instance is unchanged in this operation.
+     * @return the given date, with time set to the end of the day
      */
-    public Date getEndOfDay(Date date) {
-        currentCalendar.setTime(date);
-        currentCalendar.set(GregorianCalendar.MILLISECOND, currentCalendar
-                .getActualMaximum(GregorianCalendar.MILLISECOND));
-        currentCalendar.set(GregorianCalendar.SECOND, currentCalendar
-                .getActualMaximum(GregorianCalendar.SECOND));
-        currentCalendar.set(GregorianCalendar.MINUTE, currentCalendar
-                .getActualMaximum(GregorianCalendar.MINUTE));
-        currentCalendar.set(GregorianCalendar.HOUR, currentCalendar
-                .getActualMaximum(GregorianCalendar.HOUR));
-        currentCalendar.set(GregorianCalendar.HOUR_OF_DAY, currentCalendar
-                .getActualMaximum(GregorianCalendar.HOUR_OF_DAY));
+    public static Date getEndOfDay(java.util.Calendar calendar, Date date) {
+        java.util.Calendar calendarClone = (java.util.Calendar) calendar
+                .clone();
 
-        return currentCalendar.getTime();
+        calendarClone.setTime(date);
+        calendarClone.set(java.util.Calendar.MILLISECOND, calendarClone
+                .getActualMaximum(java.util.Calendar.MILLISECOND));
+        calendarClone.set(java.util.Calendar.SECOND, calendarClone
+                .getActualMaximum(java.util.Calendar.SECOND));
+        calendarClone.set(java.util.Calendar.MINUTE, calendarClone
+                .getActualMaximum(java.util.Calendar.MINUTE));
+        calendarClone.set(java.util.Calendar.HOUR, calendarClone
+                .getActualMaximum(java.util.Calendar.HOUR));
+        calendarClone.set(java.util.Calendar.HOUR_OF_DAY, calendarClone
+                .getActualMaximum(java.util.Calendar.HOUR_OF_DAY));
+
+        return calendarClone.getTime();
     }
 
     /**
-     * Get the start time of the day for the given date
+     * Calculates the end time of the day using the given calendar and date
      * 
      * @param date
-     * @return
+     * @param calendar
+     *            the calendar instance to be used in the calculation. The given
+     *            instance is unchanged in this operation.
+     * @return the given date, with time set to the end of the day
      */
-    public Date getStartOfDay(Date date) {
-        currentCalendar.setTime(date);
-        currentCalendar.set(GregorianCalendar.MILLISECOND, 0);
-        currentCalendar.set(GregorianCalendar.SECOND, 0);
-        currentCalendar.set(GregorianCalendar.MINUTE, 0);
-        currentCalendar.set(GregorianCalendar.HOUR, 0);
-        currentCalendar.set(GregorianCalendar.HOUR_OF_DAY, 0);
+    public static Date getStartOfDay(java.util.Calendar calendar, Date date) {
+        java.util.Calendar calendarClone = (java.util.Calendar) calendar
+                .clone();
 
-        return currentCalendar.getTime();
+        calendarClone.setTime(date);
+        calendarClone.set(java.util.Calendar.MILLISECOND, 0);
+        calendarClone.set(java.util.Calendar.SECOND, 0);
+        calendarClone.set(java.util.Calendar.MINUTE, 0);
+        calendarClone.set(java.util.Calendar.HOUR, 0);
+        calendarClone.set(java.util.Calendar.HOUR_OF_DAY, 0);
+
+        return calendarClone.getTime();
     }
 
     /**
@@ -914,17 +952,27 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Set the handler for the given type information. Mirrors
+     * {@link #addListener(String, Class, Object, Method) addListener} from
+     * AbstractComponent
      * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener)
+     * @param eventId
+     * @param eventType
+     * @param listener
+     * @param listenerMethod
      */
-    public void addListener(ForwardListener listener) {
-        addListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener,
-                ForwardListener.forwardMethod);
+    protected void setHandler(String eventId, Class<?> eventType,
+            ComponentEventListener listener, Method listenerMethod) {
+        if (handlers.get(eventId) != null) {
+            removeListener(eventType, handlers.get(eventId));
+            handlers.put(eventId, null);
+        }
+
+        if (listener != null) {
+            addListener(eventId, eventType, listener, listenerMethod);
+            handlers.put(eventId, listener);
+        }
     }
 
     /*
@@ -933,11 +981,11 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener)
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler)
      */
-    public void addListener(BackwardListener listener) {
-        addListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener,
-                BackwardListener.backwardMethod);
+    public void setHandler(ForwardHandler listener) {
+        setHandler(ForwardEvent.EVENT_ID, ForwardEvent.class, listener,
+                ForwardHandler.forwardMethod);
     }
 
     /*
@@ -946,11 +994,11 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener)
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler)
      */
-    public void addListener(DateClickListener listener) {
-        addListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener,
-                DateClickListener.dateClickMethod);
+    public void setHandler(BackwardHandler listener) {
+        setHandler(BackwardEvent.EVENT_ID, BackwardEvent.class, listener,
+                BackwardHandler.backwardMethod);
     }
 
     /*
@@ -959,11 +1007,11 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener)
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler)
      */
-    public void addListener(EventClickListener listener) {
-        addListener(EventClick.EVENT_ID, EventClick.class, listener,
-                EventClickListener.eventClickMethod);
+    public void setHandler(DateClickHandler listener) {
+        setHandler(DateClickEvent.EVENT_ID, DateClickEvent.class, listener,
+                DateClickHandler.dateClickMethod);
     }
 
     /*
@@ -972,11 +1020,24 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener)
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickHandler)
      */
-    public void addListener(WeekClickListener listener) {
-        addListener(WeekClick.EVENT_ID, WeekClick.class, listener,
-                WeekClickListener.weekClickMethod);
+    public void setHandler(EventClickHandler listener) {
+        setHandler(EventClick.EVENT_ID, EventClick.class, listener,
+                EventClickHandler.eventClickMethod);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
+     * #addListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler)
+     */
+    public void setHandler(WeekClickHandler listener) {
+        setHandler(WeekClick.EVENT_ID, WeekClick.class, listener,
+                WeekClickHandler.weekClickMethod);
     }
 
     /*
@@ -985,12 +1046,12 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
      * )
      */
-    public void addListener(EventResizeListener listener) {
-        addListener(EventResize.EVENT_ID, EventResize.class, listener,
-                EventResizeListener.eventResizeMethod);
+    public void setHandler(EventResizeHandler listener) {
+        setHandler(EventResize.EVENT_ID, EventResize.class, listener,
+                EventResizeHandler.eventResizeMethod);
     }
 
     /*
@@ -999,12 +1060,12 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler
      * )
      */
-    public void addListener(RangeSelectListener listener) {
-        addListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
-                listener, RangeSelectListener.rangeSelectMethod);
+    public void setHandler(RangeSelectHandler listener) {
+        setHandler(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class, listener,
+                RangeSelectHandler.rangeSelectMethod);
 
     }
 
@@ -1014,109 +1075,22 @@ public class Calendar extends AbstractComponent implements
      * @see
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveNotifier
      * #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener)
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler)
      */
-    public void addListener(EventMoveListener listener) {
-        addListener(MoveEvent.EVENT_ID, MoveEvent.class, listener,
-                EventMoveListener.eventMoveMethod);
+    public void setHandler(EventMoveHandler listener) {
+        setHandler(MoveEvent.EVENT_ID, MoveEvent.class, listener,
+                EventMoveHandler.eventMoveMethod);
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardListener)
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.CalendarEventNotifier
+     * #getHandler(java.lang.String)
      */
-    public void removeListener(ForwardListener listener) {
-        removeListener(ForwardEvent.EVENT_ID, ForwardEvent.class, listener);
+    public ComponentEventListener getHandler(String eventId) {
+        return handlers.get(eventId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardListener)
-     */
-    public void removeListener(BackwardListener listener) {
-        removeListener(BackwardEvent.EVENT_ID, BackwardEvent.class, listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickListener)
-     */
-    public void removeListener(DateClickListener listener) {
-        removeListener(DateClickEvent.EVENT_ID, DateClickEvent.class, listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickListener)
-     */
-    public void removeListener(EventClickListener listener) {
-        removeListener(EventClick.EVENT_ID, EventClick.class, listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.NavigationNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickListener)
-     */
-    public void removeListener(WeekClickListener listener) {
-        removeListener(WeekClick.EVENT_ID, WeekClick.class, listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveListener)
-     */
-    public void removeListener(EventMoveListener listener) {
-        removeListener(MoveEvent.EVENT_ID, MoveEvent.class, listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectListener
-     * )
-     */
-    public void removeListener(RangeSelectListener listener) {
-        removeListener(RangeSelectEvent.EVENT_ID, RangeSelectEvent.class,
-                listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeNotifier
-     * #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeListener
-     * )
-     */
-    public void removeListener(EventResizeListener listener) {
-        removeListener(EventResize.EVENT_ID, EventResize.class, listener);
-    }
 }

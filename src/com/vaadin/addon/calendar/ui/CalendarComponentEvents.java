@@ -14,26 +14,30 @@ import com.vaadin.tools.ReflectTools;
  */
 public interface CalendarComponentEvents extends Serializable {
 
-    /**
-     * Listener interface for event drag & drops.
-     */
-    public interface EventMoveNotifier extends Serializable {
-
+    public interface CalendarEventNotifier {
         /**
-         * Add a EventMoveListener.
+         * Get the assigned event handler for the given eventId.
          * 
-         * @param listener
-         *            EventMoveListener to be added
+         * @param eventId
+         * @return the assigned eventHandler, or null if no handler is assigned
          */
-        public void addListener(EventMoveListener listener);
+        public ComponentEventListener getHandler(String eventId);
+    }
+
+    /**
+     * Notifier interface for event drag & drops.
+     */
+    public interface EventMoveNotifier extends Serializable,
+            CalendarEventNotifier {
 
         /**
-         * Remove the EventMoveListener.
+         * Set the EventMoveHandler.
          * 
          * @param listener
-         *            EventMoveListener to be removed
-         * */
-        public void removeListener(EventMoveListener listener);
+         *            EventMoveHandler to be added
+         */
+        public void setHandler(EventMoveHandler listener);
+
     }
 
     /**
@@ -87,12 +91,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** EventMoveListeners listens for MoveEvents. */
-    public interface EventMoveListener extends ComponentEventListener {
+    /** EventMoveHandler handles MoveEvents. */
+    public interface EventMoveHandler extends ComponentEventListener {
 
         /** Trigger method for the MoveEvent. */
         public static final Method eventMoveMethod = ReflectTools.findMethod(
-                EventMoveListener.class, "eventMove", MoveEvent.class);
+                EventMoveHandler.class, "eventMove", MoveEvent.class);
 
         /**
          * This method will be called when event has been moved to a new
@@ -106,25 +110,18 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * Listener interface for day or time cell drag-marking with mouse.
+     * Handler interface for day or time cell drag-marking with mouse.
      */
-    public interface RangeSelectNotifier extends Serializable {
+    public interface RangeSelectNotifier extends Serializable,
+            CalendarEventNotifier {
 
         /**
-         * Add RangeSelectListener that listens for drag-marking.
+         * Set the RangeSelectHandler that listens for drag-marking.
          * 
          * @param listener
-         *            RangeSelectListener to be added.
+         *            RangeSelectHandler to be added.
          */
-        public void addListener(RangeSelectListener listener);
-
-        /**
-         * Remove target RangeSelectListener;
-         * 
-         * @param listener
-         *            RangeSelectListener to be removed.
-         */
-        public void removeListener(RangeSelectListener listener);
+        public void setHandler(RangeSelectHandler listener);
     }
 
     /**
@@ -196,13 +193,13 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** EventMoveListeners listens for RangeSelectEvent. */
-    public interface RangeSelectListener extends ComponentEventListener {
+    /** RangeSelectHandler handles RangeSelectEvent. */
+    public interface RangeSelectHandler extends ComponentEventListener {
 
         /** Trigger method for the RangeSelectEvent. */
-        public static final Method rangeSelectMethod = ReflectTools.findMethod(
-                RangeSelectListener.class, "rangeSelect",
-                RangeSelectEvent.class);
+        public static final Method rangeSelectMethod = ReflectTools
+                .findMethod(RangeSelectHandler.class, "rangeSelect",
+                        RangeSelectEvent.class);
 
         /**
          * This method will be called when day or time cells are drag-marked
@@ -214,87 +211,47 @@ public interface CalendarComponentEvents extends Serializable {
         public void rangeSelect(RangeSelectEvent event);
     }
 
-    /** Listener interface for navigation listening. */
+    /** Notifier interface for navigation listening. */
     public interface NavigationNotifier extends Serializable {
         /**
          * Add a forward navigation listener.
          * 
-         * @param listener
-         *            ForwardListener to be added.
+         * @param handler
+         *            ForwardHandler to be added.
          */
-        public void addListener(ForwardListener listener);
-
-        /**
-         * Remove the target ForwardListener.
-         * 
-         * @param listener
-         *            ForwardListener to be removed.
-         */
-        public void removeListener(ForwardListener listener);
+        public void setHandler(ForwardHandler handler);
 
         /**
          * Add a backward navigation listener.
          * 
-         * @param listener
-         *            BackwardListener to be added.
+         * @param handler
+         *            BackwardHandler to be added.
          */
-        public void addListener(BackwardListener listener);
-
-        /**
-         * Remove the target BackwardListener.
-         * 
-         * @param listener
-         *            BackwardListener to be removed.
-         */
-        public void removeListener(BackwardListener listener);
+        public void setHandler(BackwardHandler handler);
 
         /**
          * Add a date click listener.
          * 
-         * @param listener
-         *            DateClickListener to be added.
+         * @param handler
+         *            DateClickHandler to be added.
          */
-        public void addListener(DateClickListener listener);
-
-        /**
-         * Remove the target DateClickListener.
-         * 
-         * @param listener
-         *            DateClickListener to be removed.
-         */
-        public void removeListener(DateClickListener listener);
+        public void setHandler(DateClickHandler handler);
 
         /**
          * Add a event click listener.
          * 
-         * @param listener
-         *            EventClickListener to be added.
+         * @param handler
+         *            EventClickHandler to be added.
          */
-        public void addListener(EventClickListener listener);
-
-        /**
-         * Remove the target EventClickListener.
-         * 
-         * @param listener
-         *            EventClickListener to be removed.
-         */
-        public void removeListener(EventClickListener listener);
+        public void setHandler(EventClickHandler handler);
 
         /**
          * Add a week click listener.
          * 
-         * @param listener
-         *            WeekClickListener to be added.
+         * @param handler
+         *            WeekClickHandler to be added.
          */
-        public void addListener(WeekClickListener listener);
-
-        /**
-         * Remove the target WeekClickListener.
-         * 
-         * @param listener
-         *            WeekClickListener to be removed.
-         */
-        public void removeListener(WeekClickListener listener);
+        public void setHandler(WeekClickHandler handler);
     }
 
     /**
@@ -316,12 +273,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** ForwardListener listens for ForwardEvent. */
-    public interface ForwardListener extends ComponentEventListener {
+    /** ForwardHandler handles ForwardEvent. */
+    public interface ForwardHandler extends ComponentEventListener {
 
         /** Trigger method for the ForwardEvent. */
         public static final Method forwardMethod = ReflectTools.findMethod(
-                ForwardListener.class, "forward", ForwardEvent.class);
+                ForwardHandler.class, "forward", ForwardEvent.class);
 
         /**
          * This method will be called when date range is moved forward.
@@ -351,12 +308,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** BackwardListener listens for BackwardEvent. */
-    public interface BackwardListener extends ComponentEventListener {
+    /** BackwardHandler handles BackwardEvent. */
+    public interface BackwardHandler extends ComponentEventListener {
 
         /** Trigger method for the BackwardEvent. */
         public static final Method backwardMethod = ReflectTools.findMethod(
-                BackwardListener.class, "backward", BackwardEvent.class);
+                BackwardHandler.class, "backward", BackwardEvent.class);
 
         /**
          * This method will be called when date range is moved backwards.
@@ -394,12 +351,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** DateClickListener listens for DateClickEvent. */
-    public interface DateClickListener extends ComponentEventListener {
+    /** DateClickHandler handles DateClickEvent. */
+    public interface DateClickHandler extends ComponentEventListener {
 
         /** Trigger method for the DateClickEvent. */
         public static final Method dateClickMethod = ReflectTools.findMethod(
-                DateClickListener.class, "dateClick", DateClickEvent.class);
+                DateClickHandler.class, "dateClick", DateClickEvent.class);
 
         /**
          * This method will be called when a date is clicked.
@@ -437,12 +394,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** EventClickListener listens for EventClick. */
-    public interface EventClickListener extends ComponentEventListener {
+    /** EventClickHandler handles EventClick. */
+    public interface EventClickHandler extends ComponentEventListener {
 
         /** Trigger method for the EventClick. */
         public static final Method eventClickMethod = ReflectTools.findMethod(
-                EventClickListener.class, "eventClick", EventClick.class);
+                EventClickHandler.class, "eventClick", EventClick.class);
 
         /**
          * This method will be called when an event is clicked.
@@ -504,12 +461,12 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** WeekClickListener listens for WeekClick. */
-    public interface WeekClickListener extends ComponentEventListener {
+    /** WeekClickHandler handles WeekClicks. */
+    public interface WeekClickHandler extends ComponentEventListener {
 
         /** Trigger method for the WeekClick. */
         public static final Method weekClickMethod = ReflectTools.findMethod(
-                WeekClickListener.class, "weekClick", WeekClick.class);
+                WeekClickHandler.class, "weekClick", WeekClick.class);
 
         /**
          * This method will be called when a week is clicked.
@@ -567,35 +524,27 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * Listener interface for event resizing.
+     * Notifier interface for event resizing.
      */
     public interface EventResizeNotifier extends Serializable {
 
         /**
-         * Add a EventResizeListener.
+         * Set a EventResizeHandler.
          * 
-         * @param listener
-         *            EventResizeListener to be added
+         * @param handler
+         *            EventResizeHandler to be set
          */
-        public void addListener(EventResizeListener listener);
-
-        /**
-         * Remove the EventResizeListener.
-         * 
-         * @param listener
-         *            EventResizeListener to be removed
-         * */
-        public void removeListener(EventResizeListener listener);
+        public void setHandler(EventResizeHandler handler);
     }
 
     /**
-     * Listener for EventResize event.
+     * Handler for EventResize event.
      */
-    public interface EventResizeListener extends Serializable {
+    public interface EventResizeHandler extends ComponentEventListener {
 
         /** Trigger method for the EventResize. */
         public static final Method eventResizeMethod = ReflectTools.findMethod(
-                EventResizeListener.class, "eventResize", EventResize.class);
+                EventResizeHandler.class, "eventResize", EventResize.class);
 
         void eventResize(EventResize event);
     }
