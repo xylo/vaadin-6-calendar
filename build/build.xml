@@ -239,18 +239,20 @@
     <target name="package-zip" depends="package-jar, manual" unless="run.no-package-jar">
         <property name="zip.name" value="${result-path}/${addon.name}-${version}.zip"/>
 
+    	<!-- Make the zip manifest -->
+    	<mkdir dir="${result-path}/META-INF"/>
+    	<echo file="${result-path}/META-INF/MANIFEST.MF">Vaadin-Addon: ${jar.name}
+Vaadin-Package-Version: 1
+Implementation-Title: Vaadin Calendar
+Implementation-Version: ${version}
+Implementation-Vendor: IT Mill Oy
+       </echo>         
+    	        	
         <zip destfile="${zip.name}">
-            <zipfileset prefix="${addon.name}-${version}" dir="${result-path}">
-                <patternset>
-                    <include name="${jar.name}" />
-                </patternset>
-            </zipfileset>
-            <zipfileset prefix="${addon.name}-${version}" dir=".">
-                <patternset>
-                    <include name="${manual.pdf}" />
-                </patternset>
-            </zipfileset>
-            <zipfileset prefix="${addon.name}-${version}" dir="doc">
+        	<zipfileset dir="${result-path}" includes="META-INF/MANIFEST.MF" />        	
+            <zipfileset prefix="" file="${result-path}/${jar.name}" />              
+            <zipfileset prefix="doc" file="${manual.pdf}" />               
+            <zipfileset prefix="doc" dir="doc">
                 <patternset>
                     <include name="README.TXT" />
                 	<include name="licensing.txt" />
