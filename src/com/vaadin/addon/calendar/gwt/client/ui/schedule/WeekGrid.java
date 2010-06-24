@@ -1352,7 +1352,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                         EventTarget et = event.getNativeEvent()
                                 .getEventTarget();
                         Element e = Element.as(et);
-                        if (e == caption || e == eventContent) {
+                        if (e == caption || e == eventContent
+                                || e.getParentElement() == caption) {
 
                             VCalendar calendar = weekGrid.getCalendar();
 
