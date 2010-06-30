@@ -14,7 +14,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected static final int MARGINRIGHT = 20;
     protected Button backLabel;
     protected Button nextLabel;
-    private boolean sized;
+    private boolean verticalSized;
+    private boolean horizontalSized;
 
     public DayToolbar() {
         setStylePrimaryName("v-calendar-header-week");
@@ -29,14 +30,12 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void setWidthPX(int width) {
-        if (!sized) {
-            this.width = (width - MARGINLEFT) - MARGINRIGHT;
-            // super.setWidth(this.width + "px");
-            if (getWidgetCount() == 0) {
-                return;
-            }
-            updateCellWidths();
+        this.width = (width - MARGINLEFT) - MARGINRIGHT;
+        // super.setWidth(this.width + "px");
+        if (getWidgetCount() == 0) {
+            return;
         }
+        updateCellWidths();
     }
 
     public void updateCellWidths() {
@@ -70,8 +69,11 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             l.addStyleDependentName(extraClass);
         }
 
-        if (sized) {
-            l.addStyleDependentName("sized");
+        if (verticalSized) {
+            l.addStyleDependentName("Vsized");
+        }
+        if (horizontalSized) {
+            l.addStyleDependentName("Hsized");
         }
         add(l);
     }
@@ -126,8 +128,11 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
     }
 
-    public void setSized(boolean sized) {
-        this.sized = sized;
+    public void setVerticalSized(boolean sized) {
+        this.verticalSized = sized;
     }
 
+    public void setHorizontalSized(boolean sized) {
+        this.horizontalSized = sized;
+    }
 }

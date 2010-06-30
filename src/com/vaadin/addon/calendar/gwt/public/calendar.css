@@ -323,35 +323,40 @@ div.v-calendar-event-all-day {
 	width: 100px;
 }
 
-.v-calendar-header-month-sized .v-calendar-header-day {
+.v-calendar-header-month-Hsized .v-calendar-header-day {
 	width: 101px;
 }
 
-.v-calendar-header-month-sized td:first-child {
+.v-calendar-header-month-Hsized td:first-child {
 	padding-left: 21px;
 }
 
-.v-calendar-header-day-sized {
+.v-calendar-header-day-Hsized {
 	width: 200px;
 }
 
-.v-calendar-week-numbers-sized .v-calendar-week-number {
+.v-calendar-week-numbers-Vsized .v-calendar-week-number {
 	height: 100px;
 	line-height: 100px;
 }
 
-.v-calendar-week-wrapper-sized {
+.v-calendar-week-wrapper-Vsized {
 	height: 400px;
 	overflow-x: hidden !important;
 }
 
-.v-calendar-times-sized .v-calendar-time {
-	width: 42px;
+.v-calendar-times-Vsized .v-calendar-time {
 	height: 38px;
 }
 
-.v-calendar-day-times-sized .v-slot,.v-calendar-day-times-sized .v-slot-even
-	{
+.v-calendar-times-Hsized .v-calendar-time {
+	width: 42px;
+}
+
+.v-calendar-day-times-Vsized .v-slot,.v-calendar-day-times-Vsized .v-slot-even {
 	height: 18px;
+}
+
+.v-calendar-day-times-Hsized, .v-calendar-day-times-Hsized .v-slot,.v-calendar-day-times-Hsized .v-slot-even {
 	width: 200px;
 }

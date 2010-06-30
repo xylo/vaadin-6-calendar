@@ -92,22 +92,25 @@ public class MonthGrid extends Grid {
     }
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
-        if (totalWidthPX > 0 && totalHeightPX > 0) {
-            int rows = getRowCount();
-            int cells = getCellCount(0);
-            int cellWidth = (totalWidthPX / cells) - 1;
-            int widthRemainder = totalWidthPX % cells;
-            // Division for cells might not be even. Distribute it evenly to
-            // will whole space.
-            int heightPX = totalHeightPX;
-            int cellHeight = heightPX / rows;
-            int heightRemainder = heightPX % rows;
+        boolean setHeight = totalHeightPX > 0;
+        boolean setWidth = totalWidthPX > 0;
+        int rows = getRowCount();
+        int cells = getCellCount(0);
+        int cellWidth = (totalWidthPX / cells) - 1;
+        int widthRemainder = totalWidthPX % cells;
+        // Division for cells might not be even. Distribute it evenly to
+        // will whole space.
+        int heightPX = totalHeightPX;
+        int cellHeight = heightPX / rows;
+        int heightRemainder = heightPX % rows;
 
-            boolean isIE7 = BrowserInfo.get().isIE7();
+        boolean isIE7 = BrowserInfo.get().isIE7();
 
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cells; j++) {
-                    SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cells; j++) {
+                SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+
+                if (setWidth) {
                     if (widthRemainder > 0 && !isIE7) {
                         sdc.setWidth(cellWidth + 1 + "px");
                         widthRemainder--;
@@ -115,24 +118,19 @@ public class MonthGrid extends Grid {
                     } else {
                         sdc.setWidth(cellWidth + "px");
                     }
+                }
+
+                if (setHeight) {
                     if (heightRemainder > 0) {
                         sdc.setHeightPX(cellHeight + 1, true);
 
                     } else {
                         sdc.setHeightPX(cellHeight, true);
                     }
-                }
-                heightRemainder--;
-            }
-        } else {
-            int rows = getRowCount();
-            int cells = getCellCount(0);
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cells; j++) {
-                    SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+                } else
                     sdc.setHeightPX(-1, true);
-                }
             }
+            heightRemainder--;
         }
     }
 

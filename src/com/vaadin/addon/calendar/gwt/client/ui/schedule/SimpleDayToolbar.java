@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SimpleDayToolbar extends HorizontalPanel {
     private int width = 0;
-    private boolean isHeightUndefined;
+    private boolean isWidthUndefined = false;
 
     public SimpleDayToolbar() {
         setStylePrimaryName("v-calendar-header-month");
@@ -37,27 +37,39 @@ public class SimpleDayToolbar extends HorizontalPanel {
             if (getWidgetCount() == 0) {
                 return;
             }
-            updateCellWidth();
         }
+        updateCellWidth();
     }
 
     private boolean isWidthUndefined() {
-        return isHeightUndefined;
+        return isWidthUndefined;
     }
 
-    private void setWidthUndefined(boolean isHeightUndefined) {
-        this.isHeightUndefined = isHeightUndefined;
+    private void setWidthUndefined(boolean isWidthUndefined) {
+        this.isWidthUndefined = isWidthUndefined;
 
-        if (isHeightUndefined) {
-            addStyleDependentName("sized");
+        if (isWidthUndefined) {
+            addStyleDependentName("Hsized");
 
         } else {
-            removeStyleDependentName("sized");
+            removeStyleDependentName("Hsized");
         }
     }
 
     private void updateCellWidth() {
-        int cellw = width / getWidgetCount();
+        int cellw = -1;
+        int widgetCount = getWidgetCount();
+        if (widgetCount <= 0)
+            return;
+        if (isWidthUndefined()) {
+            Widget widget = getWidget(0);
+            String w = widget.getElement().getStyle().getWidth();
+            if (w.length() > 2) {
+                cellw = Integer.parseInt(w.substring(0, w.length() - 2));
+            }
+        } else {
+            cellw = width / getWidgetCount();
+        }
         if (cellw > 0) {
             for (int i = 0; i < getWidgetCount(); i++) {
                 Widget widget = getWidget(i);

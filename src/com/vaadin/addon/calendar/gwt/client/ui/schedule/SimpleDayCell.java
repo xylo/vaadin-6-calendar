@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -629,14 +628,7 @@ public class SimpleDayCell extends FlowPanel implements MouseUpHandler,
     }
 
     public int getWidth() {
-        Style s = getElement().getStyle();
-        String width = s.getWidth();
-
-        if (!"".equals(width)) {
-            return Integer.parseInt(width.substring(0, width.length() - 2));
-        } else {
-            return getOffsetWidth() - BORDERPADDINGSIZE;
-        }
+        return getOffsetWidth() - BORDERPADDINGSIZE;
     }
 
     public void setToday(boolean today) {

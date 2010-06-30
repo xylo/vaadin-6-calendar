@@ -138,16 +138,16 @@ public class WeeklyLongEvents extends HorizontalPanel {
     }
 
     public void updateCellWidths() {
-        if (width > 0) {
-            int cells = getWidgetCount();
-            int cellWidth = width / cells;
-            for (int i = 0; i < cells; i++) {
-                DateCellContainer dc = (DateCellContainer) getWidget(i);
-                dc.setWidth(cellWidth
-                        - DateCellContainer.measureBorderWidth(dc) + "px");
-            }
-        }
+        int cells = getWidgetCount();
+        if (cells <= 0)
+            return;
+        int cellWidth = calendar.getWeekGrid().getDateCellWidth();
 
+        for (int i = 0; i < cells; i++) {
+            DateCellContainer dc = (DateCellContainer) getWidget(i);
+            dc.setWidth(cellWidth - DateCellContainer.measureBorderWidth(dc)
+                    + "px");
+        }
     }
 
     public static class DateCellContainer extends FlowPanel implements

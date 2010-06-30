@@ -141,8 +141,11 @@ public class SimpleCalTest extends Application {
         cal.setHandler(new RangeSelectHandler() {
 
             public void rangeSelect(RangeSelectEvent event) {
+                long currentCalDateRange = cal.getEndDate().getTime()
+                        - cal.getStartDate().getTime();
+                boolean allDayEvent = currentCalDateRange > (VCalendar.DAYINMILLIS * 7);
                 MyEvent myEvent = new MyEvent("", event.getStart(), event
-                        .getEnd());
+                        .getEnd(), allDayEvent);
 
                 // Create popup window and add a form in it.
                 VerticalLayout layout = new VerticalLayout();
@@ -269,7 +272,7 @@ public class SimpleCalTest extends Application {
             Date start = cal.getTime();
             cal.add(GregorianCalendar.HOUR, 5);
             Date end = cal.getTime();
-            events.add(new MyEvent("My event", start, end));
+            events.add(new MyEvent("My event", start, end, false));
         }
 
         public void addEvent(CalendarEvent myEvent) {
@@ -290,10 +293,11 @@ public class SimpleCalTest extends Application {
         private Date end;
         private boolean allDay;
 
-        public MyEvent(String caption, Date start, Date end) {
+        public MyEvent(String caption, Date start, Date end, boolean allDay) {
             this.caption = caption;
             this.start = start;
             this.end = end;
+            this.allDay = allDay;
         }
 
         public String getCaption() {

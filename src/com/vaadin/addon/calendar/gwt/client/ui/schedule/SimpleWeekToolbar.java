@@ -61,8 +61,8 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     }
 
     public void setHeightPX(int intHeight) {
-        height = intHeight;
         setHeightUndefined(intHeight == -1);
+        height = intHeight;
         updateCellHeights();
     }
 
@@ -74,10 +74,10 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
         this.isHeightUndefined = isHeightUndefined;
 
         if (isHeightUndefined) {
-            addStyleDependentName("sized");
+            addStyleDependentName("Vsized");
 
         } else {
-            removeStyleDependentName("sized");
+            removeStyleDependentName("Vsized");
         }
     }
 

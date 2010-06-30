@@ -197,7 +197,7 @@ public class VCalendar extends Composite implements Paintable {
         weekGrid.setWidthPX(intWidth);
         dayToolbar.updateCellWidths();
         weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
-        weekGrid.setScrollPosition(scroll);
+        weekGrid.setVerticalScrollPosition(scroll);
         recalculateHeights();
         recalculateWidths();
     }
@@ -478,7 +478,8 @@ public class VCalendar extends Composite implements Paintable {
         }
         dayToolbar.clear();
         dayToolbar.addBackButton();
-        dayToolbar.setSized(isHeightUndefined);
+        dayToolbar.setVerticalSized(isHeightUndefined);
+        dayToolbar.setHorizontalSized(isWidthUndefined);
         weekGrid.clearDates();
         weekGrid.setReadOnly(readOnly);
         for (int i = 0; i < daysCount; i++) {
@@ -568,29 +569,17 @@ public class VCalendar extends Composite implements Paintable {
     }
 
     private void recalculateHeights() {
-        if (!isHeightUndefined) {
-            if (monthGrid != null) {
-                monthGrid.updateCellSizes(intWidth
-                        - weekToolbar.getOffsetWidth(), intHeight
-                        - nameToolbar.getOffsetHeight());
-                weekToolbar.setHeightPX(intHeight
-                        - nameToolbar.getOffsetHeight());
+        if (monthGrid != null) {
+            monthGrid.setHeightPX(intHeight);
+            monthGrid.updateCellSizes(intWidth - weekToolbar.getOffsetWidth(),
+                    intHeight - nameToolbar.getOffsetHeight());
+            weekToolbar.setHeightPX((intHeight == -1) ? intHeight : intHeight
+                    - nameToolbar.getOffsetHeight());
 
-            } else if (weekGrid != null) {
-                weekGrid.setHeightPX(intHeight
-                        - weeklyLongEvents.getOffsetHeight()
-                        - dayToolbar.getOffsetHeight());
-            }
-        } else {
-            if (weekGrid != null) {
-                weekGrid.setHeightPX(intHeight);
-            }
-
-            if (monthGrid != null) {
-                monthGrid.setHeightPX(intHeight);
-                monthGrid.updateCellSizes(-1, -1);
-                weekToolbar.setHeightPX(intHeight);
-            }
+        } else if (weekGrid != null) {
+            weekGrid.setHeightPX((intHeight == -1) ? intHeight : intHeight
+                    - weeklyLongEvents.getOffsetHeight()
+                    - dayToolbar.getOffsetHeight());
         }
     }
 
@@ -669,6 +658,10 @@ public class VCalendar extends Composite implements Paintable {
 
     public MonthGrid getMonthGrid() {
         return monthGrid;
+    }
+
+    public WeekGrid getWeekGrid() {
+        return weekGrid;
     }
 
     /**

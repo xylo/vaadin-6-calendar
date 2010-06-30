@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
@@ -52,6 +53,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private boolean format24h;
     private Timebar timebar;
     private Panel wrapper;
+    private boolean verticalScrollEnabled;
+    private boolean horizontalScrollEnabled;
     private int[] cellHeights;
     private int slotInMinutes = 30;
     private int dateCellBorder;
@@ -72,8 +75,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         Event.addNativePreviewHandler(this);
     }
 
-    private void setScroll(boolean isScrollEnabled) {
-        if (isScrollEnabled && !(isScrollable())) {
+    private void setVerticalScroll(boolean isVerticalScrollEnabled) {
+        if (isVerticalScrollEnabled && !(isVerticalScrollable())) {
+            verticalScrollEnabled = true;
+            horizontalScrollEnabled = false;
             wrapper.remove(content);
 
             final ScrollPanel scrollPanel = new ScrollPanel();
@@ -91,7 +96,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             setWidget(scrollPanel);
             wrapper = scrollPanel;
 
-        } else if (!isScrollEnabled && (isScrollable())) {
+        } else if (!isVerticalScrollEnabled && (isVerticalScrollable())) {
+            verticalScrollEnabled = false;
+            horizontalScrollEnabled = false;
             wrapper.remove(content);
 
             SimplePanel simplePanel = new SimplePanel();
@@ -103,9 +110,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
     }
 
-    public void setScrollPosition(int scrollPosition) {
-        if (isScrollable()) {
-            ((ScrollPanel) wrapper).setScrollPosition(scrollPosition);
+    public void setVerticalScrollPosition(int verticalScrollPosition) {
+        if (isVerticalScrollable()) {
+            ((ScrollPanel) wrapper).setScrollPosition(verticalScrollPosition);
         }
     }
 
@@ -117,16 +124,21 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         DateCell dc = new DateCell(this);
         dc.setDate(d);
         dc.setReadOnly(readOnly);
-        dc.setSized(isScrollable());
+        dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
+        dc.setVerticalSized(isVerticalScrollable());
         content.add(dc);
     }
 
-    private boolean isScrollable() {
-        return (wrapper instanceof ScrollPanel);
+    private boolean isVerticalScrollable() {
+        return verticalScrollEnabled;
+    }
+
+    private boolean isHorizontalScrollable() {
+        return horizontalScrollEnabled;
     }
 
     public void setWidthPX(int width) {
-        if (isScrollable()) {
+        if (isHorizontalScrollable()) {
             updateCellWidths();
 
             // Otherwise the scroll wrapper is somehow too narrow = horizontal
@@ -137,7 +149,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             this.width = content.getOffsetWidth() - timebar.getOffsetWidth();
 
         } else {
-            this.width = width - timebar.getOffsetWidth();
+            this.width = (width == -1) ? width : width
+                    - timebar.getOffsetWidth();
             updateCellWidths();
         }
     }
@@ -145,10 +158,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     public void setHeightPX(int intHeight) {
         height = intHeight;
 
-        setScroll(height <= -1);
+        setVerticalScroll(height <= -1);
 
         // if not scrollable, use any height given
-        if (!isScrollable() && height > 0) {
+        if (!isVerticalScrollable() && height > 0) {
 
             if (BrowserInfo.get().isIE7() || BrowserInfo.get().isIE6()) {
                 --height;
@@ -157,14 +170,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             content.setHeight(height + "px");
             setHeight(height + "px");
             wrapper.setHeight(height + "px");
-            wrapper.removeStyleDependentName("sized");
+            wrapper.removeStyleDependentName("Vsized");
             updateCellHeights();
             timebar.setCellHeights(cellHeights);
             timebar.setHeightPX(height);
 
-        } else if (isScrollable()) {
+        } else if (isVerticalScrollable()) {
             updateCellHeights();
-            wrapper.addStyleDependentName("sized");
+            wrapper.addStyleDependentName("Vsized");
             timebar.setHeightPX(height);
         }
     }
@@ -176,7 +189,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     }
 
     public void updateCellWidths() {
-        if (!isScrollable()) {
+        if (!isHorizontalScrollable() && width != -1) {
             int count = content.getWidgetCount();
             int datesWidth = width;
             if (datesWidth > 0 && count > 1) {
@@ -196,14 +209,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             if (count > 1) {
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
-                    dc.setSized(isScrollable());
+                    dc
+                            .setHorizontalSized(isHorizontalScrollable()
+                                    || width < 0);
                 }
             }
         }
     }
 
     public void updateCellHeights() {
-        if (!isScrollable()) {
+        if (!isVerticalScrollable()) {
             int count = content.getWidgetCount();
             if (count > 1) {
                 DateCell first = (DateCell) content.getWidget(1);
@@ -228,8 +243,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
-                    dc.setSized(isScrollable());
-
+                    dc.setVerticalSized(isVerticalScrollable());
                 }
             }
         }
@@ -330,12 +344,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         Style s = dayEvent.getElement().getStyle();
         int left = Integer.parseInt(s.getLeft().substring(0,
                 s.getLeft().length() - 2));
-        int datesWidth = width;
-        int count = content.getWidgetCount();
-        int cellWidth = datesWidth / (count - 1);
         DateCell previousParent = (DateCell) dayEvent.getParent();
         DateCell newParent = (DateCell) content
-                .getWidget((left / cellWidth) + 1);
+                .getWidget((left / getDateCellWidth()) + 1);
         CalendarEvent se = dayEvent.getCalendarEvent();
         previousParent.removeEvent(dayEvent);
         newParent.addEvent(dayEvent);
@@ -362,7 +373,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             for (int i = 1; i < count; i++) {
                 DateCell dc = (DateCell) content.getWidget(i);
                 if (dc.getDate().getTime() == todayDate.getTime()) {
-                    if (isScrollable()) {
+                    if (isVerticalScrollable()) {
                         dc.setToday(todayTimestamp, -1);
                     } else {
                         dc.setToday(todayTimestamp, getOffsetWidth());
@@ -440,6 +451,25 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         return calendar;
     }
 
+    /**
+     * Get width of the single date cell
+     * 
+     * @return Date cell width
+     */
+    public int getDateCellWidth() {
+        int count = content.getWidgetCount() - 1;
+        int cellWidth = -1;
+        if (count <= 0)
+            return cellWidth;
+
+        if (width == -1) {
+            Widget firstWidget = content.getWidget(1);
+            cellWidth = firstWidget.getElement().getOffsetWidth();
+        } else
+            cellWidth = getInternalWidth() / count;
+        return cellWidth;
+    }
+
     public static class Timebar extends HTML {
 
         private int height;
@@ -513,11 +543,11 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 // upwards, we must compensate. otherwise the element would be
                 // too short
                 super.setHeight((height + verticalPadding) + "px");
-                removeStyleDependentName("sized");
+                removeStyleDependentName("Vsized");
                 updateChildHeights();
 
             } else {
-                addStyleDependentName("sized");
+                addStyleDependentName("Vsized");
                 updateChildHeights();
             }
         }
@@ -608,17 +638,30 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         /**
-         * @param isSized
+         * @param isHorizontalSized
          *            if true, this DateCell is sized with CSS and not via
          *            {@link #setWidthPX(int)}
          */
-        public void setSized(boolean isSized) {
-            if (isSized) {
-                addStyleDependentName("sized");
+        public void setHorizontalSized(boolean isHorizontalSized) {
+            if (isHorizontalSized) {
+                addStyleDependentName("Hsized");
 
                 width = getOffsetWidth()
                         - Util.measureHorizontalBorder(getElement());
                 recalculateEventWidths();
+            } else {
+                removeStyleDependentName("Hsized");
+            }
+        }
+
+        /**
+         * @param isVerticalSized
+         *            if true, this DateCell is sized with CSS and not via
+         *            {@link #setHeightPX(int)}
+         */
+        public void setVerticalSized(boolean isVerticalSized) {
+            if (isVerticalSized) {
+                addStyleDependentName("Vsized");
 
                 // recalc heights&size for events. all other height sizes come
                 // from css
@@ -630,7 +673,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 }
 
             } else {
-                removeStyleDependentName("sized");
+                removeStyleDependentName("Vsized");
             }
         }
 
@@ -1569,13 +1612,18 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
 
             private int getDateCellWidth() {
-                int count = weekGrid.content.getWidgetCount() - 1;
-                int cellWidth = weekGrid.getInternalWidth() / count;
-                return cellWidth;
+                return weekGrid.getDateCellWidth();
             }
 
             /* Returns total width of all date cells. */
             private int getDatesWidth() {
+                if (weekGrid.width == -1) {
+                    // Undefined width. Needs to be calculated by the known cell
+                    // widths.
+                    int count = weekGrid.content.getWidgetCount() - 1;
+                    return count * getDateCellWidth();
+                }
+
                 return weekGrid.getInternalWidth();
             }
 
