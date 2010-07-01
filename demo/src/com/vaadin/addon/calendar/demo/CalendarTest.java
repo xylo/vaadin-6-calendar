@@ -4,6 +4,7 @@ import java.text.DateFormatSymbols;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import com.vaadin.Application;
@@ -26,6 +27,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.terminal.ParameterHandler;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -36,7 +38,6 @@ import com.vaadin.ui.Form;
 import com.vaadin.ui.FormFieldFactory;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Layout;
 import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -102,14 +103,49 @@ public class CalendarTest extends Application {
 
     private Button addNewEvent;
 
+    /*
+     * When testBench is set to true, CalendarTest will have static content that
+     * is more suitable for Vaadin TestBench testing. Calendar will use a static
+     * date Mon 10 Jan 2000. Enable by starting the application with a
+     * "testBench" parameter in the URL.
+     */
+    private boolean testBench = false;
+
+    @SuppressWarnings("serial")
     @Override
     public void init() {
         Window w = new Window();
         setMainWindow(w);
         setTheme("calendartest");
 
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
+        layout.setMargin(true);
+
+        w.setContent(layout);
+        w.setSizeFull();
+
+        // URL parameters must be handled before constructing layout any
+        // further. To get access to the parameters, we use ParameterHandler.
+        w.addParameterHandler(new ParameterHandler() {
+            public void handleParameters(Map<String, String[]> parameters) {
+                if (dataSource == null) {
+                    testBench = parameters.containsKey("testBench");
+                    // This needs to be called only once per a session after
+                    // the first Application init-method call.
+                    initContent();
+                }
+            }
+        });
+    }
+
+    public void initContent() {
         // Set default Locale for this application
-        setLocale(Locale.getDefault());
+        if (testBench) {
+            setLocale(Locale.US);
+        } else {
+            setLocale(Locale.getDefault());
+        }
 
         // Initialize locale, timezone and timeformat selects.
         localeSelect = createLocaleSelect();
@@ -117,19 +153,17 @@ public class CalendarTest extends Application {
         formatSelect = createCalendarFormatSelect();
 
         initCalendar();
-
-        w.setContent(initLayout(w));
-        w.setSizeFull();
+        initLayoutContent();
 
         addInitialEvents();
     }
 
     private void addInitialEvents() {
         Date originalDate = calendar.getTime();
-
+        Date today = getToday();
         // Add a event that last a whole week
-        Date start = calendarComponent.getFirstDateForWeek(new Date());
-        Date end = calendarComponent.getLastDateForWeek(new Date());
+        Date start = calendarComponent.getFirstDateForWeek(today);
+        Date end = calendarComponent.getLastDateForWeek(today);
         CalendarTestEvent event = getNewEvent("Whole week event", start, end);
         event.setAllDay(true);
         event.setStyleName("color4");
@@ -193,15 +227,11 @@ public class CalendarTest extends Application {
         calendar.setTime(originalDate);
     }
 
-    private Layout initLayout(Window w) {
+    private void initLayoutContent() {
         initNavigationButtons();
         initHideWeekEndButton();
         initReadOnlyButtonButton();
         initAddNewEventButton();
-
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSizeFull();
-        layout.setMargin(true);
 
         HorizontalLayout hl = new HorizontalLayout();
         hl.setWidth("100%");
@@ -242,11 +272,11 @@ public class CalendarTest extends Application {
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(addNewEvent, Alignment.MIDDLE_LEFT);
 
+        VerticalLayout layout = (VerticalLayout) getMainWindow().getContent();
         layout.addComponent(controlPanel);
         layout.addComponent(hl);
         layout.addComponent(calendarComponent);
         layout.setExpandRatio(calendarComponent, 1);
-        return layout;
     }
 
     private void initNavigationButtons() {
@@ -342,7 +372,7 @@ public class CalendarTest extends Application {
         // calendarComponent.setWidth("600px");
         calendarComponent.setSizeFull();
 
-        Date today = new Date();
+        Date today = getToday();
         calendar = new GregorianCalendar(getLocale());
         calendar.setTime(today);
 
@@ -358,6 +388,21 @@ public class CalendarTest extends Application {
         calendarComponent.setEndDate(calendar.getTime());
 
         addCalendarEventListeners();
+    }
+
+    private Date getToday() {
+        if (testBench) {
+            GregorianCalendar testDate = new GregorianCalendar();
+            testDate.set(GregorianCalendar.YEAR, 2000);
+            testDate.set(GregorianCalendar.MONTH, 0);
+            testDate.set(GregorianCalendar.DATE, 10);
+            testDate.set(GregorianCalendar.HOUR_OF_DAY, 0);
+            testDate.set(GregorianCalendar.MINUTE, 0);
+            testDate.set(GregorianCalendar.SECOND, 0);
+            testDate.set(GregorianCalendar.MILLISECOND, 0);
+            return testDate.getTime();
+        }
+        return new Date();
     }
 
     @SuppressWarnings("serial")
@@ -417,7 +462,11 @@ public class CalendarTest extends Application {
             }
         }
 
-        s.select(DEFAULT_ITEMID);
+        if (testBench) {
+            s.select("America/New_York");
+        } else {
+            s.select(DEFAULT_ITEMID);
+        }
         s.setImmediate(true);
         s.addListener(new ValueChangeListener() {
 
