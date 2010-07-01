@@ -374,6 +374,12 @@ public class VCalendar extends Composite implements Paintable {
         Arrays.sort(sorted, new Comparator<CalendarEvent>() {
 
             public int compare(CalendarEvent o1, CalendarEvent o2) {
+                if (o1.isAllDay() != o2.isAllDay()) {
+                    if (o2.isAllDay())
+                        return 1;
+                    return -1;
+                }
+
                 Long d1 = o1.getRangeInMilliseconds();
                 Long d2 = o2.getRangeInMilliseconds();
                 int r = 0;
