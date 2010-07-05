@@ -1500,14 +1500,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     long startFromMinutes = (from.getHours() * 60)
                             + from.getMinutes();
                     long range = calendarEvent.getRangeInMinutes();
-                    boolean eventStartAtDifferentDay = from.getDate() != to
-                            .getDate();
-                    if (eventStartAtDifferentDay) {
-                        long minutesOnPrevDay = (getTargetDateByCurrentPosition(
-                                dayOffset).getTime() - from.getTime())
-                                / VCalendar.MINUTEINMILLIS;
-                        startFromMinutes = -1 * minutesOnPrevDay;
-                    }
+                    startFromMinutes = calculateStartFromMinute(
+                            startFromMinutes, from, to, dayOffset);
+                    if (startFromMinutes < 0)
+                        range += startFromMinutes;
                     updatePosition(startFromMinutes, range);
 
                     s.setLeft(dayOffset, Unit.PX);
@@ -1555,10 +1551,27 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     long startFromMinutes = (startDatetimeFrom.getHours() * 60)
                             + startDatetimeFrom.getMinutes();
                     long range = calendarEvent.getRangeInMinutes();
-
+                    startFromMinutes = calculateStartFromMinute(
+                            startFromMinutes, from, to, dayOffset);
+                    if (startFromMinutes < 0)
+                        range += startFromMinutes;
                     updatePosition(startFromMinutes, range);
                 }
 
+            }
+
+            private long calculateStartFromMinute(long startFromMinutes,
+                    Date from, Date to, int dayOffset) {
+                boolean eventStartAtDifferentDay = from.getDate() != to
+                        .getDate();
+                if (eventStartAtDifferentDay) {
+                    long minutesOnPrevDay = (getTargetDateByCurrentPosition(
+                            dayOffset).getTime() - from.getTime())
+                            / VCalendar.MINUTEINMILLIS;
+                    startFromMinutes = -1 * minutesOnPrevDay;
+                }
+
+                return startFromMinutes;
             }
 
             /**
