@@ -111,6 +111,10 @@ public class CalendarTest extends Application {
      */
     private boolean testBench = false;
 
+    private String calendarHeight = null;
+
+    private String calendarWidth = null;
+
     @SuppressWarnings("serial")
     @Override
     public void init() {
@@ -130,13 +134,25 @@ public class CalendarTest extends Application {
         w.addParameterHandler(new ParameterHandler() {
             public void handleParameters(Map<String, String[]> parameters) {
                 if (dataSource == null) {
-                    testBench = parameters.containsKey("testBench");
+                    handleURLParams(parameters);
                     // This needs to be called only once per a session after
                     // the first Application init-method call.
                     initContent();
                 }
             }
         });
+    }
+
+    private void handleURLParams(Map<String, String[]> parameters) {
+        testBench = parameters.containsKey("testBench");
+
+        if (parameters.containsKey("width")) {
+            calendarWidth = parameters.get("width")[0];
+        }
+
+        if (parameters.containsKey("height")) {
+            calendarHeight = parameters.get("height")[0];
+        }
     }
 
     public void initContent() {
@@ -368,9 +384,15 @@ public class CalendarTest extends Application {
         calendarComponent.setHideWeekends(false);
         calendarComponent.setLocale(getLocale());
         calendarComponent.setImmediate(true);
-        // calendarComponent.setHeight("400px");
-        // calendarComponent.setWidth("600px");
-        calendarComponent.setSizeFull();
+
+        if (calendarWidth != null || calendarHeight != null) {
+            if (calendarHeight != null)
+                calendarComponent.setHeight(calendarHeight);
+            if (calendarWidth != null)
+                calendarComponent.setWidth(calendarWidth);
+        } else {
+            calendarComponent.setSizeFull();
+        }
 
         Date today = getToday();
         calendar = new GregorianCalendar(getLocale());
