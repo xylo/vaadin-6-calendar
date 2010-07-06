@@ -11,8 +11,6 @@ import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClick;
@@ -20,8 +18,6 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventClickHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler;
@@ -62,18 +58,6 @@ public class SimpleCalTest extends Application {
 
         cal.setStartDate(new Date());
         cal.setEndDate(new Date());
-
-        // Enable backward navigation
-        cal.setHandler(new BackwardHandler() {
-            public void backward(BackwardEvent event) {
-            }
-        });
-
-        // Enable forward navigation
-        cal.setHandler(new ForwardHandler() {
-            public void forward(ForwardEvent event) {
-            }
-        });
 
         // Add date click listener
         cal.setHandler(new DateClickHandler() {

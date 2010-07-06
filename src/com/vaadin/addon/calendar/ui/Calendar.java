@@ -965,8 +965,8 @@ public class Calendar extends AbstractComponent implements
     protected void setHandler(String eventId, Class<?> eventType,
             ComponentEventListener listener, Method listenerMethod) {
         if (handlers.get(eventId) != null) {
-            removeListener(eventType, handlers.get(eventId));
-            handlers.put(eventId, null);
+            removeListener(eventId, eventType, handlers.get(eventId));
+            handlers.remove(eventId);
         }
 
         if (listener != null) {

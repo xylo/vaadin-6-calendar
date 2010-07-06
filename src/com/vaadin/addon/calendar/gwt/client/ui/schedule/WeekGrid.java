@@ -58,6 +58,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int[] cellHeights;
     private int slotInMinutes = 30;
     private int dateCellBorder;
+    private boolean eventResizeEnabled = true;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
@@ -65,6 +66,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         content = new HorizontalPanel();
         timebar = new Timebar(format24h);
         content.add(timebar);
+        eventResizeEnabled = calendar.getClient().hasEventListeners(calendar,
+                CalendarEventId.EVENTRESIZE);
 
         wrapper = new SimplePanel();
         wrapper.setStylePrimaryName("v-calendar-week-wrapper");
@@ -135,6 +138,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     private boolean isHorizontalScrollable() {
         return horizontalScrollEnabled;
+    }
+
+    public boolean isEventResizeEnabled() {
+        return eventResizeEnabled;
     }
 
     public void setWidthPX(int width) {
@@ -1247,8 +1254,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 getElement().appendChild(eventContent);
 
                 VCalendar calendar = weekGrid.getCalendar();
-                if (calendar.getClient().hasEventListeners(calendar,
-                        CalendarEventId.EVENTRESIZE)) {
+                if (weekGrid.isEventResizeEnabled()) {
                     topResizeBar = DOM.createDiv();
                     bottomResizeBar = DOM.createDiv();
 
@@ -1416,8 +1422,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
                     VCalendar calendar = weekGrid.getCalendar();
 
-                    if (calendar.getClient().hasEventListeners(calendar,
-                            CalendarEventId.EVENTRESIZE)) {
+                    if (weekGrid.isEventResizeEnabled()) {
                         calendar.getClient().updateVariable(calendar.getPID(),
                                 CalendarEventId.EVENTRESIZE,
                                 buildResizeString(calendarEvent), true);
@@ -1644,8 +1649,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
              * @return true if the current mouse movement is resizing
              */
             private boolean clickTargetsResize() {
-                return clickTarget == topResizeBar
-                        || clickTarget == bottomResizeBar;
+                return weekGrid.isEventResizeEnabled()
+                        && (clickTarget == topResizeBar || clickTarget == bottomResizeBar);
             }
 
             private void addGlobalResizeStyle() {
@@ -1679,5 +1684,4 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         }
     }
-
 }
