@@ -16,8 +16,10 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected Button nextLabel;
     private boolean verticalSized;
     private boolean horizontalSized;
+    private VCalendar vcalendar;
 
-    public DayToolbar() {
+    public DayToolbar(VCalendar vcalendar) {
+        this.vcalendar = vcalendar;
         setStylePrimaryName("v-calendar-header-week");
         backLabel = new Button("&laquo;");
         backLabel.setStylePrimaryName("v-calendar-back");
@@ -79,10 +81,16 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void addBackButton() {
+        if (!vcalendar.getClient().hasEventListeners(vcalendar,
+                CalendarEventId.FORWARD))
+            nextLabel.getElement().getStyle().setOpacity(0);
         add(backLabel);
     }
 
     public void addNextButton() {
+        if (!vcalendar.getClient().hasEventListeners(vcalendar,
+                CalendarEventId.BACKWARD))
+            backLabel.getElement().getStyle().setOpacity(0);
         add(nextLabel);
     }
 

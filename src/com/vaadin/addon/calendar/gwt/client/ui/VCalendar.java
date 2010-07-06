@@ -65,7 +65,7 @@ public class VCalendar extends Composite implements Paintable {
     private String height = null;
     private String width = null;
     private SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
-    private DayToolbar dayToolbar = new DayToolbar();
+    private DayToolbar dayToolbar = new DayToolbar(this);
     private SimpleWeekToolbar weekToolbar;
     private WeeklyLongEvents weeklyLongEvents;
     private MonthGrid monthGrid;
