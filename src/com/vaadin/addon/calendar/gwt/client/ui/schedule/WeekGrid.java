@@ -466,14 +466,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     public int getDateCellWidth() {
         int count = content.getWidgetCount() - 1;
         int cellWidth = -1;
-        if (count <= 0)
+        if (count <= 0) {
             return cellWidth;
+        }
 
         if (width == -1) {
             Widget firstWidget = content.getWidget(1);
             cellWidth = firstWidget.getElement().getOffsetWidth();
-        } else
+        } else {
             cellWidth = getInternalWidth() / count;
+        }
         return cellWidth;
     }
 
@@ -710,7 +712,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
         }
 
-        // date methods are not depricated in GWT
+        // date methods are not deprecated in GWT
         @SuppressWarnings("deprecation")
         private void recalculateTimeBarPosition() {
             int h = today.getHours();
@@ -971,6 +973,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             add(dayEvent, (com.google.gwt.user.client.Element) main);
         }
 
+        // date methods are not deprecated in GWT
         @SuppressWarnings("deprecation")
         private void updatePositionFor(DayEvent dayEvent, Date targetDay,
                 CalendarEvent calendarEvent) {
@@ -1507,8 +1510,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     long range = calendarEvent.getRangeInMinutes();
                     startFromMinutes = calculateStartFromMinute(
                             startFromMinutes, from, to, dayOffset);
-                    if (startFromMinutes < 0)
+                    if (startFromMinutes < 0) {
                         range += startFromMinutes;
+                    }
                     updatePosition(startFromMinutes, range);
 
                     s.setLeft(dayOffset, Unit.PX);
@@ -1558,13 +1562,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     long range = calendarEvent.getRangeInMinutes();
                     startFromMinutes = calculateStartFromMinute(
                             startFromMinutes, from, to, dayOffset);
-                    if (startFromMinutes < 0)
+                    if (startFromMinutes < 0) {
                         range += startFromMinutes;
+                    }
                     updatePosition(startFromMinutes, range);
                 }
 
             }
 
+            //
+            @SuppressWarnings("deprecation")
             private long calculateStartFromMinute(long startFromMinutes,
                     Date from, Date to, int dayOffset) {
                 boolean eventStartAtDifferentDay = from.getDate() != to
