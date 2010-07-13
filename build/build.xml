@@ -195,7 +195,7 @@
         <fail unless="com.vaadin.testbench.deployment.url" message="The 'com.vaadin.testbench.deployment.url' property must be defined."/>
         <fail unless="com.vaadin.testbench.lib.dir" message="The 'com.vaadin.testbench.lib.dir' property must be defined."/>
 
-        <property name="test-output-dir" value="../build/test-output"/>
+        <property name="test-output-dir" value="build/test-output"/>
 
         <!-- Run the separate test script. -->
         <ant antfile="tests/test.xml" target="test-package" inheritall="false" inheritrefs="true">
