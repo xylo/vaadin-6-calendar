@@ -375,8 +375,9 @@ public class VCalendar extends Composite implements Paintable {
 
             public int compare(CalendarEvent o1, CalendarEvent o2) {
                 if (o1.isAllDay() != o2.isAllDay()) {
-                    if (o2.isAllDay())
+                    if (o2.isAllDay()) {
                         return 1;
+                    }
                     return -1;
                 }
 
@@ -541,6 +542,7 @@ public class VCalendar extends Composite implements Paintable {
                 weekToolbar.addWeek(week, d.getYear());
             }
             SimpleDayCell cell = new SimpleDayCell(this, y, x);
+            cell.setMonthGrid(monthGrid);
             cell.setDate(d);
             int dayOfMonth = d.getDate();
             if (dayOfMonth == 1

@@ -53,7 +53,7 @@ import com.vaadin.ui.ClientWidget;
  * <p>
  * Vaadin Calendar is for visualizing events in calendar. Calendar events can be
  * visualized in the variable length view depending on the start and end dates.
- * <p/>
+ * </p>
  * 
  * <li>You can set the viewable date range with {@link #setStartDate(Date)} and
  * {@link #setEndDate(Date)} methods. Calendar has a default date range of one

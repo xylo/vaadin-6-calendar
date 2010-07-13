@@ -386,10 +386,12 @@ public class CalendarTest extends Application {
         calendarComponent.setImmediate(true);
 
         if (calendarWidth != null || calendarHeight != null) {
-            if (calendarHeight != null)
+            if (calendarHeight != null) {
                 calendarComponent.setHeight(calendarHeight);
-            if (calendarWidth != null)
+            }
+            if (calendarWidth != null) {
                 calendarComponent.setWidth(calendarWidth);
+            }
         } else {
             calendarComponent.setSizeFull();
         }

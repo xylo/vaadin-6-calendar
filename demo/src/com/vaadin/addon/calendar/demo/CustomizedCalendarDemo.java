@@ -228,7 +228,7 @@ public class CustomizedCalendarDemo extends Application {
                         getMainWindow().removeWindow(w);
                     }
                 }));
-                buttons.addComponent(new Button("Calcel", new ClickListener() {
+                buttons.addComponent(new Button("Cancel", new ClickListener() {
 
                     private static final long serialVersionUID = 3909972672766063318L;
 

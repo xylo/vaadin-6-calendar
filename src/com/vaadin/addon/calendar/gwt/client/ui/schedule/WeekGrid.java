@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,9 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -29,7 +33,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
-import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -598,8 +601,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
     }
 
-    public static class DateCell extends ComplexPanel implements
-            MouseDownHandler, MouseMoveHandler, MouseUpHandler {
+    public static class DateCell extends FocusableComplexPanel implements
+            MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler {
         private Date date;
         private int width;
         private int eventRangeStart = -1;
@@ -612,6 +615,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         private int startingSlotHeight;
         private Date today;
         private Element todaybar;
+        private List<HandlerRegistration> handlers;
 
         // private double slotHeight;
 
@@ -619,10 +623,15 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             weekgrid = parent;
             Element mainElement = DOM.createDiv();
             setElement(mainElement);
+            makeFocusable();
+
             addStyleName("v-calendar-day-times");
-            addHandler(this, MouseDownEvent.getType());
-            addHandler(this, MouseUpEvent.getType());
-            addHandler(this, MouseMoveEvent.getType());
+
+            handlers = new LinkedList<HandlerRegistration>();
+            handlers.add(addHandler(this, MouseDownEvent.getType()));
+            handlers.add(addHandler(this, MouseUpEvent.getType()));
+            handlers.add(addHandler(this, MouseMoveEvent.getType()));
+            handlers.add(addKeyDownHandler(this));
 
             slotElements = new Element[48];
             slotElementHeights = new int[48];
@@ -640,6 +649,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 slotElements[i] = e;
             }
             Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
+        }
+
+        @Override
+        protected void onUnload() {
+            for (HandlerRegistration handler : handlers) {
+                handler.removeHandler();
+            }
+            super.onUnload();
         }
 
         public void setTimeBarWidth(int timebarWidth) {
@@ -684,11 +701,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             } else {
                 removeStyleDependentName("Vsized");
             }
-        }
-
-        @Override
-        protected void onUnload() {
-            super.onUnload();
         }
 
         public void setDate(Date date) {
@@ -1026,6 +1038,13 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             remove(dayEvent);
         }
 
+        public void onKeyDown(KeyDownEvent event) {
+            int keycode = event.getNativeEvent().getKeyCode();
+            if (keycode == KeyCodes.KEY_ESCAPE && eventRangeStart > -1) {
+                cancelRangeSelect();
+            }
+        }
+
         public void onMouseDown(MouseDownEvent event) {
             Element e = Element.as(event.getNativeEvent().getEventTarget());
             if (e.getClassName().contains("reserved") || isReadOnly) {
@@ -1034,6 +1053,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 eventRangeStart = event.getY();
                 eventRangeStop = eventRangeStart;
                 Event.setCapture(getElement());
+                setFocus(true);
             }
 
         }
@@ -1041,6 +1061,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         @SuppressWarnings("deprecation")
         public void onMouseUp(MouseUpEvent event) {
             Event.releaseCapture(getElement());
+            setFocus(false);
             if (eventRangeStart > -1) {
                 Element main = getElement();
                 if (eventRangeStart > eventRangeStop) {
@@ -1127,6 +1148,27 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
         }
 
+        public void cancelRangeSelect() {
+            Event.releaseCapture(getElement());
+            setFocus(false);
+
+            if (eventRangeStart > -1) {
+                // clear all "selected" class names
+                Element main = getElement();
+                NodeList<Node> nodes = main.getChildNodes();
+
+                for (int i = 0; i <= 47; i++) {
+                    Element c = (Element) nodes.getItem(i);
+                    if (c == null) {
+                        continue;
+                    }
+                    c.removeClassName("v-daterange");
+                }
+
+                eventRangeStart = -1;
+            }
+        }
+
         public void setToday(Date today, int width) {
             this.today = today;
             addStyleDependentName("today");
@@ -1207,8 +1249,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
         }
 
-        public static class DayEvent extends HTML implements MouseDownHandler,
-                MouseUpHandler, MouseMoveHandler {
+        public static class DayEvent extends FocusableHTML implements
+                MouseDownHandler, MouseUpHandler, MouseMoveHandler,
+                KeyDownHandler {
+
             private Element caption = null;
             private Element eventContent;
             private CalendarEvent calendarEvent = null;
@@ -1231,12 +1275,19 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             private Integer eventIndex;
             private boolean eventMoveAllowed;
             private int slotHeight;
+            private List<HandlerRegistration> handlers;
+            private boolean mouseMoveCanceled;
+            private int startLeftPx;
+            private int startTopPx;
 
             // private int slotHeight;
             // private int doubleSlotHeight;
 
             public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
+
+                handlers = new LinkedList<HandlerRegistration>();
+
                 setStylePrimaryName("v-calendar-event");
                 setCalendarEvent(event);
 
@@ -1269,14 +1320,23 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     getElement().appendChild(bottomResizeBar);
                 }
 
-                addMouseDownHandler(this);
-                addMouseUpHandler(this);
+                handlers.add(addMouseDownHandler(this));
+                handlers.add(addMouseUpHandler(this));
+                handlers.add(addKeyDownHandler(this));
 
                 sinkEvents(VTooltip.TOOLTIP_EVENTS);
                 eventIndex = event.getIndex();
 
                 eventMoveAllowed = calendar.getClient().hasEventListeners(
                         calendar, CalendarEventId.EVENTMOVE);
+            }
+
+            @Override
+            protected void onUnload() {
+                for (HandlerRegistration handler : handlers) {
+                    handler.removeHandler();
+                }
+                super.onUnload();
             }
 
             // public void setSlotHeightInPX(int slotHeight) {
@@ -1350,11 +1410,21 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 eventContent.setInnerHTML("");
             }
 
+            public void onKeyDown(KeyDownEvent event) {
+                int keycode = event.getNativeEvent().getKeyCode();
+                if (keycode == KeyCodes.KEY_ESCAPE && mouseMoveStarted) {
+                    cancelMouseMove();
+                }
+            }
+
             public void onMouseDown(MouseDownEvent event) {
                 clickTarget = Element.as(event.getNativeEvent()
                         .getEventTarget());
+                mouseMoveCanceled = false;
+
                 if (eventMoveAllowed || clickTargetsResize()) {
                     moveRegistration = addMouseMoveHandler(this);
+                    setFocus(true);
                     startX = event.getClientX();
                     startY = event.getClientY();
                     try {
@@ -1365,14 +1435,19 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                                 .getOffsetWidth())
                                 % getDateCellWidth();
                     } catch (Exception e) {
-                        GWT.log("foo", e);
+                        GWT
+                                .log(
+                                        "Exception calculating relative start position",
+                                        e);
                     }
                     mouseMoveStarted = false;
                     Style s = getElement().getStyle();
+                    s.setZIndex(1000);
+                    startTopPx = Integer.parseInt(s.getTop().substring(0,
+                            s.getTop().length() - 2));
                     startDatetimeFrom = (Date) calendarEvent.getStartTime()
                             .clone();
                     startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
-                    s.setZIndex(1000);
                     Event.setCapture(getElement());
                     event.getNativeEvent().stopPropagation();
                 }
@@ -1384,9 +1459,15 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
 
             public void onMouseUp(MouseUpEvent event) {
+                if (mouseMoveCanceled) {
+                    return;
+                }
+
                 Event.releaseCapture(getElement());
+                setFocus(false);
                 if (moveRegistration != null) {
                     moveRegistration.removeHandler();
+                    moveRegistration = null;
                 }
                 int endX = event.getClientX();
                 int endY = event.getClientY();
@@ -1567,10 +1648,54 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     }
                     updatePosition(startFromMinutes, range);
                 }
-
             }
 
-            //
+            private void cancelMouseMove() {
+                mouseMoveCanceled = true;
+
+                // reset and remove everything related to the event handling
+                Event.releaseCapture(getElement());
+                setFocus(false);
+
+                if (moveRegistration != null) {
+                    moveRegistration.removeHandler();
+                    moveRegistration = null;
+                }
+
+                mouseMoveStarted = false;
+                removeGlobalResizeStyle();
+
+                Style s = getElement().getStyle();
+                s.setZIndex(1);
+
+                // reset the position of the event
+                int dateCellWidth = getDateCellWidth();
+                int dayOffset = startXrelative / dateCellWidth;
+                s.clearLeft();
+
+                calendarEvent.setStartTime(startDatetimeFrom);
+                calendarEvent.setEndTime(startDatetimeTo);
+
+                long startFromMinutes = (startDatetimeFrom.getHours() * 60)
+                        + startDatetimeFrom.getMinutes();
+                long range = calendarEvent.getRangeInMinutes();
+
+                startFromMinutes = calculateStartFromMinute(startFromMinutes,
+                        startDatetimeFrom, startDatetimeTo, dayOffset);
+                if (startFromMinutes < 0) {
+                    range += startFromMinutes;
+                }
+
+                updatePosition(startFromMinutes, range);
+
+                startY = -1;
+                startX = -1;
+
+                // to reset the event width
+                ((DateCell) getParent()).recalculateEventWidths();
+            }
+
+            // date methods are not deprecated in GWT
             @SuppressWarnings("deprecation")
             private long calculateStartFromMinute(long startFromMinutes,
                     Date from, Date to, int dayOffset) {
@@ -1688,7 +1813,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             public boolean isReadOnly() {
                 return readOnly;
             }
-
         }
     }
 }

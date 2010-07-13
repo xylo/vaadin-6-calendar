@@ -5,17 +5,21 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 
-public class MonthGrid extends Grid {
+public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
     private VCalendar calendar;
     private boolean rangeSelectDisabled;
     private boolean readOnly;
+    private HandlerRegistration keyDownHandler;
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
@@ -23,6 +27,14 @@ public class MonthGrid extends Grid {
         setCellSpacing(0);
         setCellPadding(0);
         setStylePrimaryName("v-calendar-month");
+
+        keyDownHandler = addKeyDownHandler(this);
+    }
+
+    @Override
+    protected void onUnload() {
+        keyDownHandler.removeHandler();
+        super.onUnload();
     }
 
     public void setSelectionEnd(SimpleDayCell simpleDayCell) {
@@ -35,6 +47,7 @@ public class MonthGrid extends Grid {
     public void setSelectionStart(SimpleDayCell simpleDayCell) {
         if (simpleDayCell.isEnabled() && !rangeSelectDisabled && !readOnly) {
             selectionStart = simpleDayCell;
+            setFocus(true);
         }
 
     }
@@ -88,7 +101,24 @@ public class MonthGrid extends Grid {
 
             selectionStart = null;
             selectionEnd = null;
+            setFocus(false);
         }
+    }
+
+    public void cancelRangeSelection() {
+        if (selectionStart != null && selectionEnd != null) {
+            for (int row = 0; row < getRowCount(); row++) {
+                for (int cell = 0; cell < getCellCount(row); cell++) {
+                    SimpleDayCell sdc = (SimpleDayCell) getWidget(row, cell);
+                    if (sdc == null) {
+                        return;
+                    }
+                    sdc.removeStyleDependentName("selected");
+                }
+            }
+        }
+        setFocus(false);
+        selectionStart = null;
     }
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
@@ -127,8 +157,9 @@ public class MonthGrid extends Grid {
                     } else {
                         sdc.setHeightPX(cellHeight, true);
                     }
-                } else
+                } else {
                     sdc.setHeightPX(-1, true);
+                }
             }
             heightRemainder--;
         }
@@ -164,6 +195,13 @@ public class MonthGrid extends Grid {
 
         } else {
             removeStyleDependentName("sizedwidth");
+        }
+    }
+
+    public void onKeyDown(KeyDownEvent event) {
+        int keycode = event.getNativeKeyCode();
+        if (KeyCodes.KEY_ESCAPE == keycode && selectionStart != null) {
+            cancelRangeSelection();
         }
     }
 }

@@ -70,6 +70,10 @@
 }
 
 /* Month grid */
+.v-calendar-month {
+	outline: none;
+}
+
 .v-calendar-week-numbers {
 	width: 20px;
 	border-right: 1px solid #ccc;
@@ -99,6 +103,7 @@
 .v-calendar-month-day {
 	border-bottom: 1px solid #ccc;
 	border-right: 1px solid #ccc;
+	outline: none;
 }
 
 .v-calendar-month-day-today {
@@ -148,6 +153,8 @@
 	cursor: pointer;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	
+	outline: none;
 }
 
 .v-calendar-event-month {
@@ -235,6 +242,7 @@ div.v-calendar-event-all-day {
 
 .v-calendar-day-times {
 	border-right: 1px solid #ccc;
+	outline: none;
 }
 
 .v-calendar-day-times .v-slot,.v-calendar-day-times .v-slot-even {
