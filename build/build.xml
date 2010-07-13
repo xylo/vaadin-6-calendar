@@ -33,6 +33,10 @@
 		<echo> ${gwt.lib.dir}/gwt-user.jar</echo>
 		<echo> ${gwt.lib.dir}/gwt-dev.jar</echo>
 
+        <property name="base-name" value="${addon.name}-${version}" />
+        <property name="jar.name" value="${base-name}.jar"/>
+        <property name="jar.path" value="${result-path}/${jar.name}"/>
+
 		<antcall target="check-libs"/>
 
 	    <path id="test.classpath">
@@ -176,12 +180,34 @@
     <!-- Testing                                                            -->
     <!-- ================================================================== -->
 
+    <!-- ant contrib required for flow control (for loop, if, property override)   -->
+    <!-- Note that we have to use a namespace to avoid clash when running sub-ant. -->
+    <taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="build/lib/ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
+
     <!-- Vaadin TestBench tests -->
-	<target name="testbench-tests">
-		<subant target="run-and-clean-up" antfile="test.xml">
-			<fileset dir="test" includes="test.xml"/>
-		</subant>
-	</target>
+    <target name="testbench-tests" depends="init, demo.war" unless="tests.testbench.skip">
+        <!-- Parameters for the test.xml script. -->
+        <fail unless="com.vaadin.testbench.tester.host" message="The 'com.vaadin.testbench.tester.host' property must be defined."/>
+        <fail unless="com.vaadin.testbench.deployment.url" message="The 'com.vaadin.testbench.deployment.url' property must be defined."/>
+        <fail unless="com.vaadin.testbench.lib.dir" message="The 'com.vaadin.testbench.lib.dir' property must be defined."/>
+
+        <property name="test-output-dir" value="../build/test-output"/>
+
+        <!-- Run the separate test script. -->
+        <ant antfile="tests/test.xml" target="test-package" inheritall="false" inheritrefs="true">
+            <property name="war.path" value="${war.path}"/>
+
+            <property name="test-output-dir" value="${test-output-dir}"/>
+
+            <property name="com.vaadin.testbench.tester.host" value="${com.vaadin.testbench.tester.host}"/>
+            <property name="com.vaadin.testbench.deployment.url" value="${com.vaadin.testbench.deployment.url}"/>
+            <property name="com.vaadin.testbench.lib.dir" value="${com.vaadin.testbench.lib.dir}"/>
+        </ant>
+    </target>
 
     <!-- Server-side JUnit tests -->
 	<target name="serverside-tests" depends="compile">
@@ -239,8 +265,6 @@
 
     <!-- Create the JAR package. -->
     <target name="package-jar" depends="compile" unless="run.no-package-jar">
-        <property name="jar.name" value="${addon.name}-${version}.jar"/>
-        <property name="jar.path" value="${result-path}/${jar.name}"/>
 
         <jar jarfile="${jar.path}" compress="true">
             <manifest>
@@ -273,7 +297,8 @@
 	</target>		
 
     <!-- Create the ZIP distribution package. -->
-    <target name="package-zip" depends="package-jar, manual" unless="run.no-package-jar">
+<!--    <target name="package-zip" depends="package-jar, manual" unless="run.no-package-jar"> -->
+    <target name="package-zip">
         <property name="zip.name" value="${result-path}/${addon.name}-${version}.zip"/>
 
     	<!-- Make the zip manifest -->
@@ -285,9 +310,15 @@ Implementation-Version: ${version}
 Implementation-Vendor: IT Mill Oy
        </echo>         
     	        	
+        <echo>Packaging ${result-path}/${jar.name}</echo>
+
         <zip destfile="${zip.name}">
-        	<zipfileset dir="${result-path}" includes="META-INF/MANIFEST.MF" />        	
-            <zipfileset prefix="" file="${result-path}/${jar.name}" />              
+        	<zipfileset dir="${result-path}" includes="META-INF/MANIFEST.MF" />
+
+            <!-- The add-on library itself -->
+            <zipfileset prefix="" file="${result-path}/${jar.name}" />
+
+            <!-- Documentation -->
             <zipfileset prefix="doc" file="${manual.pdf}" />               
             <zipfileset prefix="doc" dir="doc">
                 <patternset>
@@ -297,11 +328,21 @@ Implementation-Vendor: IT Mill Oy
                 	<include name="license-cval-1.0.txt" />
                 </patternset>
             </zipfileset>
+
+            <!-- Demo requirements -->
+            <zipfileset prefix="" file="build/package/start.sh" />
+            <zipfileset prefix="lib" dir="build/lib">
+                <patternset>
+                    <include name="jetty/*" />
+                </patternset>
+            </zipfileset>
         </zip>
     </target>
 
 	<target name="demo.war" depends="package-jar">
-		<war destfile="${result-path}/${addon.name}.war" webxml="WebContent/WEB-INF/web.xml">
+        <property name="war.path" value="${result-path}/${addon.name}.war"/>
+
+		<war destfile="${war.path}" webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="${result.classes}"/>
 			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
 			<lib file="${jar.path}" />
