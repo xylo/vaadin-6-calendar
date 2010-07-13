@@ -328,14 +328,6 @@ Implementation-Vendor: IT Mill Oy
                 	<include name="license-cval-1.0.txt" />
                 </patternset>
             </zipfileset>
-
-            <!-- Demo requirements -->
-            <zipfileset prefix="" file="build/package/start.sh" />
-            <zipfileset prefix="lib" dir="build/lib">
-                <patternset>
-                    <include name="jetty/*" />
-                </patternset>
-            </zipfileset>
         </zip>
     </target>
 
