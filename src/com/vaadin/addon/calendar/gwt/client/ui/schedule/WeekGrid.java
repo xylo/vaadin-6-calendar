@@ -1336,6 +1336,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 for (HandlerRegistration handler : handlers) {
                     handler.removeHandler();
                 }
+                handlers.clear();
                 super.onUnload();
             }
 
