@@ -195,7 +195,8 @@
         <fail unless="com.vaadin.testbench.deployment.url" message="The 'com.vaadin.testbench.deployment.url' property must be defined."/>
         <fail unless="com.vaadin.testbench.lib.dir" message="The 'com.vaadin.testbench.lib.dir' property must be defined."/>
 
-        <property name="test-output-dir" value="build/test-output"/>
+        <fail unless="test-output-dir" message="The 'test-output-dir' property must be defined, it should be an absolute path." />
+
         <property name="deploy.as.war" value="${addon.name}.war"/>
 
         <!-- Run the separate test script. -->
