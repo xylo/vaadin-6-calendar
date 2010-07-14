@@ -196,10 +196,12 @@
         <fail unless="com.vaadin.testbench.lib.dir" message="The 'com.vaadin.testbench.lib.dir' property must be defined."/>
 
         <property name="test-output-dir" value="build/test-output"/>
+        <property name="deploy.as.war" value="${addon.name}.war"/>
 
         <!-- Run the separate test script. -->
         <ant antfile="tests/test.xml" target="test-package" inheritall="false" inheritrefs="true">
             <property name="war.path" value="${war.path}"/>
+            <property name="deploy.as.war" value="${deploy.as.war}"/>
 
             <property name="test-output-dir" value="${test-output-dir}"/>
 

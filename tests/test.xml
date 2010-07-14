@@ -17,7 +17,7 @@
 	<!-- <property name="test-output-dir" value="../build/test-output" /> -->
 	<fail unless="test-output-dir" message="The 'test-output-dir' property must be defined." />
 
-	<property name="class-dir" value="../${test-output-dir}/classes" />
+	<property name="class-dir" value="${test-output-dir}/classes" />
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
 		<classpath>
 			<pathelement location="../build/lib/ant-contrib-1.0b3.jar"/>
@@ -43,10 +43,10 @@
 		</fileset>
 		<pathconvert pathsep=" " property="testfiles" refid="html-test-files" />
 
-        <echo>Converting tests to ${basedir}/../${test-output-dir}</echo>
+        <echo>Converting tests to ${test-output-dir}</echo>
 
 		<java classname="com.vaadin.testbench.util.TestConverter" classpathref="classpath">
-			<arg value="${basedir}/../${test-output-dir}" />
+			<arg value="${test-output-dir}" />
 			<arg value="${browsers}" />
 			<arg line="${testfiles}" />
 		</java>
@@ -55,7 +55,7 @@
 	<!-- This target complies the generated java junit tests. -->
 	<target name="compile-tests" depends="create-tests">
 		<mkdir dir="${class-dir}" />
-		<javac srcdir="${basedir}/../${test-output-dir}" destdir="${class-dir}" debug="on" fork="yes" failonerror="false" encoding="UTF8" >
+		<javac srcdir="${test-output-dir}" destdir="${class-dir}" debug="on" fork="yes" failonerror="false" encoding="UTF8" >
 			<classpath>
 				<path refid="classpath" />
 			</classpath>
@@ -70,10 +70,11 @@
     <!-- Deploy to an already started server -->
     <target name="deploy">
 		<fail unless="war.path" message="Path to the demo war must be defined in 'war.path'"/>
+		<fail unless="deploy.as.war" message="Name of the war as it is deployed must be defined in 'deploy.as.war'"/>
 		<fail unless="deploy.webapps" message="Path to the webapps deployment directory must be defined in 'deploy.webapps'"/>
 
         <echo>Deploying ${war.path} to ${deploy.webapps}</echo>
-        <copy file="../${war.path}" todir="${deploy.webapps}"/>
+        <copy file="../${war.path}" tofile="${deploy.webapps}/${deploy.as.war}"/>
 
         <!-- Assume that it always succeeds -->
 		<property name="server.start.succeeded" value="1"/>
@@ -92,7 +93,7 @@
 	<target name="run-tests" depends="compile-tests" if="server.start.succeeded">
 		<for threadCount="20" parallel="true" keepgoing="true" param="target">
 			<path>
-				<fileset dir="${basedir}/../${test-output-dir}" includes="**/**.java" />
+				<fileset dir="${test-output-dir}" includes="**/**.java" />
 			</path>
 			<sequential>
 				<antcall target="execute-tests">
@@ -122,7 +123,7 @@
 			<jvmarg value="-Dcom.vaadin.testbench.screenshot.cursor=${com.vaadin.testbench.screenshot.cursor}" />
 
 			<batchtest>
-				<filelist dir="${basedir}/../${test-output-dir}" files="${target}" />
+				<filelist dir="${test-output-dir}" files="${target}" />
 			</batchtest>
 		</junit>
 		
@@ -131,7 +132,7 @@
 	<!-- Remove temporary source and compiled java files -->
 	<target name="remove-temp-testclasses">
 		<delete failonerror="false">
-			<fileset dir="../${test-output-dir}">
+			<fileset dir="${test-output-dir}">
 				<include name="**/**.java" />
 				<include name="**/**.class" />
 			</fileset>
