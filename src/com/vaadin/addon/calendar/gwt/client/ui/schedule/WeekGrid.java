@@ -1094,34 +1094,37 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     eventRangeStart = eventRangeStop;
                     eventRangeStop = temp;
                 }
-                boolean reservedFound = false;
+
                 NodeList<Node> nodes = main.getChildNodes();
 
-                int slot = (int) (((eventRangeStart - ((double) eventRangeStart % getSlotHeight())) / getSlotHeight()));
-                int slotEnd = (int) ((eventRangeStop - ((double) eventRangeStop % getSlotHeight())) / getSlotHeight());
-                if (slotEnd > 47) {
-                    slotEnd = 47;
+                int slotStart = -1;
+                int slotEnd = -1;
+
+                // iterate over all child nodes, until we find first the start,
+                // and then the end
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    Element element = (Element) nodes.getItem(i);
+                    boolean isRangeElement = element.getClassName().contains(
+                            "v-daterange");
+
+                    if (isRangeElement && slotStart == -1) {
+                        slotStart = i;
+                        slotEnd = i; // to catch one-slot selections
+
+                    } else if (isRangeElement) {
+                        slotEnd = i;
+
+                    } else if (slotStart != -1 && slotEnd != -1) {
+                        break;
+                    }
                 }
 
-                GWT.log("Slot start " + slot + " slot end " + slotEnd);
+                GWT.log("Slot start " + slotStart + " slot end " + slotEnd);
 
-                int slotEndBeforeReserved = slotEnd;
-                for (int i = slot; i <= slotEnd; i++) {
-                    Element c = (Element) nodes.getItem(i);
-                    if (c == null) {
-                        continue;
-                    }
+                clearSelectionRange();
 
-                    c.removeClassName("v-daterange");
-                    if (!reservedFound
-                            && c.getClassName().contains("v-reserved")) {
-                        reservedFound = true;
-                        slotEndBeforeReserved = i - 1;
-                    }
-                }
-
-                int startMinutes = slot * 30;
-                int endMinutes = (slotEndBeforeReserved + 1) * 30;
+                int startMinutes = slotStart * 30;
+                int endMinutes = (slotEnd + 1) * 30;
                 VCalendar schedule = weekgrid.getCalendar();
                 Date currentDate = getDate();
                 String yr = (currentDate.getYear() + 1900) + "-"
@@ -1174,6 +1177,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             Event.releaseCapture(getElement());
             setFocus(false);
 
+            clearSelectionRange();
+        }
+
+        private void clearSelectionRange() {
             if (eventRangeStart > -1) {
                 // clear all "selected" class names
                 Element main = getElement();
