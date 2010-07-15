@@ -9,6 +9,7 @@ import com.vaadin.addon.calendar.event.BasicEvent;
  */
 public class CalendarTestEvent extends BasicEvent {
 
+    private static final long serialVersionUID = 2820133201983036866L;
     private String where;
     private Object data;
 

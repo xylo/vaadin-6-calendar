@@ -44,6 +44,9 @@ import com.vaadin.addon.calendar.ui.handler.BasicEventResizeHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicForwardHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
 import com.vaadin.event.ComponentEventListener;
+import com.vaadin.event.dd.DropHandler;
+import com.vaadin.event.dd.DropTarget;
+import com.vaadin.event.dd.TargetDetails;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -75,7 +78,7 @@ public class Calendar extends AbstractComponent implements
         CalendarComponentEvents.EventMoveNotifier,
         CalendarComponentEvents.RangeSelectNotifier,
         CalendarComponentEvents.EventResizeNotifier,
-        CalendarEventProvider.EventSetChangeListener {
+        CalendarEventProvider.EventSetChangeListener, DropTarget {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -136,6 +139,8 @@ public class Calendar extends AbstractComponent implements
 
     /** Map from event ids to event handlers */
     private Map<String, ComponentEventListener> handlers;
+
+    private DropHandler dropHandler;
 
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
@@ -469,26 +474,8 @@ public class Calendar extends AbstractComponent implements
         target.addAttribute(VCalendar.ATTR_NOW, df_date.format(now) + " "
                 + df_time.format(now));
 
-        Date firstDateToShow = null;
-        Date lastDateToShow = null;
-
-        // If the duration is more than week, use monthly view and get startweek
-        // and endweek. Example if views daterange is from tuesday to next weeks
-        // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
-        // monday
-        if (durationInDays > 7) {
-            firstDateToShow = getFirstDateForWeek(startDate);
-            lastDateToShow = getLastDateForWeek(endDate);
-
-        } else {
-            firstDateToShow = (Date) startDate.clone();
-            lastDateToShow = (Date) endDate.clone();
-        }
-
-        // Always expand to the start of the first day to the end of the last
-        // day
-        firstDateToShow = getStartOfDay(currentCalendar, firstDateToShow);
-        lastDateToShow = getEndOfDay(currentCalendar, lastDateToShow);
+        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
+        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
 
         currentCalendar.setTime(firstDateToShow);
 
@@ -524,6 +511,10 @@ public class Calendar extends AbstractComponent implements
         target.endTag("events");
         target.addVariable(this, VCalendar.ATTR_SCROLL, scrollTop);
         target.addVariable(this, "navigation", 0);
+
+        if (dropHandler != null) {
+            dropHandler.getAcceptCriterion().paint(target);
+        }
         super.paintContent(target);
     }
 
@@ -901,6 +892,44 @@ public class Calendar extends AbstractComponent implements
         return calendarClone.getTime();
     }
 
+    protected Date expandStartDate(Date start, boolean expandToFullWeek) {
+        // If the duration is more than week, use monthly view and get startweek
+        // and endweek. Example if views daterange is from tuesday to next weeks
+        // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
+        // monday
+        if (expandToFullWeek) {
+            start = getFirstDateForWeek(start);
+
+        } else {
+            start = (Date) start.clone();
+        }
+
+        // Always expand to the start of the first day to the end of the last
+        // day
+        start = getStartOfDay(currentCalendar, start);
+
+        return start;
+    }
+
+    protected Date expandEndDate(Date end, boolean expandToFullWeek) {
+        // If the duration is more than week, use monthly view and get startweek
+        // and endweek. Example if views daterange is from tuesday to next weeks
+        // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
+        // monday
+        if (expandToFullWeek) {
+            end = getLastDateForWeek(end);
+
+        } else {
+            end = (Date) end.clone();
+        }
+
+        // Always expand to the start of the first day to the end of the last
+        // day
+        end = getEndOfDay(currentCalendar, end);
+
+        return end;
+    }
+
     /**
      * Set the {@link com.vaadin.addon.calendar.event.CalendarEventProvider
      * CalendarEventProvider} to be used with this calendar. The EventProvider
@@ -1093,4 +1122,43 @@ public class Calendar extends AbstractComponent implements
         return handlers.get(eventId);
     }
 
+    /* Drag and Drop related */
+
+    public DropHandler getDropHandler() {
+        return dropHandler;
+    }
+
+    public void setDropHandler(DropHandler dropHandler) {
+        this.dropHandler = dropHandler;
+    }
+
+    public TargetDetails translateDropTargetDetails(
+            Map<String, Object> clientVariables) {
+        Map<String, Object> serverVariables = new HashMap<String, Object>(1);
+
+        if (clientVariables.containsKey("dropSlotIndex")) {
+            int slotIndex = (Integer) clientVariables.get("dropSlotIndex");
+            int dayIndex = (Integer) clientVariables.get("dropDayIndex");
+
+            currentCalendar.setTime(getStartOfDay(currentCalendar, startDate));
+            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
+
+            // change this if slot length is modified
+            currentCalendar.add(java.util.Calendar.MINUTE, slotIndex * 30);
+
+            serverVariables.put("dropTime", currentCalendar.getTime());
+
+        } else {
+            int dayIndex = (Integer) clientVariables.get("dropDayIndex");
+            currentCalendar.setTime(expandStartDate(startDate, true));
+            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
+            serverVariables.put("dropDay", currentCalendar.getTime());
+        }
+
+        CalendarTargetDetails td = new CalendarTargetDetails(serverVariables,
+                this);
+        td.setHasDropTime(clientVariables.containsKey("dropSlotIndex"));
+
+        return td;
+    }
 }

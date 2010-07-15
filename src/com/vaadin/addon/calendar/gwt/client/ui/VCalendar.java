@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
@@ -19,13 +21,19 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarDropHandler;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarMonthDropHandler;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarWeekDropHandler;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.TooltipInfo;
 import com.vaadin.terminal.gwt.client.UIDL;
+import com.vaadin.terminal.gwt.client.ui.dd.VDropHandler;
+import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
 
-public class VCalendar extends Composite implements Paintable {
+public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
+    public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
     public static final String ATTR_DOW = "dow";
     public static final String ATTR_FDATE = "fdate";
@@ -87,6 +95,7 @@ public class VCalendar extends Composite implements Paintable {
     private boolean isHeightUndefined = false;
 
     private boolean isWidthUndefined = false;
+    private CalendarDropHandler dropHandler;
 
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
@@ -131,13 +140,38 @@ public class VCalendar extends Composite implements Paintable {
             outer.remove(0);
         }
 
-        if (daysCount > 7) {
+        boolean monthView = daysCount > 7;
+
+        if (monthView) {
             updateMonthView(uidl, daysUidl);
 
         } else {
             updateWeekView(uidl, daysUidl);
         }
 
+        // check for DD -related access criteria
+        Iterator<Object> childIterator = uidl.getChildIterator();
+        while (childIterator.hasNext()) {
+            UIDL child = (UIDL) childIterator.next();
+            if (ACCESSCRITERIA.equals(child.getTag())) {
+                GWT.log("DD access criteria found");
+
+                if (monthView
+                        && !(dropHandler instanceof CalendarMonthDropHandler)) {
+                    dropHandler = new CalendarMonthDropHandler();
+
+                } else if (!monthView
+                        && !(dropHandler instanceof CalendarWeekDropHandler)) {
+                    dropHandler = new CalendarWeekDropHandler();
+                }
+
+                dropHandler.setCalendarPaintable(this);
+                dropHandler.updateAcceptRules(child);
+
+            } else {
+                dropHandler = null;
+            }
+        }
     }
 
     private void updateMonthView(UIDL uidl, UIDL daysUidl) {
@@ -631,6 +665,10 @@ public class VCalendar extends Composite implements Paintable {
             }
             recalculateWidths();
         }
+    }
+
+    public VDropHandler getDropHandler() {
+        return dropHandler;
     }
 
     public ApplicationConnection getClient() {

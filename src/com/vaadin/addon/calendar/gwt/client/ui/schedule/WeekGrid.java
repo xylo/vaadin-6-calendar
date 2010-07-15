@@ -62,6 +62,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int slotInMinutes = 30;
     private int dateCellBorder;
     private boolean eventResizeEnabled = true;
+    private DateCell dateCellOfToday;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
@@ -133,6 +134,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
         dc.setVerticalSized(isVerticalScrollable());
         content.add(dc);
+    }
+
+    public int getDateCellIndex(DateCell dateCell) {
+        return content.getWidgetIndex(dateCell) - 1;
     }
 
     private boolean isVerticalScrollable() {
@@ -389,8 +394,13 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                         dc.setToday(todayTimestamp, getOffsetWidth());
                     }
                 }
+                dateCellOfToday = dc;
             }
         }
+    }
+
+    public DateCell getDateCellOfToday() {
+        return dateCellOfToday;
     }
 
     public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -603,6 +613,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     public static class DateCell extends FocusableComplexPanel implements
             MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler {
+        private static final String DRAGEMPHASISSTYLE = " dragemphasis";
         private Date date;
         private int width;
         private int eventRangeStart = -1;
@@ -657,6 +668,17 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 handler.removeHandler();
             }
             super.onUnload();
+        }
+
+        public int getSlotIndex(Element slotElement) {
+            for (int i = 0; i < slotElements.length; i++) {
+                if (slotElement == slotElements[i]) {
+                    return i;
+                }
+            }
+
+            throw new IllegalArgumentException(
+                    "Element not found in this DateCell");
         }
 
         public void setTimeBarWidth(int timebarWidth) {
@@ -1188,6 +1210,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             // position is calculated later, when we know the cell heights
         }
 
+        public Element getTodaybarElement() {
+            return todaybar;
+        }
+
         @SuppressWarnings("deprecation")
         public void addReservedEvent(ReservedCalendarEvent e) {
             Element main = getElement();
@@ -1228,6 +1254,19 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public boolean isToday() {
             return today != null;
+        }
+
+        public void addEmphasisStyle(
+                com.google.gwt.user.client.Element elementOver) {
+            String originalStylename = getStyleName(elementOver);
+            setStyleName(elementOver, originalStylename + DRAGEMPHASISSTYLE);
+        }
+
+        public void removeEmphasisStyle(
+                com.google.gwt.user.client.Element elementOver) {
+            String originalStylename = getStyleName(elementOver);
+            setStyleName(elementOver, originalStylename.substring(0,
+                    originalStylename.length() - DRAGEMPHASISSTYLE.length()));
         }
 
         private static class Group {

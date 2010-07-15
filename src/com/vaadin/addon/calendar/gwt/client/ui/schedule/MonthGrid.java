@@ -204,4 +204,19 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
             cancelRangeSelection();
         }
     }
+
+    public int getDayCellIndex(SimpleDayCell dayCell) {
+        int rows = getRowCount();
+        int cells = getCellCount(0);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cells; j++) {
+                SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+                if (dayCell == sdc) {
+                    return i * cells + j;
+                }
+            }
+        }
+
+        return -1;
+    }
 }

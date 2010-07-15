@@ -114,6 +114,10 @@
 	background-color: #fffee7;
 }
 
+.v-calendar-month-day-dragemphasis {
+		background-color: #a8a8a8;
+}
+
 .v-calendar-month-day-scrollable {
 	overflow-y: scroll;
 }
@@ -259,6 +263,10 @@ div.v-calendar-event-all-day {
 
 .v-calendar-day-times .v-reserved {
 	background-color: #FF3333;
+}
+
+.v-calendar-day-times .dragemphasis {
+	background-color: #a8a8a8;
 }
 
 .v-calendar-week-wrapper .v-calendar-event {

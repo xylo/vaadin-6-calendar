@@ -697,6 +697,14 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         return moveEvent;
     }
 
+    public void addEmphasisStyle() {
+        addStyleDependentName("dragemphasis");
+    }
+
+    public void removeEmphasisStyle() {
+        removeStyleDependentName("dragemphasis");
+    }
+
     public static class MonthEventLabel extends HTML {
 
         private boolean timeSpecificEvent = false;
