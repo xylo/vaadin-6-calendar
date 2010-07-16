@@ -19,7 +19,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private VCalendar calendar;
 
     public DayToolbar(VCalendar vcalendar) {
-        this.calendar = vcalendar;
+        calendar = vcalendar;
         setStylePrimaryName("v-calendar-header-week");
         backLabel = new Button();
         backLabel.setStylePrimaryName("v-calendar-back");
@@ -45,6 +45,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         if (count > 0) {
             setCellWidth(backLabel, MARGINLEFT + "px");
             setCellWidth(nextLabel, MARGINRIGHT + "px");
+            setCellHorizontalAlignment(nextLabel, ALIGN_RIGHT);
             int cellw = width / (count - 2);
             int remain = width % (count - 2);
             int cellw2 = cellw + 1;

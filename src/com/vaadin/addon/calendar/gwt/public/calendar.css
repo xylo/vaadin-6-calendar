@@ -40,7 +40,6 @@
 
 .v-calendar-header-week .v-calendar-back,.v-calendar-header-week .v-calendar-next
 	{
-	text-indent: -100px;
 	border: none;
 	padding: 0;
 	margin: 0;
