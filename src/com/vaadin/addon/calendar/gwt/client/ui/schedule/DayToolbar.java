@@ -50,14 +50,17 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             int remain = width % (count - 2);
             int cellw2 = cellw + 1;
             if (cellw > 0) {
+                int[] cellWidths = VCalendar
+                        .distributeSize(width, count - 2, 0);
                 for (int i = 1; i < count - 1; i++) {
                     Widget widget = getWidget(i);
-                    if (remain > 0) {
-                        setCellWidth(widget, cellw2 + "px");
-                        remain--;
-                    } else {
-                        setCellWidth(widget, cellw + "px");
-                    }
+                    // if (remain > 0) {
+                    // setCellWidth(widget, cellw2 + "px");
+                    // remain--;
+                    // } else {
+                    // setCellWidth(widget, cellw + "px");
+                    // }
+                    setCellWidth(widget, cellWidths[i - 1] + "px");
                 }
             }
         }

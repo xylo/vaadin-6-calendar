@@ -9,6 +9,10 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
 
 /**
  * Implements basic functionality needed to enable event resizing.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public class BasicEventResizeHandler implements EventResizeHandler {
 

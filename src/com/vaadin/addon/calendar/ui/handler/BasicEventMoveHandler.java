@@ -7,6 +7,14 @@ import com.vaadin.addon.calendar.event.CalendarEventEditor;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
 
+/**
+ * Implements basic functionality needed to enable moving events.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
+ * 
+ */
 public class BasicEventMoveHandler implements EventMoveHandler {
 
     private static final long serialVersionUID = -2311929051549036879L;

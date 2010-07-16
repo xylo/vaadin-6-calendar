@@ -12,6 +12,10 @@ import com.vaadin.event.dd.TargetDetailsImpl;
  * details of the drop point. Specifically, this class gives access to the date
  * where the drop happened. If the Calendar was in weekly mode, the date also
  * includes the start time of the slot.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public class CalendarTargetDetails extends TargetDetailsImpl {
 

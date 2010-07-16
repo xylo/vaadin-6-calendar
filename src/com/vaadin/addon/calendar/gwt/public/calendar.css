@@ -1,4 +1,6 @@
-/** Calendar */ /* Global resize style */
+/** Calendar */ 
+
+/* Global resize style */
 .v-calendar-nresize DIV DIV {
 	cursor: n-resize !important;
 }

@@ -17,7 +17,9 @@ import java.util.Date;
  * whether an event can be edited.
  * </p>
  * 
- * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public interface CalendarEventEditor extends CalendarEvent {
 

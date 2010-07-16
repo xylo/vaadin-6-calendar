@@ -142,12 +142,11 @@ public class WeeklyLongEvents extends HorizontalPanel {
         if (cells <= 0) {
             return;
         }
-        int cellWidth = calendar.getWeekGrid().getDateCellWidth();
+        int[] cellWidths = calendar.getWeekGrid().getDateCellWidths();
 
         for (int i = 0; i < cells; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
-            dc.setWidth(cellWidth - DateCellContainer.measureBorderWidth(dc)
-                    + "px");
+            dc.setWidth(cellWidths[i] + "px");
         }
     }
 

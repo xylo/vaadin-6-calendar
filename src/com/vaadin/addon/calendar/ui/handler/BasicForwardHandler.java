@@ -10,8 +10,9 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 /**
  * Implements basic functionality needed to enable forward navigation.
  * 
- * @author Risto Yrjänä / IT Mill Ltd.
- * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public class BasicForwardHandler implements ForwardHandler {
 

@@ -2,7 +2,13 @@ package com.vaadin.addon.calendar.ui;
 
 import com.vaadin.ui.Component;
 
-/** All Calendar events extends this class. */
+/**
+ * All Calendar events extends this class.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
+ * */
 @SuppressWarnings("serial")
 public class CalendarComponentEvent extends Component.Event {
 

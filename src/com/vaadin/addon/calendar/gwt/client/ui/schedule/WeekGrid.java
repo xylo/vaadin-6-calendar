@@ -63,6 +63,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int dateCellBorder;
     private boolean eventResizeEnabled = true;
     private DateCell dateCellOfToday;
+    private int[] cellWidths;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
@@ -208,11 +209,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int count = content.getWidgetCount();
             int datesWidth = width;
             if (datesWidth > 0 && count > 1) {
-                int cellWidth = datesWidth / (count - 1);
-                int cellWidthMinusBorder = cellWidth - 1;
+                cellWidths = VCalendar
+                        .distributeSize(datesWidth, count - 1, -1);
+
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
-                    dc.setWidthPX(cellWidthMinusBorder);
+                    dc.setWidthPX(cellWidths[i - 1]);
                     if (dc.isToday()) {
                         dc.setTimeBarWidth(getOffsetWidth());
                     }
@@ -230,6 +232,13 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 }
             }
         }
+    }
+
+    /**
+     * @return an int-array containing the widths of the cells (days)
+     */
+    public int[] getDateCellWidths() {
+        return cellWidths;
     }
 
     public void updateCellHeights() {
@@ -494,6 +503,13 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             cellWidth = getInternalWidth() / count;
         }
         return cellWidth;
+    }
+
+    /**
+     * @return the number of day cells in this week
+     */
+    public int getDateCellCount() {
+        return content.getWidgetCount() - 1;
     }
 
     public static class Timebar extends HTML {
@@ -1616,8 +1632,22 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 }
 
                 int dayOffset = relativeX / dateCellWidth;
-                dayOffset = dayOffset * dateCellWidth
+
+                // sanity check for right side overflow
+                int dateCellCount = weekGrid.getDateCellCount();
+                if (dayOffset >= dateCellCount) {
+                    dayOffset--;
+                    dayDiff--;
+                }
+
+                int dayOffsetPx = calculateDateCellOffsetPx(dayOffset)
                         + weekGrid.timebar.getOffsetWidth();
+
+                GWT.log("DateCellWidth: " + dateCellWidth + " dayDiff: "
+                        + dayDiff + " dayOffset: " + dayOffset
+                        + " dayOffsetPx: " + dayOffsetPx + " startXrelative: "
+                        + startXrelative + " moveX: " + moveX);
+
                 if (relativeX < 0 || relativeX >= getDatesWidth()) {
                     return;
                 }
@@ -1645,13 +1675,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                             + from.getMinutes();
                     long range = calendarEvent.getRangeInMinutes();
                     startFromMinutes = calculateStartFromMinute(
-                            startFromMinutes, from, to, dayOffset);
+                            startFromMinutes, from, to, dayOffsetPx);
                     if (startFromMinutes < 0) {
                         range += startFromMinutes;
                     }
                     updatePosition(startFromMinutes, range);
 
-                    s.setLeft(dayOffset, Unit.PX);
+                    s.setLeft(dayOffsetPx, Unit.PX);
+                    s
+                            .setWidth(weekGrid.getDateCellWidths()[dayOffset],
+                                    Unit.PX);
 
                 } else if (clickTarget == topResizeBar) {
                     long oldStartTime = startDatetimeFrom.getTime();
@@ -1697,7 +1730,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                             + startDatetimeFrom.getMinutes();
                     long range = calendarEvent.getRangeInMinutes();
                     startFromMinutes = calculateStartFromMinute(
-                            startFromMinutes, from, to, dayOffset);
+                            startFromMinutes, from, to, dayOffsetPx);
                     if (startFromMinutes < 0) {
                         range += startFromMinutes;
                     }
@@ -1764,6 +1797,21 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 }
 
                 return startFromMinutes;
+            }
+
+            /**
+             * @param dateOffset
+             * @return the amount of pixels the given date is from the left side
+             */
+            private int calculateDateCellOffsetPx(int dateOffset) {
+                int dateCellOffset = 0;
+                int[] dateWidths = weekGrid.getDateCellWidths();
+
+                for (int i = 0; i < dateOffset; i++) {
+                    dateCellOffset += dateWidths[i] + 1;
+                }
+
+                return dateCellOffset;
             }
 
             /**

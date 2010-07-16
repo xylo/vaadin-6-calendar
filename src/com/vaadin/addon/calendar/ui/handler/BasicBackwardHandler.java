@@ -10,7 +10,9 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 /**
  * Implements basic functionality needed to enable backwards navigation.
  * 
- * @author Risto Yrjänä / IT Mill Ltd.
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  * 
  */
 public class BasicBackwardHandler implements BackwardHandler {

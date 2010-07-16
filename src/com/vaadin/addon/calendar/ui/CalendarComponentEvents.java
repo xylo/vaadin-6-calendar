@@ -11,6 +11,10 @@ import com.vaadin.tools.ReflectTools;
 
 /**
  * Interface for all Vaadin Calendar events.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public interface CalendarComponentEvents extends Serializable {
 

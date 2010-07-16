@@ -7,6 +7,10 @@ import java.util.List;
 /**
  * Interface for querying events. The Vaadin Calendar always has a
  * CalendarEventProvider set.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public interface CalendarEventProvider extends Serializable {
     /**

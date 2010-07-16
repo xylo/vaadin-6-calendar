@@ -71,6 +71,10 @@ import com.vaadin.ui.ClientWidget;
  * CalendarEventProvider}. By default, a
  * {@link com.vaadin.addon.calendar.event.BasicEventProvider BasicEventProvider}
  * is used.</li>
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements

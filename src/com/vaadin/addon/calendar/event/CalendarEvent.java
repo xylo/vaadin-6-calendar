@@ -13,6 +13,10 @@ import java.util.Date;
  * 
  * <li>In "allDay" events longer than one day, starting and ending clock times
  * are omitted in UI and only dates are shown.</li>
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public interface CalendarEvent extends Serializable {
 

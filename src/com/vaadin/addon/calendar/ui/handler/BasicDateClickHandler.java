@@ -9,6 +9,10 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 /**
  * Implements basic functionality needed to switch to day view when a single day
  * is clicked.
+ * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public class BasicDateClickHandler implements DateClickHandler {
 

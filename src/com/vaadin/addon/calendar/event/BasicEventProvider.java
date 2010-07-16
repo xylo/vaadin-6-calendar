@@ -26,6 +26,9 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * an event is added, changed or removed.
  * </p>
  * 
+ * @author IT Mill Ltd.
+ * @version
+ * @VERSION@
  */
 public class BasicEventProvider implements CalendarEventProvider,
         EventSetChangeNotifier, CalendarEvent.EventChangeListener {
