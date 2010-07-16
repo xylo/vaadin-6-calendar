@@ -587,9 +587,28 @@ public class CalendarTest extends Application {
     }
 
     private void updateCalendarLocale(Locale l) {
+        int oldFirstDayOfWeek = calendar.getFirstDayOfWeek();
         setLocale(l);
         calendarComponent.setLocale(l);
         calendar = new GregorianCalendar(l);
+        int newFirstDayOfWeek = calendar.getFirstDayOfWeek();
+
+        // we are showing 1 week, and the first day of the week has changed
+        // update start and end dates so that the same week is showing
+        if (viewMode == Mode.WEEK && oldFirstDayOfWeek != newFirstDayOfWeek) {
+            calendar.setTime(calendarComponent.getStartDate());
+            calendar.add(java.util.Calendar.DAY_OF_WEEK, 2);
+            // starting at the beginning of the week
+            calendar.set(GregorianCalendar.DAY_OF_WEEK, newFirstDayOfWeek);
+            Date start = calendar.getTime();
+
+            // ending at the end of the week
+            calendar.add(GregorianCalendar.DATE, 6);
+            Date end = calendar.getTime();
+
+            calendarComponent.setStartDate(start);
+            calendarComponent.setEndDate(end);
+        }
     }
 
     private void handleNextButtonClick() {
