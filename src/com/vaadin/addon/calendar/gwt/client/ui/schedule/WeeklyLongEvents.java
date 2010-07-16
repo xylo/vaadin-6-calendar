@@ -139,8 +139,9 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     public void updateCellWidths() {
         int cells = getWidgetCount();
-        if (cells <= 0)
+        if (cells <= 0) {
             return;
+        }
         int cellWidth = calendar.getWeekGrid().getDateCellWidth();
 
         for (int i = 0; i < cells; i++) {
@@ -221,7 +222,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
         public void onMouseUp(MouseUpEvent event) {
             if (event.getSource() == clickTargetWidget
-                    && clickTargetWidget instanceof DateCell) {
+                    && clickTargetWidget instanceof DateCell
+                    && !calendar.isDisabled()) {
                 CalendarEvent calendarEvent = ((DateCell) clickTargetWidget)
                         .getEvent();
                 if (calendar.getClient().hasEventListeners(calendar,

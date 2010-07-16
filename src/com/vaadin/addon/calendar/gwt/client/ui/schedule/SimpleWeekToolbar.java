@@ -11,11 +11,11 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;
-    private VCalendar schedule;
+    private VCalendar calendar;
     private boolean isHeightUndefined;
 
     public SimpleWeekToolbar(VCalendar parent) {
-        schedule = parent;
+        calendar = parent;
         setCellSpacing(0);
         setCellPadding(0);
         setStyleName("v-calendar-week-numbers");
@@ -83,9 +83,10 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
 
     public void onClick(ClickEvent event) {
         WeekLabel wl = (WeekLabel) event.getSource();
-        if (schedule.getClient().hasEventListeners(schedule,
-                CalendarEventId.WEEKCLICK)) {
-            schedule.getClient().updateVariable(schedule.getPID(),
+        if (!calendar.isDisabled()
+                && calendar.getClient().hasEventListeners(calendar,
+                        CalendarEventId.WEEKCLICK)) {
+            calendar.getClient().updateVariable(calendar.getPID(),
                     CalendarEventId.WEEKCLICK,
                     wl.getYear() + "w" + wl.getWeek(), true);
         }

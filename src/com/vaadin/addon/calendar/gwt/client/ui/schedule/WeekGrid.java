@@ -52,7 +52,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int height = 0;
     private HorizontalPanel content;
     private VCalendar calendar;
-    private boolean readOnly;
+    private boolean disabled;
     private boolean format24h;
     private Timebar timebar;
     private Panel wrapper;
@@ -130,7 +130,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     public void addDate(Date d) {
         DateCell dc = new DateCell(this);
         dc.setDate(d);
-        dc.setReadOnly(readOnly);
+        dc.setDisabled(isDisabled());
         dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
         dc.setVerticalSized(isVerticalScrollable());
         content.add(dc);
@@ -427,8 +427,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
     }
 
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
     }
 
     public boolean isFormat24h() {
@@ -619,7 +623,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         private int eventRangeStart = -1;
         private int eventRangeStop = -1;
         private WeekGrid weekgrid;
-        private boolean isReadOnly = false;
+        private boolean disabled = false;
         private int height;
         private Element[] slotElements;
         private int[] slotElementHeights;
@@ -998,7 +1002,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             Element main = getElement();
             DayEvent dayEvent = new DayEvent(weekgrid, calendarEvent);
             dayEvent.setSlotHeightInPX(getSlotHeight());
-            dayEvent.setReadOnly(isReadOnly);
+            dayEvent.setDisabled(isDisabled());
 
             if (startingSlotHeight > 0) {
                 updatePositionFor(dayEvent, targetDay, calendarEvent);
@@ -1039,7 +1043,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             // slots are just elements
             for (; index < getWidgetCount(); index++) {
                 DayEvent dc = (DayEvent) getWidget(index);
-                dc.setReadOnly(isReadOnly);
+                dc.setDisabled(isDisabled());
                 events.add(dc.getCalendarEvent());
             }
             events.add(dayEvent.getCalendarEvent());
@@ -1069,7 +1073,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public void onMouseDown(MouseDownEvent event) {
             Element e = Element.as(event.getNativeEvent().getEventTarget());
-            if (e.getClassName().contains("reserved") || isReadOnly) {
+            if (e.getClassName().contains("reserved") || isDisabled()) {
                 eventRangeStart = -1;
             } else {
                 eventRangeStart = event.getY();
@@ -1247,12 +1251,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
         }
 
-        public void setReadOnly(boolean readOnly) {
-            isReadOnly = readOnly;
+        public void setDisabled(boolean disabled) {
+            this.disabled = disabled;
         }
 
-        public boolean isReadOnly() {
-            return isReadOnly;
+        public boolean isDisabled() {
+            return disabled;
         }
 
         public void setDateColor(String styleName) {
@@ -1313,7 +1317,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             private int top;
             private int startYrelative;
             private int startXrelative;
-            private boolean readOnly;
+            private boolean disabled;
             private WeekGrid weekGrid;
             private com.google.gwt.user.client.Element topResizeBar;
             private com.google.gwt.user.client.Element bottomResizeBar;
@@ -1465,6 +1469,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
 
             public void onMouseDown(MouseDownEvent event) {
+                if (isDisabled()) {
+                    return;
+                }
+
                 clickTarget = Element.as(event.getNativeEvent()
                         .getEventTarget());
                 mouseMoveCanceled = false;
@@ -1566,7 +1574,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 if (startY < 0 && startX < 0) {
                     return;
                 }
-                if (isReadOnly()) {
+                if (isDisabled()) {
                     Event.releaseCapture(getElement());
                     mouseMoveStarted = false;
                     startY = -1;
@@ -1853,12 +1861,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 return calendarEvent;
             }
 
-            public void setReadOnly(boolean readOnly) {
-                this.readOnly = readOnly;
+            public void setDisabled(boolean disabled) {
+                this.disabled = disabled;
             }
 
-            public boolean isReadOnly() {
-                return readOnly;
+            public boolean isDisabled() {
+                return disabled;
             }
         }
     }

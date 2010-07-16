@@ -16,10 +16,10 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected Button nextLabel;
     private boolean verticalSized;
     private boolean horizontalSized;
-    private VCalendar vcalendar;
+    private VCalendar calendar;
 
     public DayToolbar(VCalendar vcalendar) {
-        this.vcalendar = vcalendar;
+        this.calendar = vcalendar;
         setStylePrimaryName("v-calendar-header-week");
         backLabel = new Button();
         backLabel.setStylePrimaryName("v-calendar-back");
@@ -62,8 +62,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
     }
 
-    public void add(String dayName, String date, String localized_date_format,
-            String extraClass) {
+    public void add(String dayName, final String date,
+            String localized_date_format, String extraClass) {
         DayLabel l = new DayLabel(dayName + " " + localized_date_format);
         l.setDate(date);
 
@@ -77,30 +77,45 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         if (horizontalSized) {
             l.addStyleDependentName("Hsized");
         }
+
+        l.addClickHandler(new ClickHandler() {
+
+            public void onClick(ClickEvent event) {
+                if (!calendar.isDisabled()
+                        && calendar.getClient().hasEventListeners(calendar,
+                                CalendarEventId.DATECLICK)) {
+                    calendar.getClient().updateVariable(calendar.getPID(),
+                            CalendarEventId.DATECLICK, date, true);
+                }
+            }
+
+        });
+
         add(l);
     }
 
     public void addBackButton() {
-        if (!vcalendar.getClient().hasEventListeners(vcalendar,
-                CalendarEventId.FORWARD))
+        if (!calendar.getClient().hasEventListeners(calendar,
+                CalendarEventId.FORWARD)) {
             nextLabel.getElement().getStyle().setOpacity(0);
+        }
         add(backLabel);
     }
 
     public void addNextButton() {
-        if (!vcalendar.getClient().hasEventListeners(vcalendar,
-                CalendarEventId.BACKWARD))
+        if (!calendar.getClient().hasEventListeners(calendar,
+                CalendarEventId.BACKWARD)) {
             backLabel.getElement().getStyle().setOpacity(0);
+        }
         add(nextLabel);
     }
 
-    public static class DayLabel extends Label implements ClickHandler {
+    public static class DayLabel extends Label {
         private String date;
 
         public DayLabel(String string) {
             super(string);
             setStylePrimaryName("v-calendar-header-day");
-            addClickHandler(this);
         }
 
         public void setDate(String date) {
@@ -111,36 +126,32 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             return date;
         }
 
-        public void onClick(ClickEvent event) {
-            VCalendar w = (VCalendar) getParent().getParent().getParent();
-            if (w.getClient().hasEventListeners(w, CalendarEventId.DATECLICK)) {
-                w.getClient().updateVariable(w.getPID(),
-                        CalendarEventId.DATECLICK, date, true);
-            }
-        }
-
     }
 
     public void onClick(ClickEvent event) {
         VCalendar w = (VCalendar) getParent().getParent();
-        if (event.getSource() == nextLabel) {
-            if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
-                w.getClient().updateVariable(w.getPID(),
-                        VCalendar.ATTR_NAVIGATION, true, true);
-            }
-        } else if (event.getSource() == backLabel) {
-            if (w.getClient().hasEventListeners(w, CalendarEventId.BACKWARD)) {
-                w.getClient().updateVariable(w.getPID(),
-                        VCalendar.ATTR_NAVIGATION, false, true);
+
+        if (!calendar.isDisabled()) {
+            if (event.getSource() == nextLabel) {
+                if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
+                    w.getClient().updateVariable(w.getPID(),
+                            VCalendar.ATTR_NAVIGATION, true, true);
+                }
+            } else if (event.getSource() == backLabel) {
+                if (w.getClient()
+                        .hasEventListeners(w, CalendarEventId.BACKWARD)) {
+                    w.getClient().updateVariable(w.getPID(),
+                            VCalendar.ATTR_NAVIGATION, false, true);
+                }
             }
         }
     }
 
     public void setVerticalSized(boolean sized) {
-        this.verticalSized = sized;
+        verticalSized = sized;
     }
 
     public void setHorizontalSized(boolean sized) {
-        this.horizontalSized = sized;
+        horizontalSized = sized;
     }
 }

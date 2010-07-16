@@ -40,7 +40,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
     private final VCalendar calendar;
     private Date date;
-    private boolean enabled = true;
     private int intHeight;
     private HTML bottomspacer;
     private Label caption;
@@ -69,7 +68,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private Widget clickedWidget;
     private HandlerRegistration bottomSpacerMouseDownHandler;
     private boolean scrollable = false;
-    private boolean eventMoveAllowed;
+    private boolean hasEventMoveListeners;
     private boolean eventCanceled;
     private MonthGrid monthGrid;
     private HandlerRegistration keyDownHandler;
@@ -89,28 +88,14 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         caption.addMouseDownHandler(this);
         caption.addMouseUpHandler(this);
 
-        eventMoveAllowed = calendar.getClient().hasEventListeners(calendar,
-                CalendarEventId.EVENTMOVE);
+        hasEventMoveListeners = calendar.getClient().hasEventListeners(
+                calendar, CalendarEventId.EVENTMOVE);
     }
 
     @Override
     public void onLoad() {
         BOTTOMSPACERHEIGHT = bottomspacer.getOffsetHeight();
         EVENTHEIGHT = BOTTOMSPACERHEIGHT;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        if (!enabled) {
-            addStyleDependentName("disabled");
-        } else {
-            removeStyleDependentName("disabled");
-        }
-
     }
 
     public void setMonthGrid(MonthGrid monthGrid) {
@@ -411,6 +396,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     }
 
     public void onMouseDown(MouseDownEvent event) {
+        if (calendar.isDisabled()) {
+            return;
+        }
+
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
 
@@ -422,7 +411,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             }
             reDraw(true);
 
-        } else if (w instanceof MonthEventLabel && eventMoveAllowed) {
+        } else if (w instanceof MonthEventLabel && hasEventMoveListeners) {
             monthEventMouseDown = true;
 
             if (w instanceof MonthEventLabel) {
@@ -431,7 +420,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         } else if (w == this && !scrollable) {
             MonthGrid grid = getMonthGrid();
-            if (!grid.isReadOnly()) {
+            if (!grid.isDisabled()) {
                 grid.setSelectionStart(this);
                 grid.setSelectionEnd(this);
             }
@@ -454,7 +443,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         MonthEventLabel w = (MonthEventLabel) clickedWidget;
 
-        if (calendar.isReadOnly()) {
+        if (calendar.isDisabled()) {
             Event.releaseCapture(getElement());
             monthEventMouseDown = false;
             startY = -1;

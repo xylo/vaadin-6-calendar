@@ -87,7 +87,7 @@ public class CalendarTest extends Application {
 
     private Button hideWeekendsButton;
 
-    private Button readOnlyButton;
+    private CheckBox readOnlyButton;
 
     private Window scheduleEventPopup;
 
@@ -114,6 +114,8 @@ public class CalendarTest extends Application {
     private String calendarHeight = null;
 
     private String calendarWidth = null;
+
+    private CheckBox disabledButton;
 
     @SuppressWarnings("serial")
     @Override
@@ -246,7 +248,8 @@ public class CalendarTest extends Application {
     private void initLayoutContent() {
         initNavigationButtons();
         initHideWeekEndButton();
-        initReadOnlyButtonButton();
+        initReadOnlyButton();
+        initDisabledButton();
         initAddNewEventButton();
 
         HorizontalLayout hl = new HorizontalLayout();
@@ -276,6 +279,7 @@ public class CalendarTest extends Application {
         controlPanel.addComponent(formatSelect);
         controlPanel.addComponent(hideWeekendsButton);
         controlPanel.addComponent(readOnlyButton);
+        controlPanel.addComponent(disabledButton);
         controlPanel.addComponent(addNewEvent);
 
         controlPanel.setComponentAlignment(timeZoneSelect,
@@ -285,6 +289,8 @@ public class CalendarTest extends Application {
         controlPanel.setComponentAlignment(hideWeekendsButton,
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(readOnlyButton,
+                Alignment.MIDDLE_LEFT);
+        controlPanel.setComponentAlignment(disabledButton,
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(addNewEvent, Alignment.MIDDLE_LEFT);
 
@@ -350,15 +356,29 @@ public class CalendarTest extends Application {
         });
     }
 
-    private void initReadOnlyButtonButton() {
-        readOnlyButton = new Button("Read-only mode");
-        readOnlyButton.setSwitchMode(true);
+    private void initReadOnlyButton() {
+        readOnlyButton = new CheckBox("Read-only mode");
+        readOnlyButton.setImmediate(true);
         readOnlyButton.addListener(new ClickListener() {
 
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
                 calendarComponent.setReadOnly((Boolean) event.getButton()
+                        .getValue());
+            }
+        });
+    }
+
+    private void initDisabledButton() {
+        disabledButton = new CheckBox("Disabled");
+        disabledButton.setImmediate(true);
+        disabledButton.addListener(new ClickListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            public void buttonClick(ClickEvent event) {
+                calendarComponent.setEnabled(!(Boolean) event.getButton()
                         .getValue());
             }
         });

@@ -18,7 +18,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     private SimpleDayCell selectionEnd;
     private VCalendar calendar;
     private boolean rangeSelectDisabled;
-    private boolean readOnly;
+    private boolean disabled;
     private HandlerRegistration keyDownHandler;
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
@@ -38,14 +38,12 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     }
 
     public void setSelectionEnd(SimpleDayCell simpleDayCell) {
-        if (simpleDayCell.isEnabled()) {
-            selectionEnd = simpleDayCell;
-        }
+        selectionEnd = simpleDayCell;
         updateSelection();
     }
 
     public void setSelectionStart(SimpleDayCell simpleDayCell) {
-        if (simpleDayCell.isEnabled() && !rangeSelectDisabled && !readOnly) {
+        if (!rangeSelectDisabled && !isDisabled()) {
             selectionStart = simpleDayCell;
             setFocus(true);
         }
@@ -172,12 +170,12 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         rangeSelectDisabled = !b;
     }
 
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public boolean isDisabled() {
+        return disabled;
     }
 
     public void setHeightPX(int intHeight) {

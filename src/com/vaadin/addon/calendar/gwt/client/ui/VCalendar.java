@@ -50,6 +50,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     public static final String ATTR_FDOW = "fdow";
     public static final String ATTR_NOW = "now";
     public static final String ATTR_READONLY = "readonly";
+    public static final String ATTR_DISABLED = "disabled";
     public static final String ATTR_HIDE_WEEKENDS = "hideWeekends";
     public static final String ATTR_MONTH_NAMES = "mNames";
     public static final String ATTR_DAY_NAMES = "dNames";
@@ -90,7 +91,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     private DateTimeFormat time24format_date = DateTimeFormat
             .getFormat("HH:mm");
 
-    private boolean readOnly = false;
+    private boolean disabled = false;
 
     private boolean isHeightUndefined = false;
 
@@ -130,9 +131,11 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         dayNames = uidl.getStringArrayAttribute(ATTR_DAY_NAMES);
         monthNames = uidl.getStringArrayAttribute(ATTR_MONTH_NAMES);
         hideWeekends = uidl.getBooleanAttribute(ATTR_HIDE_WEEKENDS);
-        if (uidl.hasAttribute(ATTR_READONLY)) {
-            readOnly = uidl.getBooleanAttribute(ATTR_READONLY);
-        }
+
+        disabled = ((uidl.hasAttribute(ATTR_READONLY) && uidl
+                .getBooleanAttribute(ATTR_READONLY)) || (uidl
+                .hasAttribute(ATTR_DISABLED) && uidl
+                .getBooleanAttribute(ATTR_DISABLED)));
 
         UIDL daysUidl = uidl.getChildUIDL(0);
         int daysCount = daysUidl.getChildCount();
@@ -522,7 +525,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         dayToolbar.setVerticalSized(isHeightUndefined);
         dayToolbar.setHorizontalSized(isWidthUndefined);
         weekGrid.clearDates();
-        weekGrid.setReadOnly(readOnly);
+        weekGrid.setDisabled(isDisabled());
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
             String date = dayUidl.getStringAttribute(ATTR_DATE);
@@ -555,7 +558,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         rows = (int) Math.ceil(daysCount / (double) 7);
         int columns = (hideWeekends == true ? 5 : 7);
         monthGrid = new MonthGrid(this, rows, columns);
-        monthGrid.setReadOnly(readOnly);
+        monthGrid.setDisabled(isDisabled());
         monthGrid.setHeightPX(intHeight);
         monthGrid.setWidthPX(intWidth);
         weekToolbar.removeAllRows();
@@ -698,8 +701,8 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         return PID;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public boolean isDisabled() {
+        return disabled;
     }
 
     public MonthGrid getMonthGrid() {

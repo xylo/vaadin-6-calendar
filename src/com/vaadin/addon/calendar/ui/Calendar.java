@@ -556,21 +556,25 @@ public class Calendar extends AbstractComponent implements
     public void changeVariables(Object source, Map variables) {
         super.changeVariables(source, variables);
 
-        if (variables.containsKey(CalendarEventId.RANGESELECT) && !isReadOnly()) {
+        if (variables.containsKey(CalendarEventId.RANGESELECT)
+                && isClientChangeAllowed()) {
             handleRangeSelect((String) variables
                     .get(CalendarEventId.RANGESELECT));
         }
 
-        if (variables.containsKey(CalendarEventId.EVENTCLICK)) {
+        if (variables.containsKey(CalendarEventId.EVENTCLICK)
+                && isClientChangeAllowed()) {
             handleEventClick((Integer) variables
                     .get(CalendarEventId.EVENTCLICK));
         }
 
-        if (variables.containsKey(CalendarEventId.DATECLICK)) {
+        if (variables.containsKey(CalendarEventId.DATECLICK)
+                && isClientChangeAllowed()) {
             handleDateClick((String) variables.get(CalendarEventId.DATECLICK));
         }
 
-        if (variables.containsKey(CalendarEventId.WEEKCLICK)) {
+        if (variables.containsKey(CalendarEventId.WEEKCLICK)
+                && isClientChangeAllowed()) {
             handleWeekClick((String) variables.get(CalendarEventId.WEEKCLICK));
         }
 
@@ -578,7 +582,8 @@ public class Calendar extends AbstractComponent implements
             handleScroll(variables.get(VCalendar.ATTR_SCROLL).toString());
         }
 
-        if (variables.containsKey(CalendarEventId.EVENTMOVE) && !isReadOnly()) {
+        if (variables.containsKey(CalendarEventId.EVENTMOVE)
+                && isClientChangeAllowed()) {
             handleEventMove(variables.get(CalendarEventId.EVENTMOVE).toString());
         }
 
@@ -586,10 +591,18 @@ public class Calendar extends AbstractComponent implements
             handleNavigation((Boolean) variables.get("navigation"));
         }
 
-        if (variables.containsKey(CalendarEventId.EVENTRESIZE) && !isReadOnly()) {
+        if (variables.containsKey(CalendarEventId.EVENTRESIZE)
+                && isClientChangeAllowed()) {
             handleEventResize((String) variables
                     .get(CalendarEventId.EVENTRESIZE));
         }
+    }
+
+    /**
+     * @return true if the client is allowed to send changes to server
+     */
+    protected boolean isClientChangeAllowed() {
+        return !isReadOnly() && isEnabled();
     }
 
     /*
