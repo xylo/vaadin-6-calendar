@@ -167,6 +167,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         } else {
             this.width = (width == -1) ? width : width
                     - timebar.getOffsetWidth();
+
+            if (isVerticalScrollable()) {
+                this.width = this.width - Util.getNativeScrollbarSize();
+            }
             updateCellWidths();
         }
     }
