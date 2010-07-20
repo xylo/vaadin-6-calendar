@@ -144,7 +144,30 @@ public class Calendar extends AbstractComponent implements
     /** Map from event ids to event handlers */
     private Map<String, ComponentEventListener> handlers;
 
+    /**
+     * Drop Handler for Vaadin DD. By default null.
+     */
     private DropHandler dropHandler;
+
+    /**
+     * First day to show for a week
+     */
+    private int firstDay = 1;
+
+    /**
+     * Last day to show for a week
+     */
+    private int lastDay = 7;
+
+    /**
+     * First hour to show for a day
+     */
+    private int firstHour = 0;
+
+    /**
+     * Last hour to show for a day
+     */
+    private int lastHour = 23;
 
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
@@ -369,24 +392,22 @@ public class Calendar extends AbstractComponent implements
         return currentCalendar;
     }
 
-    /**
-     * Returns status of weekend days visibility. Default is false.
-     * 
-     * @return True when weekends are hidden. False when not.
-     */
-    public boolean isHideWeekends() {
-        return hideWeekends;
+    public void setVisibleDaysOfWeek(int firstDay, int lastDay) {
+        if (this.firstDay != firstDay || this.lastDay != lastDay) {
+            this.firstDay = firstDay;
+            this.lastDay = lastDay;
+            requestRepaint();
+        }
     }
 
-    /**
-     * Sets the weekend visibility.
-     * 
-     * @param hideWeekends
-     *            True when weekends should be hidden. False when not.
-     */
-    public void setHideWeekends(boolean hideWeekends) {
-        if (hideWeekends != this.hideWeekends) {
-            this.hideWeekends = hideWeekends;
+    public int[] getVisibleDaysOfWeek() {
+        return new int[] { firstDay, lastDay };
+    }
+
+    public void setVisibleHoursOfDay(int firstHour, int lastHour) {
+        if (this.firstHour != firstHour || this.lastHour != lastHour) {
+            this.firstHour = firstHour;
+            this.lastHour = lastHour;
             requestRepaint();
         }
     }
@@ -465,7 +486,14 @@ public class Calendar extends AbstractComponent implements
         target.addAttribute(VCalendar.ATTR_FDOW, currentCalendar
                 .getFirstDayOfWeek());
         target.addAttribute(VCalendar.ATTR_READONLY, isReadOnly());
-        target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
+        // target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
+
+        target.addAttribute(VCalendar.ATTR_FIRSTDAYOFWEEK, firstDay);
+        target.addAttribute(VCalendar.ATTR_LASTDAYOFWEEK, lastDay);
+
+        target.addAttribute(VCalendar.ATTR_FIRSTHOUROFDAY, firstHour);
+        target.addAttribute(VCalendar.ATTR_LASTHOUROFDAY, lastHour);
+
         // Use same timezone in all dates this component handles.
         // Show "now"-marker in browser within given timezone.
         Date now = new Date();
@@ -488,6 +516,10 @@ public class Calendar extends AbstractComponent implements
         // approach was taken because gwt doesn't
         // support date localization properly.
         while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
+            // int dow = currentCalendar.get(java.util.Calendar.DAY_OF_WEEK) -
+            // 1;
+            //
+            // if (dow >= firstDay && dow <= lastDay) {
             target.startTag("day");
             target.addAttribute(VCalendar.ATTR_DATE, df_date
                     .format(currentCalendar.getTime()));
@@ -499,6 +531,7 @@ public class Calendar extends AbstractComponent implements
                     .get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
             currentCalendar.add(java.util.Calendar.DATE, 1);
+            // }
         }
 
         target.endTag("days");

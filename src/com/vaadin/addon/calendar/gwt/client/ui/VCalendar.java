@@ -51,7 +51,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     public static final String ATTR_NOW = "now";
     public static final String ATTR_READONLY = "readonly";
     public static final String ATTR_DISABLED = "disabled";
-    public static final String ATTR_HIDE_WEEKENDS = "hideWeekends";
+    // public static final String ATTR_HIDE_WEEKENDS = "hideWeekends";
     public static final String ATTR_MONTH_NAMES = "mNames";
     public static final String ATTR_DAY_NAMES = "dNames";
     public static final String ATTR_FORMAT24H = "format24h";
@@ -62,9 +62,13 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;
     public static final long WEEKINMILLIS = 7 * DAYINMILLIS;
+    public static final String ATTR_FIRSTDAYOFWEEK = "firstDay";
+    public static final String ATTR_LASTDAYOFWEEK = "lastDay";
+    public static final String ATTR_FIRSTHOUROFDAY = "firstHour";
+    public static final String ATTR_LASTHOUROFDAY = "lastHour";
 
     private String PID;
-    private boolean hideWeekends;
+    // private boolean hideWeekends;
     private String[] monthNames;
     private String[] dayNames;
     private boolean format;
@@ -97,6 +101,10 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
     private boolean isWidthUndefined = false;
     private CalendarDropHandler dropHandler;
+    private int firstDay;
+    private int lastDay;
+    private int firstHour;
+    private int lastHour;
 
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
@@ -130,7 +138,13 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         format = uidl.getBooleanAttribute(ATTR_FORMAT24H);
         dayNames = uidl.getStringArrayAttribute(ATTR_DAY_NAMES);
         monthNames = uidl.getStringArrayAttribute(ATTR_MONTH_NAMES);
-        hideWeekends = uidl.getBooleanAttribute(ATTR_HIDE_WEEKENDS);
+        // hideWeekends = uidl.getBooleanAttribute(ATTR_HIDE_WEEKENDS);
+
+        firstDay = uidl.getIntAttribute(ATTR_FIRSTDAYOFWEEK);
+        lastDay = uidl.getIntAttribute(ATTR_LASTDAYOFWEEK);
+
+        firstHour = uidl.getIntAttribute(ATTR_FIRSTHOUROFDAY);
+        lastHour = uidl.getIntAttribute(ATTR_LASTHOUROFDAY);
 
         disabled = ((uidl.hasAttribute(ATTR_READONLY) && uidl
                 .getBooleanAttribute(ATTR_READONLY)) || (uidl
@@ -182,18 +196,41 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         Date today = dateformat_datetime.parse(uidl
                 .getStringAttribute(ATTR_NOW));
 
-        if (hideWeekends) {
-            nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
-                    dayNames[3], dayNames[4], dayNames[5] });
-        } else if (firstDayOfWeek == 2) {
-            nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
-                    dayNames[3], dayNames[4], dayNames[5], dayNames[6],
-                    dayNames[0] });
+        int daysPerWeek = lastDay - firstDay + 1;
+
+        String[] realDayNames = new String[daysPerWeek];
+
+        int j = 0;
+
+        if (firstDayOfWeek == 2) {
+            for (int i = firstDay; i < lastDay + 1; i++) {
+                if (i == 7) {
+                    realDayNames[j++] = dayNames[0];
+                } else {
+                    realDayNames[j++] = dayNames[i];
+                }
+            }
         } else {
-            nameToolbar.setDayNames(new String[] { dayNames[0], dayNames[1],
-                    dayNames[2], dayNames[3], dayNames[4], dayNames[5],
-                    dayNames[6] });
+            for (int i = firstDay - 1; i < lastDay; i++) {
+                realDayNames[j++] = dayNames[i];
+            }
+
         }
+
+        nameToolbar.setDayNames(realDayNames);
+
+        // if (hideWeekends) {
+        // nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
+        // dayNames[3], dayNames[4], dayNames[5] });
+        // } else if (firstDayOfWeek == 2) {
+        // nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
+        // dayNames[3], dayNames[4], dayNames[5], dayNames[6],
+        // dayNames[0] });
+        // } else {
+        // nameToolbar.setDayNames(new String[] { dayNames[0], dayNames[1],
+        // dayNames[2], dayNames[3], dayNames[4], dayNames[5],
+        // dayNames[6] });
+        // }
 
         weeklyLongEvents = null;
         weekGrid = null;
@@ -515,11 +552,10 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
     @SuppressWarnings("deprecation")
     public void updateWeekGrid(int daysCount, UIDL daysUidl, Date today) {
-        if (format != weekGrid.isFormat24h()) {
-            // Time format has changed, update time bar.
-            weekGrid.setFormat24h(format);
-            weekGrid.getTimeBar().updateTimeBar(format);
-        }
+        weekGrid.setFirstHour(firstHour);
+        weekGrid.setLastHour(lastHour);
+        weekGrid.getTimeBar().updateTimeBar(format);
+
         dayToolbar.clear();
         dayToolbar.addBackButton();
         dayToolbar.setVerticalSized(isHeightUndefined);
@@ -533,7 +569,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
                     .getStringAttribute(ATTR_FDATE);
             Date d = dateformat_date.parse(date);
             int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
-            if (hideWeekends && (dayOfWeek == 1 || dayOfWeek == 7)) {
+            if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
                 continue;
             }
             boolean isToday = false;
@@ -555,21 +591,32 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
     @SuppressWarnings("deprecation")
     private void updateMonthGrid(int daysCount, UIDL daysUidl, Date today) {
+        int columns = lastDay - firstDay + 1;
         rows = (int) Math.ceil(daysCount / (double) 7);
-        int columns = (hideWeekends == true ? 5 : 7);
+
         monthGrid = new MonthGrid(this, rows, columns);
         monthGrid.setDisabled(isDisabled());
         monthGrid.setHeightPX(intHeight);
         monthGrid.setWidthPX(intWidth);
         weekToolbar.removeAllRows();
         int pos = 0;
+        boolean monthNameDrawn = true;
+
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
             String date = dayUidl.getStringAttribute(ATTR_DATE);
             Date d = dateformat_date.parse(date);
             int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
             int week = dayUidl.getIntAttribute(ATTR_WEEK);
-            if (hideWeekends && (dayOfWeek == 1 || dayOfWeek == 7)) {
+
+            int dayOfMonth = d.getDate();
+
+            // reset at start of each month
+            if (dayOfMonth == 1) {
+                monthNameDrawn = false;
+            }
+
+            if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
                 continue;
             }
             int y = (pos / columns);
@@ -581,14 +628,16 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
             SimpleDayCell cell = new SimpleDayCell(this, y, x);
             cell.setMonthGrid(monthGrid);
             cell.setDate(d);
-            int dayOfMonth = d.getDate();
-            if (dayOfMonth == 1
-                    || (hideWeekends && x == 0 && (dayOfMonth == 2 || dayOfMonth == 3))) {
+
+            if (dayOfMonth >= 1 && !monthNameDrawn) {
                 cell.setMonthNameVisible(true);
+                monthNameDrawn = true;
             }
+
             if (today.getDate() == dayOfMonth && today.getYear() == d.getYear()
                     && today.getMonth() == d.getMonth()) {
                 cell.setToday(true);
+
             }
             monthGrid.setWidget(y, x, cell);
             pos++;

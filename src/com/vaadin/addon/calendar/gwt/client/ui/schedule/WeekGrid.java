@@ -64,6 +64,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private boolean eventResizeEnabled = true;
     private DateCell dateCellOfToday;
     private int[] cellWidths;
+    private int firstHour;
+    private int lastHour;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
@@ -311,6 +313,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     public int getPixelLengthFor(int startFromMinutes, int durationInMinutes) {
         int pixelLength = 0;
         int currentSlot = 0;
+
+        int firstHourInMinutes = firstHour * 60;
+
+        if (firstHourInMinutes > startFromMinutes) {
+            durationInMinutes -= firstHourInMinutes - startFromMinutes;
+            startFromMinutes = 0;
+        }
+
         // calculate full slots to event
         int slotsTillEvent = startFromMinutes / slotInMinutes;
         int startOverFlowTime = slotInMinutes
@@ -360,6 +370,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     public int getPixelTopFor(int startFromMinutes) {
         int pixelsToTop = 0;
         int slotIndex = 0;
+
+        int firstHourInMinutes = firstHour * 60;
+
+        if (firstHourInMinutes > startFromMinutes) {
+            startFromMinutes = 0;
+        } else {
+            startFromMinutes -= firstHourInMinutes;
+        }
 
         // calculate full slots to event
         int slotsTillEvent = startFromMinutes / slotInMinutes;
@@ -460,14 +478,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         return disabled;
     }
 
-    public boolean isFormat24h() {
-        return format24h;
-    }
-
-    public void setFormat24h(boolean format24h) {
-        this.format24h = format24h;
-    }
-
     public Timebar getTimeBar() {
         return timebar;
     }
@@ -528,6 +538,24 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         return content.getWidgetCount() - 1;
     }
 
+    public void setFirstHour(int firstHour) {
+        this.firstHour = firstHour;
+        timebar.setFirstHour(firstHour);
+    }
+
+    public void setLastHour(int lastHour) {
+        this.lastHour = lastHour;
+        timebar.setLastHour(lastHour);
+    }
+
+    public int getFirstHour() {
+        return firstHour;
+    }
+
+    public int getLastHour() {
+        return lastHour;
+    }
+
     public static class Timebar extends HTML {
 
         private int height;
@@ -536,8 +564,21 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         private int[] slotCellHeights;
 
+        private int firstHour;
+
+        private int lastHour;
+
         public Timebar(boolean format24h) {
             createTimeBar(format24h);
+        }
+
+        public void setLastHour(int lastHour) {
+            this.lastHour = lastHour;
+        }
+
+        public void setFirstHour(int firstHour) {
+            this.firstHour = firstHour;
+
         }
 
         public void setCellHeights(int[] cellHeights) {
@@ -555,8 +596,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             DateTimeService dts = new DateTimeService();
 
+            int numberOfHours = lastHour - firstHour + 1;
+
             if (format24h) {
-                for (int i = 1; i < 24; i++) {
+                for (int i = 1; i < numberOfHours; i++) {
                     e = DOM.createDiv();
                     setStyleName(e, "v-calendar-time");
                     String delimiter = dts.getClockDelimeter();
@@ -567,17 +610,27 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 // FIXME Use dts.getAmPmStrings(); and make sure that
                 // DateTimeService has a some Locale set.
                 String[] ampm = new String[] { "AM", "PM" };
-                for (int i = 1; i < 13; i++) {
-                    e = DOM.createDiv();
-                    setStyleName(e, "v-calendar-time");
-                    e.setInnerHTML("<span>" + i + "</span>" + " " + ampm[0]);
-                    getElement().appendChild(e);
+
+                if (firstHour < 12) {
+                    for (int i = firstHour + 1; i < 13; i++) {
+                        e = DOM.createDiv();
+                        setStyleName(e, "v-calendar-time");
+                        e
+                                .setInnerHTML("<span>" + i + "</span>" + " "
+                                        + ampm[0]);
+                        getElement().appendChild(e);
+                    }
                 }
-                for (int i = 1; i < 12; i++) {
-                    e = DOM.createDiv();
-                    setStyleName(e, "v-calendar-time");
-                    e.setInnerHTML("<span>" + i + "</span>" + " " + ampm[1]);
-                    getElement().appendChild(e);
+
+                if (lastHour > 11) {
+                    for (int i = 1; i < lastHour - 11; i++) {
+                        e = DOM.createDiv();
+                        setStyleName(e, "v-calendar-time");
+                        e
+                                .setInnerHTML("<span>" + i + "</span>" + " "
+                                        + ampm[1]);
+                        getElement().appendChild(e);
+                    }
                 }
             }
         }
@@ -663,6 +716,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         private Date today;
         private Element todaybar;
         private List<HandlerRegistration> handlers;
+        private int numberOfSlots;
+        private int firstHour;
+        private int lastHour;
 
         // private double slotHeight;
 
@@ -676,10 +732,15 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             handlers = new LinkedList<HandlerRegistration>();
 
-            slotElements = new Element[48];
-            slotElementHeights = new int[48];
+            // 2 slots / hour
+            firstHour = weekgrid.getFirstHour();
+            lastHour = weekgrid.getLastHour();
+            numberOfSlots = (lastHour - firstHour + 1) * 2;
 
-            for (int i = 0; i < 48; i++) {
+            slotElements = new Element[numberOfSlots];
+            slotElementHeights = new int[numberOfSlots];
+
+            for (int i = 0; i < numberOfSlots; i++) {
                 Element e = DOM.createDiv();
                 if (i % 2 == 0) {
                     setStyleName(e, "v-slot-even");
@@ -857,7 +918,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         private void recalculateCellHeights() {
-            startingSlotHeight = height / 48;
+            startingSlotHeight = height / numberOfSlots;
             //
             // // account for borders
             // int border = getSlotBorder();
@@ -1167,8 +1228,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
                 clearSelectionRange();
 
-                int startMinutes = slotStart * 30;
-                int endMinutes = (slotEnd + 1) * 30;
+                int startMinutes = firstHour + slotStart * 30;
+                int endMinutes = (firstHour + slotEnd + 1) * 30;
                 VCalendar schedule = weekgrid.getCalendar();
                 Date currentDate = getDate();
                 String yr = (currentDate.getYear() + 1900) + "-"
