@@ -498,7 +498,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         if (width == -1) {
             Widget firstWidget = content.getWidget(1);
-            cellWidth = firstWidget.getElement().getOffsetWidth();
+            cellWidth = firstWidget.getElement().getOffsetWidth() - 1;
         } else {
             cellWidth = getInternalWidth() / count;
         }

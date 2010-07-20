@@ -28,6 +28,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     private VCalendar calendar;
 
+    private boolean undefinedWidth;
+
     public WeeklyLongEvents(VCalendar calendar) {
         setStylePrimaryName("v-calendar-weekly-longevents");
         this.calendar = calendar;
@@ -45,6 +47,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
         if (getWidgetCount() == 0) {
             return;
         }
+        undefinedWidth = (width == -1);
+
         updateCellWidths();
     }
 
@@ -142,11 +146,25 @@ public class WeeklyLongEvents extends HorizontalPanel {
         if (cells <= 0) {
             return;
         }
-        int[] cellWidths = calendar.getWeekGrid().getDateCellWidths();
+
+        int cellWidth = -1;
+
+        // if width is undefined, use the width of the first cell
+        // otherwise use distributed sizes
+        if (undefinedWidth) {
+            cellWidth = calendar.getWeekGrid().getDateCellWidth();
+        }
 
         for (int i = 0; i < cells; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
-            dc.setWidth(cellWidths[i] + "px");
+
+            if (undefinedWidth) {
+                dc.setWidth(cellWidth + "px");
+
+            } else {
+                dc.setWidth(calendar.getWeekGrid().getDateCellWidths()[i]
+                        + "px");
+            }
         }
     }
 
