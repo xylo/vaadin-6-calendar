@@ -47,7 +47,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
         if (getWidgetCount() == 0) {
             return;
         }
-        undefinedWidth = (width == -1);
+        undefinedWidth = (width < 0);
 
         updateCellWidths();
     }
@@ -152,7 +152,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
         // if width is undefined, use the width of the first cell
         // otherwise use distributed sizes
         if (undefinedWidth) {
-            cellWidth = calendar.getWeekGrid().getDateCellWidth();
+            cellWidth = calendar.getWeekGrid().getDateCellWidth()
+                    - calendar.getWeekGrid().getDateSlotBorder();
         }
 
         for (int i = 0; i < cells; i++) {
