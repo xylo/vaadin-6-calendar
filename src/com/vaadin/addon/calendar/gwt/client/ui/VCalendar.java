@@ -254,22 +254,19 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         monthGrid = null;
         Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
 
-        String[] realDayNames = new String[daysCount];
+        String[] realDayNames = new String[dayNames.length];
 
         int j = 0;
 
         int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
 
         if (firstDayOfWeek == 2) {
-            for (int i = firstDay; i < lastDay + 1; i++) {
-                if (i == 7) {
-                    realDayNames[j++] = dayNames[0];
-                } else {
-                    realDayNames[j++] = dayNames[i];
-                }
+            for (int i = 1; i < dayNames.length; i++) {
+                realDayNames[j++] = dayNames[i];
             }
+            realDayNames[j] = dayNames[0];
         } else {
-            for (int i = firstDay - 1; i < lastDay; i++) {
+            for (int i = 0; i < dayNames.length; i++) {
                 realDayNames[j++] = dayNames[i];
             }
 
