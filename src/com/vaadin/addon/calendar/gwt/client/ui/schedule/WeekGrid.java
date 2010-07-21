@@ -1304,16 +1304,20 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 NodeList<Node> nodes = main.getChildNodes();
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Element c = (Element) nodes.getItem(i);
-                    int elemStart = c.getOffsetTop();
-                    int elemStop = elemStart + getSlotHeight();
-                    if (elemStart >= fromY && elemStart <= toY) {
-                        c.addClassName("v-daterange");
-                    } else if (elemStop >= fromY && elemStop <= toY) {
-                        c.addClassName("v-daterange");
-                    } else if (elemStop >= fromY && elemStart <= toY) {
-                        c.addClassName("v-daterange");
-                    } else {
-                        c.removeClassName("v-daterange");
+
+                    if (todaybar != c) {
+
+                        int elemStart = c.getOffsetTop();
+                        int elemStop = elemStart + getSlotHeight();
+                        if (elemStart >= fromY && elemStart <= toY) {
+                            c.addClassName("v-daterange");
+                        } else if (elemStop >= fromY && elemStop <= toY) {
+                            c.addClassName("v-daterange");
+                        } else if (elemStop >= fromY && elemStart <= toY) {
+                            c.addClassName("v-daterange");
+                        } else {
+                            c.removeClassName("v-daterange");
+                        }
                     }
                 }
             }
