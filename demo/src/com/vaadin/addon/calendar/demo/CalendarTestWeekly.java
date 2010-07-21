@@ -30,7 +30,7 @@ public class CalendarTestWeekly extends Application implements
     GregorianCalendar calendar = new GregorianCalendar();
     private Calendar calendarComponent;
     private Date selectedDate = null;
-    private Label label = new Label("");
+    private final Label label = new Label("");
 
     @Override
     public void init() {
@@ -106,8 +106,7 @@ public class CalendarTestWeekly extends Application implements
             private static final long serialVersionUID = -4393494935292771814L;
 
             public void menuSelected(MenuItem selectedItem) {
-                calendarComponent.setHideWeekends(false);
-
+                calendarComponent.setVisibleDaysOfWeek(1, 5);
             }
 
         });
@@ -115,7 +114,7 @@ public class CalendarTestWeekly extends Application implements
             private static final long serialVersionUID = -2176043834276176494L;
 
             public void menuSelected(MenuItem selectedItem) {
-                calendarComponent.setHideWeekends(true);
+                calendarComponent.setVisibleDaysOfWeek(1, 5);
             }
 
         });

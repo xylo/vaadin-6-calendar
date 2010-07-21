@@ -95,7 +95,7 @@ public class Calendar extends AbstractComponent implements
     }
 
     /** Defines weekend days visibility. */
-    private boolean hideWeekends = false;
+    private final boolean hideWeekends = false;
 
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
@@ -142,7 +142,7 @@ public class Calendar extends AbstractComponent implements
             .getDateInstance();
 
     /** Map from event ids to event handlers */
-    private Map<String, ComponentEventListener> handlers;
+    private final Map<String, ComponentEventListener> handlers;
 
     /**
      * Drop Handler for Vaadin DD. By default null.
@@ -392,7 +392,31 @@ public class Calendar extends AbstractComponent implements
         return currentCalendar;
     }
 
+    /**
+     * <p>
+     * This method restricts the weekdays that are shown. This affects both the
+     * monthly and the weekly view. The general contract is that <b>firstDay <
+     * lastDay</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param firstDay
+     *            the first day of the week to show, between 1 and 7
+     * @param lastDay
+     *            the first day of the week to show, between 1 and 7
+     */
     public void setVisibleDaysOfWeek(int firstDay, int lastDay) {
+        if (firstDay >= lastDay || firstDay < 1 || lastDay > 7) {
+            throw new IllegalArgumentException(
+                    "Illegal values for visible days of the week: first day "
+                            + firstDay + ", last day " + lastDay);
+        }
+
         if (this.firstDay != firstDay || this.lastDay != lastDay) {
             this.firstDay = firstDay;
             this.lastDay = lastDay;
@@ -404,7 +428,29 @@ public class Calendar extends AbstractComponent implements
         return new int[] { firstDay, lastDay };
     }
 
+    /**
+     * <p>
+     * This method restricts the hours that are shown per day. This affects the
+     * weekly view. The general contract is that <b>firstHour < lastHour</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param firstHour
+     *            the first hour of the day to show, between 0 and 23
+     * @param lastHour
+     *            the first hour of the day to show, between 0 and 23
+     */
     public void setVisibleHoursOfDay(int firstHour, int lastHour) {
+        if (firstHour >= lastHour || firstHour < 0 || lastHour > 23) {
+            throw new IllegalArgumentException(
+                    "Illegal values for visible hours of the day: first hour "
+                            + firstHour + ", last hour " + lastHour);
+        }
         if (this.firstHour != firstHour || this.lastHour != lastHour) {
             this.firstHour = firstHour;
             this.lastHour = lastHour;
@@ -516,22 +562,18 @@ public class Calendar extends AbstractComponent implements
         // approach was taken because gwt doesn't
         // support date localization properly.
         while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
-            // int dow = currentCalendar.get(java.util.Calendar.DAY_OF_WEEK) -
-            // 1;
-            //
-            // if (dow >= firstDay && dow <= lastDay) {
+            int dow = getDowByLocale(currentCalendar);
+
             target.startTag("day");
             target.addAttribute(VCalendar.ATTR_DATE, df_date
                     .format(currentCalendar.getTime()));
             target.addAttribute(VCalendar.ATTR_FDATE, weeklyCaptionFormat
                     .format(currentCalendar.getTime()));
-            target.addAttribute(VCalendar.ATTR_DOW, currentCalendar
-                    .get(java.util.Calendar.DAY_OF_WEEK));
+            target.addAttribute(VCalendar.ATTR_DOW, dow);
             target.addAttribute(VCalendar.ATTR_WEEK, currentCalendar
                     .get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
             currentCalendar.add(java.util.Calendar.DATE, 1);
-            // }
         }
 
         target.endTag("days");
@@ -553,6 +595,23 @@ public class Calendar extends AbstractComponent implements
             dropHandler.getAcceptCriterion().paint(target);
         }
         super.paintContent(target);
+    }
+
+    /**
+     * Get the day of week by the given calendar and its locale
+     * 
+     * @param c
+     * @return
+     */
+    private static int getDowByLocale(java.util.Calendar c) {
+        int fow = c.get(java.util.Calendar.DAY_OF_WEEK);
+
+        // monday first
+        if (c.getFirstDayOfWeek() == java.util.Calendar.MONDAY) {
+            fow = (fow == java.util.Calendar.SUNDAY) ? 7 : fow - 1;
+        }
+
+        return fow;
     }
 
     /**

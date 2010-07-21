@@ -309,6 +309,7 @@ div.v-calendar-event-all-day {
 	background: #5a6c86;
 	opacity: .6;
 	filter: alpha(opacity = 60);
+	z-index: 2;
 }
 
 .v-calendar-event-resizetop {

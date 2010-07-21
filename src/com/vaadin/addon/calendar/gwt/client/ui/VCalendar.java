@@ -72,27 +72,27 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     private String[] monthNames;
     private String[] dayNames;
     private boolean format;
-    private DockPanel outer = new DockPanel();
+    private final DockPanel outer = new DockPanel();
     private int rows;
     private ApplicationConnection client;
     private String height = null;
     private String width = null;
-    private SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
-    private DayToolbar dayToolbar = new DayToolbar(this);
-    private SimpleWeekToolbar weekToolbar;
+    private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
+    private final DayToolbar dayToolbar = new DayToolbar(this);
+    private final SimpleWeekToolbar weekToolbar;
     private WeeklyLongEvents weeklyLongEvents;
     private MonthGrid monthGrid;
     private WeekGrid weekGrid;
     private int intWidth = 0;
     private int intHeight = 0;
 
-    private DateTimeFormat dateformat_datetime = DateTimeFormat
+    private final DateTimeFormat dateformat_datetime = DateTimeFormat
             .getFormat("yyyy-MM-dd HH:mm:ss");
-    private DateTimeFormat dateformat_date = DateTimeFormat
+    private final DateTimeFormat dateformat_date = DateTimeFormat
             .getFormat("yyyy-MM-dd");
-    private DateTimeFormat time12format_date = DateTimeFormat
+    private final DateTimeFormat time12format_date = DateTimeFormat
             .getFormat("h:mm a");
-    private DateTimeFormat time24format_date = DateTimeFormat
+    private final DateTimeFormat time24format_date = DateTimeFormat
             .getFormat("HH:mm");
 
     private boolean disabled = false;
@@ -249,15 +249,37 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         int scroll = uidl.getIntVariable(ATTR_SCROLL);
         Date today = dateformat_datetime.parse(uidl
                 .getStringAttribute(ATTR_NOW));
+        int daysCount = daysUidl.getChildCount();
 
         monthGrid = null;
         Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
+
+        String[] realDayNames = new String[daysCount];
+
+        int j = 0;
+
+        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
+
+        if (firstDayOfWeek == 2) {
+            for (int i = firstDay; i < lastDay + 1; i++) {
+                if (i == 7) {
+                    realDayNames[j++] = dayNames[0];
+                } else {
+                    realDayNames[j++] = dayNames[i];
+                }
+            }
+        } else {
+            for (int i = firstDay - 1; i < lastDay; i++) {
+                realDayNames[j++] = dayNames[i];
+            }
+
+        }
 
         weeklyLongEvents = new WeeklyLongEvents(this);
         if (weekGrid == null) {
             weekGrid = new WeekGrid(this, format);
         }
-        updateWeekGrid(daysUidl.getChildCount(), daysUidl, today);
+        updateWeekGrid(daysCount, daysUidl, today, realDayNames);
         updateEventsToWeekGrid(sortEventsByDuration(events));
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
@@ -551,7 +573,8 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     }
 
     @SuppressWarnings("deprecation")
-    public void updateWeekGrid(int daysCount, UIDL daysUidl, Date today) {
+    public void updateWeekGrid(int daysCount, UIDL daysUidl, Date today,
+            String[] realDayNames) {
         weekGrid.setFirstHour(firstHour);
         weekGrid.setLastHour(lastHour);
         weekGrid.getTimeBar().updateTimeBar(format);
@@ -562,6 +585,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         dayToolbar.setHorizontalSized(isWidthUndefined);
         weekGrid.clearDates();
         weekGrid.setDisabled(isDisabled());
+
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
             String date = dayUidl.getStringAttribute(ATTR_DATE);
@@ -578,7 +602,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
                     && today.getMonth() == d.getMonth()) {
                 isToday = true;
             }
-            dayToolbar.add(dayNames[dayOfWeek - 1], date,
+            dayToolbar.add(realDayNames[dayOfWeek - 1], date,
                     localized_date_format, isToday ? "today" : null);
             weeklyLongEvents.addDate(d);
             weekGrid.addDate(d);

@@ -69,7 +69,7 @@ public class CalendarTest extends Application {
 
     private Date currentMonthsFirstDate;
 
-    private Label captionLabel = new Label("");
+    private final Label captionLabel = new Label("");
 
     private Button monthButton;
 
@@ -117,6 +117,14 @@ public class CalendarTest extends Application {
 
     private CheckBox disabledButton;
 
+    private Integer firstHour;
+
+    private Integer lastHour;
+
+    private Integer firstDay;
+
+    private Integer lastDay;
+
     @SuppressWarnings("serial")
     @Override
     public void init() {
@@ -154,6 +162,22 @@ public class CalendarTest extends Application {
 
         if (parameters.containsKey("height")) {
             calendarHeight = parameters.get("height")[0];
+        }
+
+        if (parameters.containsKey("firstDay")) {
+            firstDay = Integer.parseInt(parameters.get("firstDay")[0]);
+        }
+
+        if (parameters.containsKey("lastDay")) {
+            lastDay = Integer.parseInt(parameters.get("lastDay")[0]);
+        }
+
+        if (parameters.containsKey("firstHour")) {
+            firstHour = Integer.parseInt(parameters.get("firstHour")[0]);
+        }
+
+        if (parameters.containsKey("lastHour")) {
+            lastHour = Integer.parseInt(parameters.get("lastHour")[0]);
         }
     }
 
@@ -350,8 +374,11 @@ public class CalendarTest extends Application {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                calendarComponent.setHideWeekends((Boolean) event.getButton()
-                        .getValue());
+                if (event.getButton().booleanValue()) {
+                    calendarComponent.setVisibleDaysOfWeek(1, 5);
+                } else {
+                    calendarComponent.setVisibleDaysOfWeek(1, 7);
+                }
             }
         });
     }
@@ -401,7 +428,6 @@ public class CalendarTest extends Application {
         dataSource = new BasicEventProvider();
 
         calendarComponent = new Calendar(dataSource);
-        calendarComponent.setHideWeekends(false);
         calendarComponent.setLocale(getLocale());
         calendarComponent.setImmediate(true);
 
@@ -414,6 +440,14 @@ public class CalendarTest extends Application {
             }
         } else {
             calendarComponent.setSizeFull();
+        }
+
+        if (firstHour != null && lastHour != null) {
+            calendarComponent.setVisibleHoursOfDay(firstHour, lastHour);
+        }
+
+        if (firstDay != null && lastDay != null) {
+            calendarComponent.setVisibleDaysOfWeek(firstDay, lastDay);
         }
 
         Date today = getToday();
