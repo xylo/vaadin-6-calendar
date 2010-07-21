@@ -41,11 +41,11 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private final VCalendar calendar;
     private Date date;
     private int intHeight;
-    private HTML bottomspacer;
-    private Label caption;
-    private CalendarEvent[] events = new CalendarEvent[10];
-    private int cell;
-    private int row;
+    private final HTML bottomspacer;
+    private final Label caption;
+    private final CalendarEvent[] events = new CalendarEvent[10];
+    private final int cell;
+    private final int row;
     private boolean monthNameVisible;
     private HandlerRegistration mouseUpRegistration;
     private HandlerRegistration mouseDownRegistration;
@@ -68,7 +68,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private Widget clickedWidget;
     private HandlerRegistration bottomSpacerMouseDownHandler;
     private boolean scrollable = false;
-    private boolean hasEventMoveListeners;
+    private final boolean hasEventMoveListeners;
     private boolean eventCanceled;
     private MonthGrid monthGrid;
     private HandlerRegistration keyDownHandler;
@@ -420,7 +420,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         } else if (w == this && !scrollable) {
             MonthGrid grid = getMonthGrid();
-            if (!grid.isDisabled()) {
+            if (!grid.isDisabled() && grid.isRangeSelectAllowed()) {
                 grid.setSelectionStart(this);
                 grid.setSelectionEnd(this);
             }

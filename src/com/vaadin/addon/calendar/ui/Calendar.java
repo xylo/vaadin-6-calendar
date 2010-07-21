@@ -740,7 +740,6 @@ public class Calendar extends AbstractComponent implements
             } catch (ParseException e) {
                 // NOP
             }
-            requestRepaint();
         } else if (value != null && value.length() > 12 && value.contains(":")) {
             String[] dates = value.split(":");
             if (dates.length == 3) {
@@ -799,7 +798,7 @@ public class Calendar extends AbstractComponent implements
                     int week = Integer.parseInt(splitted[1]);
                     fireWeekClick(week, yr);
                 } catch (NumberFormatException e) {
-
+                    // NOP
                 }
             }
         }
@@ -875,6 +874,9 @@ public class Calendar extends AbstractComponent implements
 
     protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
         fireEvent(new RangeSelectEvent(this, from, to, monthlyMode));
+
+        // make sure the result of the range select event is painted back
+        requestRepaint();
     }
 
     protected void fireEventResize(int index, Date startTime, Date endTime) {

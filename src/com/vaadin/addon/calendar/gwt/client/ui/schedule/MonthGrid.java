@@ -16,10 +16,11 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
-    private VCalendar calendar;
+    private final VCalendar calendar;
     private boolean rangeSelectDisabled;
     private boolean disabled;
-    private HandlerRegistration keyDownHandler;
+    private final HandlerRegistration keyDownHandler;
+    private final boolean rangeSelectAllowed;
 
     public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
@@ -29,6 +30,9 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         setStylePrimaryName("v-calendar-month");
 
         keyDownHandler = addKeyDownHandler(this);
+
+        rangeSelectAllowed = parent.getClient().hasEventListeners(parent,
+                CalendarEventId.RANGESELECT);
     }
 
     @Override
@@ -216,5 +220,9 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
 
         return -1;
+    }
+
+    public boolean isRangeSelectAllowed() {
+        return rangeSelectAllowed;
     }
 }

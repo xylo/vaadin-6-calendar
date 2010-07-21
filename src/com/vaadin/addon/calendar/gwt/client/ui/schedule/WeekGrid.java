@@ -67,6 +67,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int[] cellWidths;
     private int firstHour;
     private int lastHour;
+    private final boolean rangeSelectAllowed;
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
@@ -84,6 +85,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         setWidget(wrapper);
 
         Event.addNativePreviewHandler(this);
+
+        rangeSelectAllowed = parent.getClient().hasEventListeners(parent,
+                CalendarEventId.RANGESELECT);
     }
 
     private void setVerticalScroll(boolean isVerticalScrollEnabled) {
@@ -557,6 +561,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     public int getLastHour() {
         return lastHour;
+    }
+
+    public boolean isRangeSelectAllowed() {
+        return rangeSelectAllowed;
     }
 
     public static class Timebar extends HTML {
@@ -1215,7 +1223,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public void onMouseDown(MouseDownEvent event) {
             Element e = Element.as(event.getNativeEvent().getEventTarget());
-            if (e.getClassName().contains("reserved") || isDisabled()) {
+            if (e.getClassName().contains("reserved") || isDisabled()
+                    || !weekgrid.isRangeSelectAllowed()) {
                 eventRangeStart = -1;
             } else {
                 eventRangeStart = event.getY();
