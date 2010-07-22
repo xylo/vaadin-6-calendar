@@ -59,8 +59,9 @@ public class SimpleDayToolbar extends HorizontalPanel {
     private void updateCellWidth() {
         int cellw = -1;
         int widgetCount = getWidgetCount();
-        if (widgetCount <= 0)
+        if (widgetCount <= 0) {
             return;
+        }
         if (isWidthUndefined()) {
             Widget widget = getWidget(0);
             String w = widget.getElement().getStyle().getWidth();
