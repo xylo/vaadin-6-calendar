@@ -164,9 +164,7 @@
 
 .v-calendar-event-month {
 	margin-bottom: 1px;
-	display: list-item;
-	list-style-position: inside;
-	list-style-type: none;
+
 	white-space: nowrap;
 }
 

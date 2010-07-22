@@ -515,7 +515,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         return false;
     }
 
-    /** Transforms uidl to list of ScheduleEvents */
+    /** Transforms uidl to list of CalendarEvents */
     protected ArrayList<CalendarEvent> getEvents(UIDL childUIDL) {
         int eventCount = childUIDL.getChildCount();
         ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
