@@ -24,6 +24,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.terminal.gwt.client.BrowserInfo;
+import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 import com.vaadin.terminal.gwt.client.ui.FocusableFlowPanel;
 
@@ -170,6 +172,14 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
     public void updateEvents(int slots, boolean clear) {
         int eventsAdded = 0;
+
+        // some IE magic
+        // events tend to stretch the day cell too wide, so we measure the day
+        // cell before the events, and then force the events to be the same
+        // width after adding them
+        boolean isIE = BrowserInfo.get().isIE6() || BrowserInfo.get().isIE7();
+        int widthBeforeEvents = getWidth();
+
         for (int i = 0; i < slots; i++) {
             CalendarEvent e = events[i];
             if (e == null) {
@@ -193,6 +203,18 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     }
                 } else {
                     add(createMonthEventLabel(e));
+                }
+            }
+        }
+
+        if (isIE) {
+            for (Widget widget : getChildren()) {
+                if (widget instanceof MonthEventLabel) {
+                    MonthEventLabel eventDiv = (MonthEventLabel) widget;
+                    int paddingBorder = Util.measureHorizontalPaddingAndBorder(
+                            eventDiv.getElement(), 4);
+                    int newWidth = widthBeforeEvents - paddingBorder;
+                    eventDiv.setWidth(newWidth + "px");
                 }
             }
         }

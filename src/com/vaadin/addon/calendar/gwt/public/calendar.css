@@ -96,7 +96,8 @@
 	opacity: 1;
 }
 
-/* Otherwise IE7 has uneven cell widths */
+/* Otherwise IE has uneven cell widths */
+.v-ie6 .v-calendar-month,
 .v-ie7 .v-calendar-month {
 	table-layout: fixed;
 }
@@ -164,7 +165,6 @@
 
 .v-calendar-event-month {
 	margin-bottom: 1px;
-
 	white-space: nowrap;
 }
 
