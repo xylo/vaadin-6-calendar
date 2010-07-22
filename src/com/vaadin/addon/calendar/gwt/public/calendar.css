@@ -331,6 +331,11 @@ div.v-calendar-event-all-day {
 }
 
 /** Sizes for undefined Calendar **/
+.v-ie7 .v-calendar-month-sizedwidth,
+.v-ie6 .v-calendar-month-sizedwidth {
+	table-layout: auto;
+}
+
 .v-calendar-month-sizedheight .v-calendar-month-day {
 	height: 100px;
 }
@@ -343,6 +348,12 @@ div.v-calendar-event-all-day {
 	width: 101px;
 }
 
+/* for IE */
+.v-ie6 .v-calendar-header-month-Hsized .v-calendar-header-day {
+	width: 104px;
+}
+
+/* for others */
 .v-calendar-header-month-Hsized td:first-child {
 	padding-left: 21px;
 }
