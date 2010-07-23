@@ -94,9 +94,6 @@ public class Calendar extends AbstractComponent implements
         Format12H(), Format24H();
     }
 
-    /** Defines weekend days visibility. */
-    private final boolean hideWeekends = false;
-
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
 
