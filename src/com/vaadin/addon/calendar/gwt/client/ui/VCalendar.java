@@ -25,6 +25,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarDropHandler;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarMonthDropHandler;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarWeekDropHandler;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.TooltipInfo;
 import com.vaadin.terminal.gwt.client.UIDL;
@@ -464,41 +465,22 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     public CalendarEvent[] sortEventsByDuration(Collection<CalendarEvent> events) {
         CalendarEvent[] sorted = events
                 .toArray(new CalendarEvent[events.size()]);
-        Arrays.sort(sorted, new Comparator<CalendarEvent>() {
 
-            public int compare(CalendarEvent o1, CalendarEvent o2) {
-                if (o1.isAllDay() != o2.isAllDay()) {
-                    if (o2.isAllDay()) {
-                        return 1;
-                    }
-                    return -1;
-                }
+        /*
+         * this is required because of
+         * https://bugs.webkit.org/show_bug.cgi?id=40367
+         * 
+         * remove this workaround when the fix has been released with a stable
+         * build
+         */
+        if (BrowserInfo.get().isSafari()
+                && BrowserInfo.get().getWebkitVersion() > 5) {
+            customQuicksort(sorted, getEventComparator());
 
-                Long d1 = o1.getRangeInMilliseconds();
-                Long d2 = o2.getRangeInMilliseconds();
-                int r = 0;
-                if (!d1.equals(0L) && !d2.equals(0L)) {
-                    r = d2.compareTo(d1);
-                    return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
-                            .getIndex()) : r;
-                }
+        } else {
+            Arrays.sort(sorted, getEventComparator());
+        }
 
-                if (d2.equals(0L) && d1.equals(0L)) {
-                    return ((Integer) o2.getIndex()).compareTo(o1.getIndex());
-                } else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS) {
-                    return -1;
-                } else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS) {
-                    return 1;
-                } else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS) {
-                    return 1;
-                } else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS) {
-                    return -1;
-                }
-                r = d2.compareTo(d1);
-                return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
-                        .getIndex()) : r;
-            }
-        });
         return sorted;
     }
 
@@ -820,5 +802,91 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         // cellSizes[numberOfCells - 1] += cellSizeOverFlow;
 
         return cellSizes;
+    }
+
+    public static Comparator<CalendarEvent> getEventComparator() {
+        return new Comparator<CalendarEvent>() {
+
+            public int compare(CalendarEvent o1, CalendarEvent o2) {
+                if (o1.isAllDay() != o2.isAllDay()) {
+                    if (o2.isAllDay()) {
+                        return 1;
+                    }
+                    return -1;
+                }
+
+                Long d1 = o1.getRangeInMilliseconds();
+                Long d2 = o2.getRangeInMilliseconds();
+                int r = 0;
+                if (!d1.equals(0L) && !d2.equals(0L)) {
+                    r = d2.compareTo(d1);
+                    return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
+                            .getIndex()) : r;
+                }
+
+                if (d2.equals(0L) && d1.equals(0L)) {
+                    return ((Integer) o2.getIndex()).compareTo(o1.getIndex());
+                } else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS) {
+                    return -1;
+                } else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS) {
+                    return 1;
+                } else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS) {
+                    return 1;
+                } else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS) {
+                    return -1;
+                }
+                r = d2.compareTo(d1);
+                return (r == 0) ? ((Integer) o2.getIndex()).compareTo(o1
+                        .getIndex()) : r;
+            }
+        };
+    }
+
+    static <T> void customQuicksort(T[] array, Comparator<? super T> comparator) {
+
+        if (array.length > 1) {
+            quicksort(array, 0, array.length - 1, comparator);
+        }
+    }
+
+    static <T> void quicksort(T[] array, int left0, int right0,
+            Comparator<? super T> comparator) {
+
+        int left = left0;
+        int right = right0 + 1;
+        T pivot, temp;
+
+        pivot = array[left0];
+
+        do {
+
+            do {
+                left++;
+            } while (left <= right0
+                    && comparator.compare(array[left], pivot) < 0);
+
+            do {
+                right--;
+            } while (comparator.compare(array[right], pivot) > 0);
+
+            if (left < right) {
+                temp = array[left];
+                array[left] = array[right];
+                array[right] = temp;
+            }
+
+        } while (left <= right);
+
+        temp = array[left0];
+        array[left0] = array[right];
+        array[right] = temp;
+
+        if (left0 < right) {
+            quicksort(array, left0, right, comparator);
+        }
+        if (left < right0) {
+            quicksort(array, left, right0, comparator);
+        }
+
     }
 }
