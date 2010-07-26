@@ -125,6 +125,8 @@ public class CalendarTest extends Application {
 
     private Integer lastDay;
 
+    private Locale defaultLocale = Locale.US;
+
     @SuppressWarnings("serial")
     @Override
     public void init() {
@@ -179,12 +181,19 @@ public class CalendarTest extends Application {
         if (parameters.containsKey("lastHour")) {
             lastHour = Integer.parseInt(parameters.get("lastHour")[0]);
         }
+
+        if (parameters.containsKey("locale")) {
+            String localeArray[] = parameters.get("locale")[0].split("_");
+            defaultLocale = new Locale(localeArray[0], localeArray[1]);
+            setLocale(defaultLocale);
+        }
     }
 
     public void initContent() {
         // Set default Locale for this application
         if (testBench) {
-            setLocale(Locale.US);
+            setLocale(defaultLocale);
+
         } else {
             setLocale(Locale.getDefault());
         }
@@ -418,7 +427,7 @@ public class CalendarTest extends Application {
             private static final long serialVersionUID = -8307244759142541067L;
 
             public void buttonClick(ClickEvent event) {
-                showEventPopup(createNewEvent(new Date(), new Date()), true);
+                showEventPopup(createNewEvent(getToday(), getToday()), true);
             }
 
         });
