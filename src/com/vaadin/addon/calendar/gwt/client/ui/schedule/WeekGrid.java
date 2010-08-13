@@ -368,6 +368,12 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
             pixelLength += (int) (((double) lastSlotHeight / (double) slotInMinutes) * endOverFlowTime);
         }
+        
+        // reduce possible underflow at end
+        if (endOverFlowTime < 0) {
+            int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
+            pixelLength += (int) (((double) lastSlotHeight / (double) slotInMinutes) * endOverFlowTime);
+        }
 
         return pixelLength;
     }
