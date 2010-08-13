@@ -54,7 +54,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private final HorizontalPanel content;
     private VCalendar calendar;
     private boolean disabled;
-    private final boolean format24h;
     private final Timebar timebar;
     private Panel wrapper;
     private boolean verticalScrollEnabled;
@@ -71,7 +70,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
-        this.format24h = format24h;
         content = new HorizontalPanel();
         timebar = new Timebar(format24h);
         content.add(timebar);
@@ -1694,9 +1692,17 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 Style s = getElement().getStyle();
                 s.setZIndex(1);
                 if (!clickTargetsResize()) {
-                    if (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3) {
+                    // check if mouse has moved over threshold of 3 pixels
+                    boolean mouseMoved = (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3);
+                    
+                    if (!weekGrid.getCalendar().isDisabledOrReadOnly() && mouseMoved) {
+                        // Event Move:
+                        // - calendar must be enabled 
+                        // - calendar must not be in read-only mode
                         weekGrid.eventMoved(this);
-                    } else {
+                    } else if (!weekGrid.getCalendar().isDisabled()) {
+                        // Event Click:
+                        // - calendar must be enabled (read-only is allowed) 
                         EventTarget et = event.getNativeEvent()
                                 .getEventTarget();
                         Element e = Element.as(et);
@@ -1712,7 +1718,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                                         CalendarEventId.EVENTCLICK,
                                         calendarEvent.getIndex(), true);
                             }
-                        } else if (e == getElement()) {
                         }
                     }
 

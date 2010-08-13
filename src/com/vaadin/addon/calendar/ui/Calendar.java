@@ -656,7 +656,7 @@ public class Calendar extends AbstractComponent implements
         }
 
         if (variables.containsKey(CalendarEventId.EVENTCLICK)
-                && isClientChangeAllowed()) {
+                && isEventClickAllowed()) {
             handleEventClick((Integer) variables
                     .get(CalendarEventId.EVENTCLICK));
         }
@@ -693,10 +693,19 @@ public class Calendar extends AbstractComponent implements
 
     /**
      * @return true if the client is allowed to send changes to server
+     * @see #isEventClickAllowed()
      */
     protected boolean isClientChangeAllowed() {
         return !isReadOnly() && isEnabled();
     }
+    
+    /**
+     * @return true if the client is allowed to click events
+     * @see #isClientChangeAllowed()
+     */
+    protected boolean isEventClickAllowed() {
+        return isEnabled();
+    }    
 
     /*
      * Handle an event move message from client.

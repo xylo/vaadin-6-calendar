@@ -425,30 +425,34 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
 
-        if (w == bottomspacer) {
-            if (scrollable) {
-                setLimitedCellHeight();
-            } else {
-                setUnlimitedCellHeight();
-            }
-            reDraw(true);
-
-        } else if (w instanceof MonthEventLabel && hasEventMoveListeners) {
+        if (w instanceof MonthEventLabel && hasEventMoveListeners) {
+            // event clicks should be allowed even when read-only
             monthEventMouseDown = true;
 
             if (w instanceof MonthEventLabel) {
                 startCalendarEventDrag(event, (MonthEventLabel) w);
             }
+        } else if (!calendar.isReadOnly()) {
+            // these are not allowed when in read-only
+            if (w == bottomspacer) {
+                if (scrollable) {
+                    setLimitedCellHeight();
+                } else {
+                    setUnlimitedCellHeight();
+                }
+                reDraw(true);
 
-        } else if (w == this && !scrollable) {
-            MonthGrid grid = getMonthGrid();
-            if (!grid.isDisabled() && grid.isRangeSelectAllowed()) {
-                grid.setSelectionStart(this);
-                grid.setSelectionEnd(this);
+            } else if (w == this && !scrollable) {
+                MonthGrid grid = getMonthGrid();
+                if (!grid.isDisabled() && grid.isRangeSelectAllowed()) {
+                    grid.setSelectionStart(this);
+                    grid.setSelectionEnd(this);
+                }
+            } else if (w instanceof Label) {
+                labelMouseDown = true;
             }
-        } else if (w instanceof Label) {
-            labelMouseDown = true;
         }
+
         event.stopPropagation();
     }
 
@@ -465,7 +469,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         MonthEventLabel w = (MonthEventLabel) clickedWidget;
 
-        if (calendar.isDisabled()) {
+        if (calendar.isDisabledOrReadOnly()) {
             Event.releaseCapture(getElement());
             monthEventMouseDown = false;
             startY = -1;

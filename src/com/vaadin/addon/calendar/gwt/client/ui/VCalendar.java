@@ -96,6 +96,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     private final DateTimeFormat time24format_date = DateTimeFormat
             .getFormat("HH:mm");
 
+    private boolean readOnly = false;
     private boolean disabled = false;
 
     private boolean isHeightUndefined = false;
@@ -147,10 +148,11 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         firstHour = uidl.getIntAttribute(ATTR_FIRSTHOUROFDAY);
         lastHour = uidl.getIntAttribute(ATTR_LASTHOUROFDAY);
 
-        disabled = ((uidl.hasAttribute(ATTR_READONLY) && uidl
-                .getBooleanAttribute(ATTR_READONLY)) || (uidl
-                .hasAttribute(ATTR_DISABLED) && uidl
-                .getBooleanAttribute(ATTR_DISABLED)));
+        readOnly = uidl.hasAttribute(ATTR_READONLY)
+                && uidl.getBooleanAttribute(ATTR_READONLY);
+
+        disabled = uidl.hasAttribute(ATTR_DISABLED)
+                && uidl.getBooleanAttribute(ATTR_DISABLED);
 
         UIDL daysUidl = uidl.getChildUIDL(0);
         int daysCount = daysUidl.getChildCount();
@@ -563,7 +565,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         dayToolbar.setVerticalSized(isHeightUndefined);
         dayToolbar.setHorizontalSized(isWidthUndefined);
         weekGrid.clearDates();
-        weekGrid.setDisabled(isDisabled());
+        weekGrid.setDisabled(isDisabledOrReadOnly());
 
         for (int i = 0; i < daysCount; i++) {
             UIDL dayUidl = daysUidl.getChildUIDL(i);
@@ -598,7 +600,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         rows = (int) Math.ceil(daysCount / (double) 7);
 
         monthGrid = new MonthGrid(this, rows, columns);
-        monthGrid.setDisabled(isDisabled());
+        monthGrid.setDisabled(isDisabledOrReadOnly());
         monthGrid.setHeightPX(intHeight);
         monthGrid.setWidthPX(intWidth);
         weekToolbar.removeAllRows();
@@ -753,8 +755,16 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         return PID;
     }
 
+    public boolean isDisabledOrReadOnly() {
+        return disabled || readOnly;
+    }
+
     public boolean isDisabled() {
         return disabled;
+    }
+    
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     public MonthGrid getMonthGrid() {

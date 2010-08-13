@@ -241,7 +241,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
         public void onMouseUp(MouseUpEvent event) {
             if (event.getSource() == clickTargetWidget
                     && clickTargetWidget instanceof DateCell
-                    && !calendar.isDisabled()) {
+                    && !calendar.isDisabledOrReadOnly()) {
                 CalendarEvent calendarEvent = ((DateCell) clickTargetWidget)
                         .getEvent();
                 if (calendar.getClient().hasEventListeners(calendar,

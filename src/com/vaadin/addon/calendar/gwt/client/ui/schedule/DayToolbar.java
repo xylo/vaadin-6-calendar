@@ -85,7 +85,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         l.addClickHandler(new ClickHandler() {
 
             public void onClick(ClickEvent event) {
-                if (!calendar.isDisabled()
+                if (!calendar.isDisabledOrReadOnly()
                         && calendar.getClient().hasEventListeners(calendar,
                                 CalendarEventId.DATECLICK)) {
                     calendar.getClient().updateVariable(calendar.getPID(),
@@ -135,7 +135,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     public void onClick(ClickEvent event) {
         VCalendar w = (VCalendar) getParent().getParent();
 
-        if (!calendar.isDisabled()) {
+        if (!calendar.isDisabledOrReadOnly()) {
             if (event.getSource() == nextLabel) {
                 if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
                     w.getClient().updateVariable(w.getPID(),

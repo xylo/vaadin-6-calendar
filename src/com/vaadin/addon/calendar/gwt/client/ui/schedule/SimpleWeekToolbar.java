@@ -83,7 +83,7 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
 
     public void onClick(ClickEvent event) {
         WeekLabel wl = (WeekLabel) event.getSource();
-        if (!calendar.isDisabled()
+        if (!calendar.isDisabledOrReadOnly()
                 && calendar.getClient().hasEventListeners(calendar,
                         CalendarEventId.WEEKCLICK)) {
             calendar.getClient().updateVariable(calendar.getPID(),
