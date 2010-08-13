@@ -608,7 +608,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             DateTimeService dts = new DateTimeService();
 
             if (format24h) {
-                for (int i = firstHour; i < lastHour; i++) {
+                for (int i = firstHour + 1; i <= lastHour; i++) {
                     e = DOM.createDiv();
                     setStyleName(e, "v-calendar-time");
                     String delimiter = dts.getClockDelimeter();
