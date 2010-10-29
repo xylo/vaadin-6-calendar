@@ -19,9 +19,9 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * </p>
  * 
  * <p>
- * {@link com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventSetChangeNotifier
+ * {@link com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier
  * EventSetChangeNotifier} and
- * {@link com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeNotifier
+ * {@link com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener
  * EventChangeListener} are also implemented, so the Calendar is notified when
  * an event is added, changed or removed.
  * </p>

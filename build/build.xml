@@ -2,7 +2,7 @@
 <project name="Calendar" basedir="../" default="all">
 
     <!-- Main target that does all -->
-    <target name="all" depends="compile, widgetset, tests, manual, package-jar, package-zip, demo.war"/>
+    <target name="all" depends="compile, widgetset, tests, manual, javadoc, package-jar, package-zip, demo.war"/>
 
     <!-- Non-project specific settings. -->
 	<property file="build/build.properties" />
@@ -39,13 +39,18 @@
 
 		<antcall target="check-libs"/>
 
+		<path id="vaadin.classpath">
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="**/*.jar" />
+			</fileset>
+			
+			<fileset dir="build/lib/gwt" />
+				
+		</path>
+		
 	    <path id="test.classpath">
 		    <fileset dir="build/lib">
 			    <include name="**/*.jar" />
-            </fileset>
-
-            <fileset dir="WebContent/WEB-INF/lib">
-                <include name="**/*.jar" />
             </fileset>
         </path>
 
@@ -118,6 +123,7 @@
 			<include name="**/*.*" />
 
 			<classpath refid="test.classpath" />
+		 	<classpath refid="vaadin.classpath" />
 			<classpath refid="compile.classpath" />
 			<classpath>
 				<path path="${result-path}/src" />
@@ -224,6 +230,7 @@
 				<pathelement path="${result.classes}" />
 				<path refid="compile.classpath"/>
                 <path refid="test.classpath"/>
+				<path refid="vaadin.classpath"/>
 			</classpath>
 
 			<batchtest fork="yes">
@@ -262,6 +269,22 @@
         </exec>
     </target>
 
+	<target name="javadoc" depends="init, preprocess-src">
+		<javadoc sourcepath="${result-path}/src/${src.package.dir}" destdir="${javadoc.dir}" public="true">
+			<classpath>
+				<path refid="vaadin.classpath"/>
+				<path refid="compile.classpath"/>
+			</classpath>
+			<fileset dir="${result-path}/src/${src.package.dir}">
+				<include name="**" />
+
+				<exclude name="**/gwt/**" />
+				<!--<exclude name="**/gwt/public/**"/>
+				<exclude name="**/gwt/*.xml"/>-->
+			</fileset>
+		</javadoc>
+	</target>
+	
     <!-- ================================================================== -->
     <!-- Packaging                                                          -->
     <!-- ================================================================== -->

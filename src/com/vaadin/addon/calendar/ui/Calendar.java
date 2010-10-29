@@ -134,9 +134,9 @@ public class Calendar extends AbstractComponent implements
      */
     private int scrollTop = 0;
 
-    /** Custom caption format for weekly and date views */
+    /** Caption format for the weekly view */
     private SimpleDateFormat weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
-            .getDateInstance();
+            .getDateInstance(SimpleDateFormat.SHORT);
 
     /** Map from event ids to event handlers */
     private final Map<String, ComponentEventListener> handlers;
@@ -197,7 +197,7 @@ public class Calendar extends AbstractComponent implements
      * {@link #setEndDate(Date)} to change this.
      * </p>
      * 
-     * @param calendarEventProvider
+     * @param eventProvider
      *            Event provider, cannot be null.
      */
     public Calendar(CalendarEventProvider eventProvider) {
@@ -217,7 +217,7 @@ public class Calendar extends AbstractComponent implements
      * {@link #setEndDate(Date)} to change this.
      * </p>
      * 
-     * @param calendarEventProvider
+     * @param eventProvider
      *            Event provider, cannot be null.
      */
     // this is the constructor every other constuctor calls
@@ -303,17 +303,21 @@ public class Calendar extends AbstractComponent implements
      * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
      */
     @Override
-    public void setLocale(Locale l) {
+    public void setLocale(Locale newLocale) {
+        String currentDatePattern = getWeeklyCaptionFormat();
         weeklyCaptionFormat = (SimpleDateFormat) SimpleDateFormat
-                .getDateInstance(SimpleDateFormat.SHORT, l);
+                .getDateInstance();
+        weeklyCaptionFormat.applyPattern(currentDatePattern);
+
         if (timezone != null) {
-            currentCalendar = java.util.Calendar.getInstance(timezone, l);
+            currentCalendar = java.util.Calendar.getInstance(timezone,
+                    newLocale);
 
         } else {
-            currentCalendar = java.util.Calendar.getInstance(l);
+            currentCalendar = java.util.Calendar.getInstance(newLocale);
         }
 
-        super.setLocale(l);
+        super.setLocale(newLocale);
     }
 
     /**
@@ -507,8 +511,8 @@ public class Calendar extends AbstractComponent implements
         } else if (startDate == null && endDate == null) {
             // set defaults
             currentCalendar.setTime(new Date());
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar
-                    .getFirstDayOfWeek());
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
+                    currentCalendar.getFirstDayOfWeek());
             startDate = currentCalendar.getTime();
 
             currentCalendar.add(java.util.Calendar.DAY_OF_WEEK, 6);
@@ -526,8 +530,8 @@ public class Calendar extends AbstractComponent implements
                 getTimeFormat() == TimeFormat.Format24H);
         target.addAttribute(VCalendar.ATTR_DAY_NAMES, getDayNamesShort());
         target.addAttribute(VCalendar.ATTR_MONTH_NAMES, getMonthNamesShort());
-        target.addAttribute(VCalendar.ATTR_FDOW, currentCalendar
-                .getFirstDayOfWeek());
+        target.addAttribute(VCalendar.ATTR_FDOW,
+                currentCalendar.getFirstDayOfWeek());
         target.addAttribute(VCalendar.ATTR_READONLY, isReadOnly());
         // target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
 
@@ -562,13 +566,13 @@ public class Calendar extends AbstractComponent implements
             int dow = getDowByLocale(currentCalendar);
 
             target.startTag("day");
-            target.addAttribute(VCalendar.ATTR_DATE, df_date
-                    .format(currentCalendar.getTime()));
-            target.addAttribute(VCalendar.ATTR_FDATE, weeklyCaptionFormat
-                    .format(currentCalendar.getTime()));
+            target.addAttribute(VCalendar.ATTR_DATE,
+                    df_date.format(currentCalendar.getTime()));
+            target.addAttribute(VCalendar.ATTR_FDATE,
+                    weeklyCaptionFormat.format(currentCalendar.getTime()));
             target.addAttribute(VCalendar.ATTR_DOW, dow);
-            target.addAttribute(VCalendar.ATTR_WEEK, currentCalendar
-                    .get(java.util.Calendar.WEEK_OF_YEAR));
+            target.addAttribute(VCalendar.ATTR_WEEK,
+                    currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
             currentCalendar.add(java.util.Calendar.DATE, 1);
         }
@@ -625,11 +629,11 @@ public class Calendar extends AbstractComponent implements
         target.addAttribute(VCalendar.ATTR_INDEX, i);
         target.addAttribute(VCalendar.ATTR_CAPTION,
                 (e.getCaption() == null ? "" : e.getCaption()));
-        target.addAttribute(VCalendar.ATTR_DATEFROM, df_date.format(e
-                .getStart()));
+        target.addAttribute(VCalendar.ATTR_DATEFROM,
+                df_date.format(e.getStart()));
         target.addAttribute(VCalendar.ATTR_DATETO, df_date.format(e.getEnd()));
-        target.addAttribute(VCalendar.ATTR_TIMEFROM, df_time.format(e
-                .getStart()));
+        target.addAttribute(VCalendar.ATTR_TIMEFROM,
+                df_time.format(e.getStart()));
         target.addAttribute(VCalendar.ATTR_TIMETO, df_time.format(e.getEnd()));
         target.addAttribute(VCalendar.ATTR_DESCRIPTION,
                 e.getDescription() == null ? "" : e.getDescription());
@@ -698,14 +702,14 @@ public class Calendar extends AbstractComponent implements
     protected boolean isClientChangeAllowed() {
         return !isReadOnly() && isEnabled();
     }
-    
+
     /**
      * @return true if the client is allowed to click events
      * @see #isClientChangeAllowed()
      */
     protected boolean isEventClickAllowed() {
         return isEnabled();
-    }    
+    }
 
     /*
      * Handle an event move message from client.
@@ -940,7 +944,7 @@ public class Calendar extends AbstractComponent implements
      * Gets a date that is last day in the week that target given date belongs
      * to.
      * 
-     * @param dateInWeek
+     * @param date
      *            Target date
      * @return Date that is last date in same week that given date is.
      */
@@ -972,16 +976,16 @@ public class Calendar extends AbstractComponent implements
                 .clone();
 
         calendarClone.setTime(date);
-        calendarClone.set(java.util.Calendar.MILLISECOND, calendarClone
-                .getActualMaximum(java.util.Calendar.MILLISECOND));
-        calendarClone.set(java.util.Calendar.SECOND, calendarClone
-                .getActualMaximum(java.util.Calendar.SECOND));
-        calendarClone.set(java.util.Calendar.MINUTE, calendarClone
-                .getActualMaximum(java.util.Calendar.MINUTE));
-        calendarClone.set(java.util.Calendar.HOUR, calendarClone
-                .getActualMaximum(java.util.Calendar.HOUR));
-        calendarClone.set(java.util.Calendar.HOUR_OF_DAY, calendarClone
-                .getActualMaximum(java.util.Calendar.HOUR_OF_DAY));
+        calendarClone.set(java.util.Calendar.MILLISECOND,
+                calendarClone.getActualMaximum(java.util.Calendar.MILLISECOND));
+        calendarClone.set(java.util.Calendar.SECOND,
+                calendarClone.getActualMaximum(java.util.Calendar.SECOND));
+        calendarClone.set(java.util.Calendar.MINUTE,
+                calendarClone.getActualMaximum(java.util.Calendar.MINUTE));
+        calendarClone.set(java.util.Calendar.HOUR,
+                calendarClone.getActualMaximum(java.util.Calendar.HOUR));
+        calendarClone.set(java.util.Calendar.HOUR_OF_DAY,
+                calendarClone.getActualMaximum(java.util.Calendar.HOUR_OF_DAY));
 
         return calendarClone.getTime();
     }

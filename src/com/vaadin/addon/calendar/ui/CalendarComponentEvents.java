@@ -63,7 +63,7 @@ public interface CalendarComponentEvents extends Serializable {
          * 
          * @param source
          *            Calendar component.
-         * @param CalendarComponentEvent
+         * @param calendarEvent
          *            Target event.
          * @param newStart
          *            Target event's new start date.
