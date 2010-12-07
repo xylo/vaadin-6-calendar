@@ -127,6 +127,8 @@ public class CalendarTest extends Application {
 
     private Locale defaultLocale = Locale.US;
 
+    private boolean showWeeklyView;
+
     @SuppressWarnings("serial")
     @Override
     public void init() {
@@ -187,6 +189,9 @@ public class CalendarTest extends Application {
             defaultLocale = new Locale(localeArray[0], localeArray[1]);
             setLocale(defaultLocale);
         }
+
+        showWeeklyView = parameters.containsKey("weekly");
+
     }
 
     public void initContent() {
@@ -465,14 +470,16 @@ public class CalendarTest extends Application {
 
         updateCaptionLabel();
 
-        int rollAmount = calendar.get(GregorianCalendar.DAY_OF_MONTH) - 1;
-        calendar.add(GregorianCalendar.DAY_OF_MONTH, -rollAmount);
-        resetTime(false);
-        currentMonthsFirstDate = calendar.getTime();
-        calendarComponent.setStartDate(currentMonthsFirstDate);
-        calendar.add(GregorianCalendar.MONTH, 1);
-        calendar.add(GregorianCalendar.DATE, -1);
-        calendarComponent.setEndDate(calendar.getTime());
+        if (!showWeeklyView) {
+            int rollAmount = calendar.get(GregorianCalendar.DAY_OF_MONTH) - 1;
+            calendar.add(GregorianCalendar.DAY_OF_MONTH, -rollAmount);
+            resetTime(false);
+            currentMonthsFirstDate = calendar.getTime();
+            calendarComponent.setStartDate(currentMonthsFirstDate);
+            calendar.add(GregorianCalendar.MONTH, 1);
+            calendar.add(GregorianCalendar.DATE, -1);
+            calendarComponent.setEndDate(calendar.getTime());
+        }
 
         addCalendarEventListeners();
     }

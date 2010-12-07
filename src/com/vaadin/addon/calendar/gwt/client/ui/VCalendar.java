@@ -222,19 +222,6 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
         nameToolbar.setDayNames(realDayNames);
 
-        // if (hideWeekends) {
-        // nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
-        // dayNames[3], dayNames[4], dayNames[5] });
-        // } else if (firstDayOfWeek == 2) {
-        // nameToolbar.setDayNames(new String[] { dayNames[1], dayNames[2],
-        // dayNames[3], dayNames[4], dayNames[5], dayNames[6],
-        // dayNames[0] });
-        // } else {
-        // nameToolbar.setDayNames(new String[] { dayNames[0], dayNames[1],
-        // dayNames[2], dayNames[3], dayNames[4], dayNames[5],
-        // dayNames[6] });
-        // }
-
         weeklyLongEvents = null;
         weekGrid = null;
         updateMonthGrid(daysUidl.getChildCount(), daysUidl, today);
@@ -762,7 +749,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     public boolean isDisabled() {
         return disabled;
     }
-    
+
     public boolean isReadOnly() {
         return readOnly;
     }

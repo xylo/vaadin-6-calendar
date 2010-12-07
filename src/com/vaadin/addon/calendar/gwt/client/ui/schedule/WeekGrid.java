@@ -368,7 +368,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
             pixelLength += (int) (((double) lastSlotHeight / (double) slotInMinutes) * endOverFlowTime);
         }
-        
+
         // reduce possible underflow at end
         if (endOverFlowTime < 0) {
             int lastSlotHeight = cellHeights[currentSlot] + dateCellBorder;
@@ -573,6 +573,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     public static class Timebar extends HTML {
 
+        private static final int[] timesFor12h = { 12, 1, 2, 3, 4, 5, 6, 7, 8,
+                9, 10, 11 };
+
         private int height;
 
         private final int verticalPadding = 7; // FIXME measure this from DOM
@@ -624,16 +627,15 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 // DateTimeService has a some Locale set.
                 String[] ampm = new String[] { "AM", "PM" };
 
-                int amStop = (lastHour < 13) ? lastHour + 1 : 13;
-                int pmStart = (firstHour > 12) ? firstHour - 11 : 1;
+                int amStop = (lastHour < 11) ? lastHour : 11;
+                int pmStart = (firstHour > 11) ? firstHour % 11 : 0;
 
                 if (firstHour < 12) {
-                    for (int i = firstHour + 1; i < amStop; i++) {
+                    for (int i = firstHour + 1; i <= amStop; i++) {
                         e = DOM.createDiv();
                         setStyleName(e, "v-calendar-time");
-                        e
-                                .setInnerHTML("<span>" + i + "</span>" + " "
-                                        + ampm[0]);
+                        e.setInnerHTML("<span>" + timesFor12h[i] + "</span>"
+                                + " " + ampm[0]);
                         getElement().appendChild(e);
                     }
                 }
@@ -642,9 +644,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     for (int i = pmStart; i < lastHour - 11; i++) {
                         e = DOM.createDiv();
                         setStyleName(e, "v-calendar-time");
-                        e
-                                .setInnerHTML("<span>" + i + "</span>" + " "
-                                        + ampm[1]);
+                        e.setInnerHTML("<span>" + timesFor12h[i] + "</span>"
+                                + " " + ampm[1]);
                         getElement().appendChild(e);
                     }
                 }
@@ -1700,15 +1701,16 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 if (!clickTargetsResize()) {
                     // check if mouse has moved over threshold of 3 pixels
                     boolean mouseMoved = (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3);
-                    
-                    if (!weekGrid.getCalendar().isDisabledOrReadOnly() && mouseMoved) {
+
+                    if (!weekGrid.getCalendar().isDisabledOrReadOnly()
+                            && mouseMoved) {
                         // Event Move:
-                        // - calendar must be enabled 
+                        // - calendar must be enabled
                         // - calendar must not be in read-only mode
                         weekGrid.eventMoved(this);
                     } else if (!weekGrid.getCalendar().isDisabled()) {
                         // Event Click:
-                        // - calendar must be enabled (read-only is allowed) 
+                        // - calendar must be enabled (read-only is allowed)
                         EventTarget et = event.getNativeEvent()
                                 .getEventTarget();
                         Element e = Element.as(et);
