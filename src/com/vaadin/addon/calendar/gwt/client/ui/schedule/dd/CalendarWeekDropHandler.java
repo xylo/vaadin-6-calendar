@@ -53,10 +53,14 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
             com.google.gwt.user.client.Element elementOver) {
         com.google.gwt.user.client.Element weekGridElement = calendarPaintable
                 .getWeekGrid().getElement();
-        com.google.gwt.user.client.Element todayBarElement = (Element) calendarPaintable
-                .getWeekGrid().getDateCellOfToday().getTodaybarElement();
         com.google.gwt.user.client.Element timeBarElement = calendarPaintable
                 .getWeekGrid().getTimeBar().getElement();
+
+        com.google.gwt.user.client.Element todayBarElement = null;
+        if (calendarPaintable.getWeekGrid().hasToday()) {
+            todayBarElement = (Element) calendarPaintable.getWeekGrid()
+                    .getDateCellOfToday().getTodaybarElement();
+        }
 
         // drops are not allowed in:
         // - weekday header
