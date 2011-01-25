@@ -323,8 +323,7 @@
 	</target>		
 
     <!-- Create the ZIP distribution package. -->
-<!--    <target name="package-zip" depends="package-jar, manual" unless="run.no-package-jar"> -->
-    <target name="package-zip">
+    <target name="package-zip" depends="package-jar, javadoc, manual" unless="run.no-package-jar">
         <property name="zip.name" value="${result-path}/${addon.name}-${version}.zip"/>
 
     	<!-- Make the zip manifest -->
@@ -345,7 +344,8 @@ Implementation-Vendor: IT Mill Oy
             <zipfileset prefix="" file="${result-path}/${jar.name}" />
 
             <!-- Documentation -->
-            <zipfileset prefix="doc" file="${manual.pdf}" />               
+            <zipfileset prefix="doc" file="${manual.pdf}" />
+            <zipfileset prefix="doc/api" dir="${javadoc.dir}" />
             <zipfileset prefix="doc" dir="doc">
                 <patternset>
                     <include name="README.TXT" />
@@ -357,7 +357,7 @@ Implementation-Vendor: IT Mill Oy
         </zip>
     </target>
 
-	<target name="demo.war" depends="package-jar">
+	<target name="demo.war" depends="javadoc, package-jar">
         <property name="war.path" value="${result-path}/${addon.name}.war"/>
 
 		<war destfile="${war.path}" webxml="WebContent/WEB-INF/web.xml">
@@ -370,6 +370,7 @@ Implementation-Vendor: IT Mill Oy
 					<include name="VAADIN/widgetsets/com.vaadin.addon.calendar.gwt.CalendarWidgetset/**/*" />
 				</patternset>
 			</fileset>
+	        <fileset dir="${javadoc.dir}/../" includes="api/**/*" />
 		</war>
 	</target>
 	
