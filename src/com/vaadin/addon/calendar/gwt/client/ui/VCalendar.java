@@ -331,8 +331,8 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
                 SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
                         cell);
                 if (isEventInDay(when, to, sdc.getDate())
-                        && isEventInDayWithTime(when, to, sdc.getDate(), e
-                                .getEndTime(), e.isAllDay())) {
+                        && isEventInDayWithTime(when, to, sdc.getDate(),
+                                e.getEndTime(), e.isAllDay())) {
                     if (!eventMoving) {
                         eventMoving = sdc.getMoveEvent() != null;
                     }
@@ -369,15 +369,20 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
     /*
      * We must also handle the special case when the event lasts exactly for 24
-     * hours, thus spanning two days. That special case still should span one
-     * day when rendered.
+     * hours, thus spanning two days e.g. from 1.1.2001 00:00 to 2.1.2001 00:00.
+     * That special case still should span one day when rendered.
      */
     @SuppressWarnings("deprecation")
     // Date methods are not deprecated in GWT
     private boolean isEventInDayWithTime(Date from, Date to, Date date,
             Date endTime, boolean isAllDay) {
         return (isAllDay || !(to.getDay() == date.getDay()
-                && from.getDay() != to.getDay() && endTime.getMinutes() == 0));
+                && from.getDay() != to.getDay() && isMidnight(endTime)));
+    }
+
+    private boolean isMidnight(Date endTime) {
+        return (endTime.getHours() == 0 && endTime.getMinutes() == 0 && endTime
+                .getSeconds() == 0);
     }
 
     private void updateEventSlotIndex(CalendarEvent e, List<SimpleDayCell> cells) {
@@ -510,9 +515,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
             e.setIndex(index);
             e.setEnd(dateformat_date.parse(dateto));
             e.setStart(dateformat_date.parse(datefrom));
-            e
-                    .setStartTime(dateformat_datetime.parse(datefrom + " "
-                            + timefrom));
+            e.setStartTime(dateformat_datetime.parse(datefrom + " " + timefrom));
             e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
             e.setStyleName(style);
             e.setFormat24h(format);
@@ -643,8 +646,8 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
             isHeightUndefined = "".equals(height);
 
             if (!isHeightUndefined) {
-                intHeight = Integer.parseInt(newHeight.substring(0, newHeight
-                        .length() - 2));
+                intHeight = Integer.parseInt(newHeight.substring(0,
+                        newHeight.length() - 2));
             } else {
                 intHeight = -1;
             }
@@ -677,9 +680,9 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
             dayToolbar.setWidthPX(intWidth);
 
             if (monthGrid != null) {
-                monthGrid.updateCellSizes(intWidth
-                        - weekToolbar.getOffsetWidth(), intHeight
-                        - nameToolbar.getOffsetHeight());
+                monthGrid.updateCellSizes(
+                        intWidth - weekToolbar.getOffsetWidth(), intHeight
+                                - nameToolbar.getOffsetHeight());
             } else if (weekGrid != null) {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
@@ -702,8 +705,8 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
             isWidthUndefined = "".equals(width);
 
             if (!isWidthUndefined) {
-                intWidth = Integer.parseInt(newWidth.substring(0, newWidth
-                        .length() - 2));
+                intWidth = Integer.parseInt(newWidth.substring(0,
+                        newWidth.length() - 2));
             } else {
                 intWidth = -1;
             }
