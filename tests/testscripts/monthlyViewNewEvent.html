@@ -21,6 +21,7 @@
 	<td></td>
 	<td></td>
 </tr>
+<!--Create new event with the button-->
 <tr>
 	<td>click</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[0]/VHorizontalLayout[0]/ChildComponentContainer[6]/VButton[0]/domChild[0]/domChild[0]</td>
@@ -28,64 +29,40 @@
 </tr>
 <tr>
 	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
 	<td>10,5</td>
 </tr>
 <tr>
 	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>52,8</td>
 </tr>
 <tr>
-	<td>doubleClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/26/99</td>
 </tr>
 <tr>
-	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
-	<td>106,5</td>
-</tr>
-<tr>
-	<td>doubleClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>1/1/00</td>
 </tr>
 <tr>
-	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
-	<td>64,7</td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
 	<td>Test event</td>
 </tr>
 <tr>
-	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
-	<td>54,43</td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
 	<td>Test description</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
+<!--Open previously created event, assert values-->
 <tr>
 	<td>mouseClick</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[2]/VCalendar[0]/domChild[0]/domChild[1]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[0]/domChild[0]/domChild[1]</td>
@@ -93,39 +70,40 @@
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/26/99</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>1/1/00</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
 	<td>on</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
 	<td>Test event</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
 	<td>Test description</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VFilterSelect[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VFilterSelect[0]/domChild[0]</td>
 	<td>Green</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
+<!--Open previously created event, assert values and shorten the event-->
 <tr>
 	<td>mouseClick</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[2]/VCalendar[0]/domChild[0]/domChild[1]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[6]/domChild[0]/domChild[1]</td>
@@ -133,69 +111,50 @@
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/26/99</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>1/1/00</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]</td>
 	<td>on</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]</td>
 	<td>Test event</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextArea[0]</td>
 	<td>Test description</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VFilterSelect[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VFilterSelect[0]/domChild[0]</td>
 	<td>Green</td>
 </tr>
 <tr>
-	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
-	<td>59,12</td>
-</tr>
-<tr>
-	<td>doubleClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/27/99</td>
 </tr>
 <tr>
-	<td>mouseClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
-	<td>63,9</td>
-</tr>
-<tr>
-	<td>doubleClick</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>enterCharacter</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>12/31/99</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
+<!--Click the calendar where the event previously was, assert new event creation-->
 <tr>
 	<td>mouseClick</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[2]/VCalendar[0]/domChild[0]/domChild[1]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[0]/domChild[0]/domChild[1]</td>
@@ -208,9 +167,10 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
+<!--Click the calendar where the event previously was, assert new event creation-->
 <tr>
 	<td>mouseClick</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[2]/VCalendar[0]/domChild[0]/domChild[1]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[6]/domChild[0]/domChild[3]</td>
@@ -223,9 +183,10 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
+<!--Edit the previously created event-->
 <tr>
 	<td>mouseClick</td>
 	<td>vaadin=Calendar::/VVerticalLayout[0]/ChildComponentContainer[2]/VCalendar[0]/domChild[0]/domChild[1]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[1]/domChild[0]/domChild[1]</td>
@@ -233,17 +194,17 @@
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/27/99</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>12/31/99</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[2]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[1]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
 <tr>
@@ -253,12 +214,12 @@
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[0]#field</td>
 	<td>12/27/99</td>
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VForm[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field</td>
 	<td>12/31/99</td>
 </tr>
 <tr>
@@ -273,7 +234,7 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>vaadin=Calendar::/VWindow[0]/ScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[0]/VButton[0]/domChild[0]/domChild[0]</td>
+	<td>vaadin=Calendar::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[1]/VHorizontalLayout[0]/ChildComponentContainer[0]/VButton[0]/domChild[0]/domChild[0]</td>
 	<td></td>
 </tr>
 <tr>
