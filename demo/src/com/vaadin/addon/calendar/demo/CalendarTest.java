@@ -30,6 +30,8 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.terminal.ParameterHandler;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -42,8 +44,6 @@ import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
@@ -129,6 +129,8 @@ public class CalendarTest extends Application {
 
     private boolean showWeeklyView;
 
+    private boolean useSecondResolution;
+
     @SuppressWarnings("serial")
     @Override
     public void init() {
@@ -188,6 +190,10 @@ public class CalendarTest extends Application {
             String localeArray[] = parameters.get("locale")[0].split("_");
             defaultLocale = new Locale(localeArray[0], localeArray[1]);
             setLocale(defaultLocale);
+        }
+
+        if (parameters.containsKey(("secondsResolution"))) {
+            useSecondResolution = true;
         }
 
         showWeeklyView = parameters.containsKey("weekly");
@@ -257,8 +263,7 @@ public class CalendarTest extends Application {
         event = getNewEvent("Appointment", start, end);
         event.setWhere("Office");
         event.setStyleName("color1");
-        event
-                .setDescription("A longer description, which should display correctly.");
+        event.setDescription("A longer description, which should display correctly.");
         dataSource.addEvent(event);
 
         calendar.add(GregorianCalendar.DATE, 1);
@@ -880,7 +885,11 @@ public class CalendarTest extends Application {
 
             private DateField createDateField(String caption) {
                 DateField f = new DateField(caption);
-                f.setResolution(DateField.RESOLUTION_MIN);
+                if (useSecondResolution) {
+                    f.setResolution(DateField.RESOLUTION_SEC);
+                } else {
+                    f.setResolution(DateField.RESOLUTION_MIN);
+                }
                 return f;
             }
 
@@ -1001,8 +1010,8 @@ public class CalendarTest extends Application {
 
     private void rollWeek(int direction) {
         calendar.add(GregorianCalendar.WEEK_OF_YEAR, direction);
-        calendar.set(GregorianCalendar.DAY_OF_WEEK, calendar
-                .getFirstDayOfWeek());
+        calendar.set(GregorianCalendar.DAY_OF_WEEK,
+                calendar.getFirstDayOfWeek());
         resetCalendarTime(false);
         resetTime(true);
         calendar.add(GregorianCalendar.DATE, 6);
@@ -1084,14 +1093,14 @@ public class CalendarTest extends Application {
      */
     private void resetTime(boolean max) {
         if (max) {
-            calendar.set(GregorianCalendar.HOUR_OF_DAY, calendar
-                    .getMaximum(GregorianCalendar.HOUR_OF_DAY));
-            calendar.set(GregorianCalendar.MINUTE, calendar
-                    .getMaximum(GregorianCalendar.MINUTE));
-            calendar.set(GregorianCalendar.SECOND, calendar
-                    .getMaximum(GregorianCalendar.SECOND));
-            calendar.set(GregorianCalendar.MILLISECOND, calendar
-                    .getMaximum(GregorianCalendar.MILLISECOND));
+            calendar.set(GregorianCalendar.HOUR_OF_DAY,
+                    calendar.getMaximum(GregorianCalendar.HOUR_OF_DAY));
+            calendar.set(GregorianCalendar.MINUTE,
+                    calendar.getMaximum(GregorianCalendar.MINUTE));
+            calendar.set(GregorianCalendar.SECOND,
+                    calendar.getMaximum(GregorianCalendar.SECOND));
+            calendar.set(GregorianCalendar.MILLISECOND,
+                    calendar.getMaximum(GregorianCalendar.MILLISECOND));
         } else {
             calendar.set(GregorianCalendar.HOUR_OF_DAY, 0);
             calendar.set(GregorianCalendar.MINUTE, 0);

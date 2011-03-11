@@ -380,11 +380,6 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
                 && from.getDay() != to.getDay() && isMidnight(endTime)));
     }
 
-    private boolean isMidnight(Date endTime) {
-        return (endTime.getHours() == 0 && endTime.getMinutes() == 0 && endTime
-                .getSeconds() == 0);
-    }
-
     private void updateEventSlotIndex(CalendarEvent e, List<SimpleDayCell> cells) {
         if (cells.isEmpty()) {
             return;
@@ -887,6 +882,29 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
         if (left < right0) {
             quicksort(array, left, right0, comparator);
         }
+
+    }
+
+    @SuppressWarnings("deprecation")
+    // Date methods are not deprecated in GWT
+    public static boolean isMidnight(Date endTime) {
+        return (endTime.getHours() == 0 && endTime.getMinutes() == 0 && endTime
+                .getSeconds() == 0);
+    }
+
+    @SuppressWarnings("deprecation")
+    // Date methods are not deprecated in GWT
+    public static boolean areDatesEqualToSecond(Date date1, Date date2) {
+        return date1.getYear() == date2.getYear()
+                && date1.getMonth() == date2.getMonth()
+                && date1.getDay() == date2.getDay()
+                && date1.getHours() == date2.getHours()
+                && date1.getSeconds() == date2.getSeconds();
+    }
+
+    public static boolean isZeroLengthMidnightEvent(CalendarEvent e) {
+        return areDatesEqualToSecond(e.getStartTime(), e.getEndTime())
+                && isMidnight(e.getEndTime());
 
     }
 }

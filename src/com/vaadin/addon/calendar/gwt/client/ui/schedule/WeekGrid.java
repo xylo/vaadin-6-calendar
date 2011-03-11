@@ -310,7 +310,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(toTime);
-            if (comp >= 0 && comp2 < 0) {
+            if (comp >= 0
+                    && comp2 < 0
+                    || (comp == 0 && comp2 == 0 && VCalendar
+                            .isZeroLengthMidnightEvent(e))) {
                 // Same event may be over two DateCells if event's date
                 // range floats over one day. It can't float over two days,
                 // because event which range is over 24 hours, will be handled

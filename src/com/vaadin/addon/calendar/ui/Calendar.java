@@ -219,7 +219,7 @@ public class Calendar extends AbstractComponent implements
      * @param eventProvider
      *            Event provider, cannot be null.
      */
-    // this is the constructor every other constuctor calls
+    // this is the constructor every other constructor calls
     public Calendar(String caption, CalendarEventProvider eventProvider) {
         setEventProvider(eventProvider);
         setCaption(caption);
