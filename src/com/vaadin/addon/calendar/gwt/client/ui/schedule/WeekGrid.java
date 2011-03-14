@@ -475,21 +475,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
     }
 
-    public void addReservedEvent(ReservedCalendarEvent e) {
-        int dateCount = content.getWidgetCount();
-        Date from = e.getFromDate();
-        Date to = e.getToDate();
-        for (int i = 1; i < dateCount; i++) {
-            DateCell dc = (DateCell) content.getWidget(i);
-            Date dcDate = dc.getDate();
-            int comp = dcDate.compareTo(from);
-            int comp2 = dcDate.compareTo(to);
-            if (comp >= 0 && comp2 <= 0) {
-                dc.addReservedEvent(e);
-            }
-        }
-    }
-
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
@@ -784,8 +769,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         @Override
-        protected void onLoad() {
-            super.onLoad();
+        protected void onAttach() {
+            super.onAttach();
 
             handlers.add(addHandler(this, MouseDownEvent.getType()));
             handlers.add(addHandler(this, MouseUpEvent.getType()));
@@ -794,13 +779,13 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         @Override
-        protected void onUnload() {
+        protected void onDetach() {
             for (HandlerRegistration handler : handlers) {
                 handler.removeHandler();
             }
             handlers.clear();
 
-            super.onUnload();
+            super.onDetach();
         }
 
         public int getSlotIndex(Element slotElement) {
@@ -956,14 +941,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         private void recalculateCellHeights() {
             startingSlotHeight = height / numberOfSlots;
-            //
-            // // account for borders
-            // int border = getSlotBorder();
-            //
-            // // startingSlotHeight = startingSlotHeight - border;
-            //
-            // slotElementHeights = VCalendar.distributeSize(height, 48,
-            // -border);
 
             boolean isIE6 = BrowserInfo.get().isIE6();
 
@@ -1396,32 +1373,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             return todaybar;
         }
 
-        @SuppressWarnings("deprecation")
-        public void addReservedEvent(ReservedCalendarEvent e) {
-            Element main = getElement();
-            Date fromDt = e.getFromDatetime();
-            Date toDt = e.getToDatetime();
-            int h = fromDt.getHours();
-            int m = fromDt.getMinutes();
-            int slot = h * 2;
-            if (m >= 30) {
-                slot += 1;
-            }
-            h = toDt.getHours();
-            m = toDt.getMinutes();
-
-            int slotEnd = h * 2;
-            if (m > 0 && m <= 30) {
-                slotEnd += 1;
-            } else if (m > 30) {
-                slotEnd += 2;
-            }
-            for (int i = slot; i < slotEnd; i++) {
-                Element slotelement = Element.as(main.getChild(i));
-                slotelement.addClassName("reserved");
-            }
-        }
-
         public void setDisabled(boolean disabled) {
             this.disabled = disabled;
         }
@@ -1500,11 +1451,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             private int slotHeight;
             private final List<HandlerRegistration> handlers;
             private boolean mouseMoveCanceled;
-            private int startLeftPx;
-            private int startTopPx;
-
-            // private int slotHeight;
-            // private int doubleSlotHeight;
 
             public DayEvent(WeekGrid parent, CalendarEvent event) {
                 super();
@@ -1551,27 +1497,21 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
 
             @Override
-            protected void onLoad() {
-                super.onLoad();
-
+            protected void onAttach() {
+                super.onAttach();
                 handlers.add(addMouseDownHandler(this));
                 handlers.add(addMouseUpHandler(this));
                 handlers.add(addKeyDownHandler(this));
             }
 
             @Override
-            protected void onUnload() {
+            protected void onDetach() {
                 for (HandlerRegistration handler : handlers) {
                     handler.removeHandler();
                 }
                 handlers.clear();
-                super.onUnload();
+                super.onDetach();
             }
-
-            // public void setSlotHeightInPX(int slotHeight) {
-            // this.slotHeight = slotHeight;
-            // doubleSlotHeight = 2 * slotHeight;
-            // }
 
             public void setSlotHeightInPX(int slotHeight) {
                 this.slotHeight = slotHeight;
@@ -1674,8 +1614,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     mouseMoveStarted = false;
                     Style s = getElement().getStyle();
                     s.setZIndex(1000);
-                    startTopPx = Integer.parseInt(s.getTop().substring(0,
-                            s.getTop().length() - 2));
                     startDatetimeFrom = (Date) calendarEvent.getStartTime()
                             .clone();
                     startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
