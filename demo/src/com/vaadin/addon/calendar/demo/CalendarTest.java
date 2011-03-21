@@ -638,8 +638,22 @@ public class CalendarTest extends Application {
         if (!DEFAULT_ITEMID.equals(timezoneId)) {
             tz = TimeZone.getTimeZone((String) timezoneId);
         }
+
+        // remember the week that was showing, so we can re-set it later
+        Date startDate = calendarComponent.getStartDate();
+        calendar.setTime(startDate);
+        int weekNumber = calendar.get(java.util.Calendar.WEEK_OF_YEAR);
+
         calendarComponent.setTimeZone(tz);
         calendar.setTimeZone(calendarComponent.getTimeZone());
+
+        calendar.set(java.util.Calendar.WEEK_OF_YEAR, weekNumber);
+        calendar.set(java.util.Calendar.DAY_OF_WEEK,
+                calendar.getFirstDayOfWeek());
+
+        calendarComponent.setStartDate(calendar.getTime());
+        calendar.add(java.util.Calendar.DATE, 6);
+        calendarComponent.setEndDate(calendar.getTime());
     }
 
     private void updateCalendarFormat(Object format) {
@@ -647,6 +661,7 @@ public class CalendarTest extends Application {
         if (format instanceof TimeFormat) {
             calFormat = (TimeFormat) format;
         }
+
         calendarComponent.setTimeFormat(calFormat);
     }
 
