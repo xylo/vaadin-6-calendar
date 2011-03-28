@@ -386,8 +386,8 @@ public class CalendarTest extends Application {
     }
 
     private void initHideWeekEndButton() {
-        hideWeekendsButton = new Button("Hide weekends");
-        hideWeekendsButton.setSwitchMode(true);
+        hideWeekendsButton = new CheckBox("Hide weekends");
+        hideWeekendsButton.setImmediate(true);
         hideWeekendsButton.addListener(new ClickListener() {
 
             private static final long serialVersionUID = 1L;
