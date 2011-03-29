@@ -393,13 +393,21 @@ public class CalendarTest extends Application {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                if (event.getButton().booleanValue()) {
-                    calendarComponent.setVisibleDaysOfWeek(1, 5);
-                } else {
-                    calendarComponent.setVisibleDaysOfWeek(1, 7);
-                }
+                setWeekendsHidden(event.getButton().booleanValue());
             }
         });
+    }
+
+    private void setWeekendsHidden(boolean weekendsHidden) {
+        if (weekendsHidden) {
+            int firstToShow = (GregorianCalendar.MONDAY - calendar
+                    .getFirstDayOfWeek()) % 7;
+            calendarComponent.setVisibleDaysOfWeek(firstToShow + 1,
+                    firstToShow + 5);
+        } else {
+            calendarComponent.setVisibleDaysOfWeek(1, 7);
+        }
+
     }
 
     private void initReadOnlyButton() {
@@ -699,6 +707,9 @@ public class CalendarTest extends Application {
             calendarComponent.setStartDate(start);
             calendarComponent.setEndDate(end);
         }
+
+        // Week days depend on locale so this must be refreshed
+        setWeekendsHidden(hideWeekendsButton.booleanValue());
     }
 
     private void handleNextButtonClick() {
