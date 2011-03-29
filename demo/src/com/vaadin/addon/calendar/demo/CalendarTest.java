@@ -707,10 +707,11 @@ public class CalendarTest extends Application {
 
             calendarComponent.setStartDate(start);
             calendarComponent.setEndDate(end);
+
+            // Week days depend on locale so this must be refreshed
+            setWeekendsHidden(hideWeekendsButton.booleanValue());
         }
 
-        // Week days depend on locale so this must be refreshed
-        setWeekendsHidden(hideWeekendsButton.booleanValue());
     }
 
     private void handleNextButtonClick() {
