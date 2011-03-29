@@ -563,6 +563,7 @@ public class Calendar extends AbstractComponent implements
         currentCalendar.setTime(firstDateToShow);
 
         DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
+        weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
 
         target.startTag("days");
         // Send all dates to client from server. This
