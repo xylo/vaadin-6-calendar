@@ -651,17 +651,18 @@ public class CalendarTest extends Application {
         Date startDate = calendarComponent.getStartDate();
         calendar.setTime(startDate);
         int weekNumber = calendar.get(java.util.Calendar.WEEK_OF_YEAR);
-
         calendarComponent.setTimeZone(tz);
         calendar.setTimeZone(calendarComponent.getTimeZone());
 
-        calendar.set(java.util.Calendar.WEEK_OF_YEAR, weekNumber);
-        calendar.set(java.util.Calendar.DAY_OF_WEEK,
-                calendar.getFirstDayOfWeek());
+        if (viewMode == Mode.WEEK) {
+            calendar.set(java.util.Calendar.WEEK_OF_YEAR, weekNumber);
+            calendar.set(java.util.Calendar.DAY_OF_WEEK,
+                    calendar.getFirstDayOfWeek());
 
-        calendarComponent.setStartDate(calendar.getTime());
-        calendar.add(java.util.Calendar.DATE, 6);
-        calendarComponent.setEndDate(calendar.getTime());
+            calendarComponent.setStartDate(calendar.getTime());
+            calendar.add(java.util.Calendar.DATE, 6);
+            calendarComponent.setEndDate(calendar.getTime());
+        }
     }
 
     private void updateCalendarFormat(Object format) {
