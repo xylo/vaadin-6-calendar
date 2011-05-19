@@ -130,7 +130,6 @@
 				<path path="test-src" />
 				<path path="WebContent/WEB-INF/classes" />
 				<path path="${gwt.lib.dir}/gwt-user.jar" />
-				<path path="${gwt.lib.dir}/gwt-dev.jar" />
 			</classpath>
 		</javac>
 
@@ -167,9 +166,11 @@
 				<path path="WebContent/WEB-INF/classes" />
 				<fileset dir="build/lib/gwt">
 					<include name="**/gwt-*.jar" />
+					<include name="**/validation-api-*.jar" />
 				</fileset>
 				<fileset dir="${gwt.lib.dir}">
 					<include name="**/gwt-*.jar" />
+					<include name="**/validation-api-*.jar" />
 				</fileset>
 				<fileset dir="WebContent/WEB-INF/lib">
 					<include name="**/*.jar" />
