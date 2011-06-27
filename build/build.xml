@@ -39,24 +39,27 @@
 
 		<antcall target="check-libs"/>
 
-		<path id="vaadin.classpath">
-			<fileset dir="WebContent/WEB-INF/lib">
-				<include name="**/*.jar" />
-			</fileset>
-			
-			<fileset dir="build/lib/gwt" />
-				
-		</path>
-		
-	    <path id="test.classpath">
-		    <fileset dir="build/lib">
-			    <include name="**/*.jar" />
+        <path id="test.classpath">
+            <fileset dir="build/lib">
+                <include name="**/*.jar" />
+            </fileset>
+            
+            <fileset dir="WebContent/WEB-INF/lib">
+                <include name="**/*.jar" />
+            </fileset>
+
+            <fileset dir="build/lib">
+                <include name="junit-4.5.jar" />
             </fileset>
         </path>
 
         <path id="compile.classpath">
             <fileset dir="build/lib">
-                <include name="junit-4.5.jar" />
+                <include name="**/*.jar" />
+            </fileset>
+            
+            <fileset dir="WebContent/WEB-INF/lib">
+                <include name="**/*.jar" />
             </fileset>
         </path>
 	</target>
@@ -123,8 +126,7 @@
 			<include name="**/*.*" />
 
 			<classpath refid="test.classpath" />
-		 	<classpath refid="vaadin.classpath" />
-			<classpath refid="compile.classpath" />
+            <classpath refid="compile.classpath" />
 			<classpath>
 				<path path="${result-path}/src" />
 				<path path="test-src" />
@@ -164,6 +166,9 @@
 				<path path="${result-path}/src" />
 				<path path="${basedir}/${result-path}/war/WEB-INF/classes" />
 				<path path="WebContent/WEB-INF/classes" />
+				<fileset dir="build/lib">
+					<include name="**/vaadin*.jar" />
+				</fileset>
 				<fileset dir="build/lib/gwt">
 					<include name="**/gwt-*.jar" />
 					<include name="**/validation-api-*.jar" />
@@ -231,7 +236,6 @@
 				<pathelement path="${result.classes}" />
 				<path refid="compile.classpath"/>
                 <path refid="test.classpath"/>
-				<path refid="vaadin.classpath"/>
 			</classpath>
 
 			<batchtest fork="yes">
@@ -273,7 +277,6 @@
 	<target name="javadoc" depends="init, preprocess-src">
 		<javadoc sourcepath="${result-path}/src/${src.package.dir}" destdir="${javadoc.dir}" public="true">
 			<classpath>
-				<path refid="vaadin.classpath"/>
 				<path refid="compile.classpath"/>
 			</classpath>
 			<fileset dir="${result-path}/src/${src.package.dir}">
