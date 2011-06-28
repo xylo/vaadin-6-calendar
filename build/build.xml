@@ -4,8 +4,16 @@
     <!-- Main target that does all -->
     <target name="all" depends="compile, widgetset, tests, manual, javadoc, package-jar, package-zip, demo.war"/>
 
-    <!-- Non-project specific settings. -->
+	<!-- Build type specific configuration -->
+    <echo>Using build type specfic property file: "${build.properties.file}"</echo>
+    <property file="${build.properties.file}" />
+
+    <!-- Project specific settings. -->
 	<property file="build/build.properties" />
+
+    <!-- If not already set by the build system -->
+    <property name="version" value="${calendar.version}" />
+
 	<property name="configure.libs" value="" />
 	<property name="module.junit.dir" value="${basedir}/build/result/unittests" />
 
@@ -29,6 +37,8 @@
 
     <!-- Initialization -->
 	<target name="init">
+	    <echo>Add-on version: "${version}"</echo>
+
 		<echo>Requirements for classpath:</echo>
 		<echo> ${gwt.lib.dir}/gwt-user.jar</echo>
 		<echo> ${gwt.lib.dir}/gwt-dev.jar</echo>
