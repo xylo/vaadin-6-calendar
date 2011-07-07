@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: Calendar
-Implementation-Version: 1.1.0
-Vaadin-Package-Version: 1
-Vaadin-Widgetsets: com.vaadin.calendar.gwt.CalendarWidgetset
-Class-Path: 
-
