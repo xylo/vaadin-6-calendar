@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import com.vaadin.ui.Component;
@@ -5,7 +8,7 @@ import com.vaadin.ui.Component;
 /**
  * All Calendar events extends this class.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  * */

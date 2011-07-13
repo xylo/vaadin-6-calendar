@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.event;
 
 import java.io.Serializable;
@@ -8,7 +11,7 @@ import java.util.List;
  * Interface for querying events. The Vaadin Calendar always has a
  * CalendarEventProvider set.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

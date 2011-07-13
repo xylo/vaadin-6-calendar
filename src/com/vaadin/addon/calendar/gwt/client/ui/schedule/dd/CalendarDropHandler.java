@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule.dd;
 
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;

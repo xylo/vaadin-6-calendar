@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui.handler;
 
 import java.util.Date;
@@ -10,7 +13,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
 /**
  * Implements basic functionality needed to enable event resizing.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

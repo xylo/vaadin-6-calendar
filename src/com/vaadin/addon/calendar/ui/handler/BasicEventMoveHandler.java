@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui.handler;
 
 import java.util.Date;
@@ -10,7 +13,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
 /**
  * Implements basic functionality needed to enable moving events.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  * 

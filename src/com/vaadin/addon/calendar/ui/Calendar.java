@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import java.lang.reflect.Method;
@@ -72,7 +75,7 @@ import com.vaadin.ui.ClientWidget;
  * {@link com.vaadin.addon.calendar.event.BasicEventProvider BasicEventProvider}
  * is used.</li>
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

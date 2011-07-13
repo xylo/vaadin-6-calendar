@@ -1,5 +1,5 @@
-/**
- * 
+/*
+@VaadinAddonLicenseForJavaFiles@
  */
 package com.vaadin.addon.calendar.event;
 
@@ -26,7 +26,7 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * an event is added, changed or removed.
  * </p>
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

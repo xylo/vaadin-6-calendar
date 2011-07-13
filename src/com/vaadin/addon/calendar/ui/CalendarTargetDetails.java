@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import java.util.Date;
@@ -13,7 +16,7 @@ import com.vaadin.event.dd.TargetDetailsImpl;
  * where the drop happened. If the Calendar was in weekly mode, the date also
  * includes the start time of the slot.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

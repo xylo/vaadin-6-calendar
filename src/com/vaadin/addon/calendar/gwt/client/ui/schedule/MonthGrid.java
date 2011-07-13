@@ -1,5 +1,5 @@
-/**
- * 
+/*
+@VaadinAddonLicenseForJavaFiles@
  */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 

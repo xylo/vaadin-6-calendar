@@ -43,7 +43,7 @@
 		<echo> ${gwt.lib.dir}/gwt-user.jar</echo>
 		<echo> ${gwt.lib.dir}/gwt-dev.jar</echo>
 
-        <property name="base-name" value="${addon.name}-${version}" />
+        <property name="base-name" value="${addon.name}-${license.short.name}-${version}" />
         <property name="jar.name" value="${base-name}.jar"/>
         <property name="jar.path" value="${result-path}/${jar.name}"/>
 
@@ -86,6 +86,9 @@
     <!-- ================================================================== -->
 
     <target name="preprocess-src" depends="init">
+
+    	<property file="doc/java-license-header-${license.short.name}.properties" />
+    	
         <mkdir dir="${result-path}/src" />
 
     	<patternset id="preprocessable-files">
@@ -98,11 +101,12 @@
     	<patternset id="non-preprocessable-files">
     		<include name="**/*.png" />
 		</patternset>
-
-        <echo>Replacing @VERSION@ tag with build version for java/html/css/xml files.</echo>
+    	
+        <echo>Replacing @VERSION@ and @VaadinAddonLicenseForJavaFiles@ tags for java/html/css/xml files.</echo>
         <copy todir="${result-path}/src" overwrite="yes">
             <filterset id="versionfilter">
                 <filter token="VERSION" value="${version}" />
+            	<filter token="VaadinAddonLicenseForJavaFiles" value="${license.header.text}" />
             </filterset>
 
             <fileset dir="src">
@@ -338,7 +342,7 @@
 
     <!-- Create the ZIP distribution package. -->
     <target name="package-zip" depends="package-jar, javadoc, manual" unless="run.no-package-jar">
-        <property name="zip.name" value="${result-path}/${addon.name}-${version}.zip"/>
+        <property name="zip.name" value="${result-path}/${addon.name}-${license.short.name}-${version}.zip"/>
 
     	<!-- Make the zip manifest -->
     	<mkdir dir="${result-path}/META-INF"/>
@@ -363,11 +367,10 @@ Implementation-Vendor: IT Mill Oy
             <zipfileset prefix="doc" dir="doc">
                 <patternset>
                     <include name="README.TXT" />
-                	<include name="licensing.txt" />
-                    <include name="license-agpl-3.0.txt" />
-                	<include name="license-cval-2.0.txt" />
+                    <include name="license-${license.short.name}.txt" />
                 </patternset>
             </zipfileset>
+            <zipfileset file="doc/licensing-${license.short.name}.txt" fullpath="doc/licensing.txt" />
         </zip>
     </target>
 

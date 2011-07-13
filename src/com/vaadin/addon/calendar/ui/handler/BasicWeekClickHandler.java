@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui.handler;
 
 import java.util.Calendar;
@@ -11,7 +14,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
  * Implements basic functionality needed to change to week view when a week
  * number is clicked.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */
@@ -29,8 +32,8 @@ public class BasicWeekClickHandler implements WeekClickHandler {
         javaCalendar.set(GregorianCalendar.WEEK_OF_YEAR, week);
 
         // starting at the beginning of the week
-        javaCalendar.set(GregorianCalendar.DAY_OF_WEEK, javaCalendar
-                .getFirstDayOfWeek());
+        javaCalendar.set(GregorianCalendar.DAY_OF_WEEK,
+                javaCalendar.getFirstDayOfWeek());
         Date start = javaCalendar.getTime();
 
         // ending at the end of the week

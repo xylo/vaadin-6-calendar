@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui.handler;
 
 import java.util.Calendar;
@@ -10,7 +13,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 /**
  * Implements basic functionality needed to enable forward navigation.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

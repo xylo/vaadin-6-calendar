@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import java.io.Serializable;
@@ -12,7 +15,7 @@ import com.vaadin.tools.ReflectTools;
 /**
  * Interface for all Vaadin Calendar events.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */

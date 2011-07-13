@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import com.google.gwt.event.dom.client.BlurEvent;

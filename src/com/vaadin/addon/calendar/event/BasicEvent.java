@@ -1,5 +1,5 @@
-/**
- * 
+/*
+@VaadinAddonLicenseForJavaFiles@
  */
 package com.vaadin.addon.calendar.event;
 
@@ -14,7 +14,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  * {@link com.vaadin.addon.calendar.event.CalendarEvent CalendarEvent}. Has
  * setters for all required fields and fires events when this event is changed.
  * 
- * @author IT Mill Ltd.
+ * @author Vaadin Ltd.
  * @version
  * @VERSION@
  */
