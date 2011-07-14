@@ -9,7 +9,7 @@ All Rights Reserved
 Contents
 --------
 
-vaadin-calendar-1.x.jar
+vaadin-calendar-*-1.x.jar
  - The library
 
 doc/vaadin-calendar-manual.pdf
