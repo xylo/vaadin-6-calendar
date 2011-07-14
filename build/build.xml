@@ -350,7 +350,7 @@
 Vaadin-Package-Version: 1
 Implementation-Title: Vaadin Calendar
 Implementation-Version: ${version}
-Implementation-Vendor: IT Mill Oy
+Implementation-Vendor: ${addon.vendor}
        </echo>         
     	        	
         <echo>Packaging ${result-path}/${jar.name}</echo>
