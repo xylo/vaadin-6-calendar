@@ -9,7 +9,7 @@
   </context-param>
   
   <servlet>
-    <servlet-name>test</servlet-name>
+    <servlet-name>Demo</servlet-name>
     <servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
     <init-param>
       <description>
@@ -25,8 +25,34 @@
     </init-param>
   </servlet>
   
+  <!--  Testing -->
+	<servlet>
+		<servlet-name>TestingApplication</servlet-name>
+		<servlet-class>
+		com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>		
+		<init-param>
+			<param-name>application</param-name>
+			<param-value>com.vaadin.addon.calendar.test.TestingApplication</param-value>
+		</init-param>
+		<init-param>
+			<param-name>widgetset</param-name>
+			<param-value>com.vaadin.addon.calendar.gwt.CalendarWidgetset</param-value>
+		</init-param>
+   </servlet>	
+    
   <servlet-mapping>
-    <servlet-name>test</servlet-name>
+		<servlet-name>TestingApplication</servlet-name>
+		<url-pattern>/test/*</url-pattern>
+  </servlet-mapping>		
+	
+  <servlet-mapping>
+    <servlet-name>Demo</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
+  
+   <servlet-mapping>
+    <servlet-name>Demo</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

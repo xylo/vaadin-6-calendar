@@ -81,8 +81,6 @@ public interface CalendarEvent extends Serializable {
      */
     public class EventChange implements Serializable {
 
-        private static final long serialVersionUID = 6847631666440007162L;
-
         private CalendarEvent source;
 
         public EventChange(CalendarEvent source) {

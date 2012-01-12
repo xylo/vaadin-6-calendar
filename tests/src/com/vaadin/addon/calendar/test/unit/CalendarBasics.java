@@ -1,7 +1,7 @@
 /*
 @VaadinAddonLicenseForJavaFiles@
  */
-package com.vaadin.addon.calendar.test;
+package com.vaadin.addon.calendar.test.unit;
 
 import java.util.ArrayList;
 import java.util.Date;

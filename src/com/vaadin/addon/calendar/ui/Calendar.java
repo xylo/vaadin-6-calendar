@@ -19,6 +19,8 @@ import java.util.TimeZone;
 
 import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
+import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
@@ -46,6 +48,8 @@ import com.vaadin.addon.calendar.ui.handler.BasicEventMoveHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicEventResizeHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicForwardHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
+import com.vaadin.data.Container;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
@@ -81,11 +85,11 @@ import com.vaadin.ui.ClientWidget;
  */
 @ClientWidget(VCalendar.class)
 public class Calendar extends AbstractComponent implements
-        CalendarComponentEvents.NavigationNotifier,
-        CalendarComponentEvents.EventMoveNotifier,
-        CalendarComponentEvents.RangeSelectNotifier,
-        CalendarComponentEvents.EventResizeNotifier,
-        CalendarEventProvider.EventSetChangeListener, DropTarget {
+CalendarComponentEvents.NavigationNotifier,
+CalendarComponentEvents.EventMoveNotifier,
+CalendarComponentEvents.RangeSelectNotifier,
+CalendarComponentEvents.EventResizeNotifier,
+CalendarEventProvider.EventSetChangeListener, DropTarget {
 
     private static final long serialVersionUID = -1858262705387350736L;
 
@@ -483,7 +487,7 @@ public class Calendar extends AbstractComponent implements
     public void setWeeklyCaptionFormat(String dateFormatPattern) {
         if ((weeklyCaptionFormat == null && dateFormatPattern != null)
                 || (weeklyCaptionFormat != null && !weeklyCaptionFormat
-                        .equals(dateFormatPattern))) {
+                .equals(dateFormatPattern))) {
             weeklyCaptionFormat = dateFormatPattern;
             requestRepaint();
         }
@@ -591,6 +595,7 @@ public class Calendar extends AbstractComponent implements
         target.endTag("days");
 
         events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
+
         target.startTag("events");
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
@@ -778,7 +783,7 @@ public class Calendar extends AbstractComponent implements
                     int startMinutes = Integer.parseInt(dates[1]);
                     int endMinutes = Integer.parseInt(dates[2]);
                     currentCalendar
-                            .add(java.util.Calendar.MINUTE, startMinutes);
+                    .add(java.util.Calendar.MINUTE, startMinutes);
                     Date start = currentCalendar.getTime();
                     currentCalendar.add(java.util.Calendar.MINUTE, endMinutes
                             - startMinutes);
@@ -882,11 +887,25 @@ public class Calendar extends AbstractComponent implements
         }
     }
 
+    /**
+     * Fires an event move event to all server side move listerners
+     * 
+     * @param index
+     *            The index of the event in the events list
+     * @param newFromDatetime
+     *            The changed from date time
+     */
     protected void fireEventMove(int index, Date newFromDatetime) {
-        fireEvent(new MoveEvent(this, events.get(index), newFromDatetime));
+        MoveEvent event = new MoveEvent(this, events.get(index), newFromDatetime);
 
-        // make sure the result of the move event is painted back
-        requestRepaint();
+        if (calendarEventProvider instanceof EventMoveHandler) {
+            // Notify event provider if it is an event move handler
+            ((EventMoveHandler) calendarEventProvider).eventMove(event);
+        }
+
+        // Notify event move handler attached by using the
+        // setHandler(EventMoveHandler) method
+        fireEvent(event);
     }
 
     protected void fireWeekClick(int week, int year) {
@@ -903,16 +922,20 @@ public class Calendar extends AbstractComponent implements
 
     protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
         fireEvent(new RangeSelectEvent(this, from, to, monthlyMode));
-
-        // make sure the result of the range select event is painted back
-        requestRepaint();
     }
 
     protected void fireEventResize(int index, Date startTime, Date endTime) {
-        fireEvent(new EventResize(this, events.get(index), startTime, endTime));
+        EventResize event = new EventResize(this, events.get(index), startTime,
+                endTime);
 
-        // make sure the result of the resize event is painted back
-        requestRepaint();
+        if (calendarEventProvider instanceof EventResizeHandler) {
+            // Notify event provider if it is an event resize handler
+            ((EventResizeHandler) calendarEventProvider).eventResize(event);
+        }
+
+        // Notify event resize handler attached by using the
+        // setHandler(EventMoveHandler) method
+        fireEvent(event);
     }
 
     /**
@@ -1299,5 +1322,81 @@ public class Calendar extends AbstractComponent implements
         td.setHasDropTime(clientVariables.containsKey("dropSlotIndex"));
 
         return td;
+    }
+
+    /**
+     * Sets a container as a data source for the events in the calendar.
+     * Equivalent for doing
+     * <code>Calendar.setEventProvider(new ContainerEventProvider(container))</code>
+     * 
+     * Use this method if you are adding a container which uses the default
+     * property ids like {@link BeanItemContainer} for instance. If you are
+     * using custom properties instead use
+     * {@link Calendar#setContainerDataSource(com.vaadin.data.Container.Indexed, Object, Object, Object, Object, Object)}
+     * 
+     * @param container
+     *            The container to use as a datasource
+     */
+    public void setContainerDataSource(Container.Indexed container) {
+        ContainerEventProvider provider = new ContainerEventProvider(container);
+        provider.addListener(new CalendarEventProvider.EventSetChangeListener() {
+            public void eventSetChange(EventSetChange changeEvent) {
+                // Repaint if events change
+                requestRepaint();
+            }
+        });
+        provider.addListener(new EventChangeListener() {
+            public void eventChange(EventChange changeEvent) {
+                // Repaint if event changes
+                requestRepaint();
+            }
+        });
+        setEventProvider(provider);
+    }
+
+    /**
+     * Sets a container as a data source for the events in the calendar.
+     * Equivalent for doing
+     * <code>Calendar.setEventProvider(new ContainerEventProvider(container))</code>
+     * 
+     * @param container
+     *            The container to use as a data source
+     * @param captionProperty
+     *            The property that has the caption, null if no caption property
+     *            is present
+     * @param descriptionProperty
+     *            The property that has the description, null if no description
+     *            property is present
+     * @param startDateProperty
+     *            The property that has the starting date
+     * @param endDateProperty
+     *            The property that has the ending date
+     * @param styleNameProperty
+     *            The property that has the stylename, null if no stylname
+     *            property is present
+     */
+    public void setContainerDataSource(Container.Indexed container,
+            Object captionProperty, Object descriptionProperty,
+            Object startDateProperty, Object endDateProperty,
+            Object styleNameProperty) {
+        ContainerEventProvider provider = new ContainerEventProvider(container);
+        provider.setCaptionProperty(captionProperty);
+        provider.setDescriptionProperty(descriptionProperty);
+        provider.setStartDateProperty(startDateProperty);
+        provider.setEndDateProperty(endDateProperty);
+        provider.setStyleNameProperty(styleNameProperty);
+        provider.addListener(new CalendarEventProvider.EventSetChangeListener() {
+            public void eventSetChange(EventSetChange changeEvent) {
+                // Repaint if events change
+                requestRepaint();
+            }
+        });
+        provider.addListener(new EventChangeListener() {
+            public void eventChange(EventChange changeEvent) {
+                // Repaint if event changes
+                requestRepaint();
+            }
+        });
+        setEventProvider(provider);
     }
 }

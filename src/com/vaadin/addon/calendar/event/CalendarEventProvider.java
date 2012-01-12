@@ -46,9 +46,8 @@ public interface CalendarEventProvider extends Serializable {
      * CalendarEventProvider} .
      * 
      */
+    @SuppressWarnings("serial")
     public class EventSetChange implements Serializable {
-
-        private static final long serialVersionUID = -8866008738947581269L;
 
         private CalendarEventProvider source;
 

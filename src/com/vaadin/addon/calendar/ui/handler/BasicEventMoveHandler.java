@@ -18,9 +18,8 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
  * @VERSION@
  * 
  */
+@SuppressWarnings("serial")
 public class BasicEventMoveHandler implements EventMoveHandler {
-
-    private static final long serialVersionUID = -2311929051549036879L;
 
     public void eventMove(MoveEvent event) {
         CalendarEvent calendarEvent = event.getCalendarEvent();

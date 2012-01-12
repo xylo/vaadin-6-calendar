@@ -18,20 +18,62 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  * @version
  * @VERSION@
  */
+@SuppressWarnings("serial")
 public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
-
-    private static final long serialVersionUID = -7164298377129791491L;
 
     private String caption;
     private String description;
     private Date end;
     private Date start;
     private String styleName;
-    private List<EventChangeListener> listeners = new ArrayList<EventChangeListener>();
+    private transient List<EventChangeListener> listeners = new ArrayList<EventChangeListener>();
 
     private boolean isAllDay;
 
-    // property getters from interface
+    /**
+     * Default constructor
+     */
+    public BasicEvent() {
+
+    }
+
+    /**
+     * Constructor for creating an event with the same start and end date
+     * 
+     * @param caption
+     *            The caption for the event
+     * @param description
+     *            The description for the event
+     * @param date
+     *            The date the event occurred
+     */
+    public BasicEvent(String caption, String description, Date date) {
+        this.caption = caption;
+        this.description = description;
+        this.start = date;
+        this.end = date;
+    }
+
+    /**
+     * Constructor for creating an event with a start date and an end date.
+     * Start date should be before the end date
+     * 
+     * @param caption
+     *            The caption for the event
+     * @param description
+     *            The description for the event
+     * @param startDate
+     *            The start date of the event
+     * @param endDate
+     *            The end date of the event
+     */
+    public BasicEvent(String caption, String description, Date startDate,
+            Date endDate) {
+        this.caption = caption;
+        this.description = description;
+        this.start = startDate;
+        this.end = endDate;
+    }
 
     /*
      * (non-Javadoc)
