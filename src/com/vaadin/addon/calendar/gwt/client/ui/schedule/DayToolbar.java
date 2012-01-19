@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private int width = 0;
@@ -19,9 +19,9 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected Button nextLabel;
     private boolean verticalSized;
     private boolean horizontalSized;
-    private GWTCalendar calendar;
+    private VCalendar calendar;
 
-    public DayToolbar(GWTCalendar vcalendar) {
+    public DayToolbar(VCalendar vcalendar) {
         calendar = vcalendar;
 
         setStylePrimaryName("v-calendar-header-week");
@@ -54,7 +54,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             int remain = width % (count - 2);
             int cellw2 = cellw + 1;
             if (cellw > 0) {
-                int[] cellWidths = GWTCalendar
+                int[] cellWidths = VCalendar
                         .distributeSize(width, count - 2, 0);
                 for (int i = 1; i < count - 1; i++) {
                     Widget widget = getWidget(i);

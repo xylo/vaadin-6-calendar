@@ -11,7 +11,7 @@ import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventEditor;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
@@ -103,7 +103,7 @@ public class CustomizedCalendarDemo extends Application {
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
 
-                if (currentCalDateRange < GWTCalendar.DAYINMILLIS) {
+                if (currentCalDateRange < VCalendar.DAYINMILLIS) {
                     // Change the date range to the current week
                     cal.setStartDate(cal.getFirstDateForWeek(event.getDate()));
                     cal.setEndDate(cal.getLastDateForWeek(event.getDate()));
@@ -271,7 +271,7 @@ public class CustomizedCalendarDemo extends Application {
 
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
-                if (currentCalDateRange > (GWTCalendar.DAYINMILLIS * 7)) {
+                if (currentCalDateRange > (VCalendar.DAYINMILLIS * 7)) {
                     return;
                 }
 

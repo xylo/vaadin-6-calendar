@@ -9,7 +9,7 @@ import java.util.Locale;
 import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
@@ -66,7 +66,7 @@ public class SimpleCalTest extends Application {
                 Calendar cal = event.getComponent();
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
-                if (currentCalDateRange < GWTCalendar.DAYINMILLIS) {
+                if (currentCalDateRange < VCalendar.DAYINMILLIS) {
                     // Change the date range to the current week
                     cal.setStartDate(cal.getFirstDateForWeek(event.getDate()));
                     cal.setEndDate(cal.getLastDateForWeek(event.getDate()));
@@ -127,7 +127,7 @@ public class SimpleCalTest extends Application {
             public void rangeSelect(RangeSelectEvent event) {
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
-                boolean allDayEvent = currentCalDateRange > (GWTCalendar.DAYINMILLIS * 7);
+                boolean allDayEvent = currentCalDateRange > (VCalendar.DAYINMILLIS * 7);
                 MyEvent myEvent = new MyEvent("", event.getStart(), event
                         .getEnd(), allDayEvent);
 
@@ -213,7 +213,7 @@ public class SimpleCalTest extends Application {
 
                 long currentCalDateRange = cal.getEndDate().getTime()
                         - cal.getStartDate().getTime();
-                if (currentCalDateRange > (GWTCalendar.DAYINMILLIS * 7)) {
+                if (currentCalDateRange > (VCalendar.DAYINMILLIS * 7)) {
                     return;
                 }
 

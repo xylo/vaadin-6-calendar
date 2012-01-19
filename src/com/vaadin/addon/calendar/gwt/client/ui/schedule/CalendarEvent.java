@@ -6,7 +6,7 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class CalendarEvent {
     private int index;
@@ -128,7 +128,7 @@ public class CalendarEvent {
     }
 
     public long getRangeInMinutes() {
-        return (getRangeInMilliseconds() / GWTCalendar.MINUTEINMILLIS);
+        return (getRangeInMilliseconds() / VCalendar.MINUTEINMILLIS);
     }
 
     public long getRangeInMinutesForDay(Date targetDay) {
@@ -136,7 +136,7 @@ public class CalendarEvent {
             // Time range is on different days. Calculate the second day's
             // range.
             long range = (getEndTime().getTime() - getEnd().getTime())
-                    / GWTCalendar.MINUTEINMILLIS;
+                    / VCalendar.MINUTEINMILLIS;
 
             if (getEnd().compareTo(targetDay) != 0) {
                 // Calculate first day's range.
@@ -151,7 +151,7 @@ public class CalendarEvent {
 
     @SuppressWarnings("deprecation")
     public boolean isTimeOnDifferentDays() {
-        if (getEndTime().getTime() - getStart().getTime() > GWTCalendar.DAYINMILLIS) {
+        if (getEndTime().getTime() - getStart().getTime() > VCalendar.DAYINMILLIS) {
             return true;
         }
 

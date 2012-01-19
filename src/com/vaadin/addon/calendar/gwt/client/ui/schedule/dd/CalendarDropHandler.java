@@ -3,7 +3,7 @@
  */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule.dd;
 
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler;
@@ -14,9 +14,9 @@ import com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler;
  */
 public abstract class CalendarDropHandler extends VAbstractDropHandler {
 
-    protected VCalendar calendarPaintable;
+    protected VCalendarPaintable calendarPaintable;
 
-    public void setCalendarPaintable(VCalendar calendarPaintable) {
+    public void setCalendarPaintable(VCalendarPaintable calendarPaintable) {
         this.calendarPaintable = calendarPaintable;
     }
 

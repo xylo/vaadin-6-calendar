@@ -9,19 +9,19 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
-    private final GWTCalendar calendar;
+    private final VCalendar calendar;
     private boolean rangeSelectDisabled;
     private boolean disabled;
     private final HandlerRegistration keyDownHandler;
 
-    public MonthGrid(GWTCalendar parent, int rows, int columns) {
+    public MonthGrid(VCalendar parent, int rows, int columns) {
         super(rows, columns);
         calendar = parent;
         setCellSpacing(0);

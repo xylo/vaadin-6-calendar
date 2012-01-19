@@ -7,14 +7,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;
-    private GWTCalendar calendar;
+    private VCalendar calendar;
     private boolean isHeightUndefined;
 
-    public SimpleWeekToolbar(GWTCalendar parent) {
+    public SimpleWeekToolbar(VCalendar parent) {
         calendar = parent;
         setCellSpacing(0);
         setCellPadding(0);

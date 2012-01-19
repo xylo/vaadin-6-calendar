@@ -6,7 +6,7 @@ package com.vaadin.addon.calendar.ui.handler;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
 
@@ -26,7 +26,7 @@ public class BasicForwardHandler implements ForwardHandler {
         Date end = event.getComponent().getEndDate();
 
         // calculate amount to move forward
-        int durationInDays = (int) (((end.getTime()) - start.getTime()) / GWTCalendar.DAYINMILLIS);
+        int durationInDays = (int) (((end.getTime()) - start.getTime()) / VCalendar.DAYINMILLIS);
         durationInDays++;
 
         // set new start and end times

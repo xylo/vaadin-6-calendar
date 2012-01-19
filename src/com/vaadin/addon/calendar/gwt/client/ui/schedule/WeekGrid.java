@@ -42,7 +42,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.DateTimeService;
@@ -54,7 +54,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int width = 0;
     private int height = 0;
     private final HorizontalPanel content;
-    private GWTCalendar calendar;
+    private VCalendar calendar;
     private boolean disabled;
     private final Timebar timebar;
     private Panel wrapper;
@@ -68,7 +68,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int firstHour;
     private int lastHour;
 
-    public WeekGrid(GWTCalendar parent, boolean format24h) {
+    public WeekGrid(VCalendar parent, boolean format24h) {
         setCalendar(parent);
         content = new HorizontalPanel();
         timebar = new Timebar(format24h);
@@ -231,7 +231,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int count = content.getWidgetCount();
             int datesWidth = width;
             if (datesWidth > 0 && count > 1) {
-                cellWidths = GWTCalendar
+                cellWidths = VCalendar
                         .distributeSize(datesWidth, count - 1, -1);
 
                 for (int i = 1; i < count; i++) {
@@ -267,7 +267,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             if (count > 1) {
                 DateCell first = (DateCell) content.getWidget(1);
                 dateCellBorder = first.getSlotBorder();
-                cellHeights = GWTCalendar.distributeSize(height,
+                cellHeights = VCalendar.distributeSize(height,
                         first.getNumberOfSlots(), -dateCellBorder);
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
@@ -304,7 +304,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             int comp2 = dcDate.compareTo(toTime);
             if (comp >= 0
                     && comp2 < 0
-                    || (comp == 0 && comp2 == 0 && GWTCalendar
+                    || (comp == 0 && comp2 == 0 && VCalendar
                     .isZeroLengthMidnightEvent(e))) {
                 // Same event may be over two DateCells if event's date
                 // range floats over one day. It can't float over two days,
@@ -488,14 +488,14 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
      * @param calendar
      *            the calendar to set
      */
-    public void setCalendar(GWTCalendar calendar) {
+    public void setCalendar(VCalendar calendar) {
         this.calendar = calendar;
     }
 
     /**
      * @return the calendar
      */
-    public GWTCalendar getCalendar() {
+    public VCalendar getCalendar() {
         return calendar;
     }
 
@@ -1452,7 +1452,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 eventContent.addClassName("v-calendar-event-content");
                 getElement().appendChild(eventContent);
 
-                GWTCalendar calendar = weekGrid.getCalendar();
+                VCalendar calendar = weekGrid.getCalendar();
                 if (weekGrid.getCalendar().isEventResizeAllowed()) {
                     topResizeBar = DOM.createDiv();
                     bottomResizeBar = DOM.createDiv();
@@ -1493,7 +1493,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             @Override
             public void onBrowserEvent(Event event) {
                 super.onBrowserEvent(event);
-                GWTCalendar calendar = weekGrid.getCalendar();
+                VCalendar calendar = weekGrid.getCalendar();
                 calendar.handleTooltipEvent(event, eventIndex);
             }
 
@@ -1729,7 +1729,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
                 if (!clickTargetsResize()
                         && weekGrid.getCalendar().isEventMoveAllowed()) {
-                    long daysMs = dayDiff * GWTCalendar.DAYINMILLIS;
+                    long daysMs = dayDiff * VCalendar.DAYINMILLIS;
                     from.setTime(startDatetimeFrom.getTime() + daysMs);
                     from.setTime(from.getTime()
                             + ((long) halfHourInMilliSeconds * halfHourDiff));
@@ -1866,7 +1866,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 if (eventStartAtDifferentDay) {
                     long minutesOnPrevDay = (getTargetDateByCurrentPosition(
                             dayOffset).getTime() - from.getTime())
-                            / GWTCalendar.MINUTEINMILLIS;
+                            / VCalendar.MINUTEINMILLIS;
                     startFromMinutes = -1 * minutesOnPrevDay;
                 }
 
@@ -1908,7 +1908,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
              *         resized
              */
             private long getMinTimeRange() {
-                return GWTCalendar.MINUTEINMILLIS * 30;
+                return VCalendar.MINUTEINMILLIS * 30;
             }
 
             /**
@@ -1995,7 +1995,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
     }
 
-    public GWTCalendar getParentCalendar() {
+    public VCalendar getParentCalendar() {
         return calendar;
     }
 }

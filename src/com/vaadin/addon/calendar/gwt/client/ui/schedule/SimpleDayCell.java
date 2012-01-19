@@ -26,7 +26,7 @@ import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
@@ -43,7 +43,7 @@ NativePreviewHandler {
     private static int EVENTHEIGHT = -1;
     private static final int BORDERPADDINGSIZE = 1;
 
-    private final GWTCalendar calendar;
+    private final VCalendar calendar;
     private Date date;
     private int intHeight;
     private final HTML bottomspacer;
@@ -77,7 +77,7 @@ NativePreviewHandler {
     private MonthGrid monthGrid;
     private HandlerRegistration keyDownHandler;
 
-    public SimpleDayCell(GWTCalendar calendar, int row, int cell) {
+    public SimpleDayCell(VCalendar calendar, int row, int cell) {
         this.calendar = calendar;
         this.row = row;
         this.cell = cell;
@@ -254,7 +254,7 @@ NativePreviewHandler {
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         long rangeInMillis = e.getRangeInMilliseconds();
-        boolean timeEvent = rangeInMillis <= GWTCalendar.DAYINMILLIS
+        boolean timeEvent = rangeInMillis <= VCalendar.DAYINMILLIS
                 && !e.isAllDay();
         Date fromDatetime = e.getStartTime();
 
@@ -521,8 +521,8 @@ NativePreviewHandler {
         Date to = e.getEnd();
         long duration = to.getTime() - from.getTime();
 
-        long daysMs = dayDiff * GWTCalendar.DAYINMILLIS;
-        long weeksMs = weekDiff * GWTCalendar.WEEKINMILLIS;
+        long daysMs = dayDiff * VCalendar.DAYINMILLIS;
+        long weeksMs = weekDiff * VCalendar.WEEKINMILLIS;
         from.setTime(startDateFrom.getTime() + weeksMs + daysMs);
         to.setTime((from.getTime() + duration));
         e.setStart(from);
@@ -709,7 +709,7 @@ NativePreviewHandler {
 
         private boolean timeSpecificEvent = false;
         private Integer eventIndex;
-        private GWTCalendar calendar;
+        private VCalendar calendar;
 
         public MonthEventLabel() {
             setStylePrimaryName("v-calendar-event");
@@ -720,7 +720,7 @@ NativePreviewHandler {
             eventIndex = index;
         }
 
-        public void setCalendar(GWTCalendar calendar) {
+        public void setCalendar(VCalendar calendar) {
             this.calendar = calendar;
         }
 

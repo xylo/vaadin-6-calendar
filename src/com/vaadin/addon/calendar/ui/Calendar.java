@@ -26,8 +26,8 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -87,7 +87,7 @@ import com.vaadin.ui.ClientWidget;
  * @version
  * @VERSION@
  */
-@ClientWidget(VCalendar.class)
+@ClientWidget(VCalendarPaintable.class)
 public class Calendar extends AbstractComponent implements
 CalendarComponentEvents.NavigationNotifier,
 CalendarComponentEvents.EventMoveNotifier,
@@ -535,27 +535,27 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             endDate = currentCalendar.getTime();
         }
 
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / GWTCalendar.DAYINMILLIS);
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
         durationInDays++;
         if (durationInDays > 60) {
             throw new PaintException("Daterange is too big (max 60) = "
                     + durationInDays);
         }
 
-        target.addAttribute(VCalendar.ATTR_FORMAT24H,
+        target.addAttribute(VCalendarPaintable.ATTR_FORMAT24H,
                 getTimeFormat() == TimeFormat.Format24H);
-        target.addAttribute(VCalendar.ATTR_DAY_NAMES, getDayNamesShort());
-        target.addAttribute(VCalendar.ATTR_MONTH_NAMES, getMonthNamesShort());
-        target.addAttribute(VCalendar.ATTR_FDOW,
+        target.addAttribute(VCalendarPaintable.ATTR_DAY_NAMES, getDayNamesShort());
+        target.addAttribute(VCalendarPaintable.ATTR_MONTH_NAMES, getMonthNamesShort());
+        target.addAttribute(VCalendarPaintable.ATTR_FDOW,
                 currentCalendar.getFirstDayOfWeek());
-        target.addAttribute(VCalendar.ATTR_READONLY, isReadOnly());
+        target.addAttribute(VCalendarPaintable.ATTR_READONLY, isReadOnly());
         // target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
 
-        target.addAttribute(VCalendar.ATTR_FIRSTDAYOFWEEK, firstDay);
-        target.addAttribute(VCalendar.ATTR_LASTDAYOFWEEK, lastDay);
+        target.addAttribute(VCalendarPaintable.ATTR_FIRSTDAYOFWEEK, firstDay);
+        target.addAttribute(VCalendarPaintable.ATTR_LASTDAYOFWEEK, lastDay);
 
-        target.addAttribute(VCalendar.ATTR_FIRSTHOUROFDAY, firstHour);
-        target.addAttribute(VCalendar.ATTR_LASTHOUROFDAY, lastHour);
+        target.addAttribute(VCalendarPaintable.ATTR_FIRSTHOUROFDAY, firstHour);
+        target.addAttribute(VCalendarPaintable.ATTR_LASTHOUROFDAY, lastHour);
 
         // Use same timezone in all dates this component handles.
         // Show "now"-marker in browser within given timezone.
@@ -566,7 +566,7 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
         // Reset time zones for custom date formats
         df_date.setTimeZone(currentCalendar.getTimeZone());
         df_time.setTimeZone(currentCalendar.getTimeZone());
-        target.addAttribute(VCalendar.ATTR_NOW, df_date.format(now) + " "
+        target.addAttribute(VCalendarPaintable.ATTR_NOW, df_date.format(now) + " "
                 + df_time.format(now));
 
         Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
@@ -585,13 +585,13 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             int dow = getDowByLocale(currentCalendar);
 
             target.startTag("day");
-            target.addAttribute(VCalendar.ATTR_DATE,
+            target.addAttribute(VCalendarPaintable.ATTR_DATE,
                     df_date.format(currentCalendar.getTime()));
-            target.addAttribute(VCalendar.ATTR_FDATE,
+            target.addAttribute(VCalendarPaintable.ATTR_FDATE,
                     weeklyCaptionFormatter.format(currentCalendar.getTime()));
 
-            target.addAttribute(VCalendar.ATTR_DOW, dow);
-            target.addAttribute(VCalendar.ATTR_WEEK,
+            target.addAttribute(VCalendarPaintable.ATTR_DOW, dow);
+            target.addAttribute(VCalendarPaintable.ATTR_WEEK,
                     currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
             currentCalendar.add(java.util.Calendar.DATE, 1);
@@ -610,7 +610,7 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             }
         }
         target.endTag("events");
-        target.addVariable(this, VCalendar.ATTR_SCROLL, scrollTop);
+        target.addVariable(this, VCalendarPaintable.ATTR_SCROLL, scrollTop);
         target.addVariable(this, "navigation", 0);
 
         if (dropHandler != null) {
@@ -656,20 +656,20 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
      */
     protected void paintEvent(int i, PaintTarget target) throws PaintException {
         CalendarEvent e = events.get(i);
-        target.addAttribute(VCalendar.ATTR_INDEX, i);
-        target.addAttribute(VCalendar.ATTR_CAPTION,
+        target.addAttribute(VCalendarPaintable.ATTR_INDEX, i);
+        target.addAttribute(VCalendarPaintable.ATTR_CAPTION,
                 (e.getCaption() == null ? "" : e.getCaption()));
-        target.addAttribute(VCalendar.ATTR_DATEFROM,
+        target.addAttribute(VCalendarPaintable.ATTR_DATEFROM,
                 df_date.format(e.getStart()));
-        target.addAttribute(VCalendar.ATTR_DATETO, df_date.format(e.getEnd()));
-        target.addAttribute(VCalendar.ATTR_TIMEFROM,
+        target.addAttribute(VCalendarPaintable.ATTR_DATETO, df_date.format(e.getEnd()));
+        target.addAttribute(VCalendarPaintable.ATTR_TIMEFROM,
                 df_time.format(e.getStart()));
-        target.addAttribute(VCalendar.ATTR_TIMETO, df_time.format(e.getEnd()));
-        target.addAttribute(VCalendar.ATTR_DESCRIPTION,
+        target.addAttribute(VCalendarPaintable.ATTR_TIMETO, df_time.format(e.getEnd()));
+        target.addAttribute(VCalendarPaintable.ATTR_DESCRIPTION,
                 e.getDescription() == null ? "" : e.getDescription());
-        target.addAttribute(VCalendar.ATTR_STYLE, e.getStyleName() == null ? ""
+        target.addAttribute(VCalendarPaintable.ATTR_STYLE, e.getStyleName() == null ? ""
                 : e.getStyleName());
-        target.addAttribute(VCalendar.ATTR_ALLDAY, e.isAllDay());
+        target.addAttribute(VCalendarPaintable.ATTR_ALLDAY, e.isAllDay());
     }
 
     /*
@@ -704,8 +704,8 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             handleWeekClick((String) variables.get(CalendarEventId.WEEKCLICK));
         }
 
-        if (variables.containsKey(VCalendar.ATTR_SCROLL)) {
-            handleScroll(variables.get(VCalendar.ATTR_SCROLL).toString());
+        if (variables.containsKey(VCalendarPaintable.ATTR_SCROLL)) {
+            handleScroll(variables.get(VCalendarPaintable.ATTR_SCROLL).toString());
         }
 
         if (variables.containsKey(CalendarEventId.EVENTMOVE)
@@ -713,7 +713,7 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             handleEventMove(variables.get(CalendarEventId.EVENTMOVE).toString());
         }
 
-        if (variables.containsKey(VCalendar.ATTR_NAVIGATION)) {
+        if (variables.containsKey(VCalendarPaintable.ATTR_NAVIGATION)) {
             handleNavigation((Boolean) variables.get("navigation"));
         }
 

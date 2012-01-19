@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 
@@ -29,11 +29,11 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     private int rowCount = 0;
 
-    private GWTCalendar calendar;
+    private VCalendar calendar;
 
     private boolean undefinedWidth;
 
-    public WeeklyLongEvents(GWTCalendar calendar) {
+    public WeeklyLongEvents(VCalendar calendar) {
         setStylePrimaryName("v-calendar-weekly-longevents");
         this.calendar = calendar;
     }
@@ -179,7 +179,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
         private Widget clickTargetWidget;
 
-        private GWTCalendar calendar;
+        private VCalendar calendar;
 
         private static int borderWidth = -1;
 
@@ -194,7 +194,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
             return borderWidth;
         }
 
-        public void setCalendar(GWTCalendar calendar) {
+        public void setCalendar(VCalendar calendar) {
             this.calendar = calendar;
         }
 
@@ -257,7 +257,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
     public static class DateCell extends HTML {
         private Date date;
         private CalendarEvent calendarEvent;
-        private GWTCalendar calendar;
+        private VCalendar calendar;
 
         public DateCell() {
             sinkEvents(VTooltip.TOOLTIP_EVENTS);
@@ -285,11 +285,11 @@ public class WeeklyLongEvents extends HorizontalPanel {
             return calendarEvent;
         }
 
-        public void setCalendar(GWTCalendar calendar) {
+        public void setCalendar(VCalendar calendar) {
             this.calendar = calendar;
         }
 
-        public GWTCalendar getCalendar() {
+        public VCalendar getCalendar() {
             return calendar;
         }
     }
