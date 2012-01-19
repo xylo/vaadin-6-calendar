@@ -35,7 +35,7 @@ import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.ui.dd.VDropHandler;
 import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
 
-public class VCalendar extends Composite implements Paintable, VHasDropHandler {
+public class GWTCalendar extends Composite implements Paintable, VHasDropHandler {
 
     public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
@@ -111,7 +111,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
     private int firstHour;
     private int lastHour;
 
-    public VCalendar() {
+    public GWTCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
         setStylePrimaryName("v-calendar");
@@ -340,7 +340,7 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
                         eventMoving = sdc.getMoveEvent() != null;
                     }
                     long d = e.getRangeInMilliseconds();
-                    if ((d > 0 && d <= VCalendar.DAYINMILLIS) && !e.isAllDay()) {
+                    if ((d > 0 && d <= GWTCalendar.DAYINMILLIS) && !e.isAllDay()) {
                         timeCells.add(sdc);
                     } else {
                         dayCells.add(sdc);
@@ -824,13 +824,13 @@ public class VCalendar extends Composite implements Paintable, VHasDropHandler {
 
                 if (d2.equals(0L) && d1.equals(0L)) {
                     return ((Integer) o2.getIndex()).compareTo(o1.getIndex());
-                } else if (d2.equals(0L) && d1 >= VCalendar.DAYINMILLIS) {
+                } else if (d2.equals(0L) && d1 >= GWTCalendar.DAYINMILLIS) {
                     return -1;
-                } else if (d2.equals(0L) && d1 < VCalendar.DAYINMILLIS) {
+                } else if (d2.equals(0L) && d1 < GWTCalendar.DAYINMILLIS) {
                     return 1;
-                } else if (d1.equals(0L) && d2 >= VCalendar.DAYINMILLIS) {
+                } else if (d1.equals(0L) && d2 >= GWTCalendar.DAYINMILLIS) {
                     return 1;
-                } else if (d1.equals(0L) && d2 < VCalendar.DAYINMILLIS) {
+                } else if (d1.equals(0L) && d2 < GWTCalendar.DAYINMILLIS) {
                     return -1;
                 }
                 r = d2.compareTo(d1);
