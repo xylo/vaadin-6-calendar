@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
@@ -27,6 +29,7 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
@@ -92,8 +95,6 @@ CalendarComponentEvents.RangeSelectNotifier,
 CalendarComponentEvents.EventResizeNotifier,
 CalendarEventProvider.EventSetChangeListener, DropTarget {
 
-    private static final long serialVersionUID = -1858262705387350736L;
-
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
      */
@@ -134,7 +135,8 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
     protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
 
     /** Date format that will be used in the UIDL for both date and time. */
-    protected DateFormat df_date_time = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+    protected DateFormat df_date_time = new SimpleDateFormat(
+            DateUtil.CLIENT_DATE_FORMAT + "-" + DateUtil.CLIENT_TIME_FORMAT);
 
     /**
      * Week view's scroll position. Client sends updates to this value so that
@@ -172,6 +174,8 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
      * Last hour to show for a day
      */
     private int lastHour = 23;
+
+    private Logger logger = Logger.getLogger(Calendar.class.getName());
 
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
@@ -752,9 +756,9 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
                         fireEventMove(index, d);
                     }
                 } catch (ParseException e) {
-                    // NOP
+                    logger.log(Level.WARNING, e.getMessage());
                 } catch (NumberFormatException e) {
-                    // NOP
+                    logger.log(Level.WARNING, e.getMessage());
                 }
             }
         }

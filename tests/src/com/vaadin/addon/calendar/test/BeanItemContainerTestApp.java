@@ -17,11 +17,11 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.Form;
 import com.vaadin.ui.FormFieldFactory;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 
-public class BeanItemContainerTestApp extends VerticalLayout {
+public class BeanItemContainerTestApp extends VerticalSplitPanel {
 
     private Calendar calendar;
 

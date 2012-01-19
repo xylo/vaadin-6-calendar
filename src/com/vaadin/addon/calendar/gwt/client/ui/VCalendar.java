@@ -328,6 +328,7 @@ VHasDropHandler {
             sb.append(event.getIndex());
             sb.append(":");
             sb.append(DateUtil.formatClientSideDate(event.getStart()));
+            sb.append("-");
             sb.append(DateUtil.formatClientSideTime(event.getStartTime()));
             client.updateVariable(PID, CalendarEventId.EVENTMOVE,
                     sb.toString(), true);
@@ -371,13 +372,17 @@ VHasDropHandler {
             StringBuilder buffer = new StringBuilder();
             buffer.append(event.getIndex());
             buffer.append(",");
+
             buffer.append(DateUtil.formatClientSideDate(event.getStart()));
             buffer.append("-");
             buffer.append(DateUtil.formatClientSideTime(event.getStartTime()));
+
             buffer.append(",");
+
             buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
             buffer.append("-");
             buffer.append(DateUtil.formatClientSideTime(event.getEndTime()));
+
             client.updateVariable(PID, CalendarEventId.EVENTRESIZE,
                     buffer.toString(), true);
         }

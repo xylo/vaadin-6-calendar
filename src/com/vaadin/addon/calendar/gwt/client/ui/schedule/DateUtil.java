@@ -9,6 +9,9 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class DateUtil {
 
+    public static final String CLIENT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String CLIENT_TIME_FORMAT = "HH-mm";
+
     /**
      * Checks if dates are same day without checking datetimes.
      * 
@@ -33,7 +36,8 @@ public class DateUtil {
      * @return given Date as String, for communicating to server-side
      */
     public static String formatClientSideDate(Date date) {
-        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
+        DateTimeFormat dateformat_date = DateTimeFormat
+                .getFormat(CLIENT_DATE_FORMAT);
         return dateformat_date.format(date);
     }
 
@@ -42,8 +46,9 @@ public class DateUtil {
      *            the date to format
      * @return given Date as String, for communicating to server-side
      */
-    public static Object formatClientSideTime(Date date) {
-        DateTimeFormat dateformat_date = DateTimeFormat.getFormat("HH-mm");
+    public static String formatClientSideTime(Date date) {
+        DateTimeFormat dateformat_date = DateTimeFormat
+                .getFormat(CLIENT_TIME_FORMAT);
         return dateformat_date.format(date);
     }
 }
