@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventClickListener;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 
@@ -34,16 +33,13 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
     private boolean undefinedWidth;
 
-    private final EventClickListener eventClickListener;
-
-    public WeeklyLongEvents(GWTCalendar calendar, EventClickListener ecl) {
-        this.eventClickListener = ecl;
+    public WeeklyLongEvents(GWTCalendar calendar) {
         setStylePrimaryName("v-calendar-weekly-longevents");
         this.calendar = calendar;
     }
 
     public void addDate(Date d) {
-        DateCellContainer dcc = new DateCellContainer(eventClickListener);
+        DateCellContainer dcc = new DateCellContainer();
         dcc.setDate(d);
         dcc.setCalendar(calendar);
         add(dcc);
@@ -187,10 +183,7 @@ public class WeeklyLongEvents extends HorizontalPanel {
 
         private static int borderWidth = -1;
 
-        private final EventClickListener eventClickListener;
-
-        public DateCellContainer(EventClickListener ecl) {
-            eventClickListener = ecl;
+        public DateCellContainer() {
             setStylePrimaryName("v-calendar-datecell");
         }
 
@@ -254,8 +247,8 @@ public class WeeklyLongEvents extends HorizontalPanel {
                     && !calendar.isDisabledOrReadOnly()) {
                 CalendarEvent calendarEvent = ((DateCell) clickTargetWidget)
                         .getEvent();
-                if (eventClickListener != null) {
-                    eventClickListener.eventClick(calendarEvent);
+                if (calendar.getEventClickListener() != null) {
+                    calendar.getEventClickListener().eventClick(calendarEvent);
                 }
             }
         }
@@ -299,9 +292,5 @@ public class WeeklyLongEvents extends HorizontalPanel {
         public GWTCalendar getCalendar() {
             return calendar;
         }
-    }
-
-    EventClickListener getEventClickListener() {
-        return eventClickListener;
     }
 }

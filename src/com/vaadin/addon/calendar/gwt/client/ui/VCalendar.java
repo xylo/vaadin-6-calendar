@@ -28,7 +28,7 @@ import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
  * @since 1.0.0
  */
 public class VCalendar extends GWTCalendar implements Paintable,
-VHasDropHandler {
+        VHasDropHandler {
 
     public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
@@ -59,6 +59,116 @@ VHasDropHandler {
     private CalendarDropHandler dropHandler;
 
     private String PID;
+
+    public VCalendar() {
+
+        // Listen to events
+        registerListeners();
+
+    }
+
+    protected void registerListeners() {
+        setListener(new DateClickListener() {
+            public void dateClick(String date) {
+                if (!isDisabledOrReadOnly()
+                        && getClient().hasEventListeners(VCalendar.this,
+                                CalendarEventId.DATECLICK)) {
+                    client.updateVariable(PID, CalendarEventId.DATECLICK, date, true);
+                }
+            }
+        });
+        setListener(new ForwardListener() {
+            public void forward() {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.FORWARD)) {
+                    client.updateVariable(PID, ATTR_NAVIGATION, true, true);
+                }
+            }
+        });
+        setListener(new BackwardListener() {
+            public void backward() {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.BACKWARD)) {
+                    client.updateVariable(PID, ATTR_NAVIGATION, false, true);
+                }
+            }
+        });
+        setListener(new RangeSelectListener() {
+            public void rangeSelected(String value) {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.RANGESELECT)) {
+                    client.updateVariable(PID, CalendarEventId.RANGESELECT,
+                            value, true);
+                }
+            }
+        });
+        setListener(new WeekClickListener() {
+            public void weekClick(String event) {
+                if (!isDisabledOrReadOnly()
+                        && client.hasEventListeners(VCalendar.this,
+                                CalendarEventId.WEEKCLICK)) {
+                    client.updateVariable(PID, CalendarEventId.WEEKCLICK,
+                            event, true);
+                }
+            }
+        });
+        setListener(new EventMovedListener() {
+            public void eventMoved(CalendarEvent event) {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.EVENTMOVE)) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(event.getIndex());
+                    sb.append(":");
+                    sb.append(DateUtil.formatClientSideDate(event.getStart()));
+                    sb.append("-");
+                    sb.append(DateUtil.formatClientSideTime(event
+                            .getStartTime()));
+                    client.updateVariable(PID, CalendarEventId.EVENTMOVE,
+                            sb.toString(), true);
+                }
+            }
+        });
+        setListener(new EventResizeListener() {
+            public void eventResized(CalendarEvent event) {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.EVENTRESIZE)) {
+                    StringBuilder buffer = new StringBuilder();
+                    buffer.append(event.getIndex());
+                    buffer.append(",");
+
+                    buffer.append(DateUtil.formatClientSideDate(event
+                            .getStart()));
+                    buffer.append("-");
+                    buffer.append(DateUtil.formatClientSideTime(event
+                            .getStartTime()));
+
+                    buffer.append(",");
+
+                    buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
+                    buffer.append("-");
+                    buffer.append(DateUtil.formatClientSideTime(event
+                            .getEndTime()));
+
+                    client.updateVariable(PID, CalendarEventId.EVENTRESIZE,
+                            buffer.toString(), true);
+                }
+            }
+        });
+        setListener(new ScrollListener() {
+            public void scroll(int scrollPosition) {
+                client.updateVariable(PID, ATTR_SCROLL, scrollPosition, false);
+            }
+        });
+        setListener(new EventClickListener() {
+            public void eventClick(CalendarEvent event) {
+                if (client.hasEventListeners(VCalendar.this,
+                        CalendarEventId.EVENTCLICK)) {
+                    client.updateVariable(PID, CalendarEventId.EVENTCLICK,
+                            event.getIndex(), true);
+                }
+            }
+        });
+    }
 
     /*
      * (non-Javadoc)
@@ -233,112 +343,6 @@ VHasDropHandler {
      * (non-Javadoc)
      * 
      * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#dateClick(java.lang
-     * .String)
-     */
-    @Override
-    protected void dateClick(String date) {
-        if (!isDisabledOrReadOnly()
-                && getClient().hasEventListeners(this,
-                        CalendarEventId.DATECLICK)) {
-            client.updateVariable(PID, CalendarEventId.DATECLICK, date, true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#forward()
-     */
-    @Override
-    protected void forward() {
-        if (client.hasEventListeners(this, CalendarEventId.FORWARD)) {
-            client.updateVariable(PID, ATTR_NAVIGATION,
-                    true, true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#backward()
-     */
-    @Override
-    protected void backward() {
-        if (client.hasEventListeners(this, CalendarEventId.BACKWARD)) {
-            client.updateVariable(PID, ATTR_NAVIGATION, false, true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#weekClick(java.lang
-     * .String)
-     */
-    @Override
-    protected void weekClick(String event) {
-        if (!isDisabledOrReadOnly()
-                && client.hasEventListeners(this, CalendarEventId.WEEKCLICK)) {
-            client.updateVariable(PID, CalendarEventId.WEEKCLICK, event, true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#rangeSelected(java
-     * .lang.String)
-     */
-    @Override
-    protected void rangeSelected(String value) {
-        if (client.hasEventListeners(this, CalendarEventId.RANGESELECT)) {
-            client.updateVariable(PID, CalendarEventId.RANGESELECT, value, true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#eventClick(com.vaadin
-     * .addon.calendar.gwt.client.ui.schedule.CalendarEvent)
-     */
-    @Override
-    protected void eventClick(CalendarEvent event) {
-        if (client.hasEventListeners(this, CalendarEventId.EVENTCLICK)) {
-            client.updateVariable(PID, CalendarEventId.EVENTCLICK,
-                    event.getIndex(), true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#eventMoved(com.vaadin
-     * .addon.calendar.gwt.client.ui.schedule.CalendarEvent)
-     */
-    @Override
-    protected void eventMoved(CalendarEvent event) {
-        if (client.hasEventListeners(this, CalendarEventId.EVENTMOVE)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(event.getIndex());
-            sb.append(":");
-            sb.append(DateUtil.formatClientSideDate(event.getStart()));
-            sb.append("-");
-            sb.append(DateUtil.formatClientSideTime(event.getStartTime()));
-            client.updateVariable(PID, CalendarEventId.EVENTMOVE,
-                    sb.toString(), true);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
      * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#handleTooltipEvent
      * (com.google.gwt.user.client.Event)
      */
@@ -346,45 +350,6 @@ VHasDropHandler {
     public void handleTooltipEvent(Event event, Object key) {
         if (client != null) {
             client.handleTooltipEvent(event, this, key);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#scroll(int)
-     */
-    @Override
-    protected void scroll(int scrollPosition) {
-        client.updateVariable(PID, ATTR_SCROLL, scrollPosition, false);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#eventResized(com.
-     * vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent)
-     */
-    @Override
-    protected void eventResized(CalendarEvent event) {
-        if (client.hasEventListeners(this, CalendarEventId.EVENTRESIZE)) {
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(event.getIndex());
-            buffer.append(",");
-
-            buffer.append(DateUtil.formatClientSideDate(event.getStart()));
-            buffer.append("-");
-            buffer.append(DateUtil.formatClientSideTime(event.getStartTime()));
-
-            buffer.append(",");
-
-            buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
-            buffer.append("-");
-            buffer.append(DateUtil.formatClientSideTime(event.getEndTime()));
-
-            client.updateVariable(PID, CalendarEventId.EVENTRESIZE,
-                    buffer.toString(), true);
         }
     }
 

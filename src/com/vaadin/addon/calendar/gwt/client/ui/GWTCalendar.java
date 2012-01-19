@@ -60,53 +60,7 @@ public class GWTCalendar extends Composite {
     private String width = null;
     private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
 
-    private final DateClickListener dcl = new DateClickListener() {
-        public void dateClick(String date) {
-            GWTCalendar.this.dateClick(date);
-        }
-    };
-    private final ForwardListener fl = new ForwardListener() {
-        public void forward() {
-            GWTCalendar.this.forward();
-        }
-    };
-    private final BackwardListener bl = new BackwardListener() {
-        public void backward() {
-            GWTCalendar.this.backward();
-        }
-    };
-    private final WeekClickListener wcl = new WeekClickListener() {
-        public void weekClick(String event) {
-            GWTCalendar.this.weekClick(event);
-        }
-    };
-    private final RangeSelectListener rsl = new RangeSelectListener() {
-        public void rangeSelected(String value) {
-            GWTCalendar.this.rangeSelected(value);
-        }
-    };
-    private final EventClickListener ecl = new EventClickListener() {
-        public void eventClick(CalendarEvent event) {
-            GWTCalendar.this.eventClick(event);
-        }
-    };
-    private final EventMovedListener eml = new EventMovedListener() {
-        public void eventMoved(CalendarEvent event) {
-            GWTCalendar.this.eventMoved(event);
-        }
-    };
-    private final ScrollListener sl = new ScrollListener() {
-        public void scroll(int scrollPosition) {
-            GWTCalendar.this.scroll(scrollPosition);
-        }
-    };
-    private final EventResizeListener erl = new EventResizeListener() {
-        public void eventResized(CalendarEvent event) {
-            GWTCalendar.this.eventResized(event);
-        }
-    };
-
-    private final DayToolbar dayToolbar = new DayToolbar(this, dcl, fl, bl);
+    private final DayToolbar dayToolbar = new DayToolbar(this);
     private final SimpleWeekToolbar weekToolbar;
     private WeeklyLongEvents weeklyLongEvents;
     private MonthGrid monthGrid;
@@ -171,7 +125,7 @@ public class GWTCalendar extends Composite {
     }
 
     public GWTCalendar() {
-        weekToolbar = new SimpleWeekToolbar(this, wcl);
+        weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
         setStylePrimaryName("v-calendar");
         blockSelect(getElement());
@@ -442,7 +396,7 @@ public class GWTCalendar extends Composite {
         int columns = lastDay - firstDay + 1;
         rows = (int) Math.ceil(daysCount / (double) 7);
 
-        monthGrid = new MonthGrid(this, rows, columns, rsl);
+        monthGrid = new MonthGrid(this, rows, columns);
         monthGrid.setDisabled(isDisabledOrReadOnly());
         monthGrid.setHeightPX(intHeight);
         monthGrid.setWidthPX(intWidth);
@@ -472,7 +426,7 @@ public class GWTCalendar extends Composite {
                 // Add week to weekToolbar for navigation
                 weekToolbar.addWeek(week, d.getYear());
             }
-            SimpleDayCell cell = new SimpleDayCell(this, y, x, dcl, ecl, eml);
+            SimpleDayCell cell = new SimpleDayCell(this, y, x);
             cell.setMonthGrid(monthGrid);
             cell.setDate(d);
 
@@ -960,9 +914,9 @@ public class GWTCalendar extends Composite {
 
         }
 
-        weeklyLongEvents = new WeeklyLongEvents(this, ecl);
+        weeklyLongEvents = new WeeklyLongEvents(this);
         if (weekGrid == null) {
-            weekGrid = new WeekGrid(this, is24HFormat(), sl, eml, rsl, ecl, erl);
+            weekGrid = new WeekGrid(this, is24HFormat());
         }
         updateWeekGrid(daysInMonth, days, today, realDayNames);
         updateEventsToWeekGrid(sortEventsByDuration(events));
@@ -1026,68 +980,94 @@ public class GWTCalendar extends Composite {
         recalculateWidths();
     }
 
-    /**
-     * Triggered when a date was clicked
-     * 
-     * @param date
-     *            The date string
-     */
-    protected void dateClick(String date) {
-        // Nothing to do, for extension purposes
+    private DateClickListener dateClickListener;
+
+    public void setListener(DateClickListener listener) {
+        dateClickListener = listener;
     }
 
-    /**
-     * Triggered when a week was clicked
-     * 
-     * @param event
-     *            The event parameter
-     */
-    protected void weekClick(String event) {
-        // Nothing to do, for extension purposes
+    public DateClickListener getDateClickListener() {
+        return dateClickListener;
     }
 
-    /**
-     * Triggered when the calendar should move forward
-     */
-    protected void forward() {
-        // Nothing to do, for extension purposes
+    private ForwardListener forwardListener;
+
+    public void setListener(ForwardListener listener) {
+        forwardListener = listener;
     }
 
-    /**
-     * Triggered when the calendar should move backward
-     */
-    protected void backward() {
-        // Nothing to do, for extension purposes
+    public ForwardListener getForwardListener() {
+        return forwardListener;
     }
 
-    /**
-     * Triggered when a range was selected in the month view
-     * 
-     * @param value
-     *            The value of the selection
-     */
-    protected void rangeSelected(String value) {
-        // Nothing to do, for extension purposes
+    private BackwardListener backwardListener;
+
+    public void setListener(BackwardListener listener) {
+        backwardListener = listener;
     }
 
-    /**
-     * Triggered when an event is clicked
-     * 
-     * @param event
-     *            The event that was clicked
-     */
-    protected void eventClick(CalendarEvent event) {
-        // Nothing to do, for extension purposes
+    public BackwardListener getBackwardListener() {
+        return backwardListener;
     }
 
-    /**
-     * Triggered when an event was moved
-     * 
-     * @param event
-     *            The event that was moved
-     */
-    protected void eventMoved(CalendarEvent event) {
-        // Nothing to do, for extension purposes
+    private WeekClickListener weekClickListener;
+
+    public void setListener(WeekClickListener listener) {
+        weekClickListener = listener;
+    }
+
+    public WeekClickListener getWeekClickListener() {
+        return weekClickListener;
+    }
+
+    private RangeSelectListener rangeSelectListener;
+
+    public void setListener(RangeSelectListener listener) {
+        rangeSelectListener = listener;
+    }
+
+    public RangeSelectListener getRangeSelectListener() {
+        return rangeSelectListener;
+    }
+
+    private EventClickListener eventClickListener;
+
+    public EventClickListener getEventClickListener() {
+        return eventClickListener;
+    }
+
+    public void setListener(EventClickListener listener) {
+        this.eventClickListener = listener;
+    }
+
+    private EventMovedListener eventMovedListener;
+
+    public EventMovedListener getEventMovedListener() {
+        return eventMovedListener;
+    }
+
+    public void setListener(EventMovedListener eventMovedListener) {
+        this.eventMovedListener = eventMovedListener;
+    }
+
+    private ScrollListener scrollListener;
+
+    public ScrollListener getScrollListener() {
+        return scrollListener;
+    }
+
+    public void setListener(ScrollListener scrollListener) {
+        this.scrollListener = scrollListener;
+    }
+
+    private EventResizeListener eventResizeListener;
+
+    public EventResizeListener getEventResizeListener() {
+        return eventResizeListener;
+    }
+
+    public void setListener(EventResizeListener eventResizeListener) {
+        this.eventResizeListener = eventResizeListener;
     }
 
     /**
@@ -1118,16 +1098,6 @@ public class GWTCalendar extends Composite {
     }
 
     /**
-     * Triggered when scrolling occurs in the Week view
-     * 
-     * @param scrollPosition
-     *            The scroll position
-     */
-    protected void scroll(int scrollPosition) {
-        // Nothing to do, for extension purposes
-    }
-
-    /**
      * Is moving a range allowed
      * 
      * @return
@@ -1144,16 +1114,6 @@ public class GWTCalendar extends Composite {
      */
     public void setRangeMoveAllowed(boolean rangeMoveAllowed) {
         this.rangeMoveAllowed = rangeMoveAllowed;
-    }
-
-    /**
-     * Triggered when an event is resized
-     * 
-     * @param event
-     *            The event that got resized
-     */
-    protected void eventResized(CalendarEvent event) {
-        // Nothing to do, for extension purposes
     }
 
     /**

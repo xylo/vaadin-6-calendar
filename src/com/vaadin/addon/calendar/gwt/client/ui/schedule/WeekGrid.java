@@ -43,11 +43,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventClickListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventMovedListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventResizeListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.RangeSelectListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.ScrollListener;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.DateTimeService;
@@ -73,21 +68,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     private int firstHour;
     private int lastHour;
 
-    private final ScrollListener scrollListener;
-    private final EventMovedListener eventMovedListener;
-    private final RangeSelectListener rangeSelectListener;
-    private final EventClickListener eventClickListener;
-    private final EventResizeListener eventResizeListener;
-
-    public WeekGrid(GWTCalendar parent, boolean format24h, ScrollListener sl,
-            EventMovedListener eml, RangeSelectListener rsl,
-            EventClickListener ecl, EventResizeListener erl) {
+    public WeekGrid(GWTCalendar parent, boolean format24h) {
         setCalendar(parent);
-        this.scrollListener = sl;
-        this.eventMovedListener = eml;
-        this.rangeSelectListener = rsl;
-        this.eventClickListener = ecl;
-        this.eventResizeListener = erl;
         content = new HorizontalPanel();
         timebar = new Timebar(format24h);
         content.add(timebar);
@@ -113,7 +95,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             scrollPanel.addScrollHandler(new ScrollHandler() {
                 public void onScroll(ScrollEvent event) {
-                    scrollListener.scroll(scrollPanel.getScrollPosition());
+                    if (calendar.getScrollListener() != null) {
+                        calendar.getScrollListener().scroll(
+                                scrollPanel.getScrollPosition());
+                    }
                 }
             });
 
@@ -439,8 +424,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             previousParent.recalculateEventWidths();
         }
         newParent.recalculateEventWidths();
-        if (eventMovedListener != null) {
-            eventMovedListener.eventMoved(se);
+        if (calendar.getEventMovedListener() != null) {
+            calendar.getEventMovedListener().eventMoved(se);
         }
     }
 
@@ -1271,8 +1256,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                 String yr = (currentDate.getYear() + 1900) + "-"
                         + (currentDate.getMonth() + 1) + "-"
                         + currentDate.getDate();
-                if (weekgrid.getRangeSelectListener() != null) {
-                    weekgrid.getRangeSelectListener().rangeSelected(
+                if (weekgrid.getCalendar().getRangeSelectListener() != null) {
+                    weekgrid.getCalendar()
+                    .getRangeSelectListener()
+                    .rangeSelected(
                             yr + ":" + startMinutes + ":" + endMinutes);
                 }
                 eventRangeStart = -1;
@@ -1649,9 +1636,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                         Element e = Element.as(et);
                         if (e == caption || e == eventContent
                                 || e.getParentElement() == caption) {
-                            GWTCalendar calendar = weekGrid.getCalendar();
-                            if (weekGrid.getEventClickListener() != null) {
-                                weekGrid.getEventClickListener().eventClick(
+                            if (weekGrid.getCalendar().getEventClickListener() != null) {
+                                weekGrid.getCalendar().getEventClickListener()
+                                .eventClick(
                                         calendarEvent);
                             }
                         }
@@ -1659,8 +1646,9 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
                 } else { // click targeted resize bar
                     removeGlobalResizeStyle();
-                    if (weekGrid.getEventResizeListener() != null) {
-                        weekGrid.getEventResizeListener().eventResized(
+                    if (weekGrid.getCalendar().getEventResizeListener() != null) {
+                        weekGrid.getCalendar().getEventResizeListener()
+                                .eventResized(
                                 calendarEvent);
                     }
                 }
@@ -2009,17 +1997,5 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
     public GWTCalendar getParentCalendar() {
         return calendar;
-    }
-
-    RangeSelectListener getRangeSelectListener() {
-        return rangeSelectListener;
-    }
-
-    EventClickListener getEventClickListener() {
-        return eventClickListener;
-    }
-
-    EventResizeListener getEventResizeListener() {
-        return eventResizeListener;
     }
 }

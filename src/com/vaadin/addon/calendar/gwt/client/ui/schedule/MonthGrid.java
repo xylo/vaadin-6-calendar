@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.RangeSelectListener;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 public class MonthGrid extends FocusableGrid implements KeyDownHandler {
@@ -22,13 +21,9 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     private boolean disabled;
     private final HandlerRegistration keyDownHandler;
 
-    private final RangeSelectListener rangeSelectListener;
-
-    public MonthGrid(GWTCalendar parent, int rows, int columns,
-            RangeSelectListener rsl) {
+    public MonthGrid(GWTCalendar parent, int rows, int columns) {
         super(rows, columns);
         calendar = parent;
-        this.rangeSelectListener = rsl;
         setCellSpacing(0);
         setCellPadding(0);
         setStylePrimaryName("v-calendar-month");
@@ -94,10 +89,10 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
                 endDate = temp;
             }
 
-            if (rangeSelectListener != null) {
+            if (calendar.getRangeSelectListener() != null) {
                 value = calendar.getDateFormat().format(startDate) + "TO"
                         + calendar.getDateFormat().format(endDate);
-                rangeSelectListener.rangeSelected(value);
+                calendar.getRangeSelectListener().rangeSelected(value);
             }
             selectionStart = null;
             selectionEnd = null;

@@ -27,9 +27,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.DateClickListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventClickListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventMovedListener;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
@@ -80,17 +77,8 @@ NativePreviewHandler {
     private MonthGrid monthGrid;
     private HandlerRegistration keyDownHandler;
 
-    private final DateClickListener dateClickListener;
-    private final EventClickListener eventClickListener;
-    private final EventMovedListener eventMovedListener;
-
-    public SimpleDayCell(GWTCalendar calendar, int row, int cell,
-            DateClickListener dcl, EventClickListener ecl,
-            EventMovedListener eml) {
+    public SimpleDayCell(GWTCalendar calendar, int row, int cell) {
         this.calendar = calendar;
-        this.dateClickListener = dcl;
-        this.eventClickListener = ecl;
-        this.eventMovedListener = eml;
         this.row = row;
         this.cell = cell;
         setStylePrimaryName("v-calendar-month-day");
@@ -404,9 +392,9 @@ NativePreviewHandler {
                     && (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3)) {
                 eventMoved(moveEvent);
 
-            } else if (eventClickListener != null) {
+            } else if (calendar.getEventClickListener() != null) {
                 CalendarEvent e = getEventByWidget(mel);
-                eventClickListener.eventClick(e);
+                calendar.getEventClickListener().eventClick(e);
             }
 
             moveEvent = null;
@@ -415,8 +403,8 @@ NativePreviewHandler {
 
         } else if (w instanceof Label && labelMouseDown) {
             String clickedDate = calendar.getDateFormat().format(date);
-            if (dateClickListener != null) {
-                dateClickListener.dateClick(clickedDate);
+            if (calendar.getDateClickListener() != null) {
+                calendar.getDateClickListener().dateClick(clickedDate);
             }
         }
         monthEventMouseDown = false;
@@ -547,8 +535,8 @@ NativePreviewHandler {
 
     private void eventMoved(CalendarEvent e) {
         calendar.updateEventToMonthGrid(e);
-        if (eventMovedListener != null) {
-            eventMovedListener.eventMoved(e);
+        if (calendar.getEventMovedListener() != null) {
+            calendar.getEventMovedListener().eventMoved(e);
         }
     }
 

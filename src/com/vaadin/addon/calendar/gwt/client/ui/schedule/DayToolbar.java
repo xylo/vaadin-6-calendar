@@ -10,9 +10,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.BackwardListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.DateClickListener;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.ForwardListener;
 
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private int width = 0;
@@ -24,18 +21,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private boolean horizontalSized;
     private GWTCalendar calendar;
 
-    private final DateClickListener dateClickListener;
-    private final ForwardListener forwardClickListener;
-    private final BackwardListener backwardClickListener;
-
-    public DayToolbar(GWTCalendar vcalendar,
-            DateClickListener dateClickListener,
-            ForwardListener forwardListener, BackwardListener backwardListner) {
+    public DayToolbar(GWTCalendar vcalendar) {
         calendar = vcalendar;
-
-        this.dateClickListener = dateClickListener;
-        this.forwardClickListener = forwardListener;
-        this.backwardClickListener = backwardListner;
 
         setStylePrimaryName("v-calendar-header-week");
         backLabel = new Button();
@@ -101,8 +88,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
         l.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (dateClickListener != null) {
-                    dateClickListener.dateClick(date);
+                if (calendar.getDateClickListener() != null) {
+                    calendar.getDateClickListener().dateClick(date);
                 }
             }
         });
@@ -147,12 +134,12 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     public void onClick(ClickEvent event) {
         if (!calendar.isDisabledOrReadOnly()) {
             if (event.getSource() == nextLabel) {
-                if (forwardClickListener != null) {
-                    forwardClickListener.forward();
+                if (calendar.getForwardListener() != null) {
+                    calendar.getForwardListener().forward();
                 }
             } else if (event.getSource() == backLabel) {
-                if (backwardClickListener != null) {
-                    backwardClickListener.backward();
+                if (calendar.getBackwardListener() != null) {
+                    calendar.getBackwardListener().backward();
                 }
             }
         }

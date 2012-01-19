@@ -8,18 +8,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
-import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.WeekClickListener;
 
 public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
     private int height;
     private GWTCalendar calendar;
     private boolean isHeightUndefined;
 
-    private final WeekClickListener weekClickListener;
-
-    public SimpleWeekToolbar(GWTCalendar parent, WeekClickListener wcl) {
+    public SimpleWeekToolbar(GWTCalendar parent) {
         calendar = parent;
-        this.weekClickListener = wcl;
         setCellSpacing(0);
         setCellPadding(0);
         setStyleName("v-calendar-week-numbers");
@@ -87,8 +83,9 @@ public class SimpleWeekToolbar extends FlexTable implements ClickHandler {
 
     public void onClick(ClickEvent event) {
         WeekLabel wl = (WeekLabel) event.getSource();
-        if (weekClickListener != null) {
-            weekClickListener.weekClick(wl.getYear() + "w" + wl.getWeek());
+        if (calendar.getWeekClickListener() != null) {
+            calendar.getWeekClickListener().weekClick(
+                    wl.getYear() + "w" + wl.getWeek());
         }
     }
 
