@@ -9,7 +9,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.BackwardListener;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.DateClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.ForwardListener;
 
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
     private int width = 0;
@@ -19,10 +22,21 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     protected Button nextLabel;
     private boolean verticalSized;
     private boolean horizontalSized;
-    private VCalendar calendar;
+    private GWTCalendar calendar;
 
-    public DayToolbar(VCalendar vcalendar) {
+    private final DateClickListener dateClickListener;
+    private final ForwardListener forwardClickListener;
+    private final BackwardListener backwardClickListener;
+
+    public DayToolbar(GWTCalendar vcalendar,
+            DateClickListener dateClickListener,
+            ForwardListener forwardListener, BackwardListener backwardListner) {
         calendar = vcalendar;
+
+        this.dateClickListener = dateClickListener;
+        this.forwardClickListener = forwardListener;
+        this.backwardClickListener = backwardListner;
+
         setStylePrimaryName("v-calendar-header-week");
         backLabel = new Button();
         backLabel.setStylePrimaryName("v-calendar-back");
@@ -53,7 +67,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             int remain = width % (count - 2);
             int cellw2 = cellw + 1;
             if (cellw > 0) {
-                int[] cellWidths = VCalendar
+                int[] cellWidths = GWTCalendar
                         .distributeSize(width, count - 2, 0);
                 for (int i = 1; i < count - 1; i++) {
                     Widget widget = getWidget(i);
@@ -86,34 +100,29 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
 
         l.addClickHandler(new ClickHandler() {
-
             public void onClick(ClickEvent event) {
-                if (!calendar.isDisabledOrReadOnly()
-                        && calendar.getClient().hasEventListeners(calendar,
-                                CalendarEventId.DATECLICK)) {
-                    calendar.getClient().updateVariable(calendar.getPID(),
-                            CalendarEventId.DATECLICK, date, true);
+                if (dateClickListener != null) {
+                    dateClickListener.dateClick(date);
                 }
             }
-
         });
 
         add(l);
     }
 
     public void addBackButton() {
-        if (!calendar.getClient().hasEventListeners(calendar,
-                CalendarEventId.FORWARD)) {
-            nextLabel.getElement().getStyle().setOpacity(0);
-        }
+        // if (!calendar.getClient().hasEventListeners(calendar,
+        // CalendarEventId.FORWARD)) {
+        // nextLabel.getElement().getStyle().setOpacity(0);
+        // }
         add(backLabel);
     }
 
     public void addNextButton() {
-        if (!calendar.getClient().hasEventListeners(calendar,
-                CalendarEventId.BACKWARD)) {
-            backLabel.getElement().getStyle().setOpacity(0);
-        }
+        // if (!calendar.getClient().hasEventListeners(calendar,
+        // CalendarEventId.BACKWARD)) {
+        // backLabel.getElement().getStyle().setOpacity(0);
+        // }
         add(nextLabel);
     }
 
@@ -136,19 +145,14 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void onClick(ClickEvent event) {
-        VCalendar w = (VCalendar) getParent().getParent();
-
         if (!calendar.isDisabledOrReadOnly()) {
             if (event.getSource() == nextLabel) {
-                if (w.getClient().hasEventListeners(w, CalendarEventId.FORWARD)) {
-                    w.getClient().updateVariable(w.getPID(),
-                            VCalendar.ATTR_NAVIGATION, true, true);
+                if (forwardClickListener != null) {
+                    forwardClickListener.forward();
                 }
             } else if (event.getSource() == backLabel) {
-                if (w.getClient()
-                        .hasEventListeners(w, CalendarEventId.BACKWARD)) {
-                    w.getClient().updateVariable(w.getPID(),
-                            VCalendar.ATTR_NAVIGATION, false, true);
+                if (backwardClickListener != null) {
+                    backwardClickListener.backward();
                 }
             }
         }

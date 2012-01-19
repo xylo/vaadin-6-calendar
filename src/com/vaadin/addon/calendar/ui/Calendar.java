@@ -24,6 +24,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
 import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -530,7 +531,7 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             endDate = currentCalendar.getTime();
         }
 
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / GWTCalendar.DAYINMILLIS);
         durationInDays++;
         if (durationInDays > 60) {
             throw new PaintException("Daterange is too big (max 60) = "

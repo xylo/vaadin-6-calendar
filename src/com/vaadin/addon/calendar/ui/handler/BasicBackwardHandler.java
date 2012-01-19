@@ -6,7 +6,7 @@ package com.vaadin.addon.calendar.ui.handler;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
 
@@ -27,7 +27,7 @@ public class BasicBackwardHandler implements BackwardHandler {
         Date end = event.getComponent().getEndDate();
 
         // calculate amount to move back
-        int durationInDays = (int) (((end.getTime()) - start.getTime()) / VCalendar.DAYINMILLIS);
+        int durationInDays = (int) (((end.getTime()) - start.getTime()) / GWTCalendar.DAYINMILLIS);
         durationInDays++;
         durationInDays = -durationInDays;
 

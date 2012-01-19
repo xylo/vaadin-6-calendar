@@ -9,30 +9,31 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.RangeSelectListener;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     private SimpleDayCell selectionStart;
     private SimpleDayCell selectionEnd;
-    private final VCalendar calendar;
+    private final GWTCalendar calendar;
     private boolean rangeSelectDisabled;
     private boolean disabled;
     private final HandlerRegistration keyDownHandler;
-    private final boolean rangeSelectAllowed;
 
-    public MonthGrid(VCalendar parent, int rows, int columns) {
+    private final RangeSelectListener rangeSelectListener;
+
+    public MonthGrid(GWTCalendar parent, int rows, int columns,
+            RangeSelectListener rsl) {
         super(rows, columns);
         calendar = parent;
+        this.rangeSelectListener = rsl;
         setCellSpacing(0);
         setCellPadding(0);
         setStylePrimaryName("v-calendar-month");
 
         keyDownHandler = addKeyDownHandler(this);
-
-        rangeSelectAllowed = parent.getClient().hasEventListeners(parent,
-                CalendarEventId.RANGESELECT);
     }
 
     @Override
@@ -93,14 +94,11 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
                 endDate = temp;
             }
 
-            value = calendar.getDateFormat().format(startDate) + "TO"
-                    + calendar.getDateFormat().format(endDate);
-            if (calendar.getClient().hasEventListeners(calendar,
-                    CalendarEventId.RANGESELECT)) {
-                calendar.getClient().updateVariable(calendar.getPID(),
-                        CalendarEventId.RANGESELECT, value, true);
+            if (rangeSelectListener != null) {
+                value = calendar.getDateFormat().format(startDate) + "TO"
+                        + calendar.getDateFormat().format(endDate);
+                rangeSelectListener.rangeSelected(value);
             }
-
             selectionStart = null;
             selectionEnd = null;
             setFocus(false);
@@ -220,9 +218,5 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
 
         return -1;
-    }
-
-    public boolean isRangeSelectAllowed() {
-        return rangeSelectAllowed;
     }
 }

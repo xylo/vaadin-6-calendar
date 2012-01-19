@@ -26,7 +26,10 @@ import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.DateClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar.EventMovedListener;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
@@ -36,14 +39,14 @@ import com.vaadin.terminal.gwt.client.ui.FocusableFlowPanel;
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FocusableFlowPanel implements
-        MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler,
-        NativePreviewHandler {
+MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler,
+NativePreviewHandler {
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
     private static final int BORDERPADDINGSIZE = 1;
 
-    private final VCalendar calendar;
+    private final GWTCalendar calendar;
     private Date date;
     private int intHeight;
     private final HTML bottomspacer;
@@ -73,13 +76,21 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private Widget clickedWidget;
     private HandlerRegistration bottomSpacerMouseDownHandler;
     private boolean scrollable = false;
-    private final boolean hasEventMoveListeners;
     private boolean eventCanceled;
     private MonthGrid monthGrid;
     private HandlerRegistration keyDownHandler;
 
-    public SimpleDayCell(VCalendar calendar, int row, int cell) {
+    private final DateClickListener dateClickListener;
+    private final EventClickListener eventClickListener;
+    private final EventMovedListener eventMovedListener;
+
+    public SimpleDayCell(GWTCalendar calendar, int row, int cell,
+            DateClickListener dcl, EventClickListener ecl,
+            EventMovedListener eml) {
         this.calendar = calendar;
+        this.dateClickListener = dcl;
+        this.eventClickListener = ecl;
+        this.eventMovedListener = eml;
         this.row = row;
         this.cell = cell;
         setStylePrimaryName("v-calendar-month-day");
@@ -92,9 +103,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         add(bottomspacer);
         caption.addMouseDownHandler(this);
         caption.addMouseUpHandler(this);
-
-        hasEventMoveListeners = calendar.getClient().hasEventListeners(
-                calendar, CalendarEventId.EVENTMOVE);
     }
 
     @Override
@@ -258,7 +266,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
     private MonthEventLabel createMonthEventLabel(CalendarEvent e) {
         long rangeInMillis = e.getRangeInMilliseconds();
-        boolean timeEvent = rangeInMillis <= VCalendar.DAYINMILLIS
+        boolean timeEvent = rangeInMillis <= GWTCalendar.DAYINMILLIS
                 && !e.isAllDay();
         Date fromDatetime = e.getStartTime();
 
@@ -396,11 +404,9 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     && (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3)) {
                 eventMoved(moveEvent);
 
-            } else if (calendar.getClient().hasEventListeners(calendar,
-                    CalendarEventId.EVENTCLICK)) {
+            } else if (eventClickListener != null) {
                 CalendarEvent e = getEventByWidget(mel);
-                calendar.getClient().updateVariable(calendar.getPID(),
-                        CalendarEventId.EVENTCLICK, e.getIndex(), true);
+                eventClickListener.eventClick(e);
             }
 
             moveEvent = null;
@@ -409,10 +415,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         } else if (w instanceof Label && labelMouseDown) {
             String clickedDate = calendar.getDateFormat().format(date);
-            if (calendar.getClient().hasEventListeners(calendar,
-                    CalendarEventId.DATECLICK)) {
-                calendar.getClient().updateVariable(calendar.getPID(),
-                        CalendarEventId.DATECLICK, clickedDate, true);
+            if (dateClickListener != null) {
+                dateClickListener.dateClick(clickedDate);
             }
         }
         monthEventMouseDown = false;
@@ -428,7 +432,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
 
-        if (w instanceof MonthEventLabel && hasEventMoveListeners) {
+        if (w instanceof MonthEventLabel) {
             // event clicks should be allowed even when read-only
             monthEventMouseDown = true;
 
@@ -447,7 +451,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
             } else if (w == this && !scrollable) {
                 MonthGrid grid = getMonthGrid();
-                if (!grid.isDisabled() && grid.isRangeSelectAllowed()) {
+                if (!grid.isDisabled() && calendar.isRangeSelectAllowed()) {
                     grid.setSelectionStart(this);
                     grid.setSelectionEnd(this);
                 }
@@ -529,8 +533,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         Date to = e.getEnd();
         long duration = to.getTime() - from.getTime();
 
-        long daysMs = dayDiff * VCalendar.DAYINMILLIS;
-        long weeksMs = weekDiff * VCalendar.WEEKINMILLIS;
+        long daysMs = dayDiff * GWTCalendar.DAYINMILLIS;
+        long weeksMs = weekDiff * GWTCalendar.WEEKINMILLIS;
         from.setTime(startDateFrom.getTime() + weeksMs + daysMs);
         to.setTime((from.getTime() + duration));
         e.setStart(from);
@@ -543,18 +547,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
     private void eventMoved(CalendarEvent e) {
         calendar.updateEventToMonthGrid(e);
-
-        if (calendar.getClient().hasEventListeners(calendar,
-                CalendarEventId.EVENTMOVE)) {
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(e.getIndex());
-            sb.append(":");
-            sb.append(DateUtil.formatClientSideDate(e.getStart()));
-            sb.append("-00-00");
-
-            calendar.getClient().updateVariable(calendar.getPID(),
-                    CalendarEventId.EVENTMOVE, sb.toString(), true);
+        if (eventMovedListener != null) {
+            eventMovedListener.eventMoved(e);
         }
     }
 
@@ -727,7 +721,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         private boolean timeSpecificEvent = false;
         private Integer eventIndex;
-        private VCalendar calendar;
+        private GWTCalendar calendar;
 
         public MonthEventLabel() {
             setStylePrimaryName("v-calendar-event");
@@ -738,7 +732,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             eventIndex = index;
         }
 
-        public void setCalendar(VCalendar calendar) {
+        public void setCalendar(GWTCalendar calendar) {
             this.calendar = calendar;
         }
 
@@ -750,13 +744,17 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             this.timeSpecificEvent = timeSpecificEvent;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * com.google.gwt.user.client.ui.Widget#onBrowserEvent(com.google.gwt
+         * .user.client.Event)
+         */
         @Override
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
-            if (calendar.getClient() != null) {
-                calendar.getClient().handleTooltipEvent(event, calendar,
-                        eventIndex);
-            }
+            calendar.handleTooltipEvent(event, eventIndex);
         }
     }
 }

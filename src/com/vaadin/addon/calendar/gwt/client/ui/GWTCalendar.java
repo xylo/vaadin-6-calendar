@@ -8,12 +8,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
@@ -24,43 +23,17 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarDropHandler;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarMonthDropHandler;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarWeekDropHandler;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.TooltipInfo;
-import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.ui.dd.VDropHandler;
-import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
 
-public class GWTCalendar extends Composite implements Paintable, VHasDropHandler {
-
-    public static final String ACCESSCRITERIA = "-ac";
-    public static final String ATTR_WEEK = "w";
-    public static final String ATTR_DOW = "dow";
-    public static final String ATTR_FDATE = "fdate";
-    public static final String ATTR_DATE = "date";
-    public static final String ATTR_STYLE = "extracss";
-    public static final String ATTR_DESCRIPTION = "desc";
-    public static final String ATTR_TIMETO = "tto";
-    public static final String ATTR_TIMEFROM = "tfrom";
-    public static final String ATTR_DATETO = "dto";
-    public static final String ATTR_DATEFROM = "dfrom";
-    public static final String ATTR_CAPTION = "caption";
-    public static final String ATTR_INDEX = "i";
-    public static final String ATTR_SCROLL = "scroll";
-    public static final String ATTR_FDOW = "fdow";
-    public static final String ATTR_NOW = "now";
-    public static final String ATTR_READONLY = "readonly";
-    public static final String ATTR_DISABLED = "disabled";
-    // public static final String ATTR_HIDE_WEEKENDS = "hideWeekends";
-    public static final String ATTR_MONTH_NAMES = "mNames";
-    public static final String ATTR_DAY_NAMES = "dNames";
-    public static final String ATTR_FORMAT24H = "format24h";
-    public static final String ATTR_ALLDAY = "allday";
-    public static final String ATTR_NAVIGATION = "navigation";
+/**
+ * Clients side implementation for {@link Calendar}. Can be used as a standalone
+ * GWT component as well
+ * 
+ * @author John Ahlroos / Vaadin Ltd 2012
+ * @since 1.3.0
+ */
+public class GWTCalendar extends Composite {
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
@@ -71,18 +44,69 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
     public static final String ATTR_FIRSTHOUROFDAY = "firstHour";
     public static final String ATTR_LASTHOUROFDAY = "lastHour";
 
-    private String PID;
     // private boolean hideWeekends;
     private String[] monthNames;
     private String[] dayNames;
     private boolean format;
     private final DockPanel outer = new DockPanel();
     private int rows;
-    private ApplicationConnection client;
+
+    private boolean rangeSelectAllowed = true;
+    private boolean rangeMoveAllowed = true;
+    private boolean eventResizeAllowed = true;
+    private boolean eventMoveAllowed = true;
+
     private String height = null;
     private String width = null;
     private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
-    private final DayToolbar dayToolbar = new DayToolbar(this);
+
+    private final DateClickListener dcl = new DateClickListener() {
+        public void dateClick(String date) {
+            GWTCalendar.this.dateClick(date);
+        }
+    };
+    private final ForwardListener fl = new ForwardListener() {
+        public void forward() {
+            GWTCalendar.this.forward();
+        }
+    };
+    private final BackwardListener bl = new BackwardListener() {
+        public void backward() {
+            GWTCalendar.this.backward();
+        }
+    };
+    private final WeekClickListener wcl = new WeekClickListener() {
+        public void weekClick(String event) {
+            GWTCalendar.this.weekClick(event);
+        }
+    };
+    private final RangeSelectListener rsl = new RangeSelectListener() {
+        public void rangeSelected(String value) {
+            GWTCalendar.this.rangeSelected(value);
+        }
+    };
+    private final EventClickListener ecl = new EventClickListener() {
+        public void eventClick(CalendarEvent event) {
+            GWTCalendar.this.eventClick(event);
+        }
+    };
+    private final EventMovedListener eml = new EventMovedListener() {
+        public void eventMoved(CalendarEvent event) {
+            GWTCalendar.this.eventMoved(event);
+        }
+    };
+    private final ScrollListener sl = new ScrollListener() {
+        public void scroll(int scrollPosition) {
+            GWTCalendar.this.scroll(scrollPosition);
+        }
+    };
+    private final EventResizeListener erl = new EventResizeListener() {
+        public void eventResized(CalendarEvent event) {
+            GWTCalendar.this.eventResized(event);
+        }
+    };
+
+    private final DayToolbar dayToolbar = new DayToolbar(this, dcl, fl, bl);
     private final SimpleWeekToolbar weekToolbar;
     private WeeklyLongEvents weeklyLongEvents;
     private MonthGrid monthGrid;
@@ -90,13 +114,13 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
     private int intWidth = 0;
     private int intHeight = 0;
 
-    private final DateTimeFormat dateformat_datetime = DateTimeFormat
+    protected final DateTimeFormat dateformat_datetime = DateTimeFormat
             .getFormat("yyyy-MM-dd HH:mm:ss");
-    private final DateTimeFormat dateformat_date = DateTimeFormat
+    protected final DateTimeFormat dateformat_date = DateTimeFormat
             .getFormat("yyyy-MM-dd");
-    private final DateTimeFormat time12format_date = DateTimeFormat
+    protected final DateTimeFormat time12format_date = DateTimeFormat
             .getFormat("h:mm a");
-    private final DateTimeFormat time24format_date = DateTimeFormat
+    protected final DateTimeFormat time24format_date = DateTimeFormat
             .getFormat("HH:mm");
 
     private boolean readOnly = false;
@@ -105,14 +129,49 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
     private boolean isHeightUndefined = false;
 
     private boolean isWidthUndefined = false;
-    private CalendarDropHandler dropHandler;
     private int firstDay;
     private int lastDay;
     private int firstHour;
     private int lastHour;
 
+    public interface DateClickListener {
+        void dateClick(String date);
+    }
+
+    public interface WeekClickListener {
+        void weekClick(String event);
+    }
+
+    public interface ForwardListener {
+        void forward();
+    }
+
+    public interface BackwardListener {
+        void backward();
+    }
+
+    public interface RangeSelectListener {
+        void rangeSelected(String value);
+    }
+
+    public interface EventClickListener {
+        void eventClick(CalendarEvent event);
+    }
+
+    public interface EventMovedListener {
+        void eventMoved(CalendarEvent event);
+    }
+
+    public interface EventResizeListener {
+        void eventResized(CalendarEvent event);
+    }
+
+    public interface ScrollListener {
+        void scroll(int scrollPosition);
+    }
+
     public GWTCalendar() {
-        weekToolbar = new SimpleWeekToolbar(this);
+        weekToolbar = new SimpleWeekToolbar(this, wcl);
         initWidget(outer);
         setStylePrimaryName("v-calendar");
         blockSelect(getElement());
@@ -128,165 +187,6 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
     		return false;
     	}
     }-*/;
-
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-        // This call should be made first. Ensure correct implementation,
-        // and let the containing layout manage caption, etc.
-        if (client.updateComponent(this, uidl, true)) {
-            return;
-        }
-
-        // Save reference to server connection object to be able to send
-        // user interaction later
-        this.client = client;
-        PID = uidl.getId();
-        format = uidl.getBooleanAttribute(ATTR_FORMAT24H);
-        dayNames = uidl.getStringArrayAttribute(ATTR_DAY_NAMES);
-        monthNames = uidl.getStringArrayAttribute(ATTR_MONTH_NAMES);
-        // hideWeekends = uidl.getBooleanAttribute(ATTR_HIDE_WEEKENDS);
-
-        firstDay = uidl.getIntAttribute(ATTR_FIRSTDAYOFWEEK);
-        lastDay = uidl.getIntAttribute(ATTR_LASTDAYOFWEEK);
-
-        firstHour = uidl.getIntAttribute(ATTR_FIRSTHOUROFDAY);
-        lastHour = uidl.getIntAttribute(ATTR_LASTHOUROFDAY);
-
-        readOnly = uidl.hasAttribute(ATTR_READONLY)
-                && uidl.getBooleanAttribute(ATTR_READONLY);
-
-        disabled = uidl.hasAttribute(ATTR_DISABLED)
-                && uidl.getBooleanAttribute(ATTR_DISABLED);
-
-        UIDL daysUidl = uidl.getChildUIDL(0);
-        int daysCount = daysUidl.getChildCount();
-        while (outer.getWidgetCount() > 0) {
-            outer.remove(0);
-        }
-
-        boolean monthView = daysCount > 7;
-
-        if (monthView) {
-            updateMonthView(uidl, daysUidl);
-
-        } else {
-            updateWeekView(uidl, daysUidl);
-        }
-
-        // check for DD -related access criteria
-        Iterator<Object> childIterator = uidl.getChildIterator();
-        while (childIterator.hasNext()) {
-            UIDL child = (UIDL) childIterator.next();
-            if (ACCESSCRITERIA.equals(child.getTag())) {
-                GWT.log("DD access criteria found");
-
-                if (monthView
-                        && !(dropHandler instanceof CalendarMonthDropHandler)) {
-                    dropHandler = new CalendarMonthDropHandler();
-
-                } else if (!monthView
-                        && !(dropHandler instanceof CalendarWeekDropHandler)) {
-                    dropHandler = new CalendarWeekDropHandler();
-                }
-
-                dropHandler.setCalendarPaintable(this);
-                dropHandler.updateAcceptRules(child);
-
-            } else {
-                dropHandler = null;
-            }
-        }
-    }
-
-    private void updateMonthView(UIDL uidl, UIDL daysUidl) {
-        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
-        Date today = dateformat_datetime.parse(uidl
-                .getStringAttribute(ATTR_NOW));
-
-        int daysPerWeek = lastDay - firstDay + 1;
-
-        String[] realDayNames = new String[daysPerWeek];
-
-        int j = 0;
-
-        if (firstDayOfWeek == 2) {
-            for (int i = firstDay; i < lastDay + 1; i++) {
-                if (i == 7) {
-                    realDayNames[j++] = dayNames[0];
-                } else {
-                    realDayNames[j++] = dayNames[i];
-                }
-            }
-        } else {
-            for (int i = firstDay - 1; i < lastDay; i++) {
-                realDayNames[j++] = dayNames[i];
-            }
-
-        }
-
-        nameToolbar.setDayNames(realDayNames);
-
-        weeklyLongEvents = null;
-        weekGrid = null;
-        updateMonthGrid(daysUidl.getChildCount(), daysUidl, today);
-        outer.add(nameToolbar, DockPanel.NORTH);
-        outer.add(weekToolbar, DockPanel.WEST);
-        weekToolbar.updateCellHeights();
-        outer.add(monthGrid, DockPanel.CENTER);
-        ArrayList<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
-        updateEventsToMonthGrid(events, false);
-        recalculateHeights();
-        recalculateWidths();
-    }
-
-    private void updateWeekView(UIDL uidl, UIDL daysUidl) {
-        int scroll = uidl.getIntVariable(ATTR_SCROLL);
-        Date today = dateformat_datetime.parse(uidl
-                .getStringAttribute(ATTR_NOW));
-        int daysCount = daysUidl.getChildCount();
-
-        monthGrid = null;
-        Collection<CalendarEvent> events = getEvents(uidl.getChildUIDL(1));
-
-        String[] realDayNames = new String[dayNames.length];
-
-        int j = 0;
-
-        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
-
-        if (firstDayOfWeek == 2) {
-            for (int i = 1; i < dayNames.length; i++) {
-                realDayNames[j++] = dayNames[i];
-            }
-            realDayNames[j] = dayNames[0];
-        } else {
-            for (int i = 0; i < dayNames.length; i++) {
-                realDayNames[j++] = dayNames[i];
-            }
-
-        }
-
-        weeklyLongEvents = new WeeklyLongEvents(this);
-        if (weekGrid == null) {
-            weekGrid = new WeekGrid(this, format);
-        }
-        updateWeekGrid(daysCount, daysUidl, today, realDayNames);
-        updateEventsToWeekGrid(sortEventsByDuration(events));
-        outer.add(dayToolbar, DockPanel.NORTH);
-        outer.add(weeklyLongEvents, DockPanel.NORTH);
-        outer.add(weekGrid, DockPanel.SOUTH);
-        if (!isHeightUndefined) {
-            weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
-                    - dayToolbar.getOffsetHeight());
-        } else {
-            weekGrid.setHeightPX(intHeight);
-        }
-        weekGrid.setWidthPX(intWidth);
-        dayToolbar.updateCellWidths();
-        weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
-        weekGrid.setVerticalScrollPosition(scroll);
-        recalculateHeights();
-        recalculateWidths();
-    }
 
     private void updateEventsToWeekGrid(CalendarEvent[] events) {
         List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
@@ -310,12 +210,11 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         }
     }
 
-    private void updateEventsToMonthGrid(Collection<CalendarEvent> events,
+    protected void updateEventsToMonthGrid(Collection<CalendarEvent> events,
             boolean drawImmediately) {
         for (CalendarEvent e : sortEventsByDuration(events)) {
             addEventToMonthGrid(e, false);
         }
-
     }
 
     private void addEventToMonthGrid(CalendarEvent e, boolean renderImmediately) {
@@ -489,60 +388,8 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         return false;
     }
 
-    /** Transforms uidl to list of CalendarEvents */
-    protected ArrayList<CalendarEvent> getEvents(UIDL childUIDL) {
-        int eventCount = childUIDL.getChildCount();
-        ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
-        for (int i = 0; i < eventCount; i++) {
-            UIDL eventUIDL = childUIDL.getChildUIDL(i);
-
-            int index = eventUIDL.getIntAttribute(ATTR_INDEX);
-            String caption = eventUIDL.getStringAttribute(ATTR_CAPTION);
-            String datefrom = eventUIDL.getStringAttribute(ATTR_DATEFROM);
-            String dateto = eventUIDL.getStringAttribute(ATTR_DATETO);
-            String timefrom = eventUIDL.getStringAttribute(ATTR_TIMEFROM);
-            String timeto = eventUIDL.getStringAttribute(ATTR_TIMETO);
-            String desc = eventUIDL.getStringAttribute(ATTR_DESCRIPTION);
-            String style = eventUIDL.getStringAttribute(ATTR_STYLE);
-            boolean allDay = eventUIDL.getBooleanAttribute(ATTR_ALLDAY);
-
-            CalendarEvent e = new CalendarEvent();
-
-            e.setCaption(caption);
-            e.setDescription(desc);
-            e.setIndex(index);
-            e.setEnd(dateformat_date.parse(dateto));
-            e.setStart(dateformat_date.parse(datefrom));
-            e.setStartTime(dateformat_datetime.parse(datefrom + " " + timefrom));
-            e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
-            e.setStyleName(style);
-            e.setFormat24h(format);
-            e.setAllDay(allDay);
-
-            events.add(e);
-
-            registerEventToolTip(e);
-        }
-        return events;
-    }
-
-    /**
-     * Register the description of the event as a tooltip for this paintable.
-     * This way, any event displaying widget can use the event index as a key to
-     * display the tooltip.
-     */
-    private void registerEventToolTip(CalendarEvent e) {
-        if (e.getDescription() != null && !"".equals(e.getDescription())) {
-            TooltipInfo info = new TooltipInfo(e.getDescription());
-            client.registerTooltip(this, e.getIndex(), info);
-
-        } else {
-            client.registerTooltip(this, e.getIndex(), null);
-        }
-    }
-
     @SuppressWarnings("deprecation")
-    public void updateWeekGrid(int daysCount, UIDL daysUidl, Date today,
+    public void updateWeekGrid(int daysCount, List<Day> days, Date today,
             String[] realDayNames) {
         weekGrid.setFirstHour(firstHour);
         weekGrid.setLastHour(lastHour);
@@ -555,13 +402,11 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         weekGrid.clearDates();
         weekGrid.setDisabled(isDisabledOrReadOnly());
 
-        for (int i = 0; i < daysCount; i++) {
-            UIDL dayUidl = daysUidl.getChildUIDL(i);
-            String date = dayUidl.getStringAttribute(ATTR_DATE);
-            String localized_date_format = dayUidl
-                    .getStringAttribute(ATTR_FDATE);
+        for (Day day : days) {
+            String date = day.getDate();
+            String localized_date_format = day.getLocalizedDateFormat();
             Date d = dateformat_date.parse(date);
-            int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
+            int dayOfWeek = day.getDayOfWeek();
             if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
                 continue;
             }
@@ -582,12 +427,22 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         dayToolbar.addNextButton();
     }
 
+    /**
+     * Updates the events in the Month viewq
+     * 
+     * @param daysCount
+     *            How many days there are
+     * @param daysUidl
+     * 
+     * @param today
+     *            Todays date
+     */
     @SuppressWarnings("deprecation")
-    private void updateMonthGrid(int daysCount, UIDL daysUidl, Date today) {
+    protected void updateMonthGrid(int daysCount, List<Day> days, Date today) {
         int columns = lastDay - firstDay + 1;
         rows = (int) Math.ceil(daysCount / (double) 7);
 
-        monthGrid = new MonthGrid(this, rows, columns);
+        monthGrid = new MonthGrid(this, rows, columns, rsl);
         monthGrid.setDisabled(isDisabledOrReadOnly());
         monthGrid.setHeightPX(intHeight);
         monthGrid.setWidthPX(intWidth);
@@ -595,12 +450,11 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         int pos = 0;
         boolean monthNameDrawn = true;
 
-        for (int i = 0; i < daysCount; i++) {
-            UIDL dayUidl = daysUidl.getChildUIDL(i);
-            String date = dayUidl.getStringAttribute(ATTR_DATE);
+        for (Day day : days) {
+            String date = day.getDate();
             Date d = dateformat_date.parse(date);
-            int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
-            int week = dayUidl.getIntAttribute(ATTR_WEEK);
+            int dayOfWeek = day.getDayOfWeek();
+            int week = day.getWeek();
 
             int dayOfMonth = d.getDate();
 
@@ -618,7 +472,7 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
                 // Add week to weekToolbar for navigation
                 weekToolbar.addWeek(week, d.getYear());
             }
-            SimpleDayCell cell = new SimpleDayCell(this, y, x);
+            SimpleDayCell cell = new SimpleDayCell(this, y, x, dcl, ecl, eml);
             cell.setMonthGrid(monthGrid);
             cell.setDate(d);
 
@@ -655,7 +509,7 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         }
     }
 
-    private void recalculateHeights() {
+    protected void recalculateHeights() {
         if (monthGrid != null) {
             monthGrid.setHeightPX(intHeight);
             monthGrid.updateCellSizes(intWidth - weekToolbar.getOffsetWidth(),
@@ -670,7 +524,7 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         }
     }
 
-    private void recalculateWidths() {
+    protected void recalculateWidths() {
         if (!isWidthUndefined) {
             outer.setWidth(intWidth + "px");
             super.setWidth(intWidth + "px");
@@ -680,7 +534,7 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
             if (monthGrid != null) {
                 monthGrid.updateCellSizes(
                         intWidth - weekToolbar.getOffsetWidth(), intHeight
-                                - nameToolbar.getOffsetHeight());
+                        - nameToolbar.getOffsetHeight());
             } else if (weekGrid != null) {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
@@ -712,14 +566,6 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         }
     }
 
-    public VDropHandler getDropHandler() {
-        return dropHandler;
-    }
-
-    public ApplicationConnection getClient() {
-        return client;
-    }
-
     public DateTimeFormat getDateFormat() {
         return dateformat_date;
     }
@@ -735,24 +581,42 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
         return dateformat_datetime;
     }
 
-    public String[] getMonthNames() {
-        return monthNames;
-    }
-
-    public String getPID() {
-        return PID;
-    }
-
     public boolean isDisabledOrReadOnly() {
         return disabled || readOnly;
     }
 
+    /**
+     * Is the component disabled
+     */
     public boolean isDisabled() {
         return disabled;
     }
 
+    /**
+     * Is the component disabled
+     * 
+     * @param disabled
+     *          True if disabled
+     */
+    public void setDisabled(boolean disabled){
+        this.disabled = disabled;
+    }
+
+    /**
+     * Is the component read-only
+     */
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    /**
+     * Is the component read-only
+     * 
+     * @param readOnly
+     *          True if component is readonly
+     */
+    public void setReadOnly(boolean readOnly){
+        this.readOnly = readOnly;
     }
 
     public MonthGrid getMonthGrid() {
@@ -908,6 +772,421 @@ public class GWTCalendar extends Composite implements Paintable, VHasDropHandler
     public static boolean isZeroLengthMidnightEvent(CalendarEvent e) {
         return areDatesEqualToSecond(e.getStartTime(), e.getEndTime())
                 && isMidnight(e.getEndTime());
+    }
 
+    /**
+     * Should the 24h time format be used
+     * 
+     * @param format
+     *            True if the 24h format should be used else the 12h format is
+     *            used
+     */
+    public void set24HFormat(boolean format) {
+        this.format = format;
+    }
+
+    /**
+     * Is the 24h time format used
+     */
+    public boolean is24HFormat() {
+        return this.format;
+    }
+
+    /**
+     * Set the names of the week days
+     * 
+     * @param names
+     *            The names of the days (Monday, Thursday,...)
+     */
+    public void setDayNames(String[] names) {
+        dayNames = names;
+    }
+
+    /**
+     * Get the names of the week days
+     */
+    public String[] getDayNames() {
+        return dayNames;
+    }
+
+    /**
+     * Set the names of the months
+     * 
+     * @param names
+     *            The names of the months (January, February,...)
+     */
+    public void setMonthNames(String[] names) {
+        monthNames = names;
+    }
+
+    /**
+     * Get the month names
+     */
+    public String[] getMonthNames() {
+        return monthNames;
+    }
+
+    /**
+     * Set the number when a week starts
+     * 
+     * @param dayNumber
+     *            The number of the day
+     */
+    protected void setFirstDayNumber(int dayNumber) {
+        firstDay = dayNumber;
+    }
+
+    /**
+     * Get the number when a week starts
+     */
+    protected int getFirstDayNumber() {
+        return firstDay;
+    }
+
+    /**
+     * Set the number when a week ends
+     * 
+     * @param dayNumber
+     *            The number of the day
+     */
+    protected void setLastDayNumber(int dayNumber) {
+        lastDay = dayNumber;
+    }
+
+    /**
+     * Get the number when a week ends
+     */
+    protected int getLastDayNumber() {
+        return lastDay;
+    }
+
+    /**
+     * Set the number when a week starts
+     * 
+     * @param dayNumber
+     *            The number of the day
+     */
+    protected void setFirstHourOfTheDay(int hour) {
+        firstHour = hour;
+    }
+
+    /**
+     * Get the number when a week starts
+     */
+    protected int getFirstHourOfTheDay() {
+        return firstHour;
+    }
+
+    /**
+     * Set the number when a week ends
+     * 
+     * @param dayNumber
+     *            The number of the day
+     */
+    protected void setLastHourOfTheDay(int hour) {
+        lastHour = hour;
+    }
+
+    /**
+     * Get the number when a week ends
+     */
+    protected int getLastHourOfTheDay() {
+        return lastHour;
+    }
+
+    /**
+     * Utility class used to represent a day when updating views. Only used
+     * internally.
+     */
+    protected class Day {
+        private String date;
+        private String localizedDateFormat;
+        private int dayOfWeek;
+        private int week;
+
+        public Day(String date, String localizedDateFormat, int dayOfWeek,
+                int week) {
+            super();
+            this.date = date;
+            this.localizedDateFormat = localizedDateFormat;
+            this.dayOfWeek = dayOfWeek;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public String getLocalizedDateFormat() {
+            return localizedDateFormat;
+        }
+
+        public int getDayOfWeek() {
+            return dayOfWeek;
+        }
+
+        public int getWeek() {
+            return week;
+        }
+    }
+
+    /**
+     * 
+     * @param scroll
+     * @param today
+     * @param daysInMonth
+     * @param firstDayOfWeek
+     * @param events
+     */
+    protected void updateWeekView(int scroll, Date today, int daysInMonth,
+            int firstDayOfWeek, Collection<CalendarEvent> events, List<Day> days) {
+
+        while (outer.getWidgetCount() > 0) {
+            outer.remove(0);
+        }
+
+        monthGrid = null;
+        String[] realDayNames = new String[getDayNames().length];
+        int j = 0;
+
+        if (firstDayOfWeek == 2) {
+            for (int i = 1; i < getDayNames().length; i++) {
+                realDayNames[j++] = getDayNames()[i];
+            }
+            realDayNames[j] = getDayNames()[0];
+        } else {
+            for (int i = 0; i < getDayNames().length; i++) {
+                realDayNames[j++] = getDayNames()[i];
+            }
+
+        }
+
+        weeklyLongEvents = new WeeklyLongEvents(this, ecl);
+        if (weekGrid == null) {
+            weekGrid = new WeekGrid(this, is24HFormat(), sl, eml, rsl, ecl, erl);
+        }
+        updateWeekGrid(daysInMonth, days, today, realDayNames);
+        updateEventsToWeekGrid(sortEventsByDuration(events));
+        outer.add(dayToolbar, DockPanel.NORTH);
+        outer.add(weeklyLongEvents, DockPanel.NORTH);
+        outer.add(weekGrid, DockPanel.SOUTH);
+        if (!isHeightUndefined) {
+            weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
+                    - dayToolbar.getOffsetHeight());
+        } else {
+            weekGrid.setHeightPX(intHeight);
+        }
+        weekGrid.setWidthPX(intWidth);
+        dayToolbar.updateCellWidths();
+        weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
+        weekGrid.setVerticalScrollPosition(scroll);
+        recalculateHeights();
+        recalculateWidths();
+    }
+
+    protected void updateMonthView(int firstDayOfWeek, Date today,
+            int daysInMonth, Collection<CalendarEvent> events, List<Day> days) {
+
+        while (outer.getWidgetCount() > 0) {
+            outer.remove(0);
+        }
+
+        int daysPerWeek = getLastDayNumber() - getFirstDayNumber() + 1;
+        String[] realDayNames = new String[daysPerWeek];
+        int j = 0;
+
+        if (firstDayOfWeek == 2) {
+            for (int i = getFirstDayNumber(); i < getLastDayNumber() + 1; i++) {
+                if (i == 7) {
+                    realDayNames[j++] = getDayNames()[0];
+                } else {
+                    realDayNames[j++] = getDayNames()[i];
+                }
+            }
+        } else {
+            for (int i = getFirstDayNumber() - 1; i < getLastDayNumber(); i++) {
+                realDayNames[j++] = getDayNames()[i];
+            }
+
+        }
+
+        nameToolbar.setDayNames(realDayNames);
+
+        weeklyLongEvents = null;
+        weekGrid = null;
+
+        updateMonthGrid(daysInMonth, days, today);
+
+        outer.add(nameToolbar, DockPanel.NORTH);
+        outer.add(weekToolbar, DockPanel.WEST);
+        weekToolbar.updateCellHeights();
+        outer.add(monthGrid, DockPanel.CENTER);
+
+        updateEventsToMonthGrid(events, false);
+        recalculateHeights();
+        recalculateWidths();
+    }
+
+    /**
+     * Triggered when a date was clicked
+     * 
+     * @param date
+     *            The date string
+     */
+    protected void dateClick(String date) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when a week was clicked
+     * 
+     * @param event
+     *            The event parameter
+     */
+    protected void weekClick(String event) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when the calendar should move forward
+     */
+    protected void forward() {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when the calendar should move backward
+     */
+    protected void backward() {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when a range was selected in the month view
+     * 
+     * @param value
+     *            The value of the selection
+     */
+    protected void rangeSelected(String value) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when an event is clicked
+     * 
+     * @param event
+     *            The event that was clicked
+     */
+    protected void eventClick(CalendarEvent event) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Triggered when an event was moved
+     * 
+     * @param event
+     *            The event that was moved
+     */
+    protected void eventMoved(CalendarEvent event) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Handles to tooltip event
+     * 
+     * @param event
+     *          The browser event
+     */
+    public void handleTooltipEvent(Event event, Object key) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Is selecting a range allowed?
+     */
+    public boolean isRangeSelectAllowed() {
+        return rangeSelectAllowed;
+    }
+
+    /**
+     * Set selecting a range allowed
+     * 
+     * @param rangeSelectAllowed
+     *            Should selecting a range be allowed
+     */
+    public void setRangeSelectAllowed(boolean rangeSelectAllowed) {
+        this.rangeSelectAllowed = rangeSelectAllowed;
+    }
+
+    /**
+     * Triggered when scrolling occurs in the Week view
+     * 
+     * @param scrollPosition
+     *            The scroll position
+     */
+    protected void scroll(int scrollPosition) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Is moving a range allowed
+     * 
+     * @return
+     */
+    public boolean isRangeMoveAllowed() {
+        return rangeMoveAllowed;
+    }
+
+    /**
+     * Is moving a range allowed
+     * 
+     * @param rangeMoveAllowed
+     *            Is it allowed
+     */
+    public void setRangeMoveAllowed(boolean rangeMoveAllowed) {
+        this.rangeMoveAllowed = rangeMoveAllowed;
+    }
+
+    /**
+     * Triggered when an event is resized
+     * 
+     * @param event
+     *            The event that got resized
+     */
+    protected void eventResized(CalendarEvent event) {
+        // Nothing to do, for extension purposes
+    }
+
+    /**
+     * Is resizing an event allowed
+     */
+    public boolean isEventResizeAllowed() {
+        return eventResizeAllowed;
+    }
+
+    /**
+     * Is resizing an event allowed
+     * 
+     * @param eventResizeAllowed
+     *            True if allowed false if not
+     */
+    public void setEventResizeAllowed(boolean eventResizeAllowed) {
+        this.eventResizeAllowed = eventResizeAllowed;
+    }
+
+    /**
+     * Is moving an event allowed
+     */
+    public boolean isEventMoveAllowed() {
+        return eventMoveAllowed;
+    }
+
+    /**
+     * Is moving an event allowed
+     * 
+     * @param eventMoveAllowed
+     *            True if moving is allowed, false if not
+     */
+    public void setEventMoveAllowed(boolean eventMoveAllowed) {
+        this.eventMoveAllowed = eventMoveAllowed;
     }
 }
