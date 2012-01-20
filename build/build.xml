@@ -48,6 +48,12 @@
         <property name="jar.path" value="${result-path}/${jar.name}"/>
 
 		<antcall target="check-libs"/>
+		
+		<copy todir="WebContent/WEB-INF/lib">
+			<fileset dir="build/lib/dependency">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
 
         <path id="test.classpath">
             <fileset dir="build/lib">
