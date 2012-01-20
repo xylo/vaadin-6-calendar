@@ -864,6 +864,7 @@ public class VCalendar extends Composite {
             this.date = date;
             this.localizedDateFormat = localizedDateFormat;
             this.dayOfWeek = dayOfWeek;
+            this.week = week;
         }
 
         public String getDate() {
