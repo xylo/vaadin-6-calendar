@@ -240,6 +240,37 @@ public class ContainerDataSource extends TestCase {
         assertEquals(events.get(0).getStart(), event.getStart());
     }
 
+    @Test
+    public void testRemoveEventConvinienceMethodWithCustomEventProvider() {
+
+        // Use a container data source
+        calendar.setEventProvider(new ContainerEventProvider(
+                new BeanItemContainer<BasicEvent>(BasicEvent.class)));
+
+        // Start and end dates to query for
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, 1);
+        Date end = cal.getTime();
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+
+        // Add an event
+        BasicEvent event = new BasicEvent("Test", "Test", start);
+        calendar.addEvent(event);
+
+        // Ensure event exists
+        List<CalendarEvent> events = calendar.getEvents(start, end);
+        assertEquals(1, events.size());
+
+        // Remove event
+        calendar.removeEvent(event);
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+    }
+
     private static Indexed createTestBeanItemContainer() {
         BeanItemContainer<CalendarEvent> eventContainer = new BeanItemContainer<CalendarEvent>(
                 CalendarEvent.class);
