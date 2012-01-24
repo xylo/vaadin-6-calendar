@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.vaadin.addon.calendar.event.BasicEvent;
+import com.vaadin.addon.calendar.event.CalendarEditableEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
@@ -32,7 +33,7 @@ import com.vaadin.data.Property.ValueChangeNotifier;
  * @since 1.3.0
  */
 @SuppressWarnings("serial")
-public class ContainerEventProvider implements CalendarEventProvider,
+public class ContainerEventProvider implements CalendarEditableEventProvider,
 EventSetChangeNotifier, EventChangeNotifier, EventMoveHandler,
 EventResizeHandler,
 Container.ItemSetChangeListener, Property.ValueChangeListener {
@@ -508,5 +509,39 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      */
     public void detachContainerDataSource() {
         ignoreContainerEvents();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void addEvent(CalendarEvent event) {
+        Item item = container.addItem(event);
+        if (item != null) {
+            item.getItemProperty(getCaptionProperty()).setValue(
+                    event.getCaption());
+            item.getItemProperty(getStartDateProperty()).setValue(
+                    event.getStart());
+            item.getItemProperty(getEndDateProperty()).setValue(event.getEnd());
+            item.getItemProperty(getStyleNameProperty()).setValue(
+                    event.getStyleName());
+            item.getItemProperty(getDescriptionProperty()).setValue(
+                    event.getDescription());
+
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void removeEvent(CalendarEvent event) {
+        container.removeItem(event);
     }
 }

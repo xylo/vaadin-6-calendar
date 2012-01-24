@@ -30,10 +30,9 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * @version
  * @VERSION@
  */
-public class BasicEventProvider implements CalendarEventProvider,
-        EventSetChangeNotifier, CalendarEvent.EventChangeListener {
-
-    private static final long serialVersionUID = 630145351104741918L;
+@SuppressWarnings("serial")
+public class BasicEventProvider implements CalendarEditableEventProvider,
+EventSetChangeNotifier, CalendarEvent.EventChangeListener {
 
     protected List<CalendarEvent> eventList = new ArrayList<CalendarEvent>();
 
@@ -132,5 +131,27 @@ public class BasicEventProvider implements CalendarEventProvider,
     public void eventChange(EventChange changeEvent) {
         // naive implementation
         fireEventSetChange();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void addEvent(CalendarEvent event) {
+        eventList.add(event);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void removeEvent(CalendarEvent event) {
+        eventList.remove(event);
     }
 }

@@ -20,12 +20,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.vaadin.addon.calendar.event.BasicEventProvider;
+import com.vaadin.addon.calendar.event.CalendarEditableEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
-import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChange;
-import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
@@ -93,7 +92,8 @@ CalendarComponentEvents.NavigationNotifier,
 CalendarComponentEvents.EventMoveNotifier,
 CalendarComponentEvents.RangeSelectNotifier,
 CalendarComponentEvents.EventResizeNotifier,
-CalendarEventProvider.EventSetChangeListener, DropTarget {
+CalendarEventProvider.EventSetChangeListener, DropTarget,
+CalendarEditableEventProvider {
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
@@ -1403,5 +1403,50 @@ CalendarEventProvider.EventSetChangeListener, DropTarget {
             }
         });
         setEventProvider(provider);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
+     * util.Date, java.util.Date)
+     */
+    public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
+        return getEventProvider().getEvents(startDate, endDate);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void addEvent(CalendarEvent event) {
+        if (getEventProvider() instanceof CalendarEditableEventProvider) {
+            CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
+            provider.addEvent(event);
+        } else {
+            throw new UnsupportedOperationException(
+                    "Event provider does not support adding events");
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
+     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     */
+    public void removeEvent(CalendarEvent event) {
+        if (getEventProvider() instanceof CalendarEditableEventProvider) {
+            CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
+            provider.removeEvent(event);
+        } else {
+            throw new UnsupportedOperationException(
+                    "Event provider does not support removing events");
+        }
     }
 }

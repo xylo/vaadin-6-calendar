@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
+import com.vaadin.addon.calendar.ui.ContainerEventProvider;
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
@@ -153,6 +154,90 @@ public class ContainerDataSource extends TestCase {
         // Test both null times
         events = calendar.getEventProvider().getEvents(null, null);
         assertEquals(container.size(), events.size());
+    }
+
+    /**
+     * Tests the addEvent convenience method with the default event provider
+     */
+    @Test
+    public void testAddEventConvinienceMethod() {
+
+        // Start and end dates to query for
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, 1);
+        Date end = cal.getTime();
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+
+        // Add an event
+        BasicEvent event = new BasicEvent("Test", "Test", start);
+        calendar.addEvent(event);
+
+        // Ensure event exists
+        List<CalendarEvent> events = calendar.getEvents(start, end);
+        assertEquals(1, events.size());
+        assertEquals(events.get(0).getCaption(), event.getCaption());
+        assertEquals(events.get(0).getDescription(), event.getDescription());
+        assertEquals(events.get(0).getStart(), event.getStart());
+    }
+
+    /**
+     * Test the removeEvent convenience method with the default event provider
+     */
+    @Test
+    public void testRemoveEventConvinienceMethod() {
+
+        // Start and end dates to query for
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, 1);
+        Date end = cal.getTime();
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+
+        // Add an event
+        CalendarEvent event = new BasicEvent("Test", "Test", start);
+        calendar.addEvent(event);
+
+        // Ensure event exists
+        assertEquals(1, calendar.getEvents(start, end).size());
+
+        // Remove event
+        calendar.removeEvent(event);
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+    }
+
+    @Test
+    public void testAddEventConvinienceMethodWithCustomEventProvider() {
+
+        // Use a container data source
+        calendar.setEventProvider(new ContainerEventProvider(
+                new BeanItemContainer<BasicEvent>(BasicEvent.class)));
+
+        // Start and end dates to query for
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, 1);
+        Date end = cal.getTime();
+
+        // Ensure no events
+        assertEquals(0, calendar.getEvents(start, end).size());
+
+        // Add an event
+        BasicEvent event = new BasicEvent("Test", "Test", start);
+        calendar.addEvent(event);
+
+        // Ensure event exists
+        List<CalendarEvent> events = calendar.getEvents(start, end);
+        assertEquals(1, events.size());
+        assertEquals(events.get(0).getCaption(), event.getCaption());
+        assertEquals(events.get(0).getDescription(), event.getDescription());
+        assertEquals(events.get(0).getStart(), event.getStart());
     }
 
     private static Indexed createTestBeanItemContainer() {
