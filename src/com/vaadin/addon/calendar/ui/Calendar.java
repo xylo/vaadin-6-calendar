@@ -93,6 +93,7 @@ import com.vaadin.ui.ClientWidget;
  * @version
  * @VERSION@
  */
+@SuppressWarnings("serial")
 @ClientWidget(VCalendarPaintable.class)
 public class Calendar extends AbstractComponent implements
 CalendarComponentEvents.NavigationNotifier,
@@ -1384,16 +1385,30 @@ CalendarEditableEventProvider,Action.Container {
         return handlers.get(eventId);
     }
 
-    /* Drag and Drop related */
-
+    /**
+     * Get the currently active drop handler
+     */
     public DropHandler getDropHandler() {
         return dropHandler;
     }
 
+    /**
+     * Set the drop handler for the calendar See {@link DropHandler} for
+     * implementation details.
+     * 
+     * @param dropHandler
+     *            The drop handler to set
+     */
     public void setDropHandler(DropHandler dropHandler) {
         this.dropHandler = dropHandler;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.event.dd.DropTarget#translateDropTargetDetails(java.util.Map)
+     */
     public TargetDetails translateDropTargetDetails(
             Map<String, Object> clientVariables) {
         Map<String, Object> serverVariables = new HashMap<String, Object>(1);
@@ -1505,7 +1520,6 @@ CalendarEditableEventProvider,Action.Container {
      * (non-Javadoc)
      * 
      * @see
-<<<<<<< HEAD
      * com.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
      * util.Date, java.util.Date)
      */
@@ -1547,7 +1561,11 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /* com.vaadin.event.Action.Container#addActionHandler(com.vaadin.event.Action
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.event.Action.Container#addActionHandler(com.vaadin.event.Action
      * .Handler)
      */
     public void addActionHandler(Handler actionHandler) {
