@@ -10,11 +10,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.MonthGrid;
@@ -70,6 +73,8 @@ public class VCalendar extends Composite {
 
     protected final DateTimeFormat dateformat_datetime = DateTimeFormat
             .getFormat("yyyy-MM-dd HH:mm:ss");
+    protected final DateTimeFormat dateformat_datetime_actions = DateTimeFormat
+            .getFormat("yyyy-MM-dd-HH-mm");
     protected final DateTimeFormat dateformat_date = DateTimeFormat
             .getFormat("yyyy-MM-dd");
     protected final DateTimeFormat time12format_date = DateTimeFormat
@@ -122,6 +127,10 @@ public class VCalendar extends Composite {
 
     public interface ScrollListener {
         void scroll(int scrollPosition);
+    }
+
+    public interface MouseEventListener {
+        void contextMenu(ContextMenuEvent event, Widget widget);
     }
 
     public VCalendar() {
@@ -426,9 +435,18 @@ public class VCalendar extends Composite {
                 // Add week to weekToolbar for navigation
                 weekToolbar.addWeek(week, d.getYear());
             }
-            SimpleDayCell cell = new SimpleDayCell(this, y, x);
+            final SimpleDayCell cell = new SimpleDayCell(this, y, x);
             cell.setMonthGrid(monthGrid);
             cell.setDate(d);
+            cell.addDomHandler(new ContextMenuHandler() {
+                public void onContextMenu(ContextMenuEvent event) {
+                    if (mouseEventListener != null) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        mouseEventListener.contextMenu(event, cell);
+                    }
+                }
+            }, ContextMenuEvent.getType());
 
             if (dayOfMonth >= 1 && !monthNameDrawn) {
                 cell.setMonthNameVisible(true);
@@ -1069,6 +1087,16 @@ public class VCalendar extends Composite {
 
     public void setListener(EventResizeListener eventResizeListener) {
         this.eventResizeListener = eventResizeListener;
+    }
+
+    private MouseEventListener mouseEventListener;
+
+    public MouseEventListener getMouseEventListener() {
+        return mouseEventListener;
+    }
+
+    public void setListener(MouseEventListener mouseEventListener) {
+        this.mouseEventListener = mouseEventListener;
     }
 
     /**

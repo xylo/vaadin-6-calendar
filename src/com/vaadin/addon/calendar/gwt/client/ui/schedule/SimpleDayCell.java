@@ -7,6 +7,7 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -21,8 +22,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,8 +35,7 @@ import com.vaadin.terminal.gwt.client.ui.FocusableFlowPanel;
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FocusableFlowPanel implements
-MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler,
-NativePreviewHandler {
+MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
@@ -54,8 +52,7 @@ NativePreviewHandler {
     private boolean monthNameVisible;
     private HandlerRegistration mouseUpRegistration;
     private HandlerRegistration mouseDownRegistration;
-    private HandlerRegistration mouseOverRegistration;
-    private HandlerRegistration nativePreviewRegistration;
+    private HandlerRegistration mouseOverRegistration; 
     private boolean monthEventMouseDown;
     private boolean labelMouseDown;
     private int eventCount = 0;
@@ -350,19 +347,21 @@ NativePreviewHandler {
         mouseUpRegistration = addDomHandler(this, MouseUpEvent.getType());
         mouseDownRegistration = addDomHandler(this, MouseDownEvent.getType());
         mouseOverRegistration = addDomHandler(this, MouseOverEvent.getType());
-        nativePreviewRegistration = Event.addNativePreviewHandler(this);
     }
 
     @Override
     protected void onDetach() {
         mouseUpRegistration.removeHandler();
         mouseDownRegistration.removeHandler();
-        mouseOverRegistration.removeHandler();
-        nativePreviewRegistration.removeHandler();
+        mouseOverRegistration.removeHandler();     
         super.onDetach();
     }
 
     public void onMouseUp(MouseUpEvent event) {
+        if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
+            return;
+        }
+
         Widget w = (Widget) event.getSource();
         if (moveRegistration != null) {
             Event.releaseCapture(getElement());
@@ -413,7 +412,8 @@ NativePreviewHandler {
     }
 
     public void onMouseDown(MouseDownEvent event) {
-        if (calendar.isDisabled()) {
+        if (calendar.isDisabled()
+                || event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
             return;
         }
 
@@ -623,22 +623,6 @@ NativePreviewHandler {
 
     public int getCell() {
         return cell;
-    }
-
-    public void onPreviewNativeEvent(NativePreviewEvent event) {
-
-        if (event.getTypeInt() == Event.ONMOUSEDOWN
-                && DOM.isOrHasChild(getElement(),
-                        (com.google.gwt.user.client.Element) Element.as(event
-                                .getNativeEvent().getEventTarget()))) {
-            if (scrollable
-                    && getElement().equals(
-                            event.getNativeEvent().getEventTarget())) {
-                return; // Scrollbar click workaround
-            }
-
-            event.getNativeEvent().preventDefault();
-        }
     }
 
     public int getHeigth() {

@@ -12,9 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,10 +57,13 @@ import com.vaadin.addon.calendar.ui.handler.BasicForwardHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
 import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.Action;
+import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ComponentEventListener;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
+import com.vaadin.terminal.KeyMapper;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -93,7 +100,7 @@ CalendarComponentEvents.EventMoveNotifier,
 CalendarComponentEvents.RangeSelectNotifier,
 CalendarComponentEvents.EventResizeNotifier,
 CalendarEventProvider.EventSetChangeListener, DropTarget,
-CalendarEditableEventProvider {
+CalendarEditableEventProvider,Action.Container {
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
@@ -176,6 +183,16 @@ CalendarEditableEventProvider {
     private int lastHour = 23;
 
     private Logger logger = Logger.getLogger(Calendar.class.getName());
+
+    /**
+     * List of action handlers.
+     */
+    private LinkedList<Action.Handler> actionHandlers = null;
+
+    /**
+     * Action mapper.
+     */
+    private KeyMapper actionMapper = null;
 
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
@@ -577,24 +594,54 @@ CalendarEditableEventProvider {
         DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
         weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
 
+        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<CalendarDateRange, Set<Action>>();
+
         target.startTag("days");
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
         // support date localization properly.
         while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
             int dow = getDowByLocale(currentCalendar);
+            Date date = currentCalendar.getTime();
 
             target.startTag("day");
             target.addAttribute(VCalendarPaintable.ATTR_DATE,
-                    df_date.format(currentCalendar.getTime()));
+                    df_date.format(date));
             target.addAttribute(VCalendarPaintable.ATTR_FDATE,
-                    weeklyCaptionFormatter.format(currentCalendar.getTime()));
+                    weeklyCaptionFormatter.format(date));
 
             target.addAttribute(VCalendarPaintable.ATTR_DOW, dow);
             target.addAttribute(VCalendarPaintable.ATTR_WEEK,
                     currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
+
             currentCalendar.add(java.util.Calendar.DATE, 1);
+
+            // Get actions for a specific date
+            if (actionHandlers != null) {
+                for (Action.Handler ah : actionHandlers) {
+
+                    CalendarDateRange range;
+
+                    // Get start and end for the day
+                    long start = date.getTime();
+                    start -= date.getTimezoneOffset() * 60000;
+                    long end = currentCalendar.getTimeInMillis();
+                    end -= currentCalendar.getTime().getTimezoneOffset();
+
+                    // Ensure actions do not overlap to next day
+                    end -= 1000; // ms
+
+                    range = new CalendarDateRange(new Date(start),
+                            new Date(end));
+                    Action[] actions = ah.getActions(range, this);
+                    if (actions != null) {
+                        Set<Action> actionSet = new HashSet<Action>(
+                                Arrays.asList(actions));
+                        actionMap.put(range, actionSet);
+                    }
+                }
+            }
         }
 
         target.endTag("days");
@@ -617,6 +664,43 @@ CalendarEditableEventProvider {
             dropHandler.getAcceptCriterion().paint(target);
         }
         super.paintContent(target);
+
+        paintActions(target, actionMap);
+    }
+
+    private void paintActions(PaintTarget target,
+            final Map<CalendarDateRange, Set<Action>> actionMap)
+                    throws PaintException {
+        if (!actionMap.isEmpty()) {
+            target.addVariable(this, "action", "");
+
+            target.startTag("actions");
+
+            for (Entry<CalendarDateRange, Set<Action>> entry : actionMap
+                    .entrySet()) {
+                CalendarDateRange range = entry.getKey();
+                Set<Action> actions = entry.getValue();
+                for (Action a : actions) {
+                    String key = actionMapper.key(a);
+                    target.startTag("action");
+                    target.addAttribute("key", key);
+                    target.addAttribute("start",
+                            df_date_time.format(range.getStart()));
+                    target.addAttribute("end",
+                            df_date_time.format(range.getEnd()));
+
+                    if (a.getCaption() != null) {
+                        target.addAttribute("caption", a.getCaption());
+                    }
+                    if (a.getIcon() != null) {
+                        target.addAttribute("icon", a.getIcon());
+                    }
+
+                    target.endTag("action");
+                }
+            }
+            target.endTag("actions");
+        }
     }
 
     private DateFormat getWeeklyCaptionFormatter() {
@@ -721,6 +805,17 @@ CalendarEditableEventProvider {
                 && isClientChangeAllowed()) {
             handleEventResize((String) variables
                     .get(CalendarEventId.EVENTRESIZE));
+        }
+
+        // Actions
+        if (variables.containsKey("action") && actionHandlers != null) {
+            String actionStr = (String) variables.get("action");
+            String[] args = actionStr.split(",");
+            Action action = (Action) actionMapper.get(args[0]);
+            Date date = new Date(Long.parseLong(args[1]));
+            for(Action.Handler ah : actionHandlers){
+                ah.handleAction(action, this, date);
+            }
         }
     }
 
@@ -1380,6 +1475,7 @@ CalendarEditableEventProvider {
      *            The property that has the stylename, null if no stylname
      *            property is present
      */
+    @SuppressWarnings("serial")
     public void setContainerDataSource(Container.Indexed container,
             Object captionProperty, Object descriptionProperty,
             Object startDateProperty, Object endDateProperty,
@@ -1409,6 +1505,7 @@ CalendarEditableEventProvider {
      * (non-Javadoc)
      * 
      * @see
+<<<<<<< HEAD
      * com.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
      * util.Date, java.util.Date)
      */
@@ -1447,6 +1544,40 @@ CalendarEditableEventProvider {
         } else {
             throw new UnsupportedOperationException(
                     "Event provider does not support removing events");
+        }
+    }
+
+    /* com.vaadin.event.Action.Container#addActionHandler(com.vaadin.event.Action
+     * .Handler)
+     */
+    public void addActionHandler(Handler actionHandler) {
+        if (actionHandler != null) {
+            if (actionHandlers == null) {
+                actionHandlers = new LinkedList<Action.Handler>();
+                actionMapper = new KeyMapper();
+            }
+            if (!actionHandlers.contains(actionHandler)) {
+                actionHandlers.add(actionHandler);
+                requestRepaint();
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.event.Action.Container#removeActionHandler(com.vaadin.event
+     * .Action.Handler)
+     */
+    public void removeActionHandler(Handler actionHandler) {
+        if (actionHandlers != null && actionHandlers.contains(actionHandler)) {
+            actionHandlers.remove(actionHandler);
+            if (actionHandlers.isEmpty()) {
+                actionHandlers = null;
+                actionMapper = null;
+            }
+            requestRepaint();
         }
     }
 }

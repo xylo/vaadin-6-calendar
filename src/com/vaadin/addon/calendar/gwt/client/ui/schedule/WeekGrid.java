@@ -14,12 +14,15 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -34,8 +37,6 @@ import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,7 +50,7 @@ import com.vaadin.terminal.gwt.client.DateTimeService;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 
-public class WeekGrid extends SimplePanel implements NativePreviewHandler {
+public class WeekGrid extends SimplePanel {
 
     private int width = 0;
     private int height = 0;
@@ -79,8 +80,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         wrapper.add(content);
 
         setWidget(wrapper);
-
-        Event.addNativePreviewHandler(this);
     }
 
     private void setVerticalScroll(boolean isVerticalScrollEnabled) {
@@ -130,8 +129,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     }
 
     public void addDate(Date d) {
-        DateCell dc = new DateCell(this);
-        dc.setDate(d);
+        final DateCell dc = new DateCell(this, d);
         dc.setDisabled(isDisabled());
         dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
         dc.setVerticalSized(isVerticalScrollable());
@@ -450,15 +448,6 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         return dateCellOfToday;
     }
 
-    public void onPreviewNativeEvent(NativePreviewEvent event) {
-        if (event.getTypeInt() == Event.ONMOUSEDOWN
-                && DOM.isOrHasChild(getElement(),
-                        (com.google.gwt.user.client.Element) Element.as(event
-                                .getNativeEvent().getEventTarget()))) {
-            event.getNativeEvent().preventDefault();
-        }
-    }
-
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
@@ -694,7 +683,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
     }
 
     public static class DateCell extends FocusableComplexPanel implements
-    MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler {
+    MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler,
+    ContextMenuHandler {
         private static final String DRAGEMPHASISSTYLE = " dragemphasis";
         private Date date;
         private int width;
@@ -704,6 +694,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         private boolean disabled = false;
         private int height;
         private final Element[] slotElements;
+        private final List<DateCellSlot> slots = new ArrayList<WeekGrid.DateCell.DateCellSlot>();
         private int[] slotElementHeights;
         private int startingSlotHeight;
         private Date today;
@@ -713,13 +704,41 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         private final int firstHour;
         private final int lastHour;
 
-        // private double slotHeight;
+        public class DateCellSlot extends Widget {
 
-        public DateCell(WeekGrid parent) {
+            private final DateCell cell;
+
+            private final Date from;
+
+            private final Date to;
+
+            public DateCellSlot(DateCell cell, Date from, Date to) {
+                setElement(DOM.createDiv());
+                getElement().setInnerHTML("&nbsp;");
+                this.cell = cell;
+                this.from = from;
+                this.to = to;
+            }
+
+            public Date getFrom() {
+                return from;
+            }
+
+            public Date getTo() {
+                return to;
+            }
+
+            public DateCell getParentCell() {
+                return cell;
+            }
+        }
+
+        public DateCell(WeekGrid parent, Date date) {
             weekgrid = parent;
             Element mainElement = DOM.createDiv();
             setElement(mainElement);
             makeFocusable();
+            setDate(date);
 
             addStyleName("v-calendar-day-times");
 
@@ -729,23 +748,44 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             firstHour = weekgrid.getFirstHour();
             lastHour = weekgrid.getLastHour();
             numberOfSlots = (lastHour - firstHour + 1) * 2;
+            long slotTime = Math.round(((lastHour - firstHour + 1) * 3600000.0)
+                    / numberOfSlots);
 
             slotElements = new Element[numberOfSlots];
             slotElementHeights = new int[numberOfSlots];
 
+            slots.clear();
+            long start = getDate().getTime() + firstHour * 3600000;
+            long end = start + slotTime;
             for (int i = 0; i < numberOfSlots; i++) {
-                Element e = DOM.createDiv();
+                DateCellSlot slot = new DateCellSlot(DateCell.this, new Date(
+                        start), new Date(end));
                 if (i % 2 == 0) {
-                    setStyleName(e, "v-slot-even");
+                    slot.setStyleName("v-slot-even");
                 } else {
-                    setStyleName(e, "v-slot");
+                    slot.setStyleName("v-slot");
                 }
-                e.setInnerHTML("&nbsp;");
-                Event.sinkEvents(e, Event.MOUSEEVENTS);
-                mainElement.appendChild(e);
-                slotElements[i] = e;
+                Event.sinkEvents(slot.getElement(), Event.MOUSEEVENTS);
+                mainElement.appendChild(slot.getElement());
+                slotElements[i] = slot.getElement();
+                slots.add(slot);
+                start = end;
+                end = start + slotTime;
             }
+
+            // Sink events for tooltip handling
             Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
+
+            // Custom context menu handler
+            addDomHandler(this, ContextMenuEvent.getType());
+        }
+
+        public int getFirstHour() {
+            return firstHour;
+        }
+
+        public int getLastHour() {
+            return lastHour;
         }
 
         @Override
@@ -756,6 +796,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             handlers.add(addHandler(this, MouseUpEvent.getType()));
             handlers.add(addHandler(this, MouseMoveEvent.getType()));
             handlers.add(addKeyDownHandler(this));
+
         }
 
         @Override
@@ -777,6 +818,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             throw new IllegalArgumentException(
                     "Element not found in this DateCell");
+        }
+
+        public DateCellSlot getSlot(int index) {
+            return slots.get(index);
         }
 
         public int getNumberOfSlots() {
@@ -1195,20 +1240,25 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         public void onMouseDown(MouseDownEvent event) {
-            Element e = Element.as(event.getNativeEvent().getEventTarget());
-            if (e.getClassName().contains("reserved") || isDisabled()
-                    || !weekgrid.getParentCalendar().isRangeSelectAllowed()) {
-                eventRangeStart = -1;
-            } else {
-                eventRangeStart = event.getY();
-                eventRangeStop = eventRangeStart;
-                Event.setCapture(getElement());
-                setFocus(true);
+            if (event.getNativeButton() == NativeEvent.BUTTON_LEFT) {
+                Element e = Element.as(event.getNativeEvent().getEventTarget());
+                if (e.getClassName().contains("reserved") || isDisabled()
+                        || !weekgrid.getParentCalendar().isRangeSelectAllowed()) {
+                    eventRangeStart = -1;
+                } else {
+                    eventRangeStart = event.getY();
+                    eventRangeStop = eventRangeStart;
+                    Event.setCapture(getElement());
+                    setFocus(true);
+                }
             }
         }
 
         @SuppressWarnings("deprecation")
         public void onMouseUp(MouseUpEvent event) {
+            if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
+                return;
+            }
             Event.releaseCapture(getElement());
             setFocus(false);
             if (eventRangeStart > -1) {
@@ -1267,6 +1317,10 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
         }
 
         public void onMouseMove(MouseMoveEvent event) {
+            if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
+                return;
+            }
+
             if (eventRangeStart >= 0) {
                 int newY = event.getY();
                 int fromY = 0;
@@ -1402,7 +1456,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
         public static class DayEvent extends FocusableHTML implements
         MouseDownHandler, MouseUpHandler, MouseMoveHandler,
-        KeyDownHandler {
+                KeyDownHandler {
 
             private Element caption = null;
             private final Element eventContent;
@@ -1557,7 +1611,8 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
             }
 
             public void onMouseDown(MouseDownEvent event) {
-                if (isDisabled()) {
+                if (isDisabled()
+                        || event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
                     return;
                 }
 
@@ -1648,7 +1703,7 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
                     removeGlobalResizeStyle();
                     if (weekGrid.getCalendar().getEventResizeListener() != null) {
                         weekGrid.getCalendar().getEventResizeListener()
-                                .eventResized(
+                        .eventResized(
                                 calendarEvent);
                     }
                 }
@@ -1991,6 +2046,15 @@ public class WeekGrid extends SimplePanel implements NativePreviewHandler {
 
             public boolean isDisabled() {
                 return disabled;
+            }
+        }
+
+        public void onContextMenu(ContextMenuEvent event) {
+            if (weekgrid.getCalendar().getMouseEventListener() != null) {
+                event.preventDefault();
+                event.stopPropagation();
+                weekgrid.getCalendar().getMouseEventListener()
+                .contextMenu(event, DateCell.this);
             }
         }
     }
