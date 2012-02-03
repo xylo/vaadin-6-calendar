@@ -236,7 +236,7 @@ VHasDropHandler, ActionOwner {
                                     / (double) (cell.getSlotHeight() + cell
                                             .getSlotBorder())) - 1;
                             DateCellSlot slot = cell.getSlot(slotIndex);
-                            return VCalendarPaintable.this.getActionsInRange(
+                            return VCalendarPaintable.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
                         }
                         return null;
@@ -458,37 +458,6 @@ VHasDropHandler, ActionOwner {
         List<Action> actions = new ArrayList<Action>();
         for (int i = 0; i < actionKeys.size(); i++) {
             final String actionKey = actionKeys.get(i);
-
-            Date actionStartDate;
-            Date actionEndDate;
-            try {
-                actionStartDate = getActionStartDate(actionKey);
-                actionEndDate = getActionEndDate(actionKey);
-            } catch (ParseException pe) {
-                VConsole.error("Failed to parse action date");
-                continue;
-            }
-
-            boolean startIsValid = actionStartDate.compareTo(start) >= 0
-                    && actionStartDate.compareTo(end) <= 0;
-            boolean endIsValid = actionEndDate.compareTo(start) >= 0
-                    && actionEndDate.compareTo(end) <= 0;
-            if (startIsValid && endIsValid) {
-                VCalendarAction a = new VCalendarAction(this, actionKey);
-                a.setCaption(getActionCaption(actionKey));
-                a.setIconUrl(getActionIcon(actionKey));
-                a.setActionStartDate(actionStartDate);
-                a.setActionEndDate(actionEndDate);
-                actions.add(a);
-            }
-        }
-        return actions.toArray(new Action[actions.size()]);
-    }
-
-    private Action[] getActionsInRange(Date start, Date end) {
-        List<Action> actions = new ArrayList<Action>();
-        for (int i = 0; i < actionKeys.size(); i++) {
-            final String actionKey = actionKeys.get(i);
             Date actionStartDate;
             Date actionEndDate;
             try {
@@ -501,7 +470,7 @@ VHasDropHandler, ActionOwner {
 
             boolean startIsValid = start.compareTo(actionStartDate) >= 0;
             boolean endIsValid = end.compareTo(actionEndDate) <= 0;
-            if (startIsValid || endIsValid) {
+            if (startIsValid && endIsValid) {
                 VCalendarAction a = new VCalendarAction(this, actionKey);
                 a.setCaption(getActionCaption(actionKey));
                 a.setIconUrl(getActionIcon(actionKey));
