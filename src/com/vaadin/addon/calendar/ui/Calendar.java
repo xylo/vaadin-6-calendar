@@ -30,6 +30,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendarAction;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
@@ -813,9 +814,16 @@ CalendarEditableEventProvider,Action.Container {
             String actionStr = (String) variables.get("action");
             String[] args = actionStr.split(",");
             Action action = (Action) actionMapper.get(args[0]);
-            Date date = new Date(Long.parseLong(args[1]));
-            for(Action.Handler ah : actionHandlers){
-                ah.handleAction(action, this, date);
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+            try {
+                Date start = formatter.parse(args[1]);
+                for (Action.Handler ah : actionHandlers) {
+                    ah.handleAction(action, this, start);
+                }
+
+            } catch (ParseException e) {
+                logger.log(Level.WARNING, "Could not parse action date string");
             }
         }
     }

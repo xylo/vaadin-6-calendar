@@ -2,6 +2,7 @@ package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.Date;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.terminal.gwt.client.ui.Action;
 
 public class VCalendarAction extends Action {
@@ -11,6 +12,11 @@ public class VCalendarAction extends Action {
     private Date actionStartDate;
 
     private Date actionEndDate;
+
+    public static final String ACTION_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    private final DateTimeFormat dateformat_datetime = DateTimeFormat
+            .getFormat(ACTION_DATE_FORMAT_PATTERN);
 
     /**
      * 
@@ -43,8 +49,9 @@ public class VCalendarAction extends Action {
     @Override
     public void execute() {
         owner.getClient().updateVariable(owner.getPaintableId(), "action",
-                actionKey.split("-")[0] + "," + actionStartDate.getTime() + ","
-                        + actionEndDate.getTime(), true);
+                actionKey.split("-")[0] + ","
+                        + dateformat_datetime.format(actionStartDate) + ","
+                        + dateformat_datetime.format(actionEndDate), true);
         owner.getClient().getContextMenu().hide();
     }
 
