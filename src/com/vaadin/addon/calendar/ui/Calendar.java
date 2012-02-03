@@ -1490,7 +1490,6 @@ CalendarEditableEventProvider,Action.Container {
      *            The property that has the stylename, null if no stylname
      *            property is present
      */
-    @SuppressWarnings("serial")
     public void setContainerDataSource(Container.Indexed container,
             Object captionProperty, Object descriptionProperty,
             Object startDateProperty, Object endDateProperty,
@@ -1538,6 +1537,7 @@ CalendarEditableEventProvider,Action.Container {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
             CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
             provider.addEvent(event);
+            requestRepaint();
         } else {
             throw new UnsupportedOperationException(
                     "Event provider does not support adding events");
@@ -1555,6 +1555,7 @@ CalendarEditableEventProvider,Action.Container {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
             CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
             provider.removeEvent(event);
+            requestRepaint();
         } else {
             throw new UnsupportedOperationException(
                     "Event provider does not support removing events");
