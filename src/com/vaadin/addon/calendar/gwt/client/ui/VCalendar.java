@@ -410,6 +410,8 @@ public class VCalendar extends Composite {
         weekToolbar.removeAllRows();
         int pos = 0;
         boolean monthNameDrawn = true;
+        boolean firstDayFound = false;
+        boolean lastDayFound = false;
 
         for (Day day : days) {
             String date = day.getDate();
@@ -422,6 +424,10 @@ public class VCalendar extends Composite {
             // reset at start of each month
             if (dayOfMonth == 1) {
                 monthNameDrawn = false;
+                if (firstDayFound) {
+                    lastDayFound = true;
+                }
+                firstDayFound = true;
             }
 
             if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
@@ -445,6 +451,12 @@ public class VCalendar extends Composite {
                     }
                 }
             }, ContextMenuEvent.getType());
+
+            if (!firstDayFound) {
+                cell.addStyleDependentName("prev-month");
+            } else if (lastDayFound) {
+                cell.addStyleDependentName("next-month");
+            }
 
             if (dayOfMonth >= 1 && !monthNameDrawn) {
                 cell.setMonthNameVisible(true);
