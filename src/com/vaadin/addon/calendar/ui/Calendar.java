@@ -678,6 +678,9 @@ CalendarEditableEventProvider,Action.Container {
 
             target.startTag("actions");
 
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+
             for (Entry<CalendarDateRange, Set<Action>> entry : actionMap
                     .entrySet()) {
                 CalendarDateRange range = entry.getKey();
@@ -687,9 +690,8 @@ CalendarEditableEventProvider,Action.Container {
                     target.startTag("action");
                     target.addAttribute("key", key);
                     target.addAttribute("start",
-                            df_date_time.format(range.getStart()));
-                    target.addAttribute("end",
-                            df_date_time.format(range.getEnd()));
+                            formatter.format(range.getStart()));
+                    target.addAttribute("end", formatter.format(range.getEnd()));
 
                     if (a.getCaption() != null) {
                         target.addAttribute("caption", a.getCaption());

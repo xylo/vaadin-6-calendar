@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.gwt.client.ui;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -25,6 +27,7 @@ import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.TooltipInfo;
 import com.vaadin.terminal.gwt.client.UIDL;
+import com.vaadin.terminal.gwt.client.VConsole;
 import com.vaadin.terminal.gwt.client.ui.Action;
 import com.vaadin.terminal.gwt.client.ui.ActionOwner;
 import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
@@ -455,8 +458,17 @@ VHasDropHandler, ActionOwner {
         List<Action> actions = new ArrayList<Action>();
         for (int i = 0; i < actionKeys.size(); i++) {
             final String actionKey = actionKeys.get(i);
-            Date actionStartDate = getActionStartDate(actionKey);
-            Date actionEndDate = getActionEndDate(actionKey);
+
+            Date actionStartDate;
+            Date actionEndDate;
+            try {
+                actionStartDate = getActionStartDate(actionKey);
+                actionEndDate = getActionEndDate(actionKey);
+            } catch (ParseException pe) {
+                VConsole.error("Failed to parse action date");
+                continue;
+            }
+
             boolean startIsValid = actionStartDate.compareTo(start) >= 0
                     && actionStartDate.compareTo(end) <= 0;
             boolean endIsValid = actionEndDate.compareTo(start) >= 0
@@ -477,8 +489,16 @@ VHasDropHandler, ActionOwner {
         List<Action> actions = new ArrayList<Action>();
         for (int i = 0; i < actionKeys.size(); i++) {
             final String actionKey = actionKeys.get(i);
-            Date actionStartDate = getActionStartDate(actionKey);
-            Date actionEndDate = getActionEndDate(actionKey);
+            Date actionStartDate;
+            Date actionEndDate;
+            try {
+                actionStartDate = getActionStartDate(actionKey);
+                actionEndDate = getActionEndDate(actionKey);
+            } catch (ParseException pe) {
+                VConsole.error("Failed to parse action date");
+                continue;
+            }
+
             boolean startIsValid = start.compareTo(actionStartDate) >= 0;
             boolean endIsValid = end.compareTo(actionEndDate) <= 0;
             if (startIsValid || endIsValid) {
@@ -528,14 +548,18 @@ VHasDropHandler, ActionOwner {
         return actionMap.get(actionKey + "_i");
     }
 
-    public Date getActionStartDate(String actionKey) {
+    public Date getActionStartDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_s");
-        return dateformat_datetime_actions.parse(dateStr);
+        DateTimeFormat formatter = DateTimeFormat
+                .getFormat(VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+        return formatter.parse(dateStr);
     }
 
-    public Date getActionEndDate(String actionKey) {
+    public Date getActionEndDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_e");
-        return dateformat_datetime_actions.parse(dateStr);
+        DateTimeFormat formatter = DateTimeFormat
+                .getFormat(VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+        return formatter.parse(dateStr);
     }
 
     /**
@@ -549,8 +573,14 @@ VHasDropHandler, ActionOwner {
             final VCalendarAction a = new VCalendarAction(this, actionKey);
             a.setCaption(getActionCaption(actionKey));
             a.setIconUrl(getActionIcon(actionKey));
-            a.setActionStartDate(getActionStartDate(actionKey));
-            a.setActionEndDate(getActionEndDate(actionKey));
+
+            try {
+                a.setActionStartDate(getActionStartDate(actionKey));
+                a.setActionEndDate(getActionEndDate(actionKey));
+            } catch (ParseException pe) {
+                VConsole.error(pe);
+            }
+
             actions.add(a);
         }
         return actions.toArray(new Action[actions.size()]);

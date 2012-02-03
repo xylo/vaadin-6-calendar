@@ -73,8 +73,6 @@ public class VCalendar extends Composite {
 
     protected final DateTimeFormat dateformat_datetime = DateTimeFormat
             .getFormat("yyyy-MM-dd HH:mm:ss");
-    protected final DateTimeFormat dateformat_datetime_actions = DateTimeFormat
-            .getFormat("yyyy-MM-dd-HH-mm");
     protected final DateTimeFormat dateformat_date = DateTimeFormat
             .getFormat("yyyy-MM-dd");
     protected final DateTimeFormat time12format_date = DateTimeFormat
