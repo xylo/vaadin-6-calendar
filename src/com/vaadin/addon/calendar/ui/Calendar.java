@@ -458,8 +458,39 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
+    /**
+     * Get the first and last visible day of the week. Returns the weekdays as
+     * integers represented by {@link java.util.Calendar#DAY_OF_WEEK}
+     * 
+     * @deprecated Use {@link Calendar#getFirstVisibleDayOfWeek()} and
+     *             {@link Calendar#GetLastVisibleDayOfWeek()} instead.
+     * 
+     */
+    @Deprecated
     public int[] getVisibleDaysOfWeek() {
         return new int[] { firstDay, lastDay };
+    }
+
+    /**
+     * Get the first visible day of the week. Returns the weekdays as integers
+     * represented by {@link java.util.Calendar#DAY_OF_WEEK}
+     * 
+     * @return An integer representing the week day according to
+     *         {@link java.util.Calendar#DAY_OF_WEEK}
+     */
+    public int getFirstVisibleDayOfWeek() {
+        return firstDay;
+    }
+
+    /**
+     * Get the last visible day of the week. Returns the weekdays as integers
+     * represented by {@link java.util.Calendar#DAY_OF_WEEK}
+     * 
+     * @return An integer representing the week day according to
+     *         {@link java.util.Calendar#DAY_OF_WEEK}
+     */
+    public int GetLastVisibleDayOfWeek() {
+        return lastDay;
     }
 
     /**
@@ -719,14 +750,15 @@ CalendarEditableEventProvider,Action.Container {
     /**
      * Get the day of week by the given calendar and its locale
      * 
-     * @param c
+     * @param calendar
+     *            The calendar to use
      * @return
      */
-    private static int getDowByLocale(java.util.Calendar c) {
-        int fow = c.get(java.util.Calendar.DAY_OF_WEEK);
+    private static int getDowByLocale(java.util.Calendar calendar) {
+        int fow = calendar.get(java.util.Calendar.DAY_OF_WEEK);
 
         // monday first
-        if (c.getFirstDayOfWeek() == java.util.Calendar.MONDAY) {
+        if (calendar.getFirstDayOfWeek() == java.util.Calendar.MONDAY) {
             fow = (fow == java.util.Calendar.SUNDAY) ? 7 : fow - 1;
         }
 
@@ -737,14 +769,14 @@ CalendarEditableEventProvider,Action.Container {
      * Paints single calendar event to UIDL. Override this method to add custom
      * attributes for events.
      * 
-     * @param i
+     * @param index
      *            Index of target Calendar.Event
      * @param target
      *            PaintTarget
      */
-    protected void paintEvent(int i, PaintTarget target) throws PaintException {
-        CalendarEvent e = events.get(i);
-        target.addAttribute(VCalendarPaintable.ATTR_INDEX, i);
+    protected void paintEvent(int index, PaintTarget target) throws PaintException {
+        CalendarEvent e = events.get(index);
+        target.addAttribute(VCalendarPaintable.ATTR_INDEX, index);
         target.addAttribute(VCalendarPaintable.ATTR_CAPTION,
                 (e.getCaption() == null ? "" : e.getCaption()));
         target.addAttribute(VCalendarPaintable.ATTR_DATEFROM,
@@ -831,6 +863,8 @@ CalendarEditableEventProvider,Action.Container {
     }
 
     /**
+     * Is the user allowed to trigger events which alters the events
+     * 
      * @return true if the client is allowed to send changes to server
      * @see #isEventClickAllowed()
      */
@@ -839,6 +873,8 @@ CalendarEditableEventProvider,Action.Container {
     }
 
     /**
+     * Is the user allowed to trigger click events
+     * 
      * @return true if the client is allowed to click events
      * @see #isClientChangeAllowed()
      */
@@ -846,7 +882,7 @@ CalendarEditableEventProvider,Action.Container {
         return isEnabled();
     }
 
-    /*
+    /**
      * Handle an event move message from client.
      */
     private void handleEventMove(String message) {
@@ -870,7 +906,7 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle a range select message from client.
      */
     private void handleRangeSelect(String value) {
@@ -909,7 +945,7 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle an event click message from client.
      */
     private void handleEventClick(Integer i) {
@@ -918,7 +954,7 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle a date click message from client.
      */
     private void handleDateClick(String message) {
@@ -931,7 +967,7 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle a week message from client.
      */
     private void handleWeekClick(String s) {
@@ -949,7 +985,7 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle a scroll message from client.
      */
     private void handleScroll(String varValue) {
@@ -961,14 +997,14 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
+    /**
      * Handle a navigation message from client.
      */
     private void handleNavigation(Boolean forward) {
         fireNavigationEvent(forward);
     }
 
-    /*
+    /**
      * Handle an event resize message from client.
      */
     private void handleEventResize(String value) {
@@ -990,6 +1026,13 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
+    /**
+     * Fires an event when the user selecing moving forward/backward in the
+     * calendar.
+     * 
+     * @param forward
+     *            True if the calendar moved forward else backward is assumed.
+     */
     protected void fireNavigationEvent(boolean forward) {
         if (forward) {
             fireEvent(new ForwardEvent(this));
@@ -1019,22 +1062,69 @@ CalendarEditableEventProvider,Action.Container {
         fireEvent(event);
     }
 
+    /**
+     * Fires event when a week was clicked in the calendar.
+     * 
+     * @param week
+     *            The week that was clicked
+     * @param year
+     *            The year of the week
+     */
     protected void fireWeekClick(int week, int year) {
         fireEvent(new WeekClick(this, week, year));
     }
 
-    protected void fireEventClick(Integer i) {
-        fireEvent(new EventClick(this, events.get(i)));
+    /**
+     * Fires event when a date was clicked in the calendar. Uses an existing
+     * event from the event cache.
+     * 
+     * @param index
+     *            The index of the event in the event cache.
+     */
+    protected void fireEventClick(Integer index) {
+        fireEvent(new EventClick(this, events.get(index)));
     }
 
-    protected void fireDateClick(Date d) {
-        fireEvent(new DateClickEvent(this, d));
+    /**
+     * Fires event when a date was clicked in the calendar. Creates a new event
+     * for the date and passes it to the listener.
+     * 
+     * @param date
+     *            The date and time that was clicked
+     */
+    protected void fireDateClick(Date date) {
+        fireEvent(new DateClickEvent(this, date));
     }
 
+    /**
+     * Fires an event range selected event. The event is fired when a user
+     * highlights an area in the calendar. The highlighted areas start and end
+     * dates are returned as arguments.
+     * 
+     * @param from
+     *            The start date and time of the highlighted area
+     * @param to
+     *            The end date and time of the highlighted area
+     * @param monthlyMode
+     *            Is the calendar in monthly mode
+     */
     protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
         fireEvent(new RangeSelectEvent(this, from, to, monthlyMode));
     }
 
+    /**
+     * Fires an event resize event. The event is fired when a user resizes the
+     * event in the calendar causing the time range of the event to increase or
+     * decrease. The new start and end times are returned as arguments to this
+     * method.
+     * 
+     * @param index
+     *            The index of the event in the event cache
+     * @param startTime
+     *            The new start date and time of the event
+     * @param endTime
+     *            The new end date and time of the event
+     */
     protected void fireEventResize(int index, Date startTime, Date endTime) {
         EventResize event = new EventResize(this, events.get(index), startTime,
                 endTime);
@@ -1165,6 +1255,18 @@ CalendarEditableEventProvider,Action.Container {
         return calendarClone.getTime();
     }
 
+    /**
+     * Finds the first day of the week and returns a day representing the start
+     * of that day
+     * 
+     * @param start
+     *            The actual date
+     * @param expandToFullWeek
+     *            Should the returned date be moved to the start of the week
+     * @return If expandToFullWeek is set then it returns the first day of the
+     *         week, else it returns a clone of the actual date with the time
+     *         set to the start of the day
+     */
     protected Date expandStartDate(Date start, boolean expandToFullWeek) {
         // If the duration is more than week, use monthly view and get startweek
         // and endweek. Example if views daterange is from tuesday to next weeks
@@ -1184,6 +1286,18 @@ CalendarEditableEventProvider,Action.Container {
         return start;
     }
 
+    /**
+     * Finds the last day of the week and returns a day representing the end of
+     * that day
+     * 
+     * @param end
+     *            The actual date
+     * @param expandToFullWeek
+     *            Should the returned date be moved to the end of the week
+     * @return If expandToFullWeek is set then it returns the last day of the
+     *         week, else it returns a clone of the actual date with the time
+     *         set to the end of the day
+     */
     protected Date expandEndDate(Date end, boolean expandToFullWeek) {
         // If the duration is more than week, use monthly view and get startweek
         // and endweek. Example if views daterange is from tuesday to next weeks
@@ -1260,9 +1374,15 @@ CalendarEditableEventProvider,Action.Container {
      * AbstractComponent
      * 
      * @param eventId
+     *            A unique id for the event. Usually one of
+     *            {@link CalendarEventId}
      * @param eventType
+     *            The class of the event, most likely a subclass of
+     *            {@link CalendarComponentEvent}
      * @param listener
+     *            A listener that listens to the given event
      * @param listenerMethod
+     *            The method on the lister to call when the event is triggered
      */
     protected void setHandler(String eventId, Class<?> eventType,
             ComponentEventListener listener, Method listenerMethod) {
