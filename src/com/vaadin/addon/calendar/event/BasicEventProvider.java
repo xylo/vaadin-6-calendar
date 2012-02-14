@@ -14,8 +14,8 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * <p>
  * Simple implementation of
  * {@link com.vaadin.addon.calendar.event.CalendarEventProvider
- * CalendarEventProvider}. Use {@link #addEvent(BasicEvent)} and
- * {@link #removeEvent(BasicEvent)} to add / remove events.
+ * CalendarEventProvider}. Use {@link #addEvent(CalendarEvent)} and
+ * {@link #removeEvent(CalendarEvent)} to add / remove events.
  * </p>
  * 
  * <p>
@@ -65,22 +65,13 @@ EventSetChangeNotifier, CalendarEvent.EventChangeListener {
         return activeEvents;
     }
 
-    public void addEvent(BasicEvent event) {
-        eventList.add(event);
-
-        event.addListener(this);
-
-        fireEventSetChange();
-    }
-
-    public void removeEvent(BasicEvent event) {
-        eventList.remove(event);
-
-        event.removeListener(this);
-
-        fireEventSetChange();
-    }
-
+    /**
+     * Does this event provider container this event
+     * 
+     * @param event
+     *            The event to check for
+     * @return If this provider has the event then true is returned, else false
+     */
     public boolean containsEvent(BasicEvent event) {
         return eventList.contains(event);
     }
@@ -112,6 +103,10 @@ EventSetChangeNotifier, CalendarEvent.EventChangeListener {
         listeners.remove(listener);
     }
 
+    /**
+     * Fires a eventsetchange event. The event is fired when either an event is
+     * added or removed to the event provider
+     */
     protected void fireEventSetChange() {
         EventSetChange event = new EventSetChange(this);
 
@@ -142,6 +137,10 @@ EventSetChangeNotifier, CalendarEvent.EventChangeListener {
      */
     public void addEvent(CalendarEvent event) {
         eventList.add(event);
+        if (event instanceof BasicEvent) {
+            ((BasicEvent) event).addListener(this);
+        }
+        fireEventSetChange();
     }
 
     /*
@@ -153,5 +152,9 @@ EventSetChangeNotifier, CalendarEvent.EventChangeListener {
      */
     public void removeEvent(CalendarEvent event) {
         eventList.remove(event);
+        if (event instanceof BasicEvent) {
+            ((BasicEvent) event).removeListener(this);
+        }
+        fireEventSetChange();
     }
 }

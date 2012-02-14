@@ -81,8 +81,21 @@ public interface CalendarEventProvider extends Serializable {
      */
     public interface EventSetChangeNotifier extends Serializable {
 
+        /**
+         * Add a listener for listening to when new events are adding or removed
+         * from the event provider.
+         * 
+         * @param listener
+         *            The listener to add
+         */
         void addListener(EventSetChangeListener listener);
 
+        /**
+         * Remove a listener which listens to {@link EventSetChange}-events
+         * 
+         * @param listener
+         *            The listener to remove
+         */
         void removeListener(EventSetChangeListener listener);
     }
 }

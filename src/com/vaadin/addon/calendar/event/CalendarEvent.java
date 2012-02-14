@@ -79,6 +79,7 @@ public interface CalendarEvent extends Serializable {
     /**
      * Event to signal that an event has changed.
      */
+    @SuppressWarnings("serial")
     public class EventChange implements Serializable {
 
         private CalendarEvent source;
@@ -112,8 +113,21 @@ public interface CalendarEvent extends Serializable {
      */
     public interface EventChangeNotifier extends Serializable {
 
+        /**
+         * Add a listener to listen for EventChangeEvents. These events are
+         * fired when a events properties are changed.
+         * 
+         * @param listener
+         *            The listener to add
+         */
         void addListener(EventChangeListener listener);
 
+        /**
+         * Remove a listener from the event provider.
+         * 
+         * @param listener
+         *            The listener to remove
+         */
         void removeListener(EventChangeListener listener);
     }
 

@@ -120,37 +120,81 @@ public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
         return styleName;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.addon.calendar.event.CalendarEvent#isAllDay()
+     */
     public boolean isAllDay() {
         return isAllDay;
     }
 
-    // setters for properties
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setCaption(java.lang
+     * .String)
+     */
     public void setCaption(String caption) {
         this.caption = caption;
         fireEventChange();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setDescription(java
+     * .lang.String)
+     */
     public void setDescription(String description) {
         this.description = description;
         fireEventChange();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setEnd(java.util.
+     * Date)
+     */
     public void setEnd(Date end) {
         this.end = end;
         fireEventChange();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setStart(java.util
+     * .Date)
+     */
     public void setStart(Date start) {
         this.start = start;
         fireEventChange();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setStyleName(java
+     * .lang.String)
+     */
     public void setStyleName(String styleName) {
         this.styleName = styleName;
         fireEventChange();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.event.CalendarEventEditor#setAllDay(boolean)
+     */
     public void setAllDay(boolean isAllDay) {
         this.isAllDay = isAllDay;
         fireEventChange();
@@ -167,7 +211,6 @@ public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
      */
     public void addListener(EventChangeListener listener) {
         listeners.add(listener);
-
     }
 
     /*
@@ -183,6 +226,10 @@ public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
         listeners.remove(listener);
     }
 
+    /**
+     * Fires an event change event to the listeners. Should be triggered when
+     * some property of the event changes.
+     */
     protected void fireEventChange() {
         EventChange event = new EventChange(this);
 
