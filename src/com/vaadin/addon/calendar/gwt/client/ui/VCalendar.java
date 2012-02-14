@@ -30,11 +30,11 @@ import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 /**
- * Clients side implementation for {@link Calendar}. Can be used as a standalone
- * GWT component as well
+ * Clients side implementation for {@link Calendar}.
  * 
- * @author John Ahlroos / Vaadin Ltd 2012
  * @since 1.3.0
+ * @version
+ * @VERSION@
  */
 public class VCalendar extends Composite {
 

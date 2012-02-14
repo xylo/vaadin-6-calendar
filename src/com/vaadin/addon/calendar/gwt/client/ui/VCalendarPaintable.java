@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.text.ParseException;
@@ -36,7 +39,6 @@ import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
  * Handles communication between {@link Calendar} on the server side and
  * {@link VCalendar} on the client side.
  * 
- * @author John Ahlroos / Vaadin Ltd 2012
  * @since 1.0.0
  */
 public class VCalendarPaintable extends VCalendar implements Paintable,

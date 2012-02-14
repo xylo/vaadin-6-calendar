@@ -1,11 +1,14 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.event;
 
 /**
  * An event provider which allows adding and removing events
  * 
- * @author John Ahlroos / Vaadin Ltd 2012
  * @since 1.3.0
- * 
+ * @version
+ * @VERSION@
  */
 public interface CalendarEditableEventProvider extends CalendarEventProvider {
 

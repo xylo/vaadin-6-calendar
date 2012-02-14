@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.Date;
@@ -5,6 +8,14 @@ import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.terminal.gwt.client.ui.Action;
 
+/**
+ * Action performed by the calendar
+ * 
+ * @since 1.3.0
+ * @version
+ * @VERSION@
+ * 
+ */
 public class VCalendarAction extends Action {
 
     private String actionKey = "";

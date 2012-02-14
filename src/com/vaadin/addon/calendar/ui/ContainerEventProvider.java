@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import java.util.Collections;
@@ -27,9 +30,8 @@ import com.vaadin.data.Property.ValueChangeNotifier;
 
 /**
  * A event provider which uses a {@link Container} as a datasource. Container
- * used as datasource
+ * used as data source. The data source must be sorted by date
  * 
- * @author John Ahlroos / Vaadin Ltd 2012
  * @since 1.3.0
  */
 @SuppressWarnings("serial")

@@ -1,3 +1,6 @@
+/*
+@VaadinAddonLicenseForJavaFiles@
+ */
 package com.vaadin.addon.calendar.ui;
 
 import java.io.Serializable;
@@ -7,9 +10,9 @@ import java.util.logging.Logger;
 /**
  * Class for representing a date range.
  * 
- * @author John Ahlroos / Vaadin Ltd 2012
  * @since 1.3.0
- * 
+ * @version
+ * @VERSION@
  */
 @SuppressWarnings("serial")
 public class CalendarDateRange implements Serializable {
