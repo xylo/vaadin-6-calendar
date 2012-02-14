@@ -30,7 +30,9 @@ import com.vaadin.data.Property.ValueChangeNotifier;
 
 /**
  * A event provider which uses a {@link Container} as a datasource. Container
- * used as data source. The data source must be sorted by date
+ * used as data source.
+ * 
+ * NOTE: The data source must be sorted by date!
  * 
  * @since 1.3.0
  */
@@ -533,6 +535,12 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
             item.getItemProperty(getDescriptionProperty()).setValue(
                     event.getDescription());
 
+            // Ensure container is sorted
+            if (container instanceof Container.Sortable) {
+                ((Container.Sortable) container).sort(new Object[] {
+                        getStartDateProperty(), getEndDateProperty() },
+                        new boolean[] { true, true });
+            }
         }
     }
 

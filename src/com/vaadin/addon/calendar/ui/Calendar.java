@@ -1579,6 +1579,8 @@ CalendarEditableEventProvider,Action.Container {
      * using custom properties instead use
      * {@link Calendar#setContainerDataSource(com.vaadin.data.Container.Indexed, Object, Object, Object, Object, Object)}
      * 
+     * Please note that the container must be sorted by date!
+     * 
      * @param container
      *            The container to use as a datasource
      */
@@ -1603,6 +1605,8 @@ CalendarEditableEventProvider,Action.Container {
      * Sets a container as a data source for the events in the calendar.
      * Equivalent for doing
      * <code>Calendar.setEventProvider(new ContainerEventProvider(container))</code>
+     * 
+     * Please note that the container must be sorted by date!
      * 
      * @param container
      *            The container to use as a data source
