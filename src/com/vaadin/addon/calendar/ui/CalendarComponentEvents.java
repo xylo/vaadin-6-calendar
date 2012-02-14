@@ -21,6 +21,10 @@ import com.vaadin.tools.ReflectTools;
  */
 public interface CalendarComponentEvents extends Serializable {
 
+    /**
+     * Notifier interface for notifying listener of calendar events
+     * 
+     */
     public interface CalendarEventNotifier {
         /**
          * Get the assigned event handler for the given eventId.
@@ -35,7 +39,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Notifier interface for event drag & drops.
      */
     public interface EventMoveNotifier extends Serializable,
-            CalendarEventNotifier {
+    CalendarEventNotifier {
 
         /**
          * Set the EventMoveHandler.
@@ -98,7 +102,10 @@ public interface CalendarComponentEvents extends Serializable {
         }
     }
 
-    /** EventMoveHandler handles MoveEvents. */
+    /**
+     * Handler interface for when events are being dragged on the calendar
+     * 
+     */
     public interface EventMoveHandler extends ComponentEventListener {
 
         /** Trigger method for the MoveEvent. */
@@ -120,7 +127,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Handler interface for day or time cell drag-marking with mouse.
      */
     public interface RangeSelectNotifier extends Serializable,
-            CalendarEventNotifier {
+    CalendarEventNotifier {
 
         /**
          * Set the RangeSelectHandler that listens for drag-marking.

@@ -20,6 +20,13 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
     private Element currentTargetElement;
     private SimpleDayCell currentTargetDay;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragAccepted
+     * (com.vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     protected void dragAccepted(VDragEvent drag) {
         deEmphasis();
@@ -29,6 +36,9 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         emphasis();
     }
 
+    /**
+     * Removed the emphasis CSS style name from the currently emphasized day
+     */
     private void deEmphasis() {
         if (currentTargetElement != null) {
             currentTargetDay.removeEmphasisStyle();
@@ -36,10 +46,20 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Add CSS style name for the currently emphasized day
+     */
     private void emphasis() {
         currentTargetDay.addEmphasisStyle();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragOver(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragOver(final VDragEvent drag) {
         if (isLocationValid(drag.getElementOver())) {
@@ -51,6 +71,13 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Checks if the one can perform a drop in a element
+     * 
+     * @param elementOver
+     *            The element to check
+     * @return
+     */
     private boolean isLocationValid(
             com.google.gwt.user.client.Element elementOver) {
         com.google.gwt.user.client.Element monthGridElement = calendarPaintable
@@ -62,11 +89,25 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         return DOM.isOrHasChild(monthGridElement, elementOver);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragEnter(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragEnter(VDragEvent drag) {
         // NOOP, we determine drag acceptance in dragOver
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#drop(com.vaadin
+     * .terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public boolean drop(VDragEvent drag) {
         if (isLocationValid(drag.getElementOver())) {
@@ -80,6 +121,12 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Updates the drop details sent to the server
+     * 
+     * @param drag
+     *            The drag event
+     */
     private void updateDropDetails(VDragEvent drag) {
         int dayIndex = calendarPaintable.getMonthGrid().getDayCellIndex(
                 currentTargetDay);
@@ -87,6 +134,13 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
         drag.getDropDetails().put("dropDayIndex", dayIndex);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragLeave(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragLeave(VDragEvent drag) {
         deEmphasis();

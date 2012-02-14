@@ -55,6 +55,13 @@ public class CalendarDateRange implements Serializable {
         return end;
     }
 
+    /**
+     * Is a date in the date range
+     * 
+     * @param date
+     *            The date to check
+     * @return
+     */
     public boolean inRange(Date date) {
         if (date == null) {
             return false;

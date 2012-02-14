@@ -18,10 +18,17 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
  * @version
  * @VERSION@
  */
+@SuppressWarnings("serial")
 public class BasicWeekClickHandler implements WeekClickHandler {
 
-    private static final long serialVersionUID = 3038767897246095156L;
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler
+     * #weekClick
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick)
+     */
     public void weekClick(WeekClick event) {
         int week = event.getWeek();
         int year = event.getYear();
@@ -45,6 +52,16 @@ public class BasicWeekClickHandler implements WeekClickHandler {
         // times are automatically expanded, no need to worry about them
     }
 
+    /**
+     * Set the start and end dates for the event
+     * 
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
     protected void setDates(WeekClick event, Date start, Date end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);

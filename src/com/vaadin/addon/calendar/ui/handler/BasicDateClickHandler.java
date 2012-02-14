@@ -17,10 +17,17 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
  * @version
  * @VERSION@
  */
+@SuppressWarnings("serial")
 public class BasicDateClickHandler implements DateClickHandler {
 
-    private static final long serialVersionUID = -8798228193934576480L;
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
+     * #dateClick
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
+     */
     public void dateClick(DateClickEvent event) {
         Date clickedDate = event.getDate();
 
@@ -34,6 +41,16 @@ public class BasicDateClickHandler implements DateClickHandler {
         setDates(event, start, end);
     }
 
+    /**
+     * Set the start and end dates for the event
+     * 
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
     protected void setDates(DateClickEvent event, Date start, Date end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);

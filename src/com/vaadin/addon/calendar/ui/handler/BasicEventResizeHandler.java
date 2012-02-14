@@ -17,10 +17,17 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler;
  * @version
  * @VERSION@
  */
+@SuppressWarnings("serial")
 public class BasicEventResizeHandler implements EventResizeHandler {
 
-    private static final long serialVersionUID = -6498174671188624888L;
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
+     * #eventResize
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize)
+     */
     public void eventResize(EventResize event) {
         CalendarEvent calendarEvent = event.getCalendarEvent();
 
@@ -34,6 +41,16 @@ public class BasicEventResizeHandler implements EventResizeHandler {
         }
     }
 
+    /**
+     * Set the start and end dates for the event
+     * 
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
     protected void setDates(CalendarEventEditor event, Date start, Date end) {
         event.setStart(start);
         event.setEnd(end);

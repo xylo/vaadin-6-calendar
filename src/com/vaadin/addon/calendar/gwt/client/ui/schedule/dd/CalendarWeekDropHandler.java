@@ -15,12 +15,22 @@ import com.vaadin.terminal.gwt.client.ui.dd.VDragEvent;
  * Handles DD when the weekly view is showing in the Calendar. In the weekly
  * view, drops are only allowed in the the time slots for each day. The slot
  * index and the day index are included in the drop details sent to the server.
+ * 
+ * @version
+ * @VERSION@
  */
 public class CalendarWeekDropHandler extends CalendarDropHandler {
 
     private com.google.gwt.user.client.Element currentTargetElement;
     private DateCell currentTargetDay;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragAccepted
+     * (com.vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     protected void dragAccepted(VDragEvent drag) {
         deEmphasis();
@@ -30,6 +40,9 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         emphasis();
     }
 
+    /**
+     * Removes the CSS style name from the emphasized element
+     */
     private void deEmphasis() {
         if (currentTargetElement != null) {
             currentTargetDay.removeEmphasisStyle(currentTargetElement);
@@ -37,10 +50,20 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Add a CSS stylen name to current target element
+     */
     private void emphasis() {
         currentTargetDay.addEmphasisStyle(currentTargetElement);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragOver(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragOver(final VDragEvent drag) {
         if (isLocationValid(drag.getElementOver())) {
@@ -52,6 +75,13 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Checks if the location is a valid drop location
+     * 
+     * @param elementOver
+     *            The element to check
+     * @return
+     */
     private boolean isLocationValid(
             com.google.gwt.user.client.Element elementOver) {
         com.google.gwt.user.client.Element weekGridElement = calendarPaintable
@@ -77,11 +107,25 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
                 && (Util.findWidget(elementOver, DayEvent.class) == null);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragEnter(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragEnter(VDragEvent drag) {
         // NOOP, we determine drag acceptance in dragOver
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#drop(com.vaadin
+     * .terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public boolean drop(VDragEvent drag) {
         if (isLocationValid(drag.getElementOver())) {
@@ -95,6 +139,12 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         }
     }
 
+    /**
+     * Update the drop details sent to the server
+     * 
+     * @param drag
+     *            The drag event
+     */
     private void updateDropDetails(VDragEvent drag) {
         int slotIndex = currentTargetDay.getSlotIndex(currentTargetElement);
         int dayIndex = calendarPaintable.getWeekGrid().getDateCellIndex(
@@ -104,6 +154,13 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         drag.getDropDetails().put("dropSlotIndex", slotIndex);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#dragLeave(com
+     * .vaadin.terminal.gwt.client.ui.dd.VDragEvent)
+     */
     @Override
     public void dragLeave(VDragEvent drag) {
         deEmphasis();

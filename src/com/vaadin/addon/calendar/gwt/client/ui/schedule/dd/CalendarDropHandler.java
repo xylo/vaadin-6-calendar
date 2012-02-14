@@ -16,15 +16,33 @@ public abstract class CalendarDropHandler extends VAbstractDropHandler {
 
     protected VCalendarPaintable calendarPaintable;
 
+    /**
+     * Set the calendar instance
+     * 
+     * @param calendarPaintable
+     */
     public void setCalendarPaintable(VCalendarPaintable calendarPaintable) {
         this.calendarPaintable = calendarPaintable;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#getPaintable()
+     */
     @Override
     public Paintable getPaintable() {
         return calendarPaintable;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.terminal.gwt.client.ui.dd.VDropHandler#getApplicationConnection
+     * ()
+     */
     public ApplicationConnection getApplicationConnection() {
         return calendarPaintable.getClient();
     }

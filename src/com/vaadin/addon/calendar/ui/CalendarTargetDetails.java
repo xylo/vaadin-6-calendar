@@ -38,6 +38,11 @@ public class CalendarTargetDetails extends TargetDetailsImpl {
         return hasDropTime;
     }
 
+    /**
+     * Does the dropped item have a time associated with it
+     * 
+     * @param hasDropTime
+     */
     protected void setHasDropTime(boolean hasDropTime) {
         this.hasDropTime = hasDropTime;
     }

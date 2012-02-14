@@ -18,10 +18,17 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
  * @VERSION@
  * 
  */
+@SuppressWarnings("serial")
 public class BasicBackwardHandler implements BackwardHandler {
 
-    private static final long serialVersionUID = 7706994719728595151L;
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler#
+     * backward
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent)
+     */
     public void backward(BackwardEvent event) {
         Date start = event.getComponent().getStartDate();
         Date end = event.getComponent().getEndDate();
@@ -44,6 +51,16 @@ public class BasicBackwardHandler implements BackwardHandler {
         setDates(event, newStart, newEnd);
     }
 
+    /**
+     * Set the start and end dates for the event
+     * 
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
     protected void setDates(BackwardEvent event, Date start, Date end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
