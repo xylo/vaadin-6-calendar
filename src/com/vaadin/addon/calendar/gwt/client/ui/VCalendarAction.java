@@ -66,18 +66,40 @@ public class VCalendarAction extends Action {
         owner.getClient().getContextMenu().hide();
     }
 
+    /**
+     * Get the date and time when the action starts
+     * 
+     * @return
+     */
     public Date getActionStartDate() {
         return actionStartDate;
     }
 
+    /**
+     * Set the date when the actions start
+     * 
+     * @param actionStartDate
+     *            The date and time when the action starts
+     */
     public void setActionStartDate(Date actionStartDate) {
         this.actionStartDate = actionStartDate;
     }
 
+    /**
+     * Get the date and time when the action ends
+     * 
+     * @return
+     */
     public Date getActionEndDate() {
         return actionEndDate;
     }
 
+    /**
+     * Set the date and time when the action ends
+     * 
+     * @param actionEndDate
+     *            The date and time when the action ends
+     */
     public void setActionEndDate(Date actionEndDate) {
         this.actionEndDate = actionEndDate;
     }

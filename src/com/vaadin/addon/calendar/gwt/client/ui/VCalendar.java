@@ -17,6 +17,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
@@ -91,46 +92,150 @@ public class VCalendar extends Composite {
     private int firstHour;
     private int lastHour;
 
+    /**
+     * Listener interface for listening to event click events
+     */
     public interface DateClickListener {
+        /**
+         * Triggered when a date was clicked
+         * 
+         * @param date
+         *            The date and time that was clicked
+         */
         void dateClick(String date);
     }
 
+    /**
+     * Listener interface for listening to week number click events
+     */
     public interface WeekClickListener {
+        /**
+         * Called when a week number was selected.
+         * 
+         * @param event
+         *            The format of the vent string is "<year>w<week>"
+         */
         void weekClick(String event);
     }
 
+    /**
+     * Listener interface for listening to forward events
+     */
     public interface ForwardListener {
+
+        /**
+         * Called when the calendar should move one view forward
+         */
         void forward();
     }
 
+    /**
+     * Listener interface for listening to backward events
+     */
     public interface BackwardListener {
+
+        /**
+         * Called when the calendar should move one view backward
+         */
         void backward();
     }
 
+    /**
+     * Listener interface for listening to selection events
+     */
     public interface RangeSelectListener {
+
+        /**
+         * Called when a user selected a new event by highlighting an area of
+         * the calendar.
+         * 
+         * FIXME Fix the value nonsense.
+         * 
+         * @param value
+         *            The format of the value string is
+         *            "<year>:<start-minutes>:<end-minutes>" if called from the
+         *            {@link SimpleWeekToolbar} and "<yyyy-MM-dd>TO<yyyy-MM-dd>"
+         *            if called from {@link MonthGrid}
+         */
         void rangeSelected(String value);
     }
 
+    /**
+     * Listener interface for listening to click events
+     */
     public interface EventClickListener {
+        /**
+         * Called when an event was clicked
+         * 
+         * @param event
+         *            The event that was clicked
+         */
         void eventClick(CalendarEvent event);
     }
 
+    /**
+     * Listener interface for listening to event moved events. Occurs when a
+     * user drags an event to a new position
+     */
     public interface EventMovedListener {
+        /**
+         * Triggered when an event was dragged to a new position and the start
+         * and end dates was changed
+         * 
+         * @param event
+         *            The event that was moved
+         */
         void eventMoved(CalendarEvent event);
     }
 
+    /**
+     * Listener interface for when an event gets resized (its start or end date
+     * changes)
+     */
     public interface EventResizeListener {
+        /**
+         * Triggers when the time limits for the event was changed.
+         * 
+         * @param event
+         *            The event that was changed. The new time limits have been
+         *            updated in the event before calling this method
+         */
         void eventResized(CalendarEvent event);
     }
 
+    /**
+     * Listener interface for listening to scroll events.
+     */
     public interface ScrollListener {
+        /**
+         * Triggered when the calendar is scrolled
+         * 
+         * @param scrollPosition
+         *            The scroll position in pixels as returned by
+         *            {@link ScrollPanel#getScrollPosition()}
+         */
         void scroll(int scrollPosition);
     }
 
+    /**
+     * Listener interface for listening to mouse events.
+     */
     public interface MouseEventListener {
+        /**
+         * Triggered when a user wants an context menu
+         * 
+         * @param event
+         *            The context menu event
+         * 
+         * @param widget
+         *            The widget that the context menu should be added to
+         */
         void contextMenu(ContextMenuEvent event, Widget widget);
     }
 
+    /**
+     * Default constructor
+     */
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
@@ -138,6 +243,12 @@ public class VCalendar extends Composite {
         blockSelect(getElement());
     }
 
+    /**
+     * Hack for IE to not select text when dragging.
+     * 
+     * @param e
+     *            The element to apply the hack on
+     */
     private native void blockSelect(Element e)
     /*-{
     	e.onselectstart = function() {
@@ -171,9 +282,20 @@ public class VCalendar extends Composite {
         }
     }
 
+    /**
+     * Adds events to the month grid
+     * 
+     * @param events
+     *            The events to add
+     * @param drawImmediately
+     *            Should the grid be rendered immediately. (currently not in
+     *            use)
+     * 
+     */
     protected void updateEventsToMonthGrid(Collection<CalendarEvent> events,
             boolean drawImmediately) {
         for (CalendarEvent e : sortEventsByDuration(events)) {
+            // FIXME Why is drawImmediately not used ?????
             addEventToMonthGrid(e, false);
         }
     }
@@ -291,6 +413,15 @@ public class VCalendar extends Composite {
         return true;
     }
 
+    /**
+     * Remove a month event from the view
+     * 
+     * @param target
+     *            The event to remove
+     * 
+     * @param repaintImmediately
+     *            Should we repaint after the event was removed?
+     */
     public void removeMonthEvent(CalendarEvent target,
             boolean repaintImmediately) {
         if (target != null && target.getSlotIndex() >= 0) {
@@ -308,12 +439,25 @@ public class VCalendar extends Composite {
         }
     }
 
+    /**
+     * Updates an event in the month grid
+     * 
+     * @param changedEvent
+     *            The event that has changed
+     */
     public void updateEventToMonthGrid(CalendarEvent changedEvent) {
         removeMonthEvent(changedEvent, true);
         changedEvent.setSlotIndex(-1);
         addEventToMonthGrid(changedEvent, true);
     }
 
+    /**
+     * Sort the event by how long they are
+     * 
+     * @param events
+     *            The events to sort
+     * @return An array where the events has been sorted
+     */
     public CalendarEvent[] sortEventsByDuration(Collection<CalendarEvent> events) {
         CalendarEvent[] sorted = events
                 .toArray(new CalendarEvent[events.size()]);
@@ -349,6 +493,18 @@ public class VCalendar extends Composite {
         return false;
     }
 
+    /**
+     * Re-render the week grid
+     * 
+     * @param daysCount
+     *            The amount of days to include in the week
+     * @param days
+     *            The days
+     * @param today
+     *            Todays date
+     * @param realDayNames
+     *            The names of the dates
+     */
     @SuppressWarnings("deprecation")
     public void updateWeekGrid(int daysCount, List<Day> days, Date today,
             String[] realDayNames) {
@@ -473,6 +629,11 @@ public class VCalendar extends Composite {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.gwt.user.client.ui.UIObject#setHeight(java.lang.String)
+     */
     @Override
     public void setHeight(String newHeight) {
         if (!newHeight.equals(height)) {
@@ -491,6 +652,9 @@ public class VCalendar extends Composite {
         }
     }
 
+    /**
+     * Recalculates the heights of the sub-components in the calendar
+     */
     protected void recalculateHeights() {
         if (monthGrid != null) {
             monthGrid.setHeightPX(intHeight);
@@ -506,6 +670,9 @@ public class VCalendar extends Composite {
         }
     }
 
+    /**
+     * Recalculates the widths of the sub-components in the calendar
+     */
     protected void recalculateWidths() {
         if (!isWidthUndefined) {
             outer.setWidth(intWidth + "px");
@@ -532,6 +699,11 @@ public class VCalendar extends Composite {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.gwt.user.client.ui.UIObject#setWidth(java.lang.String)
+     */
     @Override
     public void setWidth(String newWidth) {
         if (!newWidth.equals(width)) {
@@ -548,10 +720,20 @@ public class VCalendar extends Composite {
         }
     }
 
+    /**
+     * Get the date format used to format dates only (excludes time)
+     * 
+     * @return
+     */
     public DateTimeFormat getDateFormat() {
         return dateformat_date;
     }
 
+    /**
+     * Get the time format used to format time only (excludes date)
+     * 
+     * @return
+     */
     public DateTimeFormat getTimeFormat() {
         if (format) {
             return time24format_date;
@@ -559,10 +741,21 @@ public class VCalendar extends Composite {
         return time12format_date;
     }
 
+    /**
+     * Get the date and time format to format the dates (includes both date and
+     * time)
+     * 
+     * @return
+     */
     public DateTimeFormat getDateTimeFormat() {
         return dateformat_datetime;
     }
 
+    /**
+     * Is the calendar either disabled or readonly
+     * 
+     * @return
+     */
     public boolean isDisabledOrReadOnly() {
         return disabled || readOnly;
     }
@@ -601,10 +794,20 @@ public class VCalendar extends Composite {
         this.readOnly = readOnly;
     }
 
+    /**
+     * Get the month grid component
+     * 
+     * @return
+     */
     public MonthGrid getMonthGrid() {
         return monthGrid;
     }
 
+    /**
+     * Get he week grid component
+     * 
+     * @return
+     */
     public WeekGrid getWeekGrid() {
         return weekGrid;
     }
@@ -648,6 +851,11 @@ public class VCalendar extends Composite {
         return cellSizes;
     }
 
+    /**
+     * Returns a comparator which can compare calendar events.
+     * 
+     * @return
+     */
     public static Comparator<CalendarEvent> getEventComparator() {
         return new Comparator<CalendarEvent>() {
 
@@ -734,15 +942,30 @@ public class VCalendar extends Composite {
 
     }
 
+    /**
+     * Is the date at midnight
+     * 
+     * @param date
+     *            The date to check
+     * 
+     * @return
+     */
     @SuppressWarnings("deprecation")
-    // Date methods are not deprecated in GWT
-    public static boolean isMidnight(Date endTime) {
-        return (endTime.getHours() == 0 && endTime.getMinutes() == 0 && endTime
+    public static boolean isMidnight(Date date) {
+        return (date.getHours() == 0 && date.getMinutes() == 0 && date
                 .getSeconds() == 0);
     }
 
+    /**
+     * Are the dates equal (uses second resolution)
+     * 
+     * @param date1
+     *            The first the to compare
+     * @param date2
+     *            The second date to compare
+     * @return
+     */
     @SuppressWarnings("deprecation")
-    // Date methods are not deprecated in GWT
     public static boolean areDatesEqualToSecond(Date date1, Date date2) {
         return date1.getYear() == date2.getYear()
                 && date1.getMonth() == date2.getMonth()
@@ -751,9 +974,16 @@ public class VCalendar extends Composite {
                 && date1.getSeconds() == date2.getSeconds();
     }
 
-    public static boolean isZeroLengthMidnightEvent(CalendarEvent e) {
-        return areDatesEqualToSecond(e.getStartTime(), e.getEndTime())
-                && isMidnight(e.getEndTime());
+    /**
+     * Is the calendar event zero seconds long and is occurring at midnight
+     * 
+     * @param event
+     *            The event to check
+     * @return
+     */
+    public static boolean isZeroLengthMidnightEvent(CalendarEvent event) {
+        return areDatesEqualToSecond(event.getStartTime(), event.getEndTime())
+                && isMidnight(event.getEndTime());
     }
 
     /**
@@ -913,12 +1143,18 @@ public class VCalendar extends Composite {
     }
 
     /**
+     * Re-renders the whole week view
      * 
      * @param scroll
+     *            The amount of pixels to scroll the week view
      * @param today
+     *            Todays date
      * @param daysInMonth
+     *            How many days are there in the month
      * @param firstDayOfWeek
+     *            The first day of the week
      * @param events
+     *            The events to render
      */
     protected void updateWeekView(int scroll, Date today, int daysInMonth,
             int firstDayOfWeek, Collection<CalendarEvent> events, List<Day> days) {
@@ -966,6 +1202,20 @@ public class VCalendar extends Composite {
         recalculateWidths();
     }
 
+    /**
+     * Re-renders the whole month view
+     * 
+     * @param firstDayOfWeek
+     *            The first day of the week
+     * @param today
+     *            Todays date
+     * @param daysInMonth
+     *            Amount of days in the month
+     * @param events
+     *            The events to render
+     * @param days
+     *            The day information
+     */
     protected void updateMonthView(int firstDayOfWeek, Date today,
             int daysInMonth, Collection<CalendarEvent> events, List<Day> days) {
 
@@ -1011,100 +1261,212 @@ public class VCalendar extends Composite {
 
     private DateClickListener dateClickListener;
 
+    /**
+     * Sets the listener for listening to event clicks
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(DateClickListener listener) {
         dateClickListener = listener;
     }
 
+    /**
+     * Gets the listener for listening to event clicks
+     * 
+     * @return
+     */
     public DateClickListener getDateClickListener() {
         return dateClickListener;
     }
 
     private ForwardListener forwardListener;
 
+    /**
+     * Set the listener which listens to forward events from the calendar
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(ForwardListener listener) {
         forwardListener = listener;
     }
 
+    /**
+     * Get the listener which listens to forward events from the calendar
+     * 
+     * @return
+     */
     public ForwardListener getForwardListener() {
         return forwardListener;
     }
 
     private BackwardListener backwardListener;
 
+    /**
+     * Set the listener which listens to backward events from the calendar
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(BackwardListener listener) {
         backwardListener = listener;
     }
 
+    /**
+     * Set the listener which listens to backward events from the calendar
+     * 
+     * @return
+     */
     public BackwardListener getBackwardListener() {
         return backwardListener;
     }
 
     private WeekClickListener weekClickListener;
 
+    /**
+     * Set the listener that listens to user clicking on the week numbers
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(WeekClickListener listener) {
         weekClickListener = listener;
     }
 
+    /**
+     * Get the listener that listens to user clicking on the week numbers
+     * 
+     * @return
+     */
     public WeekClickListener getWeekClickListener() {
         return weekClickListener;
     }
 
     private RangeSelectListener rangeSelectListener;
 
+    /**
+     * Set the listener that listens to the user highlighting a region in the
+     * calendar
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(RangeSelectListener listener) {
         rangeSelectListener = listener;
     }
 
+    /**
+     * Get the listener that listens to the user highlighting a region in the
+     * calendar
+     * 
+     * @return
+     */
     public RangeSelectListener getRangeSelectListener() {
         return rangeSelectListener;
     }
 
     private EventClickListener eventClickListener;
 
+    /**
+     * Get the listener that listens to the user clicking on the events
+     */
     public EventClickListener getEventClickListener() {
         return eventClickListener;
     }
 
+    /**
+     * Set the listener that listens to the user clicking on the events
+     * 
+     * @param listener
+     *            The listener to use
+     */
     public void setListener(EventClickListener listener) {
         this.eventClickListener = listener;
     }
 
     private EventMovedListener eventMovedListener;
 
+    /**
+     * Get the listener that listens to when event is dragged to a new location
+     * 
+     * @return
+     */
     public EventMovedListener getEventMovedListener() {
         return eventMovedListener;
     }
 
+    /**
+     * Set the listener that listens to when event is dragged to a new location
+     * 
+     * @param eventMovedListener
+     *            The listener to use
+     */
     public void setListener(EventMovedListener eventMovedListener) {
         this.eventMovedListener = eventMovedListener;
     }
 
     private ScrollListener scrollListener;
 
+    /**
+     * Get the listener that listens to when the calendar widget is scrolled
+     * 
+     * @return
+     */
     public ScrollListener getScrollListener() {
         return scrollListener;
     }
 
+    /**
+     * Set the listener that listens to when the calendar widget is scrolled
+     * 
+     * @param scrollListener
+     *            The listener to use
+     */
     public void setListener(ScrollListener scrollListener) {
         this.scrollListener = scrollListener;
     }
 
     private EventResizeListener eventResizeListener;
 
+    /**
+     * Get the listener that listens to when an events time limits are being
+     * adjusted
+     * 
+     * @return
+     */
     public EventResizeListener getEventResizeListener() {
         return eventResizeListener;
     }
 
+    /**
+     * Set the listener that listens to when an events time limits are being
+     * adjusted
+     * 
+     * @param eventResizeListener
+     *            The listener to use
+     */
     public void setListener(EventResizeListener eventResizeListener) {
         this.eventResizeListener = eventResizeListener;
     }
 
     private MouseEventListener mouseEventListener;
 
+    /**
+     * Get the listener that listen to mouse events
+     * 
+     * @return
+     */
     public MouseEventListener getMouseEventListener() {
         return mouseEventListener;
     }
 
+    /**
+     * Set the listener that listen to mouse events
+     * 
+     * @param mouseEventListener
+     *            The listener to use
+     */
     public void setListener(MouseEventListener mouseEventListener) {
         this.mouseEventListener = mouseEventListener;
     }

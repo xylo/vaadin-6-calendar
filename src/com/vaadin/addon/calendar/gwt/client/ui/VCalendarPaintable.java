@@ -40,6 +40,8 @@ import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
  * {@link VCalendar} on the client side.
  * 
  * @since 1.0.0
+ * @version
+ * @VERSION@
  */
 public class VCalendarPaintable extends VCalendar implements Paintable,
 VHasDropHandler, ActionOwner {
@@ -511,14 +513,36 @@ VHasDropHandler, ActionOwner {
         }
     }
 
+    /**
+     * Get the text that is displayed for a context menu item
+     * 
+     * @param actionKey
+     *            The unique action key
+     * @return
+     */
     public String getActionCaption(String actionKey) {
         return actionMap.get(actionKey + "_c");
     }
 
+    /**
+     * Get the icon url for a context menu item
+     * 
+     * @param actionKey
+     *            The unique action key
+     * @return
+     */
     public String getActionIcon(String actionKey) {
         return actionMap.get(actionKey + "_i");
     }
 
+    /**
+     * Get the start date for an action item
+     * 
+     * @param actionKey
+     *            The unique action key
+     * @return
+     * @throws ParseException
+     */
     public Date getActionStartDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_s");
         DateTimeFormat formatter = DateTimeFormat
@@ -526,6 +550,14 @@ VHasDropHandler, ActionOwner {
         return formatter.parse(dateStr);
     }
 
+    /**
+     * Get the end date for an action item
+     * 
+     * @param actionKey
+     *            The unique action key
+     * @return
+     * @throws ParseException
+     */
     public Date getActionEndDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_e");
         DateTimeFormat formatter = DateTimeFormat

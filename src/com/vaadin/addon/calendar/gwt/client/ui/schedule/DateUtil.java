@@ -7,6 +7,10 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
+/**
+ * Utility class for {@link Date} operations
+ * 
+ */
 public class DateUtil {
 
     public static final String CLIENT_DATE_FORMAT = "yyyy-MM-dd";
