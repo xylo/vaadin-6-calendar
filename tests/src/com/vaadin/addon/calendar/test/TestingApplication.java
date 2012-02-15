@@ -10,6 +10,16 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
+/**
+ * This application is used as a base for all testing application. Pass it a
+ * qualified class name and it will load the testing application class. For
+ * example doing
+ * http://localhost:8080/Calendar/test/com.vaadin.addon.calendar.test
+ * .NotificationTestApp will load that application.
+ * 
+ * @author "John Ahlroos / Vaadin Ltd"
+ * 
+ */
 public class TestingApplication extends Application {
 
     private Window mainWindow;
