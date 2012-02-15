@@ -52,7 +52,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
     private boolean monthNameVisible;
     private HandlerRegistration mouseUpRegistration;
     private HandlerRegistration mouseDownRegistration;
-    private HandlerRegistration mouseOverRegistration; 
+    private HandlerRegistration mouseOverRegistration;
     private boolean monthEventMouseDown;
     private boolean labelMouseDown;
     private int eventCount = 0;
@@ -268,8 +268,9 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
             if (e.getStyleName() != null) {
                 eventDiv.addStyleDependentName(e.getStyleName());
             }
-            eventDiv.setHTML(calendar.getTimeFormat().format(fromDatetime)
-                    + " " + e.getCaption());
+            eventDiv.setCaption(e.getCaption());
+            eventDiv.setTime(fromDatetime);
+
         } else {
             eventDiv.setTimeSpecificEvent(false);
             Date from = e.getStart();
@@ -284,10 +285,11 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
             eventDiv.addStyleDependentName("all-day");
             if (fromCompareToDate == 0) {
                 eventDiv.addStyleDependentName("start");
-                eventDiv.setText(e.getCaption());
+                eventDiv.setCaption(e.getCaption());
+
             } else if (fromCompareToDate < 0 && cell == 0) {
                 eventDiv.addStyleDependentName("continued-from");
-                eventDiv.setText(e.getCaption());
+                eventDiv.setCaption(e.getCaption());
             }
             if (toCompareToDate == 0) {
                 eventDiv.addStyleDependentName("end");
@@ -353,7 +355,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
     protected void onDetach() {
         mouseUpRegistration.removeHandler();
         mouseDownRegistration.removeHandler();
-        mouseOverRegistration.removeHandler();     
+        mouseOverRegistration.removeHandler();
         super.onDetach();
     }
 
@@ -689,31 +691,118 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
         removeStyleDependentName("dragemphasis");
     }
 
+    /**
+     * The label in a month cell
+     */
     public static class MonthEventLabel extends HTML {
+
+        private static final String STYLENAME = "v-calendar-event";
 
         private boolean timeSpecificEvent = false;
         private Integer eventIndex;
         private VCalendar calendar;
+        private String caption;
+        private Date time;
 
+        /**
+         * Default constructor
+         */
         public MonthEventLabel() {
-            setStylePrimaryName("v-calendar-event");
+            setStylePrimaryName(STYLENAME);
             sinkEvents(VTooltip.TOOLTIP_EVENTS);
         }
 
+        /**
+         * Set the time of the event label
+         * 
+         * @param date
+         *            The date object that specifies the time
+         */
+        public void setTime(Date date) {
+            this.time = date;
+            renderCaption();
+        }
+
+        /**
+         * Set the caption of the event label
+         * 
+         * @param caption
+         *            The caption string, can be HTML
+         */
+        public void setCaption(String caption) {
+            this.caption = caption;
+            renderCaption();
+        }
+
+        /**
+         * Renders the caption in the DIV element
+         */
+        private void renderCaption() {
+            StringBuilder html = new StringBuilder();
+            if (caption != null && time != null) {
+                html.append("<span class=\"" + STYLENAME + "-time\">");
+                html.append(calendar.getTimeFormat().format(time));
+                html.append("</span> ");
+                html.append(caption);
+            } else if (caption != null) {
+                html.append(caption);
+            } else if (time != null) {
+                html.append("<span class=\"" + STYLENAME + "-time\">");
+                html.append(calendar.getTimeFormat().format(time));
+                html.append("</span>");
+            }
+            super.setHTML(html.toString());
+        }
+
+        /**
+         * Set the (server side) index of the event
+         * 
+         * @param index
+         *            The integer index
+         */
         public void setEventIndex(int index) {
             eventIndex = index;
         }
 
+        /**
+         * Set the Calendar instance this label belongs to
+         * 
+         * @param calendar
+         *            The calendar instance
+         */
         public void setCalendar(VCalendar calendar) {
             this.calendar = calendar;
         }
 
+        /**
+         * Is the event bound to a specific time
+         * 
+         * @return
+         */
         public boolean isTimeSpecificEvent() {
             return timeSpecificEvent;
         }
 
+        /**
+         * Is the event bound to a specific time
+         * 
+         * @param timeSpecificEvent
+         *            True if the event is bound to a time, false if it is only
+         *            bound to the day
+         */
         public void setTimeSpecificEvent(boolean timeSpecificEvent) {
             this.timeSpecificEvent = timeSpecificEvent;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.google.gwt.user.client.ui.HTML#setHTML(java.lang.String)
+         */
+        @Override
+        public void setHTML(String html) {
+            throw new UnsupportedOperationException(
+                    "Use setCaption() and setTime() instead");
         }
 
         /*
