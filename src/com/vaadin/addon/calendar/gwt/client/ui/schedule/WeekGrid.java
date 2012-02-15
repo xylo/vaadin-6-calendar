@@ -1261,7 +1261,8 @@ public class WeekGrid extends SimplePanel {
             }
             Event.releaseCapture(getElement());
             setFocus(false);
-            if (eventRangeStart > -1) {
+            int dragDistance = Math.abs(eventRangeStart - event.getY());
+            if (dragDistance > 0) {
                 Element main = getElement();
                 if (eventRangeStart > eventRangeStop) {
                     if (eventRangeStop <= -1) {
@@ -1313,6 +1314,10 @@ public class WeekGrid extends SimplePanel {
                             yr + ":" + startMinutes + ":" + endMinutes);
                 }
                 eventRangeStart = -1;
+            } else {
+                // Click event
+                eventRangeStart = -1;
+                clearSelectionRange();
             }
         }
 
@@ -1456,7 +1461,7 @@ public class WeekGrid extends SimplePanel {
 
         public static class DayEvent extends FocusableHTML implements
         MouseDownHandler, MouseUpHandler, MouseMoveHandler,
-                KeyDownHandler {
+        KeyDownHandler {
 
             private Element caption = null;
             private final Element eventContent;
