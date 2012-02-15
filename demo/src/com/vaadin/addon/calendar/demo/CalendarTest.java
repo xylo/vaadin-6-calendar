@@ -445,9 +445,15 @@ public class CalendarTest extends Application {
             private static final long serialVersionUID = -8307244759142541067L;
 
             public void buttonClick(ClickEvent event) {
-                showEventPopup(createNewEvent(getToday(), getToday()), true);
-            }
+                Date start = getToday();
+                start.setHours(0);
+                start.setMinutes(0);
+                start.setSeconds(0);
 
+                Date end = Calendar.getEndOfDay(calendar, start);
+
+                showEventPopup(createNewEvent(start, end), true);
+            }
         });
     }
 
@@ -938,19 +944,19 @@ public class CalendarTest extends Application {
         });
 
         scheduleEventForm
-                .setVisibleItemProperties(new Object[] { "start", "end",
-                        "allDay", "caption", "where", "description",
-                        "styleName" });
+        .setVisibleItemProperties(new Object[] { "start", "end",
+                "allDay", "caption", "where", "description",
+        "styleName" });
     }
 
     private void setFormDateResolution(int resolution) {
         if (scheduleEventForm.getField("start") != null
                 && scheduleEventForm.getField("end") != null) {
             ((DateField) scheduleEventForm.getField("start"))
-                    .setResolution(resolution);
+            .setResolution(resolution);
             ((DateField) scheduleEventForm.getField("start")).requestRepaint();
             ((DateField) scheduleEventForm.getField("end"))
-                    .setResolution(resolution);
+            .setResolution(resolution);
             ((DateField) scheduleEventForm.getField("end")).requestRepaint();
         }
     }
