@@ -40,7 +40,7 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
      * Removed the emphasis CSS style name from the currently emphasized day
      */
     private void deEmphasis() {
-        if (currentTargetElement != null) {
+        if (currentTargetElement != null && currentTargetDay != null) {
             currentTargetDay.removeEmphasisStyle();
             currentTargetElement = null;
         }
@@ -50,7 +50,9 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
      * Add CSS style name for the currently emphasized day
      */
     private void emphasis() {
-        currentTargetDay.addEmphasisStyle();
+        if (currentTargetElement != null && currentTargetDay != null) {
+            currentTargetDay.addEmphasisStyle();
+        }
     }
 
     /*
