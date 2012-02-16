@@ -12,6 +12,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.ContainerEventProvider;
 import com.vaadin.data.Container.Indexed;
+import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
@@ -54,6 +55,45 @@ public class ContainerDataSource extends TestCase {
         end = cal.getTime();
         events = calendar.getEventProvider().getEvents(start, end);
         assertEquals(6, events.size());
+    }
+
+    /**
+     * This tests tests that if you give the Calendar an unsorted (== not sorted
+     * by starting date) container then the calendar should gracefully handle
+     * it. In this case the size of the container will be wrong. The test is
+     * exactly the same as {@link #testWithBeanItemContainer()} except that the
+     * beans has been intentionally sorted by caption instead of date.
+     */
+    @Test
+    public void testWithUnsortedBeanItemContainer() {
+        // Create a container to use as a datasource
+        Indexed container = createTestBeanItemContainer();
+
+        // Make the container sorted by caption
+        ((Sortable)container).sort(new Object[]{"caption"}, new boolean[]{true});
+
+        // Set data source
+        calendar.setContainerDataSource(container);
+
+        // Start and end dates to query for
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(((CalendarEvent) container.getIdByIndex(0)).getStart());
+        Date start = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, 1);
+        Date end = cal.getTime();
+
+        // Test the all events are returned
+        List<CalendarEvent> events = calendar.getEventProvider().getEvents(
+                start, end);
+        assertEquals(container.size(), events.size());
+
+        // Test that a certain range is returned
+        cal.setTime(((CalendarEvent) container.getIdByIndex(6)).getStart());
+        end = cal.getTime();
+        events = calendar.getEventProvider().getEvents(start, end);
+
+        // The events size is 1 since the getEvents returns the wrong range
+        assertEquals(1, events.size());
     }
 
     /**
