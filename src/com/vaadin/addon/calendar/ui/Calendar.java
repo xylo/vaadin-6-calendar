@@ -258,6 +258,8 @@ CalendarEditableEventProvider,Action.Container {
         handlers = new HashMap<String, ComponentEventListener>();
 
         setDefaultHandlers();
+
+        currentCalendar.setTime(new Date());
     }
 
     /**
@@ -280,6 +282,11 @@ CalendarEditableEventProvider,Action.Container {
      * @return First visible date.
      */
     public Date getStartDate() {
+        if (startDate == null) {
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
+                    currentCalendar.getFirstDayOfWeek());
+            return currentCalendar.getTime();
+        }
         return startDate;
     }
 
@@ -304,6 +311,11 @@ CalendarEditableEventProvider,Action.Container {
      * @return Last visible date.
      */
     public Date getEndDate() {
+        if (endDate == null) {
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
+                    currentCalendar.getFirstDayOfWeek() + 6);
+            return currentCalendar.getTime();
+        }
         return endDate;
     }
 
@@ -439,11 +451,15 @@ CalendarEditableEventProvider,Action.Container {
      * {@link #setEndDate(Date)}.
      * </p>
      * 
+     * @deprecated Use {@link #setFirstVisibleDayOfWeek(int)} and
+     *             {@link #setLastVisibleDayOfWeek(int)} instead.
+     * 
      * @param firstDay
      *            the first day of the week to show, between 1 and 7
      * @param lastDay
      *            the first day of the week to show, between 1 and 7
      */
+    @Deprecated
     public void setVisibleDaysOfWeek(int firstDay, int lastDay) {
         if (firstDay >= lastDay || firstDay < 1 || lastDay > 7) {
             throw new IllegalArgumentException(
@@ -472,6 +488,30 @@ CalendarEditableEventProvider,Action.Container {
     }
 
     /**
+     * <p>
+     * This method restricts the weekdays that are shown. This affects both the
+     * monthly and the weekly view. The general contract is that <b>firstDay <
+     * lastDay</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param firstDay
+     *            the first day of the week to show, between 1 and 7
+     */
+    public void setFirstVisibleDayOfWeek(int firstDay) {
+        if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7
+                && getLastVisibleDayOfWeek() >= firstDay) {
+            this.firstDay = firstDay;
+            requestRepaint();
+        }
+    }
+
+    /**
      * Get the first visible day of the week. Returns the weekdays as integers
      * represented by {@link java.util.Calendar#DAY_OF_WEEK}
      * 
@@ -483,13 +523,37 @@ CalendarEditableEventProvider,Action.Container {
     }
 
     /**
+     * <p>
+     * This method restricts the weekdays that are shown. This affects both the
+     * monthly and the weekly view. The general contract is that <b>firstDay <
+     * lastDay</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param lastDay
+     *            the first day of the week to show, between 1 and 7
+     */
+    public void setLastVisibleDayOfWeek(int lastDay) {
+        if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7
+                && getFirstVisibleDayOfWeek() <= lastDay) {
+            this.lastDay = lastDay;
+            requestRepaint();
+        }
+    }
+
+    /**
      * Get the last visible day of the week. Returns the weekdays as integers
      * represented by {@link java.util.Calendar#DAY_OF_WEEK}
      * 
      * @return An integer representing the week day according to
      *         {@link java.util.Calendar#DAY_OF_WEEK}
      */
-    public int GetLastVisibleDayOfWeek() {
+    public int getLastVisibleDayOfWeek() {
         return lastDay;
     }
 
@@ -510,6 +574,7 @@ CalendarEditableEventProvider,Action.Container {
      * @param lastHour
      *            the first hour of the day to show, between 0 and 23
      */
+    @Deprecated
     public void setVisibleHoursOfDay(int firstHour, int lastHour) {
         if (firstHour >= lastHour || firstHour < 0 || lastHour > 23) {
             throw new IllegalArgumentException(
@@ -521,6 +586,74 @@ CalendarEditableEventProvider,Action.Container {
             this.lastHour = lastHour;
             requestRepaint();
         }
+    }
+
+    /**
+     * <p>
+     * This method restricts the hours that are shown per day. This affects the
+     * weekly view. The general contract is that <b>firstHour < lastHour</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param firstHour
+     *            the first hour of the day to show, between 0 and 23
+     * @param lastHour
+     *            the first hour of the day to show, between 0 and 23
+     */
+    public void setFirstVisibleHourOfDay(int firstHour) {
+        if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23
+                && firstHour <= getLastVisibleHourOfDay()) {
+            this.firstHour = firstHour;
+            requestRepaint();
+        }
+    }
+
+    /**
+     * Returns the first visible hour in the week view. Returns the hour using a
+     * 24h time format
+     * 
+     */
+    public int getFirstVisibleHourOfDay() {
+        return firstHour;
+    }
+
+    /**
+     * <p>
+     * This method restricts the hours that are shown per day. This affects the
+     * weekly view. The general contract is that <b>firstHour < lastHour</b>.
+     * </p>
+     * 
+     * <p>
+     * Note that this only affects the rendering process. Events are still
+     * requested by the dates set by {@link #setStartDate(Date)} and
+     * {@link #setEndDate(Date)}.
+     * </p>
+     * 
+     * @param firstHour
+     *            the first hour of the day to show, between 0 and 23
+     * @param lastHour
+     *            the first hour of the day to show, between 0 and 23
+     */
+    public void setLastVisibleHourOfDay(int lastHour) {
+        if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23
+                && lastHour >= getFirstVisibleHourOfDay()) {
+            this.lastHour = lastHour;
+            requestRepaint();
+        }
+    }
+
+    /**
+     * Returns the last visible hour in the week view. Returns the hour using a
+     * 24h time format
+     * 
+     */
+    public int getLastVisibleHourOfDay() {
+        return lastHour;
     }
 
     /**
@@ -576,13 +709,8 @@ CalendarEditableEventProvider,Action.Container {
 
         } else if (startDate == null && endDate == null) {
             // set defaults
-            currentCalendar.setTime(new Date());
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
-                    currentCalendar.getFirstDayOfWeek());
-            startDate = currentCalendar.getTime();
-
-            currentCalendar.add(java.util.Calendar.DAY_OF_WEEK, 6);
-            endDate = currentCalendar.getTime();
+            startDate = getStartDate();
+            endDate = getEndDate();
         }
 
         int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
