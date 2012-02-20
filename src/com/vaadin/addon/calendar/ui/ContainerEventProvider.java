@@ -523,7 +523,14 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      * (com.vaadin.addon.calendar.event.CalendarEvent)
      */
     public void addEvent(CalendarEvent event) {
-        Item item = container.addItem(event);
+        Item item;
+        try {
+            item = container.addItem(event);
+        } catch (UnsupportedOperationException uop) {
+            // Thrown if container does not support adding items with custom
+            // ids. JPAContainer for example.
+            item = container.getItem(container.addItem());
+        }
         if (item != null) {
             item.getItemProperty(getCaptionProperty()).setValue(
                     event.getCaption());
@@ -534,13 +541,6 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
                     event.getStyleName());
             item.getItemProperty(getDescriptionProperty()).setValue(
                     event.getDescription());
-
-            // Ensure container is sorted
-            if (container instanceof Container.Sortable) {
-                ((Container.Sortable) container).sort(new Object[] {
-                        getStartDateProperty(), getEndDateProperty() },
-                        new boolean[] { true, true });
-            }
         }
     }
 
