@@ -30,6 +30,17 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
     private BeanItemContainer<BasicEvent> events = new BeanItemContainer<BasicEvent>(
             BasicEvent.class);
 
+    private void test() {
+
+        BeanItemContainer<BasicEvent> events = new BeanItemContainer<BasicEvent>(
+                BasicEvent.class);
+        ContainerEventProvider eventProvider = new ContainerEventProvider(
+                events);
+        Calendar calendar = new Calendar();
+        calendar.setEventProvider(eventProvider);
+
+    }
+
     public BeanItemContainerTestApp() {
         setSizeFull();
 
@@ -40,6 +51,7 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
         calendar.setContainerDataSource(events);
         calendar.setStartDate(new Date(100, 1, 1));
         calendar.setEndDate(new Date(100, 2, 1));
+
 
         addComponent(calendar);
 
