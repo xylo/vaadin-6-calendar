@@ -1262,7 +1262,7 @@ public class WeekGrid extends SimplePanel {
             Event.releaseCapture(getElement());
             setFocus(false);
             int dragDistance = Math.abs(eventRangeStart - event.getY());
-            if (dragDistance > 0) {
+            if (dragDistance > 0 && eventRangeStart >= 0) {
                 Element main = getElement();
                 if (eventRangeStart > eventRangeStop) {
                     if (eventRangeStop <= -1) {
