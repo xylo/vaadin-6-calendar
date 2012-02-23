@@ -569,6 +569,9 @@ CalendarEditableEventProvider,Action.Container {
      * {@link #setEndDate(Date)}.
      * </p>
      * 
+     * @deprecated Use {@link #setFirstVisibleHourOfDay(int)} and
+     *             {@link #setLastVisibleHourOfDay(int)} instead
+     * 
      * @param firstHour
      *            the first hour of the day to show, between 0 and 23
      * @param lastHour
