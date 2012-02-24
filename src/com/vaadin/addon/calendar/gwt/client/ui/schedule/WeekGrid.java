@@ -1248,6 +1248,7 @@ public class WeekGrid extends SimplePanel {
                     Event.setCapture(getElement());
                     setFocus(true);
                 }
+                event.preventDefault();
             }
         }
 
@@ -1356,6 +1357,8 @@ public class WeekGrid extends SimplePanel {
                     }
                 }
             }
+
+            event.preventDefault();
         }
 
         public void cancelRangeSelect() {
@@ -1458,7 +1461,7 @@ public class WeekGrid extends SimplePanel {
 
         public class DayEvent extends FocusableHTML implements
         MouseDownHandler, MouseUpHandler, MouseMoveHandler,
-                KeyDownHandler, ContextMenuHandler {
+        KeyDownHandler, ContextMenuHandler {
 
             private Element caption = null;
             private final Element eventContent;
@@ -1647,13 +1650,14 @@ public class WeekGrid extends SimplePanel {
                             .clone();
                     startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
                     Event.setCapture(getElement());
-                    event.getNativeEvent().stopPropagation();
                 }
 
                 // make sure the right cursor is always displayed
                 if (clickTargetsResize()) {
                     addGlobalResizeStyle();
                 }
+
+                event.preventDefault();
             }
 
             public void onMouseUp(MouseUpEvent event) {
@@ -1868,6 +1872,8 @@ public class WeekGrid extends SimplePanel {
                     }
                     updatePosition(startFromMinutes, range);
                 }
+
+                event.preventDefault();
             }
 
             private void cancelMouseMove() {
@@ -2056,7 +2062,7 @@ public class WeekGrid extends SimplePanel {
                     event.preventDefault();
                     event.stopPropagation();
                     weekgrid.getCalendar().getMouseEventListener()
-                            .contextMenu(event, DayEvent.this);
+                    .contextMenu(event, DayEvent.this);
                 }
             }
         }

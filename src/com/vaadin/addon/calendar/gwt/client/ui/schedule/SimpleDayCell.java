@@ -451,6 +451,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
         }
 
         event.stopPropagation();
+        event.preventDefault();
     }
 
     public void onMouseOver(MouseOverEvent event) {
