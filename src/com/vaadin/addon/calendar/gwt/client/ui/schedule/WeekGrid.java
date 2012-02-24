@@ -775,9 +775,6 @@ public class WeekGrid extends SimplePanel {
 
             // Sink events for tooltip handling
             Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
-
-            // Custom context menu handler
-            addDomHandler(this, ContextMenuEvent.getType());
         }
 
         public int getFirstHour() {
@@ -795,8 +792,8 @@ public class WeekGrid extends SimplePanel {
             handlers.add(addHandler(this, MouseDownEvent.getType()));
             handlers.add(addHandler(this, MouseUpEvent.getType()));
             handlers.add(addHandler(this, MouseMoveEvent.getType()));
+            handlers.add(addDomHandler(this, ContextMenuEvent.getType()));
             handlers.add(addKeyDownHandler(this));
-
         }
 
         @Override
@@ -1459,9 +1456,9 @@ public class WeekGrid extends SimplePanel {
             }
         }
 
-        public static class DayEvent extends FocusableHTML implements
+        public class DayEvent extends FocusableHTML implements
         MouseDownHandler, MouseUpHandler, MouseMoveHandler,
-        KeyDownHandler {
+                KeyDownHandler, ContextMenuHandler {
 
             private Element caption = null;
             private final Element eventContent;
@@ -1534,6 +1531,7 @@ public class WeekGrid extends SimplePanel {
                 handlers.add(addMouseDownHandler(this));
                 handlers.add(addMouseUpHandler(this));
                 handlers.add(addKeyDownHandler(this));
+                handlers.add(addDomHandler(this, ContextMenuEvent.getType()));
             }
 
             @Override
@@ -2051,6 +2049,15 @@ public class WeekGrid extends SimplePanel {
 
             public boolean isDisabled() {
                 return disabled;
+            }
+
+            public void onContextMenu(ContextMenuEvent event) {
+                if (weekgrid.getCalendar().getMouseEventListener() != null) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    weekgrid.getCalendar().getMouseEventListener()
+                            .contextMenu(event, DayEvent.this);
+                }
             }
         }
 

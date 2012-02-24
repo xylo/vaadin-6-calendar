@@ -13,6 +13,8 @@ import java.util.List;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,6 +24,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DateCellSlot;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarDropHandler;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarMonthDropHandler;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarWeekDropHandler;
@@ -220,6 +223,9 @@ VHasDropHandler, ActionOwner {
                     @SuppressWarnings("deprecation")
                     public Action[] getActions() {
                         if (widget instanceof SimpleDayCell) {
+                            /*
+                             * Month view
+                             */
                             SimpleDayCell cell = (SimpleDayCell) widget;
                             Date start = new Date(cell.getDate().getYear(),
                                     cell.getDate().getMonth(), cell.getDate()
@@ -233,15 +239,29 @@ VHasDropHandler, ActionOwner {
                                     start,
                                     end);
                         } else if (widget instanceof DateCell) {
+                            /*
+                             * Week and Day view
+                             */
                             DateCell cell = (DateCell) widget;
-                            int relativeFromTop = ne.getClientY()
-                                    - cell.getElement().getOffsetTop();
-                            int slotIndex = (int) Math.floor(relativeFromTop
-                                    / (double) (cell.getSlotHeight() + cell
-                                            .getSlotBorder())) - 1;
+                            int slotIndex = DOM.getChildIndex(
+                                    cell.getElement(), (Element) ne
+                                    .getEventTarget().cast());
                             DateCellSlot slot = cell.getSlot(slotIndex);
                             return VCalendarPaintable.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
+                        } else if (widget instanceof DayEvent) {
+                            /*
+                             * Context menu on event
+                             */
+                            DayEvent dayEvent = (DayEvent) widget;
+                            CalendarEvent event = dayEvent.getCalendarEvent();
+                            Action[] actions = VCalendarPaintable.this.getActionsBetween(
+                                    event.getStartTime(), event.getEndTime());
+                            for (Action action : actions) {
+                                ((VCalendarAction) action).setEvent(event);
+                            }
+                            return actions;
+
                         }
                         return null;
                     }

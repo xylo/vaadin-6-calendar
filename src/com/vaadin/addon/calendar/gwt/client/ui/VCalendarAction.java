@@ -6,6 +6,7 @@ package com.vaadin.addon.calendar.gwt.client.ui;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.terminal.gwt.client.ui.Action;
 
 /**
@@ -23,6 +24,8 @@ public class VCalendarAction extends Action {
     private Date actionStartDate;
 
     private Date actionEndDate;
+
+    private CalendarEvent event;
 
     public static final String ACTION_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
@@ -59,10 +62,29 @@ public class VCalendarAction extends Action {
      */
     @Override
     public void execute() {
-        owner.getClient().updateVariable(owner.getPaintableId(), "action",
-                actionKey.split("-")[0] + ","
-                        + dateformat_datetime.format(actionStartDate) + ","
-                        + dateformat_datetime.format(actionEndDate), true);
+        if (event == null) {
+            /*
+             * Action on empty cell
+             */
+            owner.getClient().updateVariable(
+                    owner.getPaintableId(),
+                    "action",
+                    actionKey.split("-")[0] + ","
+                            + dateformat_datetime.format(actionStartDate) + ","
+                            + dateformat_datetime.format(actionEndDate), true);
+        } else {
+            /*
+             * Action on event
+             */
+            owner.getClient().updateVariable(
+                    owner.getPaintableId(),
+                    "action",
+                    actionKey.split("-")[0] + ","
+                            + dateformat_datetime.format(actionStartDate) + ","
+                            + dateformat_datetime.format(actionEndDate) + ","
+                            + event.getIndex(), true);
+        }
+
         owner.getClient().getContextMenu().hide();
     }
 
@@ -102,6 +124,14 @@ public class VCalendarAction extends Action {
      */
     public void setActionEndDate(Date actionEndDate) {
         this.actionEndDate = actionEndDate;
+    }
+
+    public CalendarEvent getEvent() {
+        return event;
+    }
+
+    public void setEvent(CalendarEvent event) {
+        this.event = event;
     }
 
 }

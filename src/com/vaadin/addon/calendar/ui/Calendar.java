@@ -975,21 +975,9 @@ CalendarEditableEventProvider,Action.Container {
         }
 
         // Actions
-        if (variables.containsKey("action") && actionHandlers != null) {
-            String actionStr = (String) variables.get("action");
-            String[] args = actionStr.split(",");
-            Action action = (Action) actionMapper.get(args[0]);
-            SimpleDateFormat formatter = new SimpleDateFormat(
-                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
-            try {
-                Date start = formatter.parse(args[1]);
-                for (Action.Handler ah : actionHandlers) {
-                    ah.handleAction(action, this, start);
-                }
-
-            } catch (ParseException e) {
-                logger.log(Level.WARNING, "Could not parse action date string");
-            }
+        if (variables.containsKey(CalendarEventId.ACTION)
+                && actionHandlers != null) {
+            handleAction((String) variables.get(CalendarEventId.ACTION));
         }
     }
 
@@ -1011,6 +999,46 @@ CalendarEditableEventProvider,Action.Container {
      */
     protected boolean isEventClickAllowed() {
         return isEnabled();
+    }
+
+    /**
+     * Handles action received from client
+     * 
+     * @param actionString
+     *            The comma delimited action string
+     */
+    private void handleAction(String actionString) {
+        String[] args = actionString.split(",");
+        Action action = (Action) actionMapper.get(args[0]);
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+        try {
+            if (args.length == 3) {
+                /*
+                 * Action on empty area
+                 */
+                Date start = formatter.parse(args[1]);
+                for (Action.Handler ah : actionHandlers) {
+                    ah.handleAction(action, this, start);
+                }
+
+            } else if (args.length == 4) {
+                /*
+                 * Action on event
+                 */
+                int eventIndex = Integer.parseInt(args[3]);
+                for (Action.Handler ah : actionHandlers) {
+                    ah.handleAction(action, this, events.get(eventIndex));
+                }
+
+            } else {
+                logger.log(Level.WARNING, "Could not parse action date string");
+            }
+
+
+        } catch (ParseException e) {
+            logger.log(Level.WARNING, "Could not parse action date string");
+        }
     }
 
     /**

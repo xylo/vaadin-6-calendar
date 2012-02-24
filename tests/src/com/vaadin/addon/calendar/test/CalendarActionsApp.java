@@ -1,14 +1,14 @@
 package com.vaadin.addon.calendar.test;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.addon.calendar.event.BasicEvent;
+import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarDateRange;
 import com.vaadin.event.Action;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.VerticalLayout;
 
 public class CalendarActionsApp extends VerticalLayout {
@@ -19,70 +19,61 @@ public class CalendarActionsApp extends VerticalLayout {
     public CalendarActionsApp() {
         setSizeFull();
 
-        final Calendar calendar = new Calendar();
-        calendar.setLocale(new Locale("fi", "FI"));
+        // Create the calendar
+        Calendar calendar = new Calendar("My Contextual Calendar");
+        calendar.setWidth("600px"); // Undefined by default
+        calendar.setHeight("300px"); // Undefined by default
 
-        calendar.setSizeFull();
-        calendar.setStartDate(new Date(100, 1, 1));
-        calendar.setEndDate(new Date(100, 2, 1));
+        // Use US English for date/time representation
+        calendar.setLocale(new Locale("en", "US"));
 
-        calendar.addActionHandler(new Action.Handler() {
+        // Add an event from now to plus one hour
+        GregorianCalendar start = new GregorianCalendar();
+        GregorianCalendar end = new GregorianCalendar();
+        end.add(java.util.Calendar.HOUR, 1);
+        calendar.addEvent(new BasicEvent("Calendar study",
+                "Learning how to use Vaadin Calendar", start.getTime(), end
+                .getTime()));
 
-            public final Action NEW_EVENT = new Action("Add event");
-            public final Action EDIT_EVENT = new Action("Edit event");
-            public final Action REMOVE_EVENT = new Action("Remove event");
+        Action.Handler actionHandler = new Action.Handler() {
+            Action addEventAction = new Action("Add Event");
+            Action deleteEventAction = new Action("Delete Event");
 
-            /*
-             * (non-Javadoc)
-             * 
-             * @see
-             * com.vaadin.event.Action.Handler#handleAction(com.vaadin.event
-             * .Action, java.lang.Object, java.lang.Object)
-             */
-            public void handleAction(Action action, Object sender, Object target) {
-                Date date = (Date) target;
-                if (action == NEW_EVENT) {
-                    BasicEvent event = new BasicEvent("New event",
-                            "Hello world", date, date);
-                    calendar.addEvent(event);
-                }
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see com.vaadin.event.Action.Handler#getActions(java.lang.Object,
-             * java.lang.Object)
-             */
             public Action[] getActions(Object target, Object sender) {
-                CalendarDateRange date = (CalendarDateRange) target;
-
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                cal.set(2000, 1, 1, 12, 0, 0);
-
-                if (date.inRange(cal.getTime())) {
-                    return new Action[] { NEW_EVENT, };
+                System.out.println("getActions()");
+                if (!(target instanceof CalendarDateRange)) {
+                    System.out.println("Target is a "
+                            + target.getClass().getName());
+                    return null;
                 }
+                CalendarDateRange dateRange = (CalendarDateRange) target;
 
-                cal.add(java.util.Calendar.DAY_OF_WEEK, 1);
-
-                if (date.inRange(cal.getTime())) {
-                    return new Action[] { REMOVE_EVENT };
+                if (!(sender instanceof Calendar)) {
+                    System.out.println("Sender is a "
+                            + sender.getClass().getName());
+                    return null;
                 }
+                Calendar calendar = (Calendar) sender;
 
-                return null;
+                // List all the events on the requested day
+                List<CalendarEvent> events = calendar.getEvents(
+                        dateRange.getStart(), dateRange.getEnd());
+
+                System.out.println("Returning two actions");
+                return new Action[] { addEventAction, deleteEventAction };
             }
-        });
+
+            public void handleAction(Action action, Object sender, Object target) {
+                if (target instanceof CalendarEvent) {
+                    CalendarEvent e = (CalendarEvent) target;
+                    System.out.println(e.getCaption());
+                }
+                System.out.println("handeAction()");
+            }
+        };
+        calendar.addActionHandler(actionHandler);
 
         addComponent(calendar);
-
-        addComponent(new Button("Set week view", new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                calendar.setEndDate(new Date(100, 1, 7));
-            }
-        }));
-
-        setExpandRatio(calendar, 1);
 
     }
 
