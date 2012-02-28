@@ -1248,7 +1248,6 @@ public class WeekGrid extends SimplePanel {
                     Event.setCapture(getElement());
                     setFocus(true);
                 }
-                event.preventDefault();
             }
         }
 
@@ -1315,7 +1314,8 @@ public class WeekGrid extends SimplePanel {
             } else {
                 // Click event
                 eventRangeStart = -1;
-                clearSelectionRange();
+                cancelRangeSelect();
+
             }
         }
 
@@ -1357,8 +1357,6 @@ public class WeekGrid extends SimplePanel {
                     }
                 }
             }
-
-            event.preventDefault();
         }
 
         public void cancelRangeSelect() {
@@ -1657,6 +1655,11 @@ public class WeekGrid extends SimplePanel {
                     addGlobalResizeStyle();
                 }
 
+                /*
+                 * We need to stop the event propagation or else the WeekGrid
+                 * range select will kick in
+                 */
+                event.stopPropagation();
                 event.preventDefault();
             }
 
@@ -1872,8 +1875,6 @@ public class WeekGrid extends SimplePanel {
                     }
                     updatePosition(startFromMinutes, range);
                 }
-
-                event.preventDefault();
             }
 
             private void cancelMouseMove() {
