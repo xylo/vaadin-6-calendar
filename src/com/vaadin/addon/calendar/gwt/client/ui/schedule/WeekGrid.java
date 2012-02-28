@@ -1357,6 +1357,8 @@ public class WeekGrid extends SimplePanel {
                     }
                 }
             }
+
+            event.preventDefault();
         }
 
         public void cancelRangeSelect() {
