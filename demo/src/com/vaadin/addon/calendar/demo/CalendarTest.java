@@ -127,8 +127,6 @@ public class CalendarTest extends Application {
 
     private Locale defaultLocale = Locale.US;
 
-    private TimeZone defaultTimezone = TimeZone.getTimeZone("America/New_York");
-
     private boolean showWeeklyView;
 
     private boolean useSecondResolution;
@@ -206,7 +204,7 @@ public class CalendarTest extends Application {
         // Set default Locale for this application
         if (testBench) {
             setLocale(defaultLocale);
-            TimeZone.setDefault(defaultTimezone);
+
         } else {
             setLocale(Locale.getDefault());
         }
@@ -217,11 +215,6 @@ public class CalendarTest extends Application {
         formatSelect = createCalendarFormatSelect();
 
         initCalendar();
-        if (testBench) {
-            calendar.setTimeZone(TimeZone.getDefault());
-            calendarComponent.setTimeZone(calendar.getTimeZone());
-        }
-
         initLayoutContent();
 
         addInitialEvents();
@@ -582,7 +575,11 @@ public class CalendarTest extends Application {
             }
         }
 
-        s.select(DEFAULT_ITEMID);
+        if (testBench) {
+            s.select("America/New_York");
+        } else {
+            s.select(DEFAULT_ITEMID);
+        }
         s.setImmediate(true);
         s.addListener(new ValueChangeListener() {
 
