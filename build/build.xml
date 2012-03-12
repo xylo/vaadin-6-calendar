@@ -396,6 +396,31 @@ Implementation-Vendor: ${addon.vendor}
 		</war>
 	</target>
 	
+	<!-- Publish to the demo server -->     
+    <target name="demo-publish" depends="demo.war">
+               
+    	<fail message="Demo server is not defined">
+    	     <condition>
+    	       <not>
+    	         <isset property="demo.server.publish"/>
+    	       </not>
+    	     </condition>
+    	</fail>
+    	
+        <!-- Publish to the demo server. -->
+        <property name="src" value="${war.path}"/>
+        <property name="target" value="${demo.server.publish}/calendar.war"/>
+       
+        <echo>Installing ${src} to ${target}</echo>
+        <exec executable="scp" searchpath="true" resultproperty="demo.install.scp.result">
+            <arg value="-B"/>
+            <arg value="${src}"/>
+            <arg value="${target}"/>
+        </exec>
+
+        <echo>Result: ${demo.install.scp.result}</echo>
+    </target>
+	
 </project>
 
 <!-- Keep this comment at the end of the file
