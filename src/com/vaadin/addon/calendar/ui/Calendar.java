@@ -184,8 +184,6 @@ CalendarEditableEventProvider,Action.Container {
      */
     private int lastHour = 23;
 
-    private Logger logger = Logger.getLogger(Calendar.class.getName());
-
     /**
      * List of action handlers.
      */
@@ -195,6 +193,13 @@ CalendarEditableEventProvider,Action.Container {
      * Action mapper.
      */
     private KeyMapper actionMapper = null;
+
+    /**
+     * Returns the logger for the calendar
+     */
+    protected Logger getLogger() {
+        return Logger.getLogger(Calendar.class.getName());
+    }
 
     /**
      * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
@@ -1032,12 +1037,14 @@ CalendarEditableEventProvider,Action.Container {
                 }
 
             } else {
-                logger.log(Level.WARNING, "Could not parse action date string");
+                getLogger().log(Level.WARNING,
+                        "Could not parse action date string");
             }
 
 
         } catch (ParseException e) {
-            logger.log(Level.WARNING, "Could not parse action date string");
+            getLogger()
+            .log(Level.WARNING, "Could not parse action date string");
         }
     }
 
@@ -1057,9 +1064,9 @@ CalendarEditableEventProvider,Action.Container {
                         fireEventMove(index, d);
                     }
                 } catch (ParseException e) {
-                    logger.log(Level.WARNING, e.getMessage());
+                    getLogger().log(Level.WARNING, e.getMessage());
                 } catch (NumberFormatException e) {
-                    logger.log(Level.WARNING, e.getMessage());
+                    getLogger().log(Level.WARNING, e.getMessage());
                 }
             }
         }
