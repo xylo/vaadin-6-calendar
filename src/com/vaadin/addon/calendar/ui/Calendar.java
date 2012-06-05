@@ -1897,6 +1897,38 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
+    /**
+     * Adds an action handler to the calender that handles event produced by the
+     * context menu.
+     * 
+     * <p>
+     * The {@link Handler#getActions(Object, Object)} parameters depend on what
+     * view the Calendar is in:
+     * <ul>
+     * <li>If the Calendar is in <i>Day or Week View</i> then the target
+     * parameter will be a {@link CalendarDateRange} with a range of
+     * half-an-hour. The {@link Handler#getActions(Object, Object)} method will
+     * be called once per half-hour slot.</li>
+     * <li>If the Calendar is in <i>Month View</i> then the target parameter
+     * will be a {@link CalendarDateRange} with a range of one day. The
+     * {@link Handler#getActions(Object, Object)} will be called once for each
+     * day.
+     * </ul>
+     * The Dates passed into the {@link CalendarDateRange} are in the same
+     * timezone as the calendar is.
+     * </p>
+     * 
+     * <p>
+     * The {@link Handler#handleAction(Action, Object, Object)} parameters
+     * depend on what the context menu is called upon:
+     * <ul>
+     * <li>If the context menu is called upon an event then the target parameter
+     * is the event, i.e. instanceof {@link CalendarEvent}</li>
+     * <li>If the context menu is called upon an empty slot then the target is a
+     * {@link Date} representing that slot
+     * </ul>
+     * </p>
+     */
     public void addActionHandler(Handler actionHandler) {
         if (actionHandler != null) {
             if (actionHandlers == null) {
