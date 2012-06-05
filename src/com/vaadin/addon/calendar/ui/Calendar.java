@@ -789,6 +789,7 @@ CalendarEditableEventProvider,Action.Container {
             if (actionHandlers != null) {
                 for (Action.Handler ah : actionHandlers) {
 
+                    // Create calendar which omits time
                     GregorianCalendar cal = new GregorianCalendar(
                             getTimeZone(), getLocale());
                     cal.clear();
@@ -796,19 +797,49 @@ CalendarEditableEventProvider,Action.Container {
                             currentCalendar.get(java.util.Calendar.MONTH),
                             currentCalendar.get(java.util.Calendar.DATE));
 
-                    // Get start and end for the day
+                    // Get day start and end times
                     Date start = cal.getTime();
                     cal.add(java.util.Calendar.DATE, 1);
                     Date end = cal.getTime();
 
-                    CalendarDateRange range = new CalendarDateRange(start, end,
-                            getTimeZone());
-                    Action[] actions = ah.getActions(range, this);
-                    if (actions != null) {
-                        Set<Action> actionSet = new HashSet<Action>(
-                                Arrays.asList(actions));
-                        actionMap.put(range, actionSet);
+                    /**
+                     * If in day or week view add actions for each half-an-hour.
+                     * If in month view add actions for each day
+                     */
+                    if (durationInDays > 7) {
+                        /*
+                         * Month view
+                         */
+                        CalendarDateRange range = new CalendarDateRange(start,
+                                end, getTimeZone());
+                        Action[] actions = ah.getActions(range, this);
+                        if (actions != null) {
+                            Set<Action> actionSet = new HashSet<Action>(
+                                    Arrays.asList(actions));
+                            actionMap.put(range, actionSet);
+                        }
+                    } else {
+                        /*
+                         * Day or week view
+                         */
+                        GregorianCalendar c = new GregorianCalendar(
+                                getTimeZone(), getLocale());
+                        c.setTime(start);
+                        while (c.getTime().before(end)) {
+                            Date s = c.getTime();
+                            c.add(java.util.Calendar.MINUTE, 30);
+                            Date e = c.getTime();
+                            CalendarDateRange range = new CalendarDateRange(s,
+                                    e, getTimeZone());
+                            Action[] actions = ah.getActions(range, this);
+                            if (actions != null) {
+                                Set<Action> actionSet = new HashSet<Action>(
+                                        Arrays.asList(actions));
+                                actionMap.put(range, actionSet);
+                            }
+                        }
                     }
+
                 }
             }
 
@@ -1866,13 +1897,6 @@ CalendarEditableEventProvider,Action.Container {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.event.Action.Container#addActionHandler(com.vaadin.event.Action
-     * .Handler)
-     */
     public void addActionHandler(Handler actionHandler) {
         if (actionHandler != null) {
             if (actionHandlers == null) {
