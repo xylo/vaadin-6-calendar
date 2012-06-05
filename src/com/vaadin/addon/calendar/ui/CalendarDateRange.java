@@ -5,12 +5,14 @@ package com.vaadin.addon.calendar.ui;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 /**
  * Class for representing a date range.
  * 
- * @since 1.3.0
+ * @since 1.2.2
  * @version
  * @VERSION@
  */
@@ -20,6 +22,8 @@ public class CalendarDateRange implements Serializable {
     private Date start;
 
     private Date end;
+
+    private final transient TimeZone tz;
 
     private static final String DELIMITER = ",";
 
@@ -31,10 +35,11 @@ public class CalendarDateRange implements Serializable {
      * @param end
      *            The end date and time of the date range
      */
-    public CalendarDateRange(Date start, Date end) {
+    public CalendarDateRange(Date start, Date end, TimeZone tz) {
         super();
         this.start = start;
         this.end = end;
+        this.tz = tz;
     }
 
     /**
@@ -66,7 +71,8 @@ public class CalendarDateRange implements Serializable {
         if (date == null) {
             return false;
         }
-        return start.compareTo(date) <= 0 && end.compareTo(date) >= 0;
+
+        return date.compareTo(start) >= 0 && date.compareTo(end) <= 0;
     }
 
     /**
@@ -88,9 +94,13 @@ public class CalendarDateRange implements Serializable {
     public void unserialize(String serialized) {
         if (serialized != null) {
             String[] parts = serialized.split(DELIMITER);
+            GregorianCalendar cal = new GregorianCalendar(tz);
             if (parts.length >= 2) {
-                start = new Date(Long.valueOf(parts[0]));
-                end = new Date(Long.valueOf(parts[1]));
+                cal.clear();
+                cal.setTimeInMillis(Long.valueOf(parts[0]));
+                start = cal.getTime();
+                cal.setTimeInMillis(Long.valueOf(parts[1]));
+                end = cal.getTime();
             } else {
                 Logger.getLogger(CalendarDateRange.class.getName()).warning(
                         "Could not desialize string '" + serialized + "'");

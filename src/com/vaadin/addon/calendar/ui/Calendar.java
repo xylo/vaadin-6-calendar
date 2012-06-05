@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -784,25 +785,24 @@ CalendarEditableEventProvider,Action.Container {
                     currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
             target.endTag("day");
 
-            currentCalendar.add(java.util.Calendar.DATE, 1);
-
             // Get actions for a specific date
             if (actionHandlers != null) {
                 for (Action.Handler ah : actionHandlers) {
 
-                    CalendarDateRange range;
+                    GregorianCalendar cal = new GregorianCalendar(
+                            getTimeZone(), getLocale());
+                    cal.clear();
+                    cal.set(currentCalendar.get(java.util.Calendar.YEAR),
+                            currentCalendar.get(java.util.Calendar.MONTH),
+                            currentCalendar.get(java.util.Calendar.DATE));
 
                     // Get start and end for the day
-                    long start = date.getTime();
-                    start -= date.getTimezoneOffset() * 60000;
-                    long end = currentCalendar.getTimeInMillis();
-                    end -= currentCalendar.getTime().getTimezoneOffset();
+                    Date start = cal.getTime();
+                    cal.add(java.util.Calendar.DATE, 1);
+                    Date end = cal.getTime();
 
-                    // Ensure actions do not overlap to next day
-                    end -= 1000; // ms
-
-                    range = new CalendarDateRange(new Date(start),
-                            new Date(end));
+                    CalendarDateRange range = new CalendarDateRange(start, end,
+                            getTimeZone());
                     Action[] actions = ah.getActions(range, this);
                     if (actions != null) {
                         Set<Action> actionSet = new HashSet<Action>(
@@ -811,6 +811,8 @@ CalendarEditableEventProvider,Action.Container {
                     }
                 }
             }
+
+            currentCalendar.add(java.util.Calendar.DATE, 1);
         }
 
         target.endTag("days");
@@ -847,6 +849,7 @@ CalendarEditableEventProvider,Action.Container {
 
             SimpleDateFormat formatter = new SimpleDateFormat(
                     VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+            formatter.setTimeZone(getTimeZone());
 
             for (Entry<CalendarDateRange, Set<Action>> entry : actionMap
                     .entrySet()) {
@@ -1017,6 +1020,7 @@ CalendarEditableEventProvider,Action.Container {
         Action action = (Action) actionMapper.get(args[0]);
         SimpleDateFormat formatter = new SimpleDateFormat(
                 VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+        formatter.setTimeZone(getTimeZone());
         try {
             if (args.length == 3) {
                 /*
