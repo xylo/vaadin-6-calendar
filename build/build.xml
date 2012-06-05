@@ -421,6 +421,13 @@ Implementation-Vendor: ${addon.vendor}
         <echo>Result: ${demo.install.scp.result}</echo>
     </target>
 	
+	<target name="git-log">
+        <exec executable="git" output="build/result/calendar-git-log.txt">
+            <arg value="log" />
+            <arg value="--pretty=oneline" />            
+        </exec>
+	</target>
+	
 </project>
 
 <!-- Keep this comment at the end of the file
