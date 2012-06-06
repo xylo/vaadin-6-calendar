@@ -418,8 +418,13 @@ Implementation-Vendor: ${addon.vendor}
             <arg value="${target}"/>
         </exec>
 
-        <echo>Result: ${demo.install.scp.result}</echo>
-        	
+    	<fail message="Publishing to demo server failed with the result code ${demo.install.scp.result}">
+    		 <condition>
+    		       <not>
+    		         <equals arg1="${demo.install.scp.result}" arg2="0"/>
+    		       </not>
+    		  </condition>
+    	</fail>        	
     </target>
 	
 	<target name="git-log">
