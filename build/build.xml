@@ -412,13 +412,14 @@ Implementation-Vendor: ${addon.vendor}
         <property name="target" value="${demo.server.publish}/calendar.war"/>
        
         <echo>Installing ${src} to ${target}</echo>
-        <exec executable="scp" searchpath="true" resultproperty="demo.install.scp.result">
+        <exec executable="scp" searchpath="true" failonerror="true" failifexecutionfails="true" resultproperty="demo.install.scp.result">
             <arg value="-B"/>
             <arg value="${src}"/>
             <arg value="${target}"/>
         </exec>
 
         <echo>Result: ${demo.install.scp.result}</echo>
+        	
     </target>
 	
 	<target name="git-log">
