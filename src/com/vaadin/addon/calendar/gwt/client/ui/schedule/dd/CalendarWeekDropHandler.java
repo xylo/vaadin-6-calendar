@@ -7,9 +7,9 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
-import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.ui.dd.VAcceptCallback;
-import com.vaadin.terminal.gwt.client.ui.dd.VDragEvent;
+import com.vaadin.client.Util;
+import com.vaadin.client.ui.dd.VAcceptCallback;
+import com.vaadin.client.ui.dd.VDragEvent;
 
 /**
  * Handles DD when the weekly view is showing in the Calendar. In the weekly
@@ -85,14 +85,14 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
     private boolean isLocationValid(
             com.google.gwt.user.client.Element elementOver) {
         com.google.gwt.user.client.Element weekGridElement = calendarPaintable
-                .getWeekGrid().getElement();
+                .getWidget().getWeekGrid().getElement();
         com.google.gwt.user.client.Element timeBarElement = calendarPaintable
-                .getWeekGrid().getTimeBar().getElement();
+                .getWidget().getWeekGrid().getTimeBar().getElement();
 
         com.google.gwt.user.client.Element todayBarElement = null;
-        if (calendarPaintable.getWeekGrid().hasToday()) {
-            todayBarElement = (Element) calendarPaintable.getWeekGrid()
-                    .getDateCellOfToday().getTodaybarElement();
+        if (calendarPaintable.getWidget().getWeekGrid().hasToday()) {
+            todayBarElement = (Element) calendarPaintable.getWidget()
+                    .getWeekGrid().getDateCellOfToday().getTodaybarElement();
         }
 
         // drops are not allowed in:
@@ -147,8 +147,8 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
      */
     private void updateDropDetails(VDragEvent drag) {
         int slotIndex = currentTargetDay.getSlotIndex(currentTargetElement);
-        int dayIndex = calendarPaintable.getWeekGrid().getDateCellIndex(
-                currentTargetDay);
+        int dayIndex = calendarPaintable.getWidget().getWeekGrid()
+                .getDateCellIndex(currentTargetDay);
 
         drag.getDropDetails().put("dropDayIndex", dayIndex);
         drag.getDropDetails().put("dropSlotIndex", slotIndex);

@@ -4,9 +4,9 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule.dd;
 
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler;
+import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.ComponentConnector;
+import com.vaadin.client.ui.dd.VAbstractDropHandler;
 
 /**
  * Abstract base class for calendar drop handlers.
@@ -29,10 +29,10 @@ public abstract class CalendarDropHandler extends VAbstractDropHandler {
      * (non-Javadoc)
      * 
      * @see
-     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#getPaintable()
+     * com.vaadin.terminal.gwt.client.ui.dd.VAbstractDropHandler#getConnector()
      */
     @Override
-    public Paintable getPaintable() {
+    public ComponentConnector getConnector() {
         return calendarPaintable;
     }
 

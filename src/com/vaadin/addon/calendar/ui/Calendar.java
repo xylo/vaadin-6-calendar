@@ -30,9 +30,10 @@ import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
 import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
+import com.vaadin.addon.calendar.gwt.client.ui.CalendarServerRpc;
+import com.vaadin.addon.calendar.gwt.client.ui.CalendarState;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendarAction;
-import com.vaadin.addon.calendar.gwt.client.ui.VCalendarPaintable;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
@@ -65,11 +66,8 @@ import com.vaadin.event.ComponentEventListener;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
-import com.vaadin.terminal.KeyMapper;
-import com.vaadin.terminal.PaintException;
-import com.vaadin.terminal.PaintTarget;
+import com.vaadin.server.KeyMapper;
 import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.ClientWidget;
 
 /**
  * <p>
@@ -96,14 +94,13 @@ import com.vaadin.ui.ClientWidget;
  * @VERSION@
  */
 @SuppressWarnings("serial")
-@ClientWidget(VCalendarPaintable.class)
 public class Calendar extends AbstractComponent implements
-CalendarComponentEvents.NavigationNotifier,
-CalendarComponentEvents.EventMoveNotifier,
-CalendarComponentEvents.RangeSelectNotifier,
-CalendarComponentEvents.EventResizeNotifier,
-CalendarEventProvider.EventSetChangeListener, DropTarget,
-CalendarEditableEventProvider,Action.Container {
+        CalendarComponentEvents.NavigationNotifier,
+        CalendarComponentEvents.EventMoveNotifier,
+        CalendarComponentEvents.RangeSelectNotifier,
+        CalendarComponentEvents.EventResizeNotifier,
+        CalendarEventProvider.EventSetChangeListener, DropTarget,
+        CalendarEditableEventProvider, Action.Container {
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
@@ -193,7 +190,12 @@ CalendarEditableEventProvider,Action.Container {
     /**
      * Action mapper.
      */
-    private KeyMapper actionMapper = null;
+    private KeyMapper<Action> actionMapper = null;
+
+    /**
+     * 
+     */
+    private CalendarServerRpcImpl rpc = new CalendarServerRpcImpl();
 
     /**
      * Returns the logger for the calendar
@@ -258,14 +260,35 @@ CalendarEditableEventProvider,Action.Container {
      */
     // this is the constructor every other constructor calls
     public Calendar(String caption, CalendarEventProvider eventProvider) {
-        setEventProvider(eventProvider);
+        registerRpc(rpc);
         setCaption(caption);
-
         handlers = new HashMap<String, ComponentEventListener>();
-
         setDefaultHandlers();
-
         currentCalendar.setTime(new Date());
+        setEventProvider(eventProvider);
+        getState().setFirstDayOfWeek(firstDay);
+        getState().setLastDayOfWeek(lastDay);
+        getState().setFirstHourOfDay(firstHour);
+        getState().setLastHourOfDay(lastHour);
+        setTimeFormat(null);
+
+    }
+
+    @Override
+    public CalendarState getState() {
+        return (CalendarState) super.getState();
+    }
+
+    @Override
+    public void beforeClientResponse(boolean initial) {
+        super.beforeClientResponse(initial);
+
+        initCalendarWithLocale();
+
+        getState().setFormat24H(TimeFormat.Format24H == getTimeFormat());
+        setupDaysAndActions();
+        setupCalendarEvents();
+        rpc.scroll(scrollTop);
     }
 
     /**
@@ -307,7 +330,7 @@ CalendarEditableEventProvider,Action.Container {
     public void setStartDate(Date date) {
         if (!date.equals(startDate)) {
             startDate = date;
-            requestRepaint();
+            markAsDirty();
         }
     }
 
@@ -338,10 +361,10 @@ CalendarEditableEventProvider,Action.Container {
     public void setEndDate(Date date) {
         if (startDate != null && startDate.after(date)) {
             startDate = (Date) date.clone();
-            requestRepaint();
+            markAsDirty();
         } else if (!date.equals(endDate)) {
             endDate = date;
-            requestRepaint();
+            markAsDirty();
         }
     }
 
@@ -353,7 +376,6 @@ CalendarEditableEventProvider,Action.Container {
     @Override
     public void setLocale(Locale newLocale) {
         super.setLocale(newLocale);
-
         initCalendarWithLocale();
     }
 
@@ -369,6 +391,218 @@ CalendarEditableEventProvider,Action.Container {
         } else {
             currentCalendar = java.util.Calendar.getInstance(getLocale());
         }
+    }
+
+    private void setupCalendarEvents() {
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
+        durationInDays++;
+        if (durationInDays > 60) {
+            throw new RuntimeException("Daterange is too big (max 60) = "
+                    + durationInDays);
+        }
+
+        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
+        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
+
+        currentCalendar.setTime(firstDateToShow);
+        events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
+
+        List<CalendarState.Event> calendarStateEvents = new ArrayList<CalendarState.Event>();
+        if (events != null) {
+            for (int i = 0; i < events.size(); i++) {
+                CalendarEvent e = events.get(i);
+                CalendarState.Event event = new CalendarState.Event();
+                event.setIndex(i);
+                event.setCaption(e.getCaption() == null ? "" : e.getCaption());
+                event.setDateFrom(df_date.format(e.getStart()));
+                event.setDateTo(df_date.format(e.getEnd()));
+                event.setTimeFrom(df_time.format(e.getStart()));
+                event.setTimeTo(df_time.format(e.getEnd()));
+                event.setDescription(e.getDescription() == null ? "" : e
+                        .getDescription());
+                event.setStyleName(e.getStyleName() == null ? "" : e
+                        .getStyleName());
+                event.setAllDay(e.isAllDay());
+                calendarStateEvents.add(event);
+            }
+        }
+        getState().setEvents(calendarStateEvents);
+    }
+
+    private void setupDaysAndActions() {
+        // Make sure we have a up-to-date locale
+        initCalendarWithLocale();
+
+        CalendarState state = getState();
+
+        state.setFDOW(currentCalendar.getFirstDayOfWeek());
+
+        // If only one is null, throw exception
+        // If both are null, set defaults
+        if (startDate == null ^ endDate == null) {
+            String message = "Schedule cannot be painted without a proper date range.\n";
+            if (startDate == null) {
+                throw new RuntimeException(message
+                        + "You must set a start date using setStartDate(Date).");
+
+            } else {
+                throw new RuntimeException(message
+                        + "You must set an end date using setEndDate(Date).");
+            }
+
+        } else if (startDate == null && endDate == null) {
+            // set defaults
+            startDate = getStartDate();
+            endDate = getEndDate();
+        }
+
+        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
+        durationInDays++;
+        if (durationInDays > 60) {
+            throw new RuntimeException("Daterange is too big (max 60) = "
+                    + durationInDays);
+        }
+
+        state.setDayNames(getDayNamesShort());
+        state.setMonthNames(getMonthNamesShort());
+
+        // Use same timezone in all dates this component handles.
+        // Show "now"-marker in browser within given timezone.
+        Date now = new Date();
+        currentCalendar.setTime(now);
+        now = currentCalendar.getTime();
+
+        // Reset time zones for custom date formats
+        df_date.setTimeZone(currentCalendar.getTimeZone());
+        df_time.setTimeZone(currentCalendar.getTimeZone());
+
+        state.setNow(df_date.format(now) + " " + df_time.format(now));
+
+        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
+        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
+
+        currentCalendar.setTime(firstDateToShow);
+
+        DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
+        weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
+
+        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<CalendarDateRange, Set<Action>>();
+
+        List<CalendarState.Day> days = new ArrayList<CalendarState.Day>();
+
+        // Send all dates to client from server. This
+        // approach was taken because gwt doesn't
+        // support date localization properly.
+        while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
+            final Date date = currentCalendar.getTime();
+            final CalendarState.Day day = new CalendarState.Day();
+            day.setDate(df_date.format(date));
+            day.setLocalizedDateFormat(weeklyCaptionFormatter.format(date));
+            day.setDayOfWeek(getDowByLocale(currentCalendar));
+            day.setWeek(currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
+
+            days.add(day);
+
+            // Get actions for a specific date
+            if (actionHandlers != null) {
+                for (Action.Handler actionHandler : actionHandlers) {
+
+                    // Create calendar which omits time
+                    GregorianCalendar cal = new GregorianCalendar(
+                            getTimeZone(), getLocale());
+                    cal.clear();
+                    cal.set(currentCalendar.get(java.util.Calendar.YEAR),
+                            currentCalendar.get(java.util.Calendar.MONTH),
+                            currentCalendar.get(java.util.Calendar.DATE));
+
+                    // Get day start and end times
+                    Date start = cal.getTime();
+                    cal.add(java.util.Calendar.DATE, 1);
+                    Date end = cal.getTime();
+
+                    boolean monthView = (durationInDays > 7);
+
+                    /**
+                     * If in day or week view add actions for each half-an-hour.
+                     * If in month view add actions for each day
+                     */
+                    if (monthView) {
+                        setActionsForDay(actionMap, start, end, actionHandler);
+                    } else {
+                        setActionsForEachHalfHour(actionMap, start, end,
+                                actionHandler);
+                    }
+
+                }
+            }
+
+            currentCalendar.add(java.util.Calendar.DATE, 1);
+        }
+        state.setDays(days);
+        state.setActions(createActionsList(actionMap));
+    }
+
+    private void setActionsForEachHalfHour(
+            Map<CalendarDateRange, Set<Action>> actionMap, Date start,
+            Date end, Action.Handler actionHandler) {
+        GregorianCalendar cal = new GregorianCalendar(getTimeZone(),
+                getLocale());
+        cal.setTime(start);
+        while (cal.getTime().before(end)) {
+            Date s = cal.getTime();
+            cal.add(java.util.Calendar.MINUTE, 30);
+            Date e = cal.getTime();
+            CalendarDateRange range = new CalendarDateRange(s, e, getTimeZone());
+            Action[] actions = actionHandler.getActions(range, this);
+            if (actions != null) {
+                Set<Action> actionSet = new HashSet<Action>(
+                        Arrays.asList(actions));
+                actionMap.put(range, actionSet);
+            }
+        }
+    }
+
+    private void setActionsForDay(
+            Map<CalendarDateRange, Set<Action>> actionMap, Date start,
+            Date end, Action.Handler actionHandler) {
+        CalendarDateRange range = new CalendarDateRange(start, end,
+                getTimeZone());
+        Action[] actions = actionHandler.getActions(range, this);
+        if (actions != null) {
+            Set<Action> actionSet = new HashSet<Action>(Arrays.asList(actions));
+            actionMap.put(range, actionSet);
+        }
+    }
+
+    private List<CalendarState.Action> createActionsList(
+            Map<CalendarDateRange, Set<Action>> actionMap) {
+        if (actionMap.isEmpty()) {
+            return null;
+        }
+
+        List<CalendarState.Action> calendarActions = new ArrayList<CalendarState.Action>();
+
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+        formatter.setTimeZone(getTimeZone());
+
+        for (Entry<CalendarDateRange, Set<Action>> entry : actionMap.entrySet()) {
+            CalendarDateRange range = entry.getKey();
+            Set<Action> actions = entry.getValue();
+            for (Action action : actions) {
+                String key = actionMapper.key(action);
+                CalendarState.Action calendarAction = new CalendarState.Action();
+                calendarAction.setActionKey(key);
+                calendarAction.setCaption(action.getCaption());
+                setResource(key, action.getIcon());
+                calendarAction.setIconKey(key);
+                calendarAction.setStartDate(formatter.format(range.getStart()));
+                calendarAction.setEndDate(formatter.format(range.getEnd()));
+                calendarActions.add(calendarAction);
+            }
+        }
+
+        return calendarActions;
     }
 
     /**
@@ -399,7 +633,7 @@ CalendarEditableEventProvider,Action.Container {
      */
     public void setTimeFormat(TimeFormat format) {
         currentTimeFormat = format;
-        requestRepaint();
+        markAsDirty();
     }
 
     /**
@@ -429,7 +663,7 @@ CalendarEditableEventProvider,Action.Container {
             }
             currentCalendar.setTimeZone(zone);
             df_date_time.setTimeZone(zone);
-            requestRepaint();
+            markAsDirty();
         }
     }
 
@@ -473,11 +707,8 @@ CalendarEditableEventProvider,Action.Container {
                             + firstDay + ", last day " + lastDay);
         }
 
-        if (this.firstDay != firstDay || this.lastDay != lastDay) {
-            this.firstDay = firstDay;
-            this.lastDay = lastDay;
-            requestRepaint();
-        }
+        setFirstVisibleDayOfWeek(firstDay);
+        setLastVisibleDayOfWeek(lastDay);
     }
 
     /**
@@ -490,7 +721,8 @@ CalendarEditableEventProvider,Action.Container {
      */
     @Deprecated
     public int[] getVisibleDaysOfWeek() {
-        return new int[] { firstDay, lastDay };
+        return new int[] { getFirstVisibleDayOfWeek(),
+                getLastVisibleDayOfWeek() };
     }
 
     /**
@@ -513,7 +745,7 @@ CalendarEditableEventProvider,Action.Container {
         if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7
                 && getLastVisibleDayOfWeek() >= firstDay) {
             this.firstDay = firstDay;
-            requestRepaint();
+            getState().setFirstDayOfWeek(firstDay);
         }
     }
 
@@ -548,7 +780,7 @@ CalendarEditableEventProvider,Action.Container {
         if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7
                 && getFirstVisibleDayOfWeek() <= lastDay) {
             this.lastDay = lastDay;
-            requestRepaint();
+            getState().setLastDayOfWeek(lastDay);
         }
     }
 
@@ -590,11 +822,9 @@ CalendarEditableEventProvider,Action.Container {
                     "Illegal values for visible hours of the day: first hour "
                             + firstHour + ", last hour " + lastHour);
         }
-        if (this.firstHour != firstHour || this.lastHour != lastHour) {
-            this.firstHour = firstHour;
-            this.lastHour = lastHour;
-            requestRepaint();
-        }
+
+        setFirstVisibleHourOfDay(firstHour);
+        setLastVisibleHourOfDay(lastHour);
     }
 
     /**
@@ -618,7 +848,7 @@ CalendarEditableEventProvider,Action.Container {
         if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23
                 && firstHour <= getLastVisibleHourOfDay()) {
             this.firstHour = firstHour;
-            requestRepaint();
+            getState().setFirstHourOfDay(firstHour);
         }
     }
 
@@ -652,7 +882,7 @@ CalendarEditableEventProvider,Action.Container {
         if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23
                 && lastHour >= getFirstVisibleHourOfDay()) {
             this.lastHour = lastHour;
-            requestRepaint();
+            getState().setLastHourOfDay(lastHour);
         }
     }
 
@@ -684,227 +914,9 @@ CalendarEditableEventProvider,Action.Container {
     public void setWeeklyCaptionFormat(String dateFormatPattern) {
         if ((weeklyCaptionFormat == null && dateFormatPattern != null)
                 || (weeklyCaptionFormat != null && !weeklyCaptionFormat
-                .equals(dateFormatPattern))) {
+                        .equals(dateFormatPattern))) {
             weeklyCaptionFormat = dateFormatPattern;
-            requestRepaint();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.AbstractComponent#paintContent(com.vaadin.terminal.PaintTarget
-     * )
-     */
-    @Override
-    public void paintContent(PaintTarget target) throws PaintException {
-
-        // Make sure we have a up-to-date locale
-        initCalendarWithLocale();
-
-        // If only one is null, throw exception
-        // If both are null, set defaults
-        if (startDate == null ^ endDate == null) {
-            String message = "Schedule cannot be painted without a proper date range.\n";
-            if (startDate == null) {
-                throw new PaintException(message
-                        + "You must set a start date using setStartDate(Date).");
-
-            } else {
-                throw new PaintException(message
-                        + "You must set an end date using setEndDate(Date).");
-            }
-
-        } else if (startDate == null && endDate == null) {
-            // set defaults
-            startDate = getStartDate();
-            endDate = getEndDate();
-        }
-
-        int durationInDays = (int) (((endDate.getTime()) - startDate.getTime()) / VCalendar.DAYINMILLIS);
-        durationInDays++;
-        if (durationInDays > 60) {
-            throw new PaintException("Daterange is too big (max 60) = "
-                    + durationInDays);
-        }
-
-        target.addAttribute(VCalendarPaintable.ATTR_FORMAT24H,
-                getTimeFormat() == TimeFormat.Format24H);
-        target.addAttribute(VCalendarPaintable.ATTR_DAY_NAMES, getDayNamesShort());
-        target.addAttribute(VCalendarPaintable.ATTR_MONTH_NAMES, getMonthNamesShort());
-        target.addAttribute(VCalendarPaintable.ATTR_FDOW,
-                currentCalendar.getFirstDayOfWeek());
-        target.addAttribute(VCalendarPaintable.ATTR_READONLY, isReadOnly());
-        // target.addAttribute(VCalendar.ATTR_HIDE_WEEKENDS, isHideWeekends());
-
-        target.addAttribute(VCalendarPaintable.ATTR_FIRSTDAYOFWEEK, firstDay);
-        target.addAttribute(VCalendarPaintable.ATTR_LASTDAYOFWEEK, lastDay);
-
-        target.addAttribute(VCalendarPaintable.ATTR_FIRSTHOUROFDAY, firstHour);
-        target.addAttribute(VCalendarPaintable.ATTR_LASTHOUROFDAY, lastHour);
-
-        // Use same timezone in all dates this component handles.
-        // Show "now"-marker in browser within given timezone.
-        Date now = new Date();
-        currentCalendar.setTime(now);
-        now = currentCalendar.getTime();
-
-        // Reset time zones for custom date formats
-        df_date.setTimeZone(currentCalendar.getTimeZone());
-        df_time.setTimeZone(currentCalendar.getTimeZone());
-        target.addAttribute(VCalendarPaintable.ATTR_NOW, df_date.format(now) + " "
-                + df_time.format(now));
-
-        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
-        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
-
-        currentCalendar.setTime(firstDateToShow);
-
-        DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
-        weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
-
-        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<CalendarDateRange, Set<Action>>();
-
-        target.startTag("days");
-        // Send all dates to client from server. This
-        // approach was taken because gwt doesn't
-        // support date localization properly.
-        while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
-            int dow = getDowByLocale(currentCalendar);
-            Date date = currentCalendar.getTime();
-
-            target.startTag("day");
-            target.addAttribute(VCalendarPaintable.ATTR_DATE,
-                    df_date.format(date));
-            target.addAttribute(VCalendarPaintable.ATTR_FDATE,
-                    weeklyCaptionFormatter.format(date));
-
-            target.addAttribute(VCalendarPaintable.ATTR_DOW, dow);
-            target.addAttribute(VCalendarPaintable.ATTR_WEEK,
-                    currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR));
-            target.endTag("day");
-
-            // Get actions for a specific date
-            if (actionHandlers != null) {
-                for (Action.Handler ah : actionHandlers) {
-
-                    // Create calendar which omits time
-                    GregorianCalendar cal = new GregorianCalendar(
-                            getTimeZone(), getLocale());
-                    cal.clear();
-                    cal.set(currentCalendar.get(java.util.Calendar.YEAR),
-                            currentCalendar.get(java.util.Calendar.MONTH),
-                            currentCalendar.get(java.util.Calendar.DATE));
-
-                    // Get day start and end times
-                    Date start = cal.getTime();
-                    cal.add(java.util.Calendar.DATE, 1);
-                    Date end = cal.getTime();
-
-                    /**
-                     * If in day or week view add actions for each half-an-hour.
-                     * If in month view add actions for each day
-                     */
-                    if (durationInDays > 7) {
-                        /*
-                         * Month view
-                         */
-                        CalendarDateRange range = new CalendarDateRange(start,
-                                end, getTimeZone());
-                        Action[] actions = ah.getActions(range, this);
-                        if (actions != null) {
-                            Set<Action> actionSet = new HashSet<Action>(
-                                    Arrays.asList(actions));
-                            actionMap.put(range, actionSet);
-                        }
-                    } else {
-                        /*
-                         * Day or week view
-                         */
-                        GregorianCalendar c = new GregorianCalendar(
-                                getTimeZone(), getLocale());
-                        c.setTime(start);
-                        while (c.getTime().before(end)) {
-                            Date s = c.getTime();
-                            c.add(java.util.Calendar.MINUTE, 30);
-                            Date e = c.getTime();
-                            CalendarDateRange range = new CalendarDateRange(s,
-                                    e, getTimeZone());
-                            Action[] actions = ah.getActions(range, this);
-                            if (actions != null) {
-                                Set<Action> actionSet = new HashSet<Action>(
-                                        Arrays.asList(actions));
-                                actionMap.put(range, actionSet);
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            currentCalendar.add(java.util.Calendar.DATE, 1);
-        }
-
-        target.endTag("days");
-
-        events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
-
-        target.startTag("events");
-        if (events != null) {
-            for (int i = 0; i < events.size(); i++) {
-                target.startTag("event");
-                paintEvent(i, target);
-                target.endTag("event");
-            }
-        }
-        target.endTag("events");
-        target.addVariable(this, VCalendarPaintable.ATTR_SCROLL, scrollTop);
-        target.addVariable(this, "navigation", 0);
-
-        if (dropHandler != null) {
-            dropHandler.getAcceptCriterion().paint(target);
-        }
-        super.paintContent(target);
-
-        paintActions(target, actionMap);
-    }
-
-    private void paintActions(PaintTarget target,
-            final Map<CalendarDateRange, Set<Action>> actionMap)
-                    throws PaintException {
-        if (!actionMap.isEmpty()) {
-            target.addVariable(this, "action", "");
-
-            target.startTag("actions");
-
-            SimpleDateFormat formatter = new SimpleDateFormat(
-                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
-            formatter.setTimeZone(getTimeZone());
-
-            for (Entry<CalendarDateRange, Set<Action>> entry : actionMap
-                    .entrySet()) {
-                CalendarDateRange range = entry.getKey();
-                Set<Action> actions = entry.getValue();
-                for (Action a : actions) {
-                    String key = actionMapper.key(a);
-                    target.startTag("action");
-                    target.addAttribute("key", key);
-                    target.addAttribute("start",
-                            formatter.format(range.getStart()));
-                    target.addAttribute("end", formatter.format(range.getEnd()));
-
-                    if (a.getCaption() != null) {
-                        target.addAttribute("caption", a.getCaption());
-                    }
-                    if (a.getIcon() != null) {
-                        target.addAttribute("icon", a.getIcon());
-                    }
-
-                    target.endTag("action");
-                }
-            }
-            target.endTag("actions");
+            markAsDirty();
         }
     }
 
@@ -936,91 +948,6 @@ CalendarEditableEventProvider,Action.Container {
     }
 
     /**
-     * Paints single calendar event to UIDL. Override this method to add custom
-     * attributes for events.
-     * 
-     * @param index
-     *            Index of target Calendar.Event
-     * @param target
-     *            PaintTarget
-     */
-    protected void paintEvent(int index, PaintTarget target) throws PaintException {
-        CalendarEvent e = events.get(index);
-        target.addAttribute(VCalendarPaintable.ATTR_INDEX, index);
-        target.addAttribute(VCalendarPaintable.ATTR_CAPTION,
-                (e.getCaption() == null ? "" : e.getCaption()));
-        target.addAttribute(VCalendarPaintable.ATTR_DATEFROM,
-                df_date.format(e.getStart()));
-        target.addAttribute(VCalendarPaintable.ATTR_DATETO, df_date.format(e.getEnd()));
-        target.addAttribute(VCalendarPaintable.ATTR_TIMEFROM,
-                df_time.format(e.getStart()));
-        target.addAttribute(VCalendarPaintable.ATTR_TIMETO, df_time.format(e.getEnd()));
-        target.addAttribute(VCalendarPaintable.ATTR_DESCRIPTION,
-                e.getDescription() == null ? "" : e.getDescription());
-        target.addAttribute(VCalendarPaintable.ATTR_STYLE, e.getStyleName() == null ? ""
-                : e.getStyleName());
-        target.addAttribute(VCalendarPaintable.ATTR_ALLDAY, e.isAllDay());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.AbstractComponent#changeVariables(java.lang.Object,
-     * java.util.Map)
-     */
-    @Override
-    public void changeVariables(Object source, Map<String, Object> variables) {
-        super.changeVariables(source, variables);
-
-        if (variables.containsKey(CalendarEventId.RANGESELECT)
-                && isClientChangeAllowed()) {
-            handleRangeSelect((String) variables
-                    .get(CalendarEventId.RANGESELECT));
-        }
-
-        if (variables.containsKey(CalendarEventId.EVENTCLICK)
-                && isEventClickAllowed()) {
-            handleEventClick((Integer) variables
-                    .get(CalendarEventId.EVENTCLICK));
-        }
-
-        if (variables.containsKey(CalendarEventId.DATECLICK)
-                && isClientChangeAllowed()) {
-            handleDateClick((String) variables.get(CalendarEventId.DATECLICK));
-        }
-
-        if (variables.containsKey(CalendarEventId.WEEKCLICK)
-                && isClientChangeAllowed()) {
-            handleWeekClick((String) variables.get(CalendarEventId.WEEKCLICK));
-        }
-
-        if (variables.containsKey(VCalendarPaintable.ATTR_SCROLL)) {
-            handleScroll(variables.get(VCalendarPaintable.ATTR_SCROLL).toString());
-        }
-
-        if (variables.containsKey(CalendarEventId.EVENTMOVE)
-                && isClientChangeAllowed()) {
-            handleEventMove(variables.get(CalendarEventId.EVENTMOVE).toString());
-        }
-
-        if (variables.containsKey(VCalendarPaintable.ATTR_NAVIGATION)) {
-            handleNavigation((Boolean) variables.get("navigation"));
-        }
-
-        if (variables.containsKey(CalendarEventId.EVENTRESIZE)
-                && isClientChangeAllowed()) {
-            handleEventResize((String) variables
-                    .get(CalendarEventId.EVENTRESIZE));
-        }
-
-        // Actions
-        if (variables.containsKey(CalendarEventId.ACTION)
-                && actionHandlers != null) {
-            handleAction((String) variables.get(CalendarEventId.ACTION));
-        }
-    }
-
-    /**
      * Is the user allowed to trigger events which alters the events
      * 
      * @return true if the client is allowed to send changes to server
@@ -1038,193 +965,6 @@ CalendarEditableEventProvider,Action.Container {
      */
     protected boolean isEventClickAllowed() {
         return isEnabled();
-    }
-
-    /**
-     * Handles action received from client
-     * 
-     * @param actionString
-     *            The comma delimited action string
-     */
-    private void handleAction(String actionString) {
-        String[] args = actionString.split(",");
-        Action action = (Action) actionMapper.get(args[0]);
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
-        formatter.setTimeZone(getTimeZone());
-        try {
-            if (args.length == 3) {
-                /*
-                 * Action on empty area
-                 */
-                Date start = formatter.parse(args[1]);
-                for (Action.Handler ah : actionHandlers) {
-                    ah.handleAction(action, this, start);
-                }
-
-            } else if (args.length == 4) {
-                /*
-                 * Action on event
-                 */
-                int eventIndex = Integer.parseInt(args[3]);
-                for (Action.Handler ah : actionHandlers) {
-                    ah.handleAction(action, this, events.get(eventIndex));
-                }
-
-            } else {
-                getLogger().log(Level.WARNING,
-                        "Could not parse action date string");
-            }
-
-
-        } catch (ParseException e) {
-            getLogger()
-            .log(Level.WARNING, "Could not parse action date string");
-        }
-    }
-
-    /**
-     * Handle an event move message from client.
-     */
-    private void handleEventMove(String message) {
-        if (message != null && message.length() > 10) {
-            String[] splitted = message.split(":");
-            if (splitted.length == 2) {
-                int index = Integer.parseInt(splitted[0]);
-
-                try {
-                    Date d = df_date_time.parse(splitted[1]);
-                    if (index >= 0 && index < events.size()
-                            && events.get(index) != null) {
-                        fireEventMove(index, d);
-                    }
-                } catch (ParseException e) {
-                    getLogger().log(Level.WARNING, e.getMessage());
-                } catch (NumberFormatException e) {
-                    getLogger().log(Level.WARNING, e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Handle a range select message from client.
-     */
-    private void handleRangeSelect(String value) {
-        if (value != null && value.length() > 14 && value.contains("TO")) {
-            String[] dates = value.split("TO");
-            try {
-                Date d1 = df_date.parse(dates[0]);
-                Date d2 = df_date.parse(dates[1]);
-
-                fireRangeSelect(d1, d2, true);
-
-            } catch (ParseException e) {
-                // NOP
-            }
-        } else if (value != null && value.length() > 12 && value.contains(":")) {
-            String[] dates = value.split(":");
-            if (dates.length == 3) {
-                try {
-                    Date d = df_date.parse(dates[0]);
-                    currentCalendar.setTime(d);
-                    int startMinutes = Integer.parseInt(dates[1]);
-                    int endMinutes = Integer.parseInt(dates[2]);
-                    currentCalendar
-                    .add(java.util.Calendar.MINUTE, startMinutes);
-                    Date start = currentCalendar.getTime();
-                    currentCalendar.add(java.util.Calendar.MINUTE, endMinutes
-                            - startMinutes);
-                    Date end = currentCalendar.getTime();
-                    fireRangeSelect(start, end, false);
-                } catch (ParseException e) {
-                    // NOP
-                } catch (NumberFormatException e) {
-                    // NOP
-                }
-            }
-        }
-    }
-
-    /**
-     * Handle an event click message from client.
-     */
-    private void handleEventClick(Integer i) {
-        if (i >= 0 && i < events.size() && events.get(i) != null) {
-            fireEventClick(i);
-        }
-    }
-
-    /**
-     * Handle a date click message from client.
-     */
-    private void handleDateClick(String message) {
-        if (message != null && message.length() > 6) {
-            try {
-                Date d = df_date.parse(message);
-                fireDateClick(d);
-            } catch (ParseException e) {
-            }
-        }
-    }
-
-    /**
-     * Handle a week message from client.
-     */
-    private void handleWeekClick(String s) {
-        if (s.length() > 0 && s.contains("w")) {
-            String[] splitted = s.split("w");
-            if (splitted.length == 2) {
-                try {
-                    int yr = 1900 + Integer.parseInt(splitted[0]);
-                    int week = Integer.parseInt(splitted[1]);
-                    fireWeekClick(week, yr);
-                } catch (NumberFormatException e) {
-                    // NOP
-                }
-            }
-        }
-    }
-
-    /**
-     * Handle a scroll message from client.
-     */
-    private void handleScroll(String varValue) {
-        try {
-            int i = Integer.parseInt(varValue);
-            scrollTop = i;
-        } catch (NumberFormatException e) {
-            // NOP
-        }
-    }
-
-    /**
-     * Handle a navigation message from client.
-     */
-    private void handleNavigation(Boolean forward) {
-        fireNavigationEvent(forward);
-    }
-
-    /**
-     * Handle an event resize message from client.
-     */
-    private void handleEventResize(String value) {
-        if (value != null && !"".equals(value)) {
-            try {
-                String[] values = value.split(",");
-                if (values.length == 3) {
-                    int eventIndex = Integer.parseInt(values[0]);
-                    Date newStartTime = df_date_time.parse(values[1]);
-                    Date newEndTime = df_date_time.parse(values[2]);
-
-                    fireEventResize(eventIndex, newStartTime, newEndTime);
-                }
-            } catch (NumberFormatException e) {
-                // NOOP
-            } catch (ParseException e) {
-                // NOOP
-            }
-        }
     }
 
     /**
@@ -1251,7 +991,8 @@ CalendarEditableEventProvider,Action.Container {
      *            The changed from date time
      */
     protected void fireEventMove(int index, Date newFromDatetime) {
-        MoveEvent event = new MoveEvent(this, events.get(index), newFromDatetime);
+        MoveEvent event = new MoveEvent(this, events.get(index),
+                newFromDatetime);
 
         if (calendarEventProvider instanceof EventMoveHandler) {
             // Notify event provider if it is an event move handler
@@ -1565,7 +1306,7 @@ CalendarEditableEventProvider,Action.Container {
     public void eventSetChange(EventSetChange changeEvent) {
         // sanity check
         if (calendarEventProvider == changeEvent.getProvider()) {
-            requestRepaint();
+            markAsDirty();
         }
     }
 
@@ -1790,13 +1531,13 @@ CalendarEditableEventProvider,Action.Container {
         provider.addListener(new CalendarEventProvider.EventSetChangeListener() {
             public void eventSetChange(EventSetChange changeEvent) {
                 // Repaint if events change
-                requestRepaint();
+                markAsDirty();
             }
         });
         provider.addListener(new EventChangeListener() {
             public void eventChange(EventChange changeEvent) {
                 // Repaint if event changes
-                requestRepaint();
+                markAsDirty();
             }
         });
         setEventProvider(provider);
@@ -1838,13 +1579,13 @@ CalendarEditableEventProvider,Action.Container {
         provider.addListener(new CalendarEventProvider.EventSetChangeListener() {
             public void eventSetChange(EventSetChange changeEvent) {
                 // Repaint if events change
-                requestRepaint();
+                markAsDirty();
             }
         });
         provider.addListener(new EventChangeListener() {
             public void eventChange(EventChange changeEvent) {
                 // Repaint if event changes
-                requestRepaint();
+                markAsDirty();
             }
         });
         setEventProvider(provider);
@@ -1872,7 +1613,7 @@ CalendarEditableEventProvider,Action.Container {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
             CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
             provider.addEvent(event);
-            requestRepaint();
+            markAsDirty();
         } else {
             throw new UnsupportedOperationException(
                     "Event provider does not support adding events");
@@ -1890,7 +1631,7 @@ CalendarEditableEventProvider,Action.Container {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
             CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
             provider.removeEvent(event);
-            requestRepaint();
+            markAsDirty();
         } else {
             throw new UnsupportedOperationException(
                     "Event provider does not support removing events");
@@ -1933,11 +1674,11 @@ CalendarEditableEventProvider,Action.Container {
         if (actionHandler != null) {
             if (actionHandlers == null) {
                 actionHandlers = new LinkedList<Action.Handler>();
-                actionMapper = new KeyMapper();
+                actionMapper = new KeyMapper<Action>();
             }
             if (!actionHandlers.contains(actionHandler)) {
                 actionHandlers.add(actionHandler);
-                requestRepaint();
+                markAsDirty();
             }
         }
     }
@@ -1956,7 +1697,180 @@ CalendarEditableEventProvider,Action.Container {
                 actionHandlers = null;
                 actionMapper = null;
             }
-            requestRepaint();
+            markAsDirty();
+        }
+    }
+
+    private class CalendarServerRpcImpl implements CalendarServerRpc {
+
+        @Override
+        public void eventMove(int eventIndex, String newDate) {
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+            if (newDate != null) {
+                try {
+                    Date d = df_date_time.parse(newDate);
+                    if (eventIndex >= 0 && eventIndex < events.size()
+                            && events.get(eventIndex) != null) {
+                        fireEventMove(eventIndex, d);
+                    }
+                } catch (ParseException e) {
+                    getLogger().log(Level.WARNING, e.getMessage());
+                }
+            }
+        }
+
+        @Override
+        public void rangeSelect(String range) {
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+
+            if (range != null && range.length() > 14 && range.contains("TO")) {
+                String[] dates = range.split("TO");
+                try {
+                    Date d1 = df_date.parse(dates[0]);
+                    Date d2 = df_date.parse(dates[1]);
+
+                    fireRangeSelect(d1, d2, true);
+
+                } catch (ParseException e) {
+                    // NOP
+                }
+            } else if (range != null && range.length() > 12
+                    && range.contains(":")) {
+                String[] dates = range.split(":");
+                if (dates.length == 3) {
+                    try {
+                        Date d = df_date.parse(dates[0]);
+                        currentCalendar.setTime(d);
+                        int startMinutes = Integer.parseInt(dates[1]);
+                        int endMinutes = Integer.parseInt(dates[2]);
+                        currentCalendar.add(java.util.Calendar.MINUTE,
+                                startMinutes);
+                        Date start = currentCalendar.getTime();
+                        currentCalendar.add(java.util.Calendar.MINUTE,
+                                endMinutes - startMinutes);
+                        Date end = currentCalendar.getTime();
+                        fireRangeSelect(start, end, false);
+                    } catch (ParseException e) {
+                        // NOP
+                    } catch (NumberFormatException e) {
+                        // NOP
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void forward() {
+            fireEvent(new ForwardEvent(Calendar.this));
+        }
+
+        @Override
+        public void backward() {
+            fireEvent(new BackwardEvent(Calendar.this));
+        }
+
+        @Override
+        public void dateClick(String date) {
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+            if (date != null && date.length() > 6) {
+                try {
+                    Date d = df_date.parse(date);
+                    fireDateClick(d);
+                } catch (ParseException e) {
+                }
+            }
+        }
+
+        @Override
+        public void weekClick(String event) {
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+            if (event.length() > 0 && event.contains("w")) {
+                String[] splitted = event.split("w");
+                if (splitted.length == 2) {
+                    try {
+                        int yr = 1900 + Integer.parseInt(splitted[0]);
+                        int week = Integer.parseInt(splitted[1]);
+                        fireWeekClick(week, yr);
+                    } catch (NumberFormatException e) {
+                        // NOP
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void eventClick(int eventIndex) {
+            if (!isEventClickAllowed()) {
+                return;
+            }
+            if (eventIndex >= 0 && eventIndex < events.size()
+                    && events.get(eventIndex) != null) {
+                fireEventClick(eventIndex);
+            }
+        }
+
+        @Override
+        public void eventResize(int eventIndex, String newStartDate,
+                String newEndDate) {
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+            if (newStartDate != null && !"".equals(newStartDate)
+                    && newEndDate != null && !"".equals(newEndDate)) {
+                try {
+                    Date newStartTime = df_date_time.parse(newStartDate);
+                    Date newEndTime = df_date_time.parse(newEndDate);
+
+                    fireEventResize(eventIndex, newStartTime, newEndTime);
+                } catch (ParseException e) {
+                    // NOOP
+                }
+            }
+        }
+
+        @Override
+        public void scroll(int scrollPosition) {
+            scrollTop = scrollPosition;
+        }
+
+        @Override
+        public void actionOnEmptyCell(String actionKey, String startDate,
+                String endDate) {
+            Action action = actionMapper.get(actionKey);
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+            formatter.setTimeZone(getTimeZone());
+            try {
+                Date start = formatter.parse(startDate);
+                for (Action.Handler ah : actionHandlers) {
+                    ah.handleAction(action, this, start);
+                }
+
+            } catch (ParseException e) {
+                getLogger().log(Level.WARNING,
+                        "Could not parse action date string");
+            }
+
+        }
+
+        @Override
+        public void actionOnEvent(String actionKey, String startDate,
+                String endDate, int eventIndex) {
+            Action action = actionMapper.get(actionKey);
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                    VCalendarAction.ACTION_DATE_FORMAT_PATTERN);
+            formatter.setTimeZone(getTimeZone());
+            for (Action.Handler ah : actionHandlers) {
+                ah.handleAction(action, this, events.get(eventIndex));
+            }
         }
     }
 }

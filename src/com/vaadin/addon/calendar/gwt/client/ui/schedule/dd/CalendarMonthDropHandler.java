@@ -6,9 +6,9 @@ package com.vaadin.addon.calendar.gwt.client.ui.schedule.dd;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
-import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.ui.dd.VAcceptCallback;
-import com.vaadin.terminal.gwt.client.ui.dd.VDragEvent;
+import com.vaadin.client.Util;
+import com.vaadin.client.ui.dd.VAcceptCallback;
+import com.vaadin.client.ui.dd.VDragEvent;
 
 /**
  * Handles DD when the monthly view is showing in the Calendar. In the monthly
@@ -83,7 +83,7 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
     private boolean isLocationValid(
             com.google.gwt.user.client.Element elementOver) {
         com.google.gwt.user.client.Element monthGridElement = calendarPaintable
-                .getMonthGrid().getElement();
+                .getWidget().getMonthGrid().getElement();
 
         // drops are not allowed in:
         // - weekday header
@@ -130,8 +130,8 @@ public class CalendarMonthDropHandler extends CalendarDropHandler {
      *            The drag event
      */
     private void updateDropDetails(VDragEvent drag) {
-        int dayIndex = calendarPaintable.getMonthGrid().getDayCellIndex(
-                currentTargetDay);
+        int dayIndex = calendarPaintable.getWidget().getMonthGrid()
+                .getDayCellIndex(currentTargetDay);
 
         drag.getDropDetails().put("dropDayIndex", dayIndex);
     }

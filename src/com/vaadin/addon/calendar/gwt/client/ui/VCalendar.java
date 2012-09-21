@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarDay;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.MonthGrid;
@@ -27,7 +28,6 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleWeekToolbar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
-import com.vaadin.addon.calendar.ui.Calendar;
 
 /**
  * Clients side implementation for {@link Calendar}.
@@ -490,11 +490,11 @@ public class VCalendar extends Composite {
      *            The names of the dates
      */
     @SuppressWarnings("deprecation")
-    public void updateWeekGrid(int daysCount, List<Day> days, Date today,
-            String[] realDayNames) {
-        weekGrid.setFirstHour(firstHour);
-        weekGrid.setLastHour(lastHour);
-        weekGrid.getTimeBar().updateTimeBar(format);
+    public void updateWeekGrid(int daysCount, List<CalendarDay> days,
+            Date today, String[] realDayNames) {
+        weekGrid.setFirstHour(getFirstHourOfTheDay());
+        weekGrid.setLastHour(getLastHourOfTheDay());
+        weekGrid.getTimeBar().updateTimeBar(is24HFormat());
 
         dayToolbar.clear();
         dayToolbar.addBackButton();
@@ -503,12 +503,13 @@ public class VCalendar extends Composite {
         weekGrid.clearDates();
         weekGrid.setDisabled(isDisabledOrReadOnly());
 
-        for (Day day : days) {
+        for (CalendarDay day : days) {
             String date = day.getDate();
             String localized_date_format = day.getLocalizedDateFormat();
             Date d = dateformat_date.parse(date);
             int dayOfWeek = day.getDayOfWeek();
-            if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
+            if (dayOfWeek < getFirstDayNumber()
+                    || dayOfWeek > getLastDayNumber()) {
                 continue;
             }
             boolean isToday = false;
@@ -539,8 +540,9 @@ public class VCalendar extends Composite {
      *            Todays date
      */
     @SuppressWarnings("deprecation")
-    protected void updateMonthGrid(int daysCount, List<Day> days, Date today) {
-        int columns = lastDay - firstDay + 1;
+    protected void updateMonthGrid(int daysCount, List<CalendarDay> days,
+            Date today) {
+        int columns = getLastDayNumber() - getFirstDayNumber() + 1;
         rows = (int) Math.ceil(daysCount / (double) 7);
 
         monthGrid = new MonthGrid(this, rows, columns);
@@ -553,7 +555,7 @@ public class VCalendar extends Composite {
         boolean firstDayFound = false;
         boolean lastDayFound = false;
 
-        for (Day day : days) {
+        for (CalendarDay day : days) {
             String date = day.getDate();
             Date d = dateformat_date.parse(date);
             int dayOfWeek = day.getDayOfWeek();
@@ -570,7 +572,8 @@ public class VCalendar extends Composite {
                 firstDayFound = true;
             }
 
-            if (dayOfWeek < firstDay || dayOfWeek > lastDay) {
+            if (dayOfWeek < getFirstDayNumber()
+                    || dayOfWeek > getLastDayNumber()) {
                 continue;
             }
             int y = (pos / columns);
@@ -1043,42 +1046,6 @@ public class VCalendar extends Composite {
     }
 
     /**
-     * Utility class used to represent a day when updating views. Only used
-     * internally.
-     */
-    protected class Day {
-        private String date;
-        private String localizedDateFormat;
-        private int dayOfWeek;
-        private int week;
-
-        public Day(String date, String localizedDateFormat, int dayOfWeek,
-                int week) {
-            super();
-            this.date = date;
-            this.localizedDateFormat = localizedDateFormat;
-            this.dayOfWeek = dayOfWeek;
-            this.week = week;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public String getLocalizedDateFormat() {
-            return localizedDateFormat;
-        }
-
-        public int getDayOfWeek() {
-            return dayOfWeek;
-        }
-
-        public int getWeek() {
-            return week;
-        }
-    }
-
-    /**
      * Re-renders the whole week view
      * 
      * @param scroll
@@ -1092,8 +1059,9 @@ public class VCalendar extends Composite {
      * @param events
      *            The events to render
      */
-    protected void updateWeekView(int scroll, Date today, int daysInMonth,
-            int firstDayOfWeek, Collection<CalendarEvent> events, List<Day> days) {
+    void updateWeekView(int scroll, Date today, int daysInMonth,
+            int firstDayOfWeek, Collection<CalendarEvent> events,
+            List<CalendarDay> days) {
 
         while (outer.getWidgetCount() > 0) {
             outer.remove(0);
@@ -1152,8 +1120,8 @@ public class VCalendar extends Composite {
      * @param days
      *            The day information
      */
-    protected void updateMonthView(int firstDayOfWeek, Date today,
-            int daysInMonth, Collection<CalendarEvent> events, List<Day> days) {
+    void updateMonthView(int firstDayOfWeek, Date today, int daysInMonth,
+            Collection<CalendarEvent> events, List<CalendarDay> days) {
 
         while (outer.getWidgetCount() > 0) {
             outer.remove(0);

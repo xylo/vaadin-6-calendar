@@ -7,7 +7,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
-import com.vaadin.terminal.gwt.client.ui.Action;
+import com.vaadin.client.ui.Action;
 
 /**
  * Action performed by the calendar
@@ -18,6 +18,8 @@ import com.vaadin.terminal.gwt.client.ui.Action;
  * 
  */
 public class VCalendarAction extends Action {
+
+    private CalendarServerRpc rpc;
 
     private String actionKey = "";
 
@@ -45,13 +47,15 @@ public class VCalendarAction extends Action {
      * 
      * @param owner
      *            The owner who trigger this kinds of events
+     * @param rpc
+     *            The CalendarRpc which is used for executing actions
      * @param key
      *            The unique action key which identifies this particular action
-     * @param date
-     *            The date this action represenets
      */
-    public VCalendarAction(VCalendarPaintable owner, String key) {
+    public VCalendarAction(VCalendarPaintable owner, CalendarServerRpc rpc,
+            String key) {
         this(owner);
+        this.rpc = rpc;
         actionKey = key;
     }
 
@@ -62,27 +66,14 @@ public class VCalendarAction extends Action {
      */
     @Override
     public void execute() {
+        String startDate = dateformat_datetime.format(actionStartDate);
+        String endDate = dateformat_datetime.format(actionEndDate);
+
         if (event == null) {
-            /*
-             * Action on empty cell
-             */
-            owner.getClient().updateVariable(
-                    owner.getPaintableId(),
-                    "action",
-                    actionKey.split("-")[0] + ","
-                            + dateformat_datetime.format(actionStartDate) + ","
-                            + dateformat_datetime.format(actionEndDate), true);
+            rpc.actionOnEmptyCell(actionKey.split("-")[0], startDate, endDate);
         } else {
-            /*
-             * Action on event
-             */
-            owner.getClient().updateVariable(
-                    owner.getPaintableId(),
-                    "action",
-                    actionKey.split("-")[0] + ","
-                            + dateformat_datetime.format(actionStartDate) + ","
-                            + dateformat_datetime.format(actionEndDate) + ","
-                            + event.getIndex(), true);
+            rpc.actionOnEvent(actionKey.split("-")[0], startDate, endDate,
+                    event.getIndex());
         }
 
         owner.getClient().getContextMenu().hide();

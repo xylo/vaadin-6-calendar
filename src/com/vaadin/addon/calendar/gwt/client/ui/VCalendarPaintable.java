@@ -7,17 +7,26 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.BackwardListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.DateClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.EventClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.EventMovedListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.EventResizeListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.ForwardListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.MouseEventListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.RangeSelectListener;
+import com.vaadin.addon.calendar.gwt.client.ui.VCalendar.WeekClickListener;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarDay;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
@@ -26,17 +35,18 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DateCellSlot;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarDropHandler;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarMonthDropHandler;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.dd.CalendarWeekDropHandler;
-import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.TooltipInfo;
-import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.VConsole;
-import com.vaadin.terminal.gwt.client.ui.Action;
-import com.vaadin.terminal.gwt.client.ui.ActionOwner;
-import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
+import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.TooltipInfo;
+import com.vaadin.client.UIDL;
+import com.vaadin.client.Util;
+import com.vaadin.client.VConsole;
+import com.vaadin.client.communication.RpcProxy;
+import com.vaadin.client.communication.StateChangeEvent;
+import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.client.ui.Action;
+import com.vaadin.client.ui.ActionOwner;
+import com.vaadin.client.ui.dd.VHasDropHandler;
+import com.vaadin.shared.ui.Connect;
 
 /**
  * Handles communication between {@link Calendar} on the server side and
@@ -46,8 +56,9 @@ import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
  * @version
  * @VERSION@
  */
-public class VCalendarPaintable extends VCalendar implements Paintable,
-VHasDropHandler, ActionOwner {
+@Connect(com.vaadin.addon.calendar.ui.Calendar.class)
+public class VCalendarPaintable extends AbstractComponentConnector implements
+        VHasDropHandler, ActionOwner {
 
     public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
@@ -73,13 +84,13 @@ VHasDropHandler, ActionOwner {
     public static final String ATTR_ALLDAY = "allday";
     public static final String ATTR_NAVIGATION = "navigation";
 
-    private ApplicationConnection client;
+    private CalendarServerRpc rpc = RpcProxy.create(CalendarServerRpc.class,
+            this);
 
     private CalendarDropHandler dropHandler;
 
-    private String PID;
-
     private final HashMap<String, String> actionMap = new HashMap<String, String>();
+    private HashMap<Object, String> tooltips = new HashMap<Object, String>();
 
     /**
      * 
@@ -90,84 +101,85 @@ VHasDropHandler, ActionOwner {
         registerListeners();
     }
 
+    @Override
+    protected void init() {
+        super.init();
+        registerRpc(CalendarClientRpc.class, new CalendarClientRpc() {
+            @Override
+            public void scroll(int scrollPosition) {
+                // TODO widget scroll
+            }
+        });
+    }
+
+    @Override
+    public VCalendar getWidget() {
+        return (VCalendar) super.getWidget();
+    }
+
+    @Override
+    public CalendarState getState() {
+        return (CalendarState) super.getState();
+    }
+
     /**
      * Registers listeners on the calendar so server can be notified of the
      * events
      */
     protected void registerListeners() {
-        setListener(new DateClickListener() {
+        getWidget().setListener(new DateClickListener() {
             public void dateClick(String date) {
-                if (!isDisabledOrReadOnly()
-                        && getClient().hasEventListeners(VCalendarPaintable.this,
-                                CalendarEventId.DATECLICK)) {
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.DATECLICK, date, true);
+                if (!getWidget().isDisabledOrReadOnly()
+                        && hasEventListener(CalendarEventId.DATECLICK)) {
+                    rpc.dateClick(date);
                 }
             }
         });
-        setListener(new ForwardListener() {
+        getWidget().setListener(new ForwardListener() {
             public void forward() {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.FORWARD)) {
-                    client.updateVariable(getPaintableId(), ATTR_NAVIGATION,
-                            true, true);
+                if (hasEventListener(CalendarEventId.FORWARD)) {
+                    rpc.forward();
                 }
             }
         });
-        setListener(new BackwardListener() {
+        getWidget().setListener(new BackwardListener() {
             public void backward() {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.BACKWARD)) {
-                    client.updateVariable(getPaintableId(), ATTR_NAVIGATION,
-                            false, true);
+                if (hasEventListener(CalendarEventId.BACKWARD)) {
+                    rpc.backward();
                 }
             }
         });
-        setListener(new RangeSelectListener() {
+        getWidget().setListener(new RangeSelectListener() {
             public void rangeSelected(String value) {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.RANGESELECT)) {
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.RANGESELECT,
-                            value, true);
+                if (hasEventListener(CalendarEventId.RANGESELECT)) {
+                    rpc.rangeSelect(value);
                 }
             }
         });
-        setListener(new WeekClickListener() {
+        getWidget().setListener(new WeekClickListener() {
             public void weekClick(String event) {
-                if (!isDisabledOrReadOnly()
-                        && client.hasEventListeners(VCalendarPaintable.this,
-                                CalendarEventId.WEEKCLICK)) {
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.WEEKCLICK,
-                            event, true);
+                if (!getWidget().isDisabledOrReadOnly()
+                        && hasEventListener(CalendarEventId.WEEKCLICK)) {
+                    rpc.weekClick(event);
                 }
             }
         });
-        setListener(new EventMovedListener() {
+        getWidget().setListener(new EventMovedListener() {
             public void eventMoved(CalendarEvent event) {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.EVENTMOVE)) {
+                if (hasEventListener(CalendarEventId.EVENTMOVE)) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(event.getIndex());
-                    sb.append(":");
                     sb.append(DateUtil.formatClientSideDate(event.getStart()));
                     sb.append("-");
                     sb.append(DateUtil.formatClientSideTime(event
                             .getStartTime()));
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTMOVE,
-                            sb.toString(), true);
+                    rpc.eventMove(event.getIndex(), sb.toString());
                 }
             }
         });
-        setListener(new EventResizeListener() {
+        getWidget().setListener(new EventResizeListener() {
             public void eventResized(CalendarEvent event) {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.EVENTRESIZE)) {
+                if (hasEventListener(CalendarEventId.EVENTRESIZE)) {
                     StringBuilder buffer = new StringBuilder();
-                    buffer.append(event.getIndex());
-                    buffer.append(",");
 
                     buffer.append(DateUtil.formatClientSideDate(event
                             .getStart()));
@@ -175,43 +187,44 @@ VHasDropHandler, ActionOwner {
                     buffer.append(DateUtil.formatClientSideTime(event
                             .getStartTime()));
 
-                    buffer.append(",");
+                    String newStartDate = buffer.toString();
 
+                    buffer = new StringBuilder();
                     buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
                     buffer.append("-");
                     buffer.append(DateUtil.formatClientSideTime(event
                             .getEndTime()));
 
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTRESIZE,
-                            buffer.toString(), true);
+                    String newEndDate = buffer.toString();
+
+                    rpc.eventResize(event.getIndex(), newStartDate, newEndDate);
                 }
             }
         });
-        setListener(new ScrollListener() {
+        getWidget().setListener(new VCalendar.ScrollListener() {
             public void scroll(int scrollPosition) {
-                client.updateVariable(getPaintableId(), ATTR_SCROLL,
-                        scrollPosition, false);
+                // This was using client.updateVariable() with immediate ==
+                // false,
+                // but equivalent for it is not apparently present in Vaadin 7
+                // alpha 3 yet
+                rpc.scroll(scrollPosition);
             }
         });
-        setListener(new EventClickListener() {
+        getWidget().setListener(new EventClickListener() {
             public void eventClick(CalendarEvent event) {
-                if (client.hasEventListeners(VCalendarPaintable.this,
-                        CalendarEventId.EVENTCLICK)) {
-                    client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTCLICK,
-                            event.getIndex(), true);
+                if (hasEventListener(CalendarEventId.EVENTCLICK)) {
+                    rpc.eventClick(event.getIndex());
                 }
             }
         });
-        setListener(new MouseEventListener() {
+        getWidget().setListener(new MouseEventListener() {
             public void contextMenu(ContextMenuEvent event, final Widget widget) {
                 final NativeEvent ne = event.getNativeEvent();
                 int left = ne.getClientX();
                 int top = ne.getClientY();
                 top += Window.getScrollTop();
                 left += Window.getScrollLeft();
-                client.getContextMenu().showAt(new ActionOwner() {
+                getClient().getContextMenu().showAt(new ActionOwner() {
                     public String getPaintableId() {
                         return VCalendarPaintable.this.getPaintableId();
                     }
@@ -229,15 +242,14 @@ VHasDropHandler, ActionOwner {
                             SimpleDayCell cell = (SimpleDayCell) widget;
                             Date start = new Date(cell.getDate().getYear(),
                                     cell.getDate().getMonth(), cell.getDate()
-                                    .getDate(), 0, 0, 0);
+                                            .getDate(), 0, 0, 0);
 
                             Date end = new Date(cell.getDate().getYear(), cell
                                     .getDate().getMonth(), cell.getDate()
                                     .getDate(), 23, 59, 59);
 
                             return VCalendarPaintable.this.getActionsBetween(
-                                    start,
-                                    end);
+                                    start, end);
                         } else if (widget instanceof DateCell) {
                             /*
                              * Week and Day view
@@ -245,7 +257,7 @@ VHasDropHandler, ActionOwner {
                             DateCell cell = (DateCell) widget;
                             int slotIndex = DOM.getChildIndex(
                                     cell.getElement(), (Element) ne
-                                    .getEventTarget().cast());
+                                            .getEventTarget().cast());
                             DateCellSlot slot = cell.getSlot(slotIndex);
                             return VCalendarPaintable.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
@@ -255,8 +267,9 @@ VHasDropHandler, ActionOwner {
                              */
                             DayEvent dayEvent = (DayEvent) widget;
                             CalendarEvent event = dayEvent.getCalendarEvent();
-                            Action[] actions = VCalendarPaintable.this.getActionsBetween(
-                                    event.getStartTime(), event.getEndTime());
+                            Action[] actions = VCalendarPaintable.this
+                                    .getActionsBetween(event.getStartTime(),
+                                            event.getEndTime());
                             for (Action action : actions) {
                                 ((VCalendarAction) action).setEvent(event);
                             }
@@ -270,6 +283,49 @@ VHasDropHandler, ActionOwner {
         });
     }
 
+    @Override
+    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+        super.onStateChanged(stateChangeEvent);
+
+        CalendarState state = getState();
+        VCalendar widget = getWidget();
+        boolean monthView = state.getDays().size() > 7;
+
+        widget.set24HFormat(state.isFormat24H());
+        widget.setDayNames(state.getDayNames());
+        widget.setMonthNames(state.getMonthNames());
+        widget.setFirstDayNumber(state.getFirstDayOfWeek());
+        widget.setLastDayNumber(state.getLastDayOfWeek());
+        widget.setFirstHourOfTheDay(state.getFirstHourOfDay());
+        widget.setLastHourOfTheDay(state.getLastHourOfDay());
+        widget.setReadOnly(state.readOnly);
+        widget.setDisabled(!state.enabled);
+
+        widget.setRangeSelectAllowed(hasEventListener(CalendarEventId.RANGESELECT));
+        widget.setRangeMoveAllowed(hasEventListener(CalendarEventId.EVENTMOVE));
+        widget.setEventMoveAllowed(hasEventListener(CalendarEventId.EVENTMOVE));
+        widget.setEventResizeAllowed(hasEventListener(CalendarEventId.EVENTRESIZE));
+
+        List<CalendarState.Day> days = state.getDays();
+        List<CalendarState.Event> events = state.getEvents();
+
+        final int newWidth = getLayoutManager().getOuterWidth(
+                getWidget().getElement());
+        final int newHeight = getLayoutManager().getOuterHeight(
+                getWidget().getElement());
+        if (monthView) {
+            updateMonthView(days, events);
+        } else {
+            updateWeekView(days, events);
+        }
+        if (newWidth != -1 && newHeight != -1) {
+            getWidget().setSizeForChildren(newWidth, newHeight);
+        }
+
+        registerEventToolTips(state.getEvents());
+        updateActionMap(state.getActions());
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -278,184 +334,74 @@ VHasDropHandler, ActionOwner {
      * .gwt.client.UIDL, com.vaadin.terminal.gwt.client.ApplicationConnection)
      */
     public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-        // This call should be made first. Ensure correct implementation,
-        // and let the containing layout manage caption, etc.
-        if (client.updateComponent(this, uidl, true)) {
-            return;
-        }
-
-        // Save reference to server connection object to be able to send
-        // user interaction later
-        this.client = client;
-        PID = uidl.getId();
-        set24HFormat(uidl.getBooleanAttribute(ATTR_FORMAT24H));
-        setDayNames(uidl.getStringArrayAttribute(ATTR_DAY_NAMES));
-        setMonthNames(uidl.getStringArrayAttribute(ATTR_MONTH_NAMES));
-
-        setFirstDayNumber(uidl.getIntAttribute(ATTR_FIRSTDAYOFWEEK));
-        setLastDayNumber(uidl.getIntAttribute(ATTR_LASTDAYOFWEEK));
-
-        setFirstHourOfTheDay(uidl.getIntAttribute(ATTR_FIRSTHOUROFDAY));
-        setLastHourOfTheDay(uidl.getIntAttribute(ATTR_LASTHOUROFDAY));
-
-        setReadOnly(uidl.hasAttribute(ATTR_READONLY)
-                && uidl.getBooleanAttribute(ATTR_READONLY));
-
-        setDisabled(uidl.hasAttribute(ATTR_DISABLED)
-                && uidl.getBooleanAttribute(ATTR_DISABLED));
-
-        setRangeSelectAllowed(client.hasEventListeners(this,
-                CalendarEventId.RANGESELECT));
-        setRangeMoveAllowed(client.hasEventListeners(this,
-                CalendarEventId.EVENTMOVE));
-        setEventResizeAllowed(client.hasEventListeners(this,
-                CalendarEventId.EVENTRESIZE));
-        setEventMoveAllowed(client.hasEventListeners(this,
-                CalendarEventId.EVENTMOVE));
-
-        UIDL daysUidl = uidl.getChildUIDL(0);
-        int daysCount = daysUidl.getChildCount();
-        boolean monthView = daysCount > 7;
-        if (monthView) {
-            updateMonthView(uidl, daysUidl);
-        } else {
-            updateWeekView(uidl, daysUidl);
-        }
 
         // check for DD -related access criteria
-        Iterator<Object> childIterator = uidl.getChildIterator();
-        while (childIterator.hasNext()) {
-            UIDL child = (UIDL) childIterator.next();
-
-            // Drag&drop
-            if (ACCESSCRITERIA.equals(child.getTag())) {
-                if (monthView
-                        && !(getDropHandler() instanceof CalendarMonthDropHandler)) {
-                    setDropHandler(new CalendarMonthDropHandler());
-
-                } else if (!monthView
-                        && !(getDropHandler() instanceof CalendarWeekDropHandler)) {
-                    setDropHandler(new CalendarWeekDropHandler());
-                }
-
-                getDropHandler().setCalendarPaintable(this);
-                getDropHandler().updateAcceptRules(child);
-
-            } else {
-                setDropHandler(null);
-            }
-
-            // Actions
-            if ("actions".equals(child.getTag())) {
-                updateActionMap(child);
-            }
-        }
+        // Iterator<Object> childIterator = uidl.getChildIterator();
+        // while (childIterator.hasNext()) {
+        // UIDL child = (UIDL) childIterator.next();
+        //
+        // // Drag&drop
+        // if (ACCESSCRITERIA.equals(child.getTag())) {
+        // if (monthView
+        // && !(getDropHandler() instanceof CalendarMonthDropHandler)) {
+        // setDropHandler(new CalendarMonthDropHandler());
+        //
+        // } else if (!monthView
+        // && !(getDropHandler() instanceof CalendarWeekDropHandler)) {
+        // setDropHandler(new CalendarWeekDropHandler());
+        // }
+        //
+        // getDropHandler().setCalendarPaintable(this);
+        // getDropHandler().updateAcceptRules(child);
+        //
+        // } else {
+        // setDropHandler(null);
+        // }
+        //
+        // }
     }
 
     /**
      * Returns the ApplicationConnection used to connect to the server side
      */
     public ApplicationConnection getClient() {
-        return client;
-    }
-
-    /** Transforms uidl to list of CalendarEvents */
-    protected ArrayList<CalendarEvent> getEvents(UIDL childUIDL) {
-        int eventCount = childUIDL.getChildCount();
-        ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
-        for (int i = 0; i < eventCount; i++) {
-            UIDL eventUIDL = childUIDL.getChildUIDL(i);
-
-            int index = eventUIDL.getIntAttribute(ATTR_INDEX);
-            String caption = eventUIDL.getStringAttribute(ATTR_CAPTION);
-            String datefrom = eventUIDL.getStringAttribute(ATTR_DATEFROM);
-            String dateto = eventUIDL.getStringAttribute(ATTR_DATETO);
-            String timefrom = eventUIDL.getStringAttribute(ATTR_TIMEFROM);
-            String timeto = eventUIDL.getStringAttribute(ATTR_TIMETO);
-            String desc = eventUIDL.getStringAttribute(ATTR_DESCRIPTION);
-            String style = eventUIDL.getStringAttribute(ATTR_STYLE);
-            boolean allDay = eventUIDL.getBooleanAttribute(ATTR_ALLDAY);
-
-            CalendarEvent e = new CalendarEvent();
-
-            e.setCaption(caption);
-            e.setDescription(desc);
-            e.setIndex(index);
-            e.setEnd(dateformat_date.parse(dateto));
-            e.setStart(dateformat_date.parse(datefrom));
-            e.setStartTime(dateformat_datetime.parse(datefrom + " " + timefrom));
-            e.setEndTime(dateformat_datetime.parse(dateto + " " + timeto));
-            e.setStyleName(style);
-            e.setFormat24h(is24HFormat());
-            e.setAllDay(allDay);
-
-            events.add(e);
-
-            registerEventToolTip(e);
-        }
-        return events;
+        return getConnection();
     }
 
     /**
-     * Register the description of the event as a tooltip for this paintable.
-     * This way, any event displaying widget can use the event index as a key to
-     * display the tooltip.
+     * Register the description of the events as tooltips. This way, any event
+     * displaying widget can use the event index as a key to display the
+     * tooltip.
      */
-    private void registerEventToolTip(CalendarEvent e) {
-        if (e.getDescription() != null && !"".equals(e.getDescription())) {
-            TooltipInfo info = new TooltipInfo(e.getDescription());
-            client.registerTooltip(this, e.getIndex(), info);
-
-        } else {
-            client.registerTooltip(this, e.getIndex(), null);
+    private void registerEventToolTips(List<CalendarState.Event> events) {
+        for (CalendarState.Event e : events) {
+            if (e.getDescription() != null && !"".equals(e.getDescription())) {
+                tooltips.put(e.getIndex(), e.getDescription());
+            } else {
+                tooltips.remove(e.getIndex());
+            }
         }
     }
 
-    private List<Day> getDaysFromUIDL(UIDL daysUIDL){
-        List<Day> days = new ArrayList<VCalendar.Day>();
-        for (int i = 0; i < daysUIDL.getChildCount(); i++) {
-            UIDL dayUidl = daysUIDL.getChildUIDL(i);
-            String date = dayUidl.getStringAttribute(ATTR_DATE);
-            String localized_date_format = dayUidl
-                    .getStringAttribute(ATTR_FDATE);
-            int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
-            int week = dayUidl.getIntAttribute(ATTR_WEEK);
-            days.add(new Day(date,localized_date_format,dayOfWeek,week));
         }
-        return days;
     }
 
-    private void updateMonthView(UIDL uidl, UIDL daysUidl) {
-        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
-        Date today = dateformat_datetime.parse(uidl
-                .getStringAttribute(ATTR_NOW));
-        super.updateMonthView(firstDayOfWeek, today, daysUidl.getChildCount(),
-                getEvents(uidl.getChildUIDL(1)), getDaysFromUIDL(daysUidl));
+    private void updateMonthView(List<CalendarState.Day> days,
+            List<CalendarState.Event> events) {
+        CalendarState state = getState();
+        getWidget().updateMonthView(state.getFDOW(),
+                getWidget().getDateTimeFormat().parse(state.getNow()),
+                days.size(), calendarEventListOf(events),
+                calendarDayListOf(days));
     }
 
-    private void updateWeekView(UIDL uidl, UIDL daysUidl) {
-        int scroll = uidl.getIntVariable(ATTR_SCROLL);
-        Date today = dateformat_datetime.parse(uidl
-                .getStringAttribute(ATTR_NOW));
-        int daysCount = daysUidl.getChildCount();
-        int firstDayOfWeek = uidl.getIntAttribute(ATTR_FDOW);
-
-        super.updateWeekView(scroll, today, daysCount, firstDayOfWeek,
-                getEvents(uidl.getChildUIDL(1)), getDaysFromUIDL(daysUidl));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.addon.calendar.gwt.client.ui.GWTCalendar#handleTooltipEvent
-     * (com.google.gwt.user.client.Event)
-     */
-    @Override
-    public void handleTooltipEvent(Event event, Object key) {
-        if (client != null) {
-            client.handleTooltipEvent(event, this, key);
-        }
+    private void updateWeekView(List<CalendarState.Day> days,
+            List<CalendarState.Event> events) {
+        CalendarState state = getState();
+        getWidget().updateWeekView(state.getScroll(),
+                getWidget().getDateTimeFormat().parse(state.getNow()),
+                days.size(), state.getFDOW(), calendarEventListOf(events),
+                calendarDayListOf(days));
     }
 
     /*
@@ -495,7 +441,7 @@ VHasDropHandler, ActionOwner {
             boolean startIsValid = start.compareTo(actionStartDate) >= 0;
             boolean endIsValid = end.compareTo(actionEndDate) <= 0;
             if (startIsValid && endIsValid) {
-                VCalendarAction a = new VCalendarAction(this, actionKey);
+                VCalendarAction a = new VCalendarAction(this, rpc, actionKey);
                 a.setCaption(getActionCaption(actionKey));
                 a.setIconUrl(getActionIcon(actionKey));
                 a.setActionStartDate(start);
@@ -508,25 +454,25 @@ VHasDropHandler, ActionOwner {
     }
 
     private List<String> actionKeys = new ArrayList<String>();
-    private void updateActionMap(UIDL c) {
+
+    private void updateActionMap(List<CalendarState.Action> actions) {
         actionMap.clear();
         actionKeys.clear();
 
-        final Iterator<?> it = c.getChildIterator();
-        while (it.hasNext()) {
-            final UIDL action = (UIDL) it.next();
-            final String key = action.getStringAttribute("key");
-            final String caption = action.getStringAttribute("caption");
-            final String formatted_start = action.getStringAttribute("start");
-            final String formatted_end = action.getStringAttribute("end");
-            String id = key + "-" + formatted_start + "-" + formatted_end;
-            actionMap.put(id + "_c", caption);
-            actionMap.put(id + "_s", formatted_start);
-            actionMap.put(id + "_e", formatted_end);
+        if (actions == null) {
+            return;
+        }
+
+        for (CalendarState.Action action : actions) {
+            String id = action.getActionKey() + "-" + action.getStartDate()
+                    + "-" + action.getEndDate();
+            actionMap.put(id + "_c", action.getCaption());
+            actionMap.put(id + "_s", action.getStartDate());
+            actionMap.put(id + "_e", action.getEndDate());
             actionKeys.add(id);
-            if (action.hasAttribute("icon")) {
-                actionMap.put(id + "_i", client.translateVaadinUri(action
-                        .getStringAttribute("icon")));
+            if (action.getIconKey() != null) {
+                actionMap.put(id + "_i", getResourceUrl(action.getIconKey()));
+
             } else {
                 actionMap.remove(id + "_i");
             }
@@ -593,7 +539,7 @@ VHasDropHandler, ActionOwner {
         List<Action> actions = new ArrayList<Action>();
         for (int i = 0; i < actionKeys.size(); i++) {
             final String actionKey = actionKeys.get(i);
-            final VCalendarAction a = new VCalendarAction(this, actionKey);
+            final VCalendarAction a = new VCalendarAction(this, rpc, actionKey);
             a.setCaption(getActionCaption(actionKey));
             a.setIconUrl(getActionIcon(actionKey));
 
@@ -615,6 +561,44 @@ VHasDropHandler, ActionOwner {
      * @see com.vaadin.terminal.gwt.client.ui.ActionOwner#getPaintableId()
      */
     public String getPaintableId() {
-        return PID;
+        return getConnectorId();
+    }
+
+    private List<CalendarEvent> calendarEventListOf(
+            List<CalendarState.Event> events) {
+        List<CalendarEvent> list = new ArrayList<CalendarEvent>(events.size());
+        for (CalendarState.Event event : events) {
+            final String dateFrom = event.getDateFrom();
+            final String dateTo = event.getDateTo();
+            final String timeFrom = event.getTimeFrom();
+            final String timeTo = event.getTimeTo();
+            CalendarEvent calendarEvent = new CalendarEvent();
+            calendarEvent.setAllDay(event.isAllDay());
+            calendarEvent.setCaption(event.getCaption());
+            calendarEvent.setDescription(event.getDescription());
+            calendarEvent.setStart(getWidget().getDateFormat().parse(dateFrom));
+            calendarEvent.setEnd(getWidget().getDateFormat().parse(dateTo));
+            calendarEvent.setStartTime(getWidget().getDateTimeFormat().parse(
+                    dateFrom + " " + timeFrom));
+            calendarEvent.setEndTime(getWidget().getDateTimeFormat().parse(
+                    dateTo + " " + timeTo));
+            calendarEvent.setStyleName(event.getStyleName());
+            calendarEvent.setIndex(event.getIndex());
+            list.add(calendarEvent);
+        }
+        return list;
+    }
+
+    private List<CalendarDay> calendarDayListOf(List<CalendarState.Day> days) {
+        List<CalendarDay> list = new ArrayList<CalendarDay>(days.size());
+        for (CalendarState.Day day : days) {
+            CalendarDay d = new CalendarDay(day.getDate(),
+                    day.getLocalizedDateFormat(), day.getDayOfWeek(),
+                    day.getWeek());
+
+            list.add(d);
+        }
+        return list;
+    }
     }
 }

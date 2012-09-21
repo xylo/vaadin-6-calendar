@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
-import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.client.Util;
 import com.vaadin.terminal.gwt.client.VTooltip;
 
 public class WeeklyLongEvents extends HorizontalPanel {

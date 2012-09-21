@@ -18,7 +18,7 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.impl.FocusImpl;
-import com.vaadin.terminal.gwt.client.Focusable;
+import com.vaadin.client.Focusable;
 
 public class FocusableGrid extends Grid implements HasFocusHandlers,
         HasBlurHandlers, HasKeyDownHandlers, HasKeyPressHandlers, Focusable {

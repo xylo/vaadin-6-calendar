@@ -10,7 +10,7 @@ import java.util.Date;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.event.ComponentEventListener;
-import com.vaadin.tools.ReflectTools;
+import com.vaadin.util.ReflectTools;
 
 /**
  * Interface for all Vaadin Calendar events.
@@ -39,7 +39,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Notifier interface for event drag & drops.
      */
     public interface EventMoveNotifier extends Serializable,
-    CalendarEventNotifier {
+            CalendarEventNotifier {
 
         /**
          * Set the EventMoveHandler.
@@ -127,7 +127,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Handler interface for day or time cell drag-marking with mouse.
      */
     public interface RangeSelectNotifier extends Serializable,
-    CalendarEventNotifier {
+            CalendarEventNotifier {
 
         /**
          * Set the RangeSelectHandler that listens for drag-marking.
