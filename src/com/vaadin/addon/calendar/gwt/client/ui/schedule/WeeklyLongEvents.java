@@ -10,16 +10,14 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.client.Util;
-import com.vaadin.terminal.gwt.client.VTooltip;
 
-public class WeeklyLongEvents extends HorizontalPanel {
+public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
 
     public static final int EVENT_HEIGTH = 15;
 
@@ -254,19 +252,12 @@ public class WeeklyLongEvents extends HorizontalPanel {
         }
     }
 
-    public static class DateCell extends HTML {
+    public static class DateCell extends HTML implements HasTooltipKey {
         private Date date;
         private CalendarEvent calendarEvent;
         private VCalendar calendar;
 
         public DateCell() {
-            sinkEvents(VTooltip.TOOLTIP_EVENTS);
-        }
-
-        @Override
-        public void onBrowserEvent(Event event) {
-            super.onBrowserEvent(event);
-            calendar.handleTooltipEvent(event, calendarEvent.getIndex());
         }
 
         public void setDate(Date date) {
@@ -292,5 +283,18 @@ public class WeeklyLongEvents extends HorizontalPanel {
         public VCalendar getCalendar() {
             return calendar;
         }
+
+        @Override
+        public Object getTooltipKey() {
+            if (calendarEvent != null) {
+                return calendarEvent.getIndex();
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public String getTooltipKey() {
+        return null;
     }
 }

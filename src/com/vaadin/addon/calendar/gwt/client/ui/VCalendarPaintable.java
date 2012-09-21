@@ -30,6 +30,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarDay;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.HasTooltipKey;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DateCellSlot;
@@ -383,7 +384,19 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
         }
     }
 
+    @Override
+    public TooltipInfo getTooltipInfo(com.google.gwt.dom.client.Element element) {
+        TooltipInfo tooltipInfo = null;
+        Widget w = Util.findWidget((Element) element, null);
+        if (w instanceof HasTooltipKey) {
+            tooltipInfo = GWT.create(TooltipInfo.class);
+            String title = tooltips.get(((HasTooltipKey) w).getTooltipKey());
+            tooltipInfo.setTitle(title != null ? title : "");
         }
+        if (tooltipInfo == null) {
+            tooltipInfo = super.getTooltipInfo(element);
+        }
+        return tooltipInfo;
     }
 
     private void updateMonthView(List<CalendarState.Day> days,

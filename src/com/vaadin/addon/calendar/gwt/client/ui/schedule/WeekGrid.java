@@ -48,7 +48,6 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEve
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.DateTimeService;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.VTooltip;
 
 public class WeekGrid extends SimplePanel {
 
@@ -683,8 +682,8 @@ public class WeekGrid extends SimplePanel {
     }
 
     public static class DateCell extends FocusableComplexPanel implements
-    MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler,
-    ContextMenuHandler {
+            MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler,
+            ContextMenuHandler {
         private static final String DRAGEMPHASISSTYLE = " dragemphasis";
         private Date date;
         private int width;
@@ -1460,8 +1459,8 @@ public class WeekGrid extends SimplePanel {
         }
 
         public class DayEvent extends FocusableHTML implements
-        MouseDownHandler, MouseUpHandler, MouseMoveHandler,
-        KeyDownHandler, ContextMenuHandler {
+                MouseDownHandler, MouseUpHandler, MouseMoveHandler,
+                KeyDownHandler, ContextMenuHandler, HasTooltipKey {
 
             private Element caption = null;
             private final Element eventContent;
@@ -1524,7 +1523,6 @@ public class WeekGrid extends SimplePanel {
                     getElement().appendChild(bottomResizeBar);
                 }
 
-                sinkEvents(VTooltip.TOOLTIP_EVENTS);
                 eventIndex = event.getIndex();
             }
 
@@ -1548,13 +1546,6 @@ public class WeekGrid extends SimplePanel {
 
             public void setSlotHeightInPX(int slotHeight) {
                 this.slotHeight = slotHeight;
-            }
-
-            @Override
-            public void onBrowserEvent(Event event) {
-                super.onBrowserEvent(event);
-                VCalendar calendar = weekGrid.getCalendar();
-                calendar.handleTooltipEvent(event, eventIndex);
             }
 
             public void updatePosition(long startFromMinutes,
@@ -2068,6 +2059,9 @@ public class WeekGrid extends SimplePanel {
                     .contextMenu(event, DayEvent.this);
                 }
             }
+            @Override
+            public Object getTooltipKey() {
+                return eventIndex;
         }
 
         public void onContextMenu(ContextMenuEvent event) {

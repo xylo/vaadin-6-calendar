@@ -29,13 +29,12 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.client.ui.FocusableFlowPanel;
 import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.VTooltip;
 
 /**
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FocusableFlowPanel implements
-MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
+        MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
@@ -695,7 +694,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
     /**
      * The label in a month cell
      */
-    public static class MonthEventLabel extends HTML {
+    public static class MonthEventLabel extends HTML implements HasTooltipKey {
 
         private static final String STYLENAME = "v-calendar-event";
 
@@ -710,7 +709,6 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
          */
         public MonthEventLabel() {
             setStylePrimaryName(STYLENAME);
-            sinkEvents(VTooltip.TOOLTIP_EVENTS);
         }
 
         /**
@@ -720,7 +718,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
          *            The date object that specifies the time
          */
         public void setTime(Date date) {
-            this.time = date;
+            time = date;
             renderCaption();
         }
 
@@ -806,17 +804,9 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
                     "Use setCaption() and setTime() instead");
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * com.google.gwt.user.client.ui.Widget#onBrowserEvent(com.google.gwt
-         * .user.client.Event)
-         */
         @Override
-        public void onBrowserEvent(Event event) {
-            super.onBrowserEvent(event);
-            calendar.handleTooltipEvent(event, eventIndex);
+        public Object getTooltipKey() {
+            return eventIndex;
         }
     }
 }

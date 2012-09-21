@@ -1376,16 +1376,6 @@ public class VCalendar extends Composite {
     }
 
     /**
-     * Handles to tooltip event
-     * 
-     * @param event
-     *          The browser event
-     */
-    public void handleTooltipEvent(Event event, Object key) {
-        // Nothing to do, for extension purposes
-    }
-
-    /**
      * Is selecting a range allowed?
      */
     public boolean isRangeSelectAllowed() {
