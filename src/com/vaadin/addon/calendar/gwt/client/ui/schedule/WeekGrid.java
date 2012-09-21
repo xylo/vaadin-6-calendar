@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +201,7 @@ public class WeekGrid extends SimplePanel {
         } else if (isVerticalScrollable()) {
             updateCellHeights();
             wrapper.addStyleDependentName("Vsized");
+            timebar.setCellHeights(cellHeights);
             timebar.setHeightPX(height);
         }
     }
@@ -964,7 +966,14 @@ public class WeekGrid extends SimplePanel {
                         Unit.PX);
 
             }
+
+            Iterator<Widget> it = iterator();
+            while (it.hasNext()) {
+                Widget child = it.next();
+                if (child instanceof DayEvent) {
+                    ((DayEvent) child).setSlotHeightInPX(getSlotHeight());
                 }
+
             }
         }
 
