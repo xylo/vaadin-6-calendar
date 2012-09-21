@@ -544,8 +544,6 @@ public class VCalendar extends Composite {
 
         monthGrid = new MonthGrid(this, rows, columns);
         monthGrid.setDisabled(isDisabledOrReadOnly());
-        monthGrid.setHeightPX(intHeight);
-        monthGrid.setWidthPX(intWidth);
         weekToolbar.removeAllRows();
         int pos = 0;
         boolean monthNameDrawn = true;
@@ -679,7 +677,7 @@ public class VCalendar extends Composite {
      * @return
      */
     public DateTimeFormat getTimeFormat() {
-        if (format) {
+        if (is24HFormat()) {
             return time24format_date;
         }
         return time12format_date;
@@ -1049,18 +1047,7 @@ public class VCalendar extends Composite {
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
         outer.add(weekGrid, DockPanel.SOUTH);
-        if (!isHeightUndefined) {
-            weekGrid.setHeightPX(intHeight - weeklyLongEvents.getOffsetHeight()
-                    - dayToolbar.getOffsetHeight());
-        } else {
-            weekGrid.setHeightPX(intHeight);
-        }
-        weekGrid.setWidthPX(intWidth);
-        dayToolbar.updateCellWidths();
-        weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
         weekGrid.setVerticalScrollPosition(scroll);
-        recalculateHeights();
-        recalculateWidths();
     }
 
     /**
@@ -1116,8 +1103,6 @@ public class VCalendar extends Composite {
         outer.add(monthGrid, DockPanel.CENTER);
 
         updateEventsToMonthGrid(events, false);
-        recalculateHeights();
-        recalculateWidths();
     }
 
     private DateClickListener dateClickListener;
