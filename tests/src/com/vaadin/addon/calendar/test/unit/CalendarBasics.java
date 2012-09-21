@@ -87,9 +87,10 @@ public class CalendarBasics {
         c2.setTime(calendar.getStartDate());
         assertEquals(c.getFirstDayOfWeek(),
                 c2.get(java.util.Calendar.DAY_OF_WEEK));
-
         c2.setTime(calendar.getEndDate());
-        assertEquals(c.getFirstDayOfWeek() + 6,
+
+        c.set(java.util.Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek() + 6);
+        assertEquals(c.get(java.util.Calendar.DAY_OF_WEEK),
                 c2.get(java.util.Calendar.DAY_OF_WEEK));
     }
 
