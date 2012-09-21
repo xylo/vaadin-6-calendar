@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
-import com.vaadin.terminal.gwt.client.BrowserInfo;
 
 public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
@@ -129,14 +128,12 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         int cellHeight = heightPX / rows;
         int heightRemainder = heightPX % rows;
 
-        boolean isIE = BrowserInfo.get().isIE7() || BrowserInfo.get().isIE6();
-
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cells; j++) {
                 SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
 
                 if (setWidth) {
-                    if (widthRemainder > 0 && !isIE) {
+                    if (widthRemainder > 0) {
                         sdc.setWidth(cellWidth + 1 + "px");
                         widthRemainder--;
 

@@ -45,9 +45,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
-import com.vaadin.terminal.gwt.client.BrowserInfo;
-import com.vaadin.terminal.gwt.client.DateTimeService;
-import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.client.DateTimeService;
+import com.vaadin.client.Util;
 
 public class WeekGrid extends SimplePanel {
 
@@ -188,10 +187,6 @@ public class WeekGrid extends SimplePanel {
 
         // if not scrollable, use any height given
         if (!isVerticalScrollable() && height > 0) {
-
-            if (BrowserInfo.get().isIE7() || BrowserInfo.get().isIE6()) {
-                --height;
-            }
 
             content.setHeight(height + "px");
             setHeight(height + "px");
@@ -963,15 +958,11 @@ public class WeekGrid extends SimplePanel {
         private void recalculateCellHeights() {
             startingSlotHeight = height / numberOfSlots;
 
-            boolean isIE6 = BrowserInfo.get().isIE6();
-
             for (int i = 0; i < slotElements.length; i++) {
                 slotElements[i].getStyle().setHeight(slotElementHeights[i],
                         Unit.PX);
 
-                if (isIE6) {
-                    slotElements[i].getStyle().setProperty("lineHeight",
-                            slotElementHeights[i] + "px");
+            }
                 }
             }
         }
