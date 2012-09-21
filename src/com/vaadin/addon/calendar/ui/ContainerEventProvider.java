@@ -38,9 +38,9 @@ import com.vaadin.data.Property.ValueChangeNotifier;
  */
 @SuppressWarnings("serial")
 public class ContainerEventProvider implements CalendarEditableEventProvider,
-EventSetChangeNotifier, EventChangeNotifier, EventMoveHandler,
-EventResizeHandler,
-Container.ItemSetChangeListener, Property.ValueChangeListener {
+        EventSetChangeNotifier, EventChangeNotifier, EventMoveHandler,
+        EventResizeHandler, Container.ItemSetChangeListener,
+        Property.ValueChangeListener {
 
     // Default property ids
     public static final String CAPTION_PROPERTY = "caption";
@@ -125,7 +125,7 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      * 
      */
     public Container.Indexed getContainerDataSource() {
-        return this.container;
+        return container;
     }
 
     /**
@@ -133,10 +133,10 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      */
     private void listenToContainerEvents() {
         if (container instanceof ItemSetChangeNotifier) {
-            ((ItemSetChangeNotifier) container).addListener(this);
+            ((ItemSetChangeNotifier) container).addItemSetChangeListener(this);
         }
         if (container instanceof ValueChangeNotifier) {
-            ((ValueChangeNotifier) container).addListener(this);
+            ((ValueChangeNotifier) container).addValueChangeListener(this);
         }
     }
 
@@ -145,10 +145,11 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      */
     private void ignoreContainerEvents() {
         if (container instanceof ItemSetChangeNotifier) {
-            ((ItemSetChangeNotifier) container).removeListener(this);
+            ((ItemSetChangeNotifier) container)
+                    .removeItemSetChangeListener(this);
         }
         if (container instanceof ValueChangeNotifier) {
-            ((ValueChangeNotifier) container).removeListener(this);
+            ((ValueChangeNotifier) container).removeValueChangeListener(this);
         }
     }
 
@@ -159,7 +160,7 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
      *            The index of the item in the container to get the event for
      * @return
      */
-    private CalendarEvent getEvent(int index){
+    private CalendarEvent getEvent(int index) {
 
         // Check the event cache first
         for (CalendarEvent e : eventCache) {
@@ -176,9 +177,8 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
         CalendarEvent event;
         if (id instanceof CalendarEvent) {
             /*
-             * If we are using the BeanItemContainer or another container
-             * which stores the objects as ids then just return the
-             * instances
+             * If we are using the BeanItemContainer or another container which
+             * stores the objects as ids then just return the instances
              */
             event = (CalendarEvent) id;
 
@@ -195,27 +195,24 @@ Container.ItemSetChangeListener, Property.ValueChangeListener {
                         captionProperty).getValue()));
             }
             if (descriptionProperty != null
-                    && item.getItemPropertyIds().contains(
-                            descriptionProperty)) {
-                basicEvent.setDescription(String.valueOf(item
-                        .getItemProperty(descriptionProperty).getValue()));
+                    && item.getItemPropertyIds().contains(descriptionProperty)) {
+                basicEvent.setDescription(String.valueOf(item.getItemProperty(
+                        descriptionProperty).getValue()));
             }
             if (startDateProperty != null
-                    && item.getItemPropertyIds()
-                    .contains(startDateProperty)) {
+                    && item.getItemPropertyIds().contains(startDateProperty)) {
                 basicEvent.setStart((Date) item.getItemProperty(
                         startDateProperty).getValue());
             }
             if (endDateProperty != null
                     && item.getItemPropertyIds().contains(endDateProperty)) {
-                basicEvent.setEnd((Date) item.getItemProperty(
-                        endDateProperty).getValue());
+                basicEvent.setEnd((Date) item.getItemProperty(endDateProperty)
+                        .getValue());
             }
             if (styleNameProperty != null
-                    && item.getItemPropertyIds()
-                    .contains(styleNameProperty)) {
-                basicEvent.setDescription(String.valueOf(item
-                        .getItemProperty(descriptionProperty).getValue()));
+                    && item.getItemPropertyIds().contains(styleNameProperty)) {
+                basicEvent.setDescription(String.valueOf(item.getItemProperty(
+                        descriptionProperty).getValue()));
             }
             event = basicEvent;
         }
