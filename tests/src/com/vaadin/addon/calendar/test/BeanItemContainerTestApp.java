@@ -6,17 +6,16 @@ import java.util.Date;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.ContainerEventProvider;
-import com.vaadin.data.Item;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
-import com.vaadin.ui.Component;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.FormFieldFactory;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
@@ -40,7 +39,6 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
         calendar.setContainerDataSource(events);
         calendar.setStartDate(new Date(100, 1, 1));
         calendar.setEndDate(new Date(100, 2, 1));
-
 
         addComponent(calendar);
 
@@ -102,39 +100,47 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
         modal.setResizable(false);
         modal.setDraggable(false);
         modal.setWidth("300px");
-        final Form form = new Form();
-        form.setFormFieldFactory(new FormFieldFactory() {
-            public Field createField(Item item, Object propertyId,
-                    Component uiContext) {
-                if (ContainerEventProvider.STARTDATE_PROPERTY
-                        .equals(propertyId)
-                        || ContainerEventProvider.ENDDATE_PROPERTY
-                        .equals(propertyId)) {
-                    Class<?> type = item.getItemProperty(propertyId).getType();
-                    DateField field = (DateField) DefaultFieldFactory
-                            .createFieldByPropertyType(type);
-                    field.setResolution(DateField.RESOLUTION_MIN);
-                    return field;
-                } else {
-                    return DefaultFieldFactory.get().createField(item,
-                            propertyId, uiContext);
-                }
-            }
-        });
+        final FieldGroup fieldGroup = new FieldGroup();
 
-        form.setItemDataSource(new BeanItem<BasicEvent>(event, Arrays.asList(
-                ContainerEventProvider.CAPTION_PROPERTY,
-                ContainerEventProvider.DESCRIPTION_PROPERTY,
-                ContainerEventProvider.STARTDATE_PROPERTY,
-                ContainerEventProvider.ENDDATE_PROPERTY)));
-        modal.addComponent(form);
-        modal.addListener(new Window.CloseListener() {
+        FormLayout formLayout = new FormLayout();
+        TextField captionField = new TextField("Caption");
+        captionField.setImmediate(true);
+        TextField descriptionField = new TextField("Description");
+        descriptionField.setImmediate(true);
+        DateField startField = new DateField("Start");
+        startField.setResolution(Resolution.MINUTE);
+        startField.setImmediate(true);
+        DateField endField = new DateField("End");
+        endField.setImmediate(true);
+        endField.setResolution(Resolution.MINUTE);
+
+        formLayout.addComponent(captionField);
+        formLayout.addComponent(descriptionField);
+        formLayout.addComponent(startField);
+        formLayout.addComponent(endField);
+
+        fieldGroup.bind(captionField, ContainerEventProvider.CAPTION_PROPERTY);
+        fieldGroup.bind(descriptionField,
+                ContainerEventProvider.DESCRIPTION_PROPERTY);
+        fieldGroup.bind(startField, ContainerEventProvider.STARTDATE_PROPERTY);
+        fieldGroup.bind(endField, ContainerEventProvider.ENDDATE_PROPERTY);
+
+        fieldGroup.setItemDataSource(new BeanItem<BasicEvent>(event, Arrays
+                .asList(ContainerEventProvider.CAPTION_PROPERTY,
+                        ContainerEventProvider.DESCRIPTION_PROPERTY,
+                        ContainerEventProvider.STARTDATE_PROPERTY,
+                        ContainerEventProvider.ENDDATE_PROPERTY)));
+        modal.addComponent(formLayout);
+        modal.addCloseListener(new Window.CloseListener() {
             public void windowClose(CloseEvent e) {
+                // Commit changes to bean
+                try {
+                    fieldGroup.commit();
+                } catch (CommitException e1) {
+                    e1.printStackTrace();
+                }
+
                 if (events.containsId(event)) {
-
-                    // Commit changes to bean
-                    form.commit();
-
                     /*
                      * BeanItemContainer does not notify container listeners
                      * when the bean changes so we need to trigger a
@@ -149,6 +155,6 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
                 }
             }
         });
-        getWindow().addWindow(modal);
+        getUI().addWindow(modal);
     }
 }

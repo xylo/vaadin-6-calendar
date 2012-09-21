@@ -12,6 +12,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
 public class NotificationTestApp extends VerticalLayout {
@@ -41,13 +42,11 @@ public class NotificationTestApp extends VerticalLayout {
     public NotificationTestApp() {
         final Button btn = new Button("Show working notification",
                 new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                event.getButton()
-                .getWindow()
-                .showNotification(
-                        "This will disappear when you move your mouse!");
-            }
-        });
+                    public void buttonClick(ClickEvent event) {
+                        Notification
+                                .show("This will disappear when you move your mouse!");
+                    }
+                });
         addComponent(btn);
 
         provider = new DummyEventProvider();
@@ -56,11 +55,11 @@ public class NotificationTestApp extends VerticalLayout {
         cal.setHandler(new DateClickHandler() {
             public void dateClick(DateClickEvent event) {
                 provider.addEvent(event.getDate());
-                cal.getWindow().showNotification(
-                        "This should disappear, but if wont unless clicked.");
+                Notification
+                        .show("This should disappear, but if wont unless clicked.");
 
                 // this requestRepaint call interferes with the notification
-                cal.requestRepaint();
+                cal.markAsDirty();
             }
         });
         addComponent(cal);

@@ -1,14 +1,13 @@
 package com.vaadin.addon.calendar.test;
 
-import java.net.URL;
 import java.util.TimeZone;
 
-import com.vaadin.Application;
-import com.vaadin.terminal.DownloadStream;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
 /**
  * This application is used as a base for all testing application. Pass it a
@@ -20,41 +19,38 @@ import com.vaadin.ui.Window;
  * @author "John Ahlroos / Vaadin Ltd"
  * 
  */
-public class TestingApplication extends Application {
-
-    private Window mainWindow;
+@Theme("calendartest")
+public class TestingApplication extends UI {
 
     @Override
-    public void init() {
-
-        mainWindow = new Window("Calendar testing application");
-        mainWindow.addURIHandler(this);
-        setMainWindow(mainWindow);
+    public void init(WrappedRequest request) {
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        setTheme("calendartest");
-    }
-
-    @Override
-    public DownloadStream handleURI(URL context, String relativeUri) {
-        if (relativeUri.startsWith("com.vaadin")) {
-            String clazz = relativeUri;
+        String pathInfo = request.getRequestPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/com.vaadin")) {
+            String className = pathInfo.substring(1);
             try {
-                Class<?> c = Class.forName(clazz);
-                if (mainWindow.getContent().getClass() != c) {
-                    ComponentContainer component = (ComponentContainer) c
-                            .newInstance();
-                    mainWindow.setContent(component);
-                }
-
+                setContentFromClass(className);
             } catch (Exception e) {
-                VerticalLayout vl = new VerticalLayout();
-                vl.addComponent(new Label("Test not found."));
-                mainWindow.setContent(vl);
+                setDefaultContent();
                 e.printStackTrace();
             }
+        } else {
+            setDefaultContent();
         }
-        return super.handleURI(context, relativeUri);
     }
 
+    private void setContentFromClass(String className) throws Exception {
+        Class<?> c = Class.forName(className);
+        if (getContent().getClass() != c) {
+            ComponentContainer component = (ComponentContainer) c.newInstance();
+            setContent(component);
+        }
+    }
+
+    private void setDefaultContent() {
+        VerticalLayout vl = new VerticalLayout();
+        vl.addComponent(new Label("Test not found."));
+        setContent(vl);
+    }
 }
