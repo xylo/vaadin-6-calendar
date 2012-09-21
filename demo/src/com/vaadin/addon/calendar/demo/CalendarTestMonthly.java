@@ -6,19 +6,20 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
-public class CalendarTestMonthly extends Application implements
-        CalendarEventProvider {
+@Theme("calendartest")
+public class CalendarTestMonthly extends UI implements CalendarEventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -31,11 +32,7 @@ public class CalendarTestMonthly extends Application implements
     private Label label = new Label("");
 
     @Override
-    public void init() {
-        Window w = new Window();
-        setMainWindow(w);
-        setTheme("calendartest");
-
+    public void init(WrappedRequest request) {
         calendarComponent = new Calendar(this);
         calendarComponent.setTimeFormat(TimeFormat.Format24H);
 
@@ -56,8 +53,7 @@ public class CalendarTestMonthly extends Application implements
         VerticalLayout vl = new VerticalLayout();
         vl.setSizeFull();
         vl.setMargin(true);
-        w.setContent(vl);
-        w.setSizeFull();
+        setContent(vl);
 
         Button next = new Button("next", new Button.ClickListener() {
             private static final long serialVersionUID = 1L;
@@ -119,8 +115,8 @@ public class CalendarTestMonthly extends Application implements
 
         List<CalendarEvent> e = new ArrayList<CalendarEvent>();
 
-        CalendarTestEvent event = getNewEvent("Phase1", fromStartDate, calendar
-                .getTime());
+        CalendarTestEvent event = getNewEvent("Phase1", fromStartDate,
+                calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);

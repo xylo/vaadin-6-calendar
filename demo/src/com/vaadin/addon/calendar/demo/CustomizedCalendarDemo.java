@@ -6,7 +6,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventEditor;
@@ -28,32 +27,33 @@ import com.vaadin.addon.calendar.ui.handler.BasicEventMoveHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicEventResizeHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicForwardHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
-import com.vaadin.data.Item;
+import com.vaadin.annotations.Theme;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.Page;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.FormFieldFactory;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
-public class CustomizedCalendarDemo extends Application {
+@Theme("calendartest")
+public class CustomizedCalendarDemo extends UI {
 
     private static final long serialVersionUID = -6310422191810341994L;
 
     private MyEventProvider provider = new MyEventProvider();
 
     @Override
-    public void init() {
-        Window w = new Window();
-        setMainWindow(w);
-        setTheme("calendartest");
+    public void init(WrappedRequest request) {
         setLocale(Locale.US);
 
         final Calendar cal = new Calendar(provider);
@@ -137,8 +137,8 @@ public class CustomizedCalendarDemo extends Application {
 
             public void eventClick(EventClick event) {
                 BasicEvent e = (BasicEvent) event.getCalendarEvent();
-                getMainWindow().showNotification(
-                        "Event clicked: " + e.getCaption(), e.getDescription());
+                new Notification("Event clicked: " + e.getCaption(), e
+                        .getDescription()).show(Page.getCurrent());
             }
         });
 
@@ -189,28 +189,19 @@ public class CustomizedCalendarDemo extends Application {
                 final BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(
                         calendarEvent);
 
-                final Form form = new Form();
-                form.setWriteThrough(false);
-                form.setItemDataSource(item);
-                form.setFormFieldFactory(new FormFieldFactory() {
+                final FieldGroup fieldGroup = new FieldGroup();
+                fieldGroup.setBuffered(true);
+                fieldGroup.setItemDataSource(item);
 
-                    private static final long serialVersionUID = -831979043038483438L;
+                TextField f = new TextField("Caption");
+                f.setNullRepresentation("");
+                f.focus();
+                fieldGroup.bind(f, "caption");
 
-                    public Field createField(Item item, Object propertyId,
-                            Component uiContext) {
-                        if (propertyId.equals("caption")) {
-                            TextField f = new TextField("Caption");
-                            f.setNullRepresentation("");
-                            f.focus();
-                            return f;
+                FormLayout formLayout = new FormLayout();
+                formLayout.addComponent(f);
 
-                        }
-                        return null;
-                    }
-                });
-                form.setVisibleItemProperties(new Object[] { "caption" });
-
-                layout.addComponent(form);
+                layout.addComponent(formLayout);
 
                 HorizontalLayout buttons = new HorizontalLayout();
                 buttons.setSpacing(true);
@@ -219,13 +210,17 @@ public class CustomizedCalendarDemo extends Application {
                     private static final long serialVersionUID = 7174826216293514881L;
 
                     public void buttonClick(ClickEvent event) {
-                        form.commit();
+                        try {
+                            fieldGroup.commit();
+                        } catch (CommitException e) {
+                            e.printStackTrace();
+                        }
                         // Update event provider's data source
                         provider.addEvent(item.getBean());
                         // Calendar needs to be repainted
-                        cal.requestRepaint();
+                        cal.markAsDirty();
 
-                        getMainWindow().removeWindow(w);
+                        removeWindow(w);
                     }
                 }));
                 buttons.addComponent(new Button("Cancel", new ClickListener() {
@@ -233,13 +228,13 @@ public class CustomizedCalendarDemo extends Application {
                     private static final long serialVersionUID = 3909972672766063318L;
 
                     public void buttonClick(ClickEvent event) {
-                        getMainWindow().removeWindow(w);
+                        removeWindow(w);
                     }
                 }));
                 layout.addComponent(buttons);
                 layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
 
-                getMainWindow().addWindow(w);
+                addWindow(w);
             }
         });
 
@@ -260,7 +255,7 @@ public class CustomizedCalendarDemo extends Application {
         });
 
         Button monthViewButton = new Button("Show month");
-        monthViewButton.addListener(new ClickListener() {
+        monthViewButton.addClickListener(new ClickListener() {
 
             private static final long serialVersionUID = -3290020614808289426L;
 
@@ -276,8 +271,8 @@ public class CustomizedCalendarDemo extends Application {
                 }
 
                 // Reset calendar's start time to the target month's first day.
-                gc.set(GregorianCalendar.DATE, gc
-                        .getMinimum(GregorianCalendar.DATE));
+                gc.set(GregorianCalendar.DATE,
+                        gc.getMinimum(GregorianCalendar.DATE));
                 gc.set(GregorianCalendar.HOUR_OF_DAY, 0);
                 gc.set(GregorianCalendar.MINUTE, 0);
                 gc.set(GregorianCalendar.SECOND, 0);
@@ -296,8 +291,7 @@ public class CustomizedCalendarDemo extends Application {
         layout.addComponent(monthViewButton);
         layout.addComponent(cal);
         layout.setExpandRatio(cal, 1);
-        w.setContent(layout);
-        w.setSizeFull();
+        setContent(layout);
     }
 
     public static boolean isThisYear(java.util.Calendar calendar, Date date) {

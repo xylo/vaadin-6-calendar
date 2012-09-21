@@ -6,7 +6,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
@@ -23,23 +22,26 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.RangeSelectHandler;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
-import com.vaadin.data.Item;
+import com.vaadin.annotations.Theme;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.Page;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.FormFieldFactory;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Window.Notification;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
-public class SimpleCalTest extends Application {
+@Theme("calendartest")
+public class SimpleCalTest extends UI {
 
     private static final long serialVersionUID = -2399403357909880914L;
 
@@ -47,10 +49,7 @@ public class SimpleCalTest extends Application {
 
     @SuppressWarnings("serial")
     @Override
-    public void init() {
-        Window w = new Window();
-        setMainWindow(w);
-        setTheme("calendartest");
+    public void init(WrappedRequest request) {
         setLocale(Locale.US);
 
         final Calendar cal = new Calendar(provider);
@@ -102,8 +101,8 @@ public class SimpleCalTest extends Application {
 
             public void eventClick(EventClick event) {
                 MyEvent e = (MyEvent) event.getCalendarEvent();
-                getMainWindow().showNotification("Event clicked",
-                        e.getCaption(), Notification.POSITION_CENTERED);
+                new Notification("Event clicked", e.getCaption()).show(Page
+                        .getCurrent());
             }
         });
 
@@ -117,7 +116,7 @@ public class SimpleCalTest extends Application {
                 calEvent.setStart(event.getNewStart());
                 calEvent.setEnd(new Date(event.getNewStart().getTime()
                         + duration));
-                event.getComponent().requestRepaint();
+                event.getComponent().markAsDirty();
             }
         });
 
@@ -145,51 +144,49 @@ public class SimpleCalTest extends Application {
                 final BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(
                         myEvent);
 
-                final Form form = new Form();
-                form.setWriteThrough(false);
-                form.setItemDataSource(item);
-                form.setFormFieldFactory(new FormFieldFactory() {
+                final FormLayout formLayout = new FormLayout();
+                final FieldGroup fieldGroup = new FieldGroup();
 
-                    public Field createField(Item item, Object propertyId,
-                            Component uiContext) {
-                        if (propertyId.equals("caption")) {
-                            TextField f = new TextField("Caption");
-                            f.setNullRepresentation("");
-                            f.focus();
-                            return f;
+                TextField captionField = new TextField();
+                captionField.setNullRepresentation("");
+                captionField.focus();
 
-                        }
-                        return null;
-                    }
-                });
-                form.setVisibleItemProperties(new Object[] { "caption" });
+                formLayout.addComponent(captionField);
+                fieldGroup.bind(captionField, "caption");
 
-                layout.addComponent(form);
+                fieldGroup.setBuffered(true);
+                fieldGroup.setItemDataSource(item);
+
+                layout.addComponent(formLayout);
 
                 HorizontalLayout buttons = new HorizontalLayout();
                 buttons.setSpacing(true);
                 buttons.addComponent(new Button("OK", new ClickListener() {
 
                     public void buttonClick(ClickEvent event) {
-                        form.commit();
+                        try {
+                            fieldGroup.commit();
+                        } catch (CommitException e) {
+                            e.printStackTrace();
+                        }
                         // Update event provider's data source
                         provider.addEvent(item.getBean());
                         // Calendar needs to be repainted
-                        cal.requestRepaint();
+                        cal.markAsDirty();
 
-                        getMainWindow().removeWindow(w);
+                        removeWindow(w);
                     }
                 }));
                 buttons.addComponent(new Button("Calcel", new ClickListener() {
 
                     public void buttonClick(ClickEvent event) {
-                        getMainWindow().removeWindow(w);
+                        removeWindow(w);
                     }
                 }));
                 layout.addComponent(buttons);
                 layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
 
-                getMainWindow().addWindow(w);
+                addWindow(w);
             }
         });
 
@@ -204,7 +201,7 @@ public class SimpleCalTest extends Application {
         });
 
         Button monthViewButton = new Button("Show month");
-        monthViewButton.addListener(new ClickListener() {
+        monthViewButton.addClickListener(new ClickListener() {
 
             public void buttonClick(ClickEvent event) {
                 GregorianCalendar gc = new GregorianCalendar(cal.getTimeZone(),
@@ -218,8 +215,8 @@ public class SimpleCalTest extends Application {
                 }
 
                 // Reset calendar's start time to the target month's first day.
-                gc.set(GregorianCalendar.DATE, gc
-                        .getMinimum(GregorianCalendar.DATE));
+                gc.set(GregorianCalendar.DATE,
+                        gc.getMinimum(GregorianCalendar.DATE));
                 gc.set(GregorianCalendar.HOUR_OF_DAY, 0);
                 gc.set(GregorianCalendar.MINUTE, 0);
                 gc.set(GregorianCalendar.SECOND, 0);
@@ -238,8 +235,7 @@ public class SimpleCalTest extends Application {
         layout.addComponent(monthViewButton);
         layout.addComponent(cal);
         layout.setExpandRatio(cal, 1);
-        w.setContent(layout);
-        w.setSizeFull();
+        setContent(layout);
     }
 
     public static class MyEventProvider implements CalendarEventProvider {

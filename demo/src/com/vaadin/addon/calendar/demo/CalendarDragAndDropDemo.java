@@ -3,7 +3,6 @@ package com.vaadin.addon.calendar.demo;
 import java.util.Date;
 import java.util.Random;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
@@ -13,17 +12,18 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.TableTransferable;
+import com.vaadin.ui.UI;
 
-public class CalendarDragAndDropDemo extends Application {
+public class CalendarDragAndDropDemo extends UI {
 
     private static final long serialVersionUID = 5885467281800911082L;
 
@@ -36,7 +36,7 @@ public class CalendarDragAndDropDemo extends Application {
             "Thea", "Epimetheus", "Metis" };
 
     @Override
-    public void init() {
+    public void init(WrappedRequest request) {
         Table table = createDDTable();
         final Calendar calendar = createDDCalendar();
 
@@ -57,9 +57,7 @@ public class CalendarDragAndDropDemo extends Application {
         main.setExpandRatio(table, 0.5f);
 
         Button monthButton = new Button("View month");
-        monthButton.addListener(new Button.ClickListener() {
-
-            private static final long serialVersionUID = 4630911817907732542L;
+        monthButton.addClickListener(new Button.ClickListener() {
 
             public void buttonClick(ClickEvent event) {
                 java.util.Calendar internalCalendar = calendar
@@ -67,8 +65,8 @@ public class CalendarDragAndDropDemo extends Application {
                 internalCalendar.setTime(calendar.getStartDate());
                 internalCalendar.set(java.util.Calendar.DATE, 1);
                 Date start = internalCalendar.getTime();
-                internalCalendar.set(java.util.Calendar.DATE, internalCalendar
-                        .getMaximum(java.util.Calendar.DATE));
+                internalCalendar.set(java.util.Calendar.DATE,
+                        internalCalendar.getMaximum(java.util.Calendar.DATE));
                 Date end = internalCalendar.getTime();
 
                 calendar.setStartDate(start);
@@ -76,10 +74,8 @@ public class CalendarDragAndDropDemo extends Application {
             }
         });
 
-        Window mainWindow = new Window();
-        mainWindow.addComponent(monthButton);
-        mainWindow.addComponent(main);
-        setMainWindow(mainWindow);
+        getContent().addComponent(monthButton);
+        getContent().addComponent(main);
     }
 
     private Table createDDTable() {

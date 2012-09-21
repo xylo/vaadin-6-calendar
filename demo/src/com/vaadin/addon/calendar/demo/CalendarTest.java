@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.BasicEventProvider;
 import com.vaadin.addon.calendar.event.CalendarEvent;
@@ -22,33 +21,37 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicDateClickHandler;
 import com.vaadin.addon.calendar.ui.handler.BasicWeekClickHandler;
+import com.vaadin.annotations.Theme;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.terminal.ParameterHandler;
+import com.vaadin.server.WrappedRequest;
+import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.combobox.FilteringMode;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Form;
-import com.vaadin.ui.FormFieldFactory;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Select;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
 
 /** Calendar component test application */
-public class CalendarTest extends Application {
+@Theme("calendartest")
+public class CalendarTest extends UI {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -79,19 +82,22 @@ public class CalendarTest extends Application {
 
     private Button prevButton;
 
-    private Select timeZoneSelect;
+    private ComboBox timeZoneSelect;
 
-    private Select formatSelect;
+    private ComboBox formatSelect;
 
-    private Select localeSelect;
+    private ComboBox localeSelect;
 
-    private Button hideWeekendsButton;
+    private CheckBox hideWeekendsButton;
 
     private CheckBox readOnlyButton;
 
+    private TextField captionField;
+
     private Window scheduleEventPopup;
 
-    private final Form scheduleEventForm = new Form();
+    private final FormLayout scheduleEventFieldLayout = new FormLayout();
+    private final FieldGroup scheduleEventFieldGroup = new FieldGroup();
 
     private Button deleteEventButton;
 
@@ -131,32 +137,20 @@ public class CalendarTest extends Application {
 
     private boolean useSecondResolution;
 
+    private DateField startDateField;
+    private DateField endDateField;
+
     @SuppressWarnings("serial")
     @Override
-    public void init() {
-        Window w = new Window();
-        setMainWindow(w);
-        setTheme("calendartest");
-
+    public void init(WrappedRequest request) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
         layout.setMargin(true);
+        setContent(layout);
 
-        w.setContent(layout);
-        w.setSizeFull();
+        handleURLParams(request.getParameterMap());
 
-        // URL parameters must be handled before constructing layout any
-        // further. To get access to the parameters, we use ParameterHandler.
-        w.addParameterHandler(new ParameterHandler() {
-            public void handleParameters(Map<String, String[]> parameters) {
-                if (dataSource == null) {
-                    handleURLParams(parameters);
-                    // This needs to be called only once per a session after
-                    // the first Application init-method call.
-                    initContent();
-                }
-            }
-        });
+        initContent();
     }
 
     private void handleURLParams(Map<String, String[]> parameters) {
@@ -216,6 +210,7 @@ public class CalendarTest extends Application {
 
         initCalendar();
         initLayoutContent();
+        initFormFields();
 
         addInitialEvents();
     }
@@ -298,7 +293,7 @@ public class CalendarTest extends Application {
         HorizontalLayout hl = new HorizontalLayout();
         hl.setWidth("100%");
         hl.setSpacing(true);
-        hl.setMargin(false, false, true, false);
+        hl.setMargin(new MarginInfo(false, false, true, false));
         hl.addComponent(prevButton);
         hl.addComponent(captionLabel);
         hl.addComponent(monthButton);
@@ -315,7 +310,7 @@ public class CalendarTest extends Application {
 
         HorizontalLayout controlPanel = new HorizontalLayout();
         controlPanel.setSpacing(true);
-        controlPanel.setMargin(false, false, true, false);
+        controlPanel.setMargin(new MarginInfo(false, false, true, false));
         controlPanel.setWidth("100%");
         controlPanel.addComponent(localeSelect);
         controlPanel.addComponent(timeZoneSelect);
@@ -337,7 +332,7 @@ public class CalendarTest extends Application {
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(addNewEvent, Alignment.MIDDLE_LEFT);
 
-        VerticalLayout layout = (VerticalLayout) getMainWindow().getContent();
+        VerticalLayout layout = (VerticalLayout) getContent();
         layout.addComponent(controlPanel);
         layout.addComponent(hl);
         layout.addComponent(calendarComponent);
@@ -388,24 +383,27 @@ public class CalendarTest extends Application {
     private void initHideWeekEndButton() {
         hideWeekendsButton = new CheckBox("Hide weekends");
         hideWeekendsButton.setImmediate(true);
-        hideWeekendsButton.addListener(new ClickListener() {
+        hideWeekendsButton
+                .addValueChangeListener(new Property.ValueChangeListener() {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            public void buttonClick(ClickEvent event) {
-                setWeekendsHidden(event.getButton().booleanValue());
-            }
-        });
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        setWeekendsHidden(hideWeekendsButton.getValue());
+                    }
+                });
     }
 
     private void setWeekendsHidden(boolean weekendsHidden) {
         if (weekendsHidden) {
             int firstToShow = (GregorianCalendar.MONDAY - calendar
                     .getFirstDayOfWeek()) % 7;
-            calendarComponent.setVisibleDaysOfWeek(firstToShow + 1,
-                    firstToShow + 5);
+            calendarComponent.setFirstVisibleDayOfWeek(firstToShow + 1);
+            calendarComponent.setLastVisibleDayOfWeek(firstToShow + 5);
         } else {
-            calendarComponent.setVisibleDaysOfWeek(1, 7);
+            calendarComponent.setFirstVisibleDayOfWeek(1);
+            calendarComponent.setLastVisibleDayOfWeek(7);
         }
 
     }
@@ -413,34 +411,36 @@ public class CalendarTest extends Application {
     private void initReadOnlyButton() {
         readOnlyButton = new CheckBox("Read-only mode");
         readOnlyButton.setImmediate(true);
-        readOnlyButton.addListener(new ClickListener() {
+        readOnlyButton
+                .addValueChangeListener(new Property.ValueChangeListener() {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            public void buttonClick(ClickEvent event) {
-                calendarComponent.setReadOnly((Boolean) event.getButton()
-                        .getValue());
-            }
-        });
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        calendarComponent.setReadOnly(readOnlyButton.getValue());
+                    }
+                });
     }
 
     private void initDisabledButton() {
         disabledButton = new CheckBox("Disabled");
         disabledButton.setImmediate(true);
-        disabledButton.addListener(new ClickListener() {
+        disabledButton
+                .addValueChangeListener(new Property.ValueChangeListener() {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            public void buttonClick(ClickEvent event) {
-                calendarComponent.setEnabled(!(Boolean) event.getButton()
-                        .getValue());
-            }
-        });
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        calendarComponent.setEnabled(!disabledButton.getValue());
+                    }
+                });
     }
 
     public void initAddNewEventButton() {
         addNewEvent = new Button("Add new event");
-        addNewEvent.addListener(new Button.ClickListener() {
+        addNewEvent.addClickListener(new Button.ClickListener() {
 
             private static final long serialVersionUID = -8307244759142541067L;
 
@@ -455,6 +455,92 @@ public class CalendarTest extends Application {
                 showEventPopup(createNewEvent(start, end), true);
             }
         });
+    }
+
+    private void initFormFields() {
+
+        startDateField = createDateField("Start date");
+        endDateField = createDateField("End date");
+
+        final CheckBox allDayField = createCheckBox("All-day");
+        allDayField.addValueChangeListener(new Property.ValueChangeListener() {
+
+            private static final long serialVersionUID = -7104996493482558021L;
+
+            public void valueChange(ValueChangeEvent event) {
+                Object value = event.getProperty().getValue();
+                if (value instanceof Boolean && Boolean.TRUE.equals(value)) {
+                    setFormDateResolution(Resolution.DAY);
+
+                } else {
+                    setFormDateResolution(Resolution.MINUTE);
+                }
+            }
+
+        });
+
+        captionField = createTextField("Caption");
+        final TextArea descriptionField = createTextArea("Description");
+        descriptionField.setRows(3);
+
+        final ComboBox styleNameField = createStyleNameComboBox();
+
+        scheduleEventFieldLayout.addComponent(startDateField);
+        scheduleEventFieldLayout.addComponent(endDateField);
+        scheduleEventFieldLayout.addComponent(allDayField);
+        scheduleEventFieldLayout.addComponent(captionField);
+        scheduleEventFieldLayout.addComponent(descriptionField);
+        scheduleEventFieldLayout.addComponent(styleNameField);
+
+        scheduleEventFieldGroup.bind(startDateField, "start");
+        scheduleEventFieldGroup.bind(endDateField, "end");
+        scheduleEventFieldGroup.bind(captionField, "caption");
+        scheduleEventFieldGroup.bind(descriptionField, "description");
+        scheduleEventFieldGroup.bind(styleNameField, "styleName");
+        scheduleEventFieldGroup.bind(allDayField, "allDay");
+    }
+
+    private CheckBox createCheckBox(String caption) {
+        CheckBox cb = new CheckBox(caption);
+        cb.setImmediate(true);
+        return cb;
+    }
+
+    private TextField createTextField(String caption) {
+        TextField f = new TextField(caption);
+        f.setNullRepresentation("");
+        return f;
+    }
+
+    private TextArea createTextArea(String caption) {
+        TextArea f = new TextArea(caption);
+        f.setNullRepresentation("");
+        return f;
+    }
+
+    private DateField createDateField(String caption) {
+        DateField f = new DateField(caption);
+        if (useSecondResolution) {
+            f.setResolution(Resolution.SECOND);
+        } else {
+            f.setResolution(Resolution.MINUTE);
+        }
+        return f;
+    }
+
+    private ComboBox createStyleNameComboBox() {
+        ComboBox s = new ComboBox("Color");
+        s.addContainerProperty("c", String.class, "");
+        s.setItemCaptionPropertyId("c");
+        Item i = s.addItem("color1");
+        i.getItemProperty("c").setValue("Green");
+        i = s.addItem("color2");
+        i.getItemProperty("c").setValue("Blue");
+        i = s.addItem("color3");
+        i.getItemProperty("c").setValue("Red");
+        i = s.addItem("color4");
+        i.getItemProperty("c").setValue("Orange");
+        return s;
     }
 
     private void initCalendar() {
@@ -476,11 +562,13 @@ public class CalendarTest extends Application {
         }
 
         if (firstHour != null && lastHour != null) {
-            calendarComponent.setVisibleHoursOfDay(firstHour, lastHour);
+            calendarComponent.setFirstVisibleHourOfDay(firstHour);
+            calendarComponent.setLastVisibleHourOfDay(lastHour);
         }
 
         if (firstDay != null && lastDay != null) {
-            calendarComponent.setVisibleDaysOfWeek(firstDay, lastDay);
+            calendarComponent.setFirstVisibleDayOfWeek(firstDay);
+            calendarComponent.setLastVisibleDayOfWeek(lastDay);
         }
 
         Date today = getToday();
@@ -559,11 +647,11 @@ public class CalendarTest extends Application {
         });
     }
 
-    private Select createTimeZoneSelect() {
-        Select s = new Select("Timezone");
+    private ComboBox createTimeZoneSelect() {
+        ComboBox s = new ComboBox("Timezone");
         s.addContainerProperty("caption", String.class, "");
         s.setItemCaptionPropertyId("caption");
-        s.setFilteringMode(Select.FILTERINGMODE_CONTAINS);
+        s.setFilteringMode(FilteringMode.CONTAINS);
 
         Item i = s.addItem(DEFAULT_ITEMID);
         i.getItemProperty("caption").setValue(
@@ -581,7 +669,7 @@ public class CalendarTest extends Application {
             s.select(DEFAULT_ITEMID);
         }
         s.setImmediate(true);
-        s.addListener(new ValueChangeListener() {
+        s.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -594,8 +682,8 @@ public class CalendarTest extends Application {
         return s;
     }
 
-    private Select createCalendarFormatSelect() {
-        Select s = new Select("Calendar format");
+    private ComboBox createCalendarFormatSelect() {
+        ComboBox s = new ComboBox("Calendar format");
         s.addContainerProperty("caption", String.class, "");
         s.setItemCaptionPropertyId("caption");
 
@@ -608,7 +696,7 @@ public class CalendarTest extends Application {
 
         s.select(DEFAULT_ITEMID);
         s.setImmediate(true);
-        s.addListener(new ValueChangeListener() {
+        s.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -620,11 +708,11 @@ public class CalendarTest extends Application {
         return s;
     }
 
-    private Select createLocaleSelect() {
-        Select s = new Select("Locale");
+    private ComboBox createLocaleSelect() {
+        ComboBox s = new ComboBox("Locale");
         s.addContainerProperty("caption", String.class, "");
         s.setItemCaptionPropertyId("caption");
-        s.setFilteringMode(Select.FILTERINGMODE_CONTAINS);
+        s.setFilteringMode(FilteringMode.CONTAINS);
 
         for (Locale l : Locale.getAvailableLocales()) {
             if (!s.containsId(l)) {
@@ -635,7 +723,7 @@ public class CalendarTest extends Application {
 
         s.select(getLocale());
         s.setImmediate(true);
-        s.addListener(new ValueChangeListener() {
+        s.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -715,7 +803,7 @@ public class CalendarTest extends Application {
             calendarComponent.setEndDate(end);
 
             // Week days depend on locale so this must be refreshed
-            setWeekendsHidden(hideWeekendsButton.booleanValue());
+            setWeekendsHidden(hideWeekendsButton.getValue());
         }
 
     }
@@ -771,8 +859,8 @@ public class CalendarTest extends Application {
         updateCalendarEventPopup(newEvent);
         updateCalendarEventForm(event);
 
-        if (!getMainWindow().getChildWindows().contains(scheduleEventPopup)) {
-            getMainWindow().addWindow(scheduleEventPopup);
+        if (!getWindows().contains(scheduleEventPopup)) {
+            addWindow(scheduleEventPopup);
         }
     }
 
@@ -787,14 +875,18 @@ public class CalendarTest extends Application {
         scheduleEventPopup.setModal(true);
         scheduleEventPopup.center();
 
-        layout.addComponent(scheduleEventForm);
+        layout.addComponent(scheduleEventFieldLayout);
 
         applyEventButton = new Button("Apply", new ClickListener() {
 
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                commitCalendarEvent();
+                try {
+                    commitCalendarEvent();
+                } catch (CommitException e) {
+                    e.printStackTrace();
+                }
             }
         });
         Button cancel = new Button("Cancel", new ClickListener() {
@@ -813,11 +905,11 @@ public class CalendarTest extends Application {
                 deleteCalendarEvent();
             }
         });
-        scheduleEventPopup.addListener(new CloseListener() {
+        scheduleEventPopup.addCloseListener(new Window.CloseListener() {
 
             private static final long serialVersionUID = 1L;
 
-            public void windowClose(CloseEvent e) {
+            public void windowClose(Window.CloseEvent e) {
                 discardCalendarEvent();
             }
         });
@@ -851,113 +943,14 @@ public class CalendarTest extends Application {
         // Lets create a CalendarEvent BeanItem and pass it to the form's data
         // source.
         BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(event);
-        scheduleEventForm.setWriteThrough(false);
-        scheduleEventForm.setItemDataSource(item);
-        scheduleEventForm.setFormFieldFactory(new FormFieldFactory() {
-
-            private static final long serialVersionUID = 1L;
-
-            public Field createField(Item item, Object propertyId,
-                    Component uiContext) {
-                if (propertyId.equals("caption")) {
-                    TextField f = createTextField("Caption");
-                    f.focus();
-                    return f;
-
-                } else if (propertyId.equals("where")) {
-                    return createTextField("Where");
-
-                } else if (propertyId.equals("description")) {
-                    TextField f = createTextField("Description");
-                    f.setRows(3);
-                    return f;
-
-                } else if (propertyId.equals("styleName")) {
-                    return createStyleNameSelect();
-
-                } else if (propertyId.equals("start")) {
-                    return createDateField("Start date");
-
-                } else if (propertyId.equals("end")) {
-                    return createDateField("End date");
-                } else if (propertyId.equals("allDay")) {
-                    CheckBox cb = createCheckBox("All-day");
-
-                    cb.addListener(new Property.ValueChangeListener() {
-
-                        private static final long serialVersionUID = -7104996493482558021L;
-
-                        public void valueChange(ValueChangeEvent event) {
-                            Object value = event.getProperty().getValue();
-                            if (value instanceof Boolean
-                                    && Boolean.TRUE.equals(value)) {
-                                setFormDateResolution(DateField.RESOLUTION_DAY);
-
-                            } else {
-                                setFormDateResolution(DateField.RESOLUTION_MIN);
-                            }
-                        }
-
-                    });
-
-                    return cb;
-                }
-                return null;
-            }
-
-            private CheckBox createCheckBox(String caption) {
-                CheckBox cb = new CheckBox(caption);
-                cb.setImmediate(true);
-                return cb;
-            }
-
-            private TextField createTextField(String caption) {
-                TextField f = new TextField(caption);
-                f.setNullRepresentation("");
-                return f;
-            }
-
-            private DateField createDateField(String caption) {
-                DateField f = new DateField(caption);
-                if (useSecondResolution) {
-                    f.setResolution(DateField.RESOLUTION_SEC);
-                } else {
-                    f.setResolution(DateField.RESOLUTION_MIN);
-                }
-                return f;
-            }
-
-            private Select createStyleNameSelect() {
-                Select s = new Select("Color");
-                s.addContainerProperty("c", String.class, "");
-                s.setItemCaptionPropertyId("c");
-                Item i = s.addItem("color1");
-                i.getItemProperty("c").setValue("Green");
-                i = s.addItem("color2");
-                i.getItemProperty("c").setValue("Blue");
-                i = s.addItem("color3");
-                i.getItemProperty("c").setValue("Red");
-                i = s.addItem("color4");
-                i.getItemProperty("c").setValue("Orange");
-                return s;
-            }
-        });
-
-        scheduleEventForm
-        .setVisibleItemProperties(new Object[] { "start", "end",
-                "allDay", "caption", "where", "description",
-        "styleName" });
+        scheduleEventFieldGroup.setBuffered(true);
+        scheduleEventFieldGroup.setItemDataSource(item);
     }
 
-    private void setFormDateResolution(int resolution) {
-        if (scheduleEventForm.getField("start") != null
-                && scheduleEventForm.getField("end") != null) {
-            ((DateField) scheduleEventForm.getField("start"))
-            .setResolution(resolution);
-            ((DateField) scheduleEventForm.getField("start")).requestRepaint();
-            ((DateField) scheduleEventForm.getField("end"))
-            .setResolution(resolution);
-            ((DateField) scheduleEventForm.getField("end")).requestRepaint();
+    private void setFormDateResolution(Resolution resolution) {
+        if (startDateField != null && endDateField != null) {
+            startDateField.setResolution(resolution);
+            endDateField.setResolution(resolution);
         }
     }
 
@@ -977,28 +970,28 @@ public class CalendarTest extends Application {
         if (dataSource.containsEvent(event)) {
             dataSource.removeEvent(event);
         }
-        getMainWindow().removeWindow(scheduleEventPopup);
+        removeWindow(scheduleEventPopup);
     }
 
     /* Adds/updates the event in the data source and fires change event. */
-    private void commitCalendarEvent() {
-        scheduleEventForm.commit();
+    private void commitCalendarEvent() throws CommitException {
+        scheduleEventFieldGroup.commit();
         BasicEvent event = getFormCalendarEvent();
         if (!dataSource.containsEvent(event)) {
             dataSource.addEvent(event);
         }
 
-        getMainWindow().removeWindow(scheduleEventPopup);
+        removeWindow(scheduleEventPopup);
     }
 
     private void discardCalendarEvent() {
-        scheduleEventForm.discard();
-        getMainWindow().removeWindow(scheduleEventPopup);
+        scheduleEventFieldGroup.discard();
+        removeWindow(scheduleEventPopup);
     }
 
     @SuppressWarnings("unchecked")
     private BasicEvent getFormCalendarEvent() {
-        BeanItem<CalendarEvent> item = (BeanItem<CalendarEvent>) scheduleEventForm
+        BeanItem<CalendarEvent> item = (BeanItem<CalendarEvent>) scheduleEventFieldGroup
                 .getItemDataSource();
         CalendarEvent event = item.getBean();
         return (BasicEvent) event;

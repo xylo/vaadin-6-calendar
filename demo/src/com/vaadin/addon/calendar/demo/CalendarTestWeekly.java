@@ -7,23 +7,24 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.WrappedRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
-public class CalendarTestWeekly extends Application implements
-        CalendarEventProvider {
+@Theme("calendartest")
+public class CalendarTestWeekly extends UI implements CalendarEventProvider {
 
     private static final long serialVersionUID = -5436777475398410597L;
 
@@ -33,11 +34,8 @@ public class CalendarTestWeekly extends Application implements
     private final Label label = new Label("");
 
     @Override
-    public void init() {
-        Window w = new Window();
-        setMainWindow(w);
+    public void init(WrappedRequest request) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        setTheme("calendartest");
 
         calendarComponent = new Calendar(this);
         for (String s : TimeZone.getAvailableIDs()) {
@@ -59,8 +57,7 @@ public class CalendarTestWeekly extends Application implements
         VerticalLayout vl = new VerticalLayout();
         vl.setSizeFull();
         vl.setMargin(true);
-        w.setContent(vl);
-        w.setSizeFull();
+        setContent(vl);
         Button next = new Button("next", new Button.ClickListener() {
             private static final long serialVersionUID = 1L;
 
@@ -106,7 +103,8 @@ public class CalendarTestWeekly extends Application implements
             private static final long serialVersionUID = -4393494935292771814L;
 
             public void menuSelected(MenuItem selectedItem) {
-                calendarComponent.setVisibleDaysOfWeek(1, 5);
+                calendarComponent.setFirstVisibleDayOfWeek(1);
+                calendarComponent.setLastVisibleDayOfWeek(5);
             }
 
         });
@@ -114,7 +112,8 @@ public class CalendarTestWeekly extends Application implements
             private static final long serialVersionUID = -2176043834276176494L;
 
             public void menuSelected(MenuItem selectedItem) {
-                calendarComponent.setVisibleDaysOfWeek(1, 5);
+                calendarComponent.setFirstVisibleDayOfWeek(1);
+                calendarComponent.setLastVisibleDayOfWeek(5);
             }
 
         });
@@ -128,8 +127,8 @@ public class CalendarTestWeekly extends Application implements
         calendar.setTime(fromStartDate);
         calendar.add(GregorianCalendar.DATE, 1);
         ArrayList<CalendarEvent> e = new ArrayList<CalendarEvent>();
-        CalendarTestEvent event = getNewEvent("Phase1", fromStartDate, calendar
-                .getTime());
+        CalendarTestEvent event = getNewEvent("Phase1", fromStartDate,
+                calendar.getTime());
         event.setDescription("asdgasdgj asdfg adfga fsdgafdsgasdga asdgadfsg");
         event.setStyleName("color1");
         e.add(event);

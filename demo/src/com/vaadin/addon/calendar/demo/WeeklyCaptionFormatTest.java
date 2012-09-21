@@ -1,20 +1,17 @@
 package com.vaadin.addon.calendar.demo;
 
-import com.vaadin.Application;
 import com.vaadin.addon.calendar.ui.Calendar;
-import com.vaadin.ui.Window;
+import com.vaadin.server.WrappedRequest;
+import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
-public class WeeklyCaptionFormatTest extends Application {
+public class WeeklyCaptionFormatTest extends UI {
 
     @Override
-    public void init() {
+    public void init(WrappedRequest request) {
         Calendar calendar = new Calendar();
         calendar.setWeeklyCaptionFormat("MMM d, ''yy");
 
-        Window window = new Window();
-        window.addComponent(calendar);
-
-        setMainWindow(window);
+        getContent().addComponent(calendar);
     }
 }
