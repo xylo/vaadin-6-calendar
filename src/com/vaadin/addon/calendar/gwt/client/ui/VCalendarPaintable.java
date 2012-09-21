@@ -46,6 +46,7 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.client.ui.Action;
 import com.vaadin.client.ui.ActionOwner;
+import com.vaadin.client.ui.SimpleManagedLayout;
 import com.vaadin.client.ui.dd.VHasDropHandler;
 import com.vaadin.shared.ui.Connect;
 
@@ -59,7 +60,7 @@ import com.vaadin.shared.ui.Connect;
  */
 @Connect(com.vaadin.addon.calendar.ui.Calendar.class)
 public class VCalendarPaintable extends AbstractComponentConnector implements
-        VHasDropHandler, ActionOwner {
+        VHasDropHandler, ActionOwner, SimpleManagedLayout {
 
     public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
@@ -111,6 +112,13 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
                 // TODO widget scroll
             }
         });
+        getLayoutManager().registerDependency(this, getWidget().getElement());
+    }
+
+    @Override
+    public void onUnregister() {
+        super.onUnregister();
+        getLayoutManager().unregisterDependency(this, getWidget().getElement());
     }
 
     @Override
@@ -613,5 +621,12 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
         }
         return list;
     }
+
+    @Override
+    public void layout() {
+        int height = getLayoutManager()
+                .getOuterHeight(getWidget().getElement());
+        int width = getLayoutManager().getOuterWidth(getWidget().getElement());
+        getWidget().setSizeForChildren(width, height);
     }
 }

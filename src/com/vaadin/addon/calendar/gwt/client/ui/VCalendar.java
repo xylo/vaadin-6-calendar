@@ -58,8 +58,6 @@ public class VCalendar extends Composite {
     private boolean eventResizeAllowed = true;
     private boolean eventMoveAllowed = true;
 
-    private String height = null;
-    private String width = null;
     private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
 
     private final DayToolbar dayToolbar = new DayToolbar(this);
@@ -615,27 +613,11 @@ public class VCalendar extends Composite {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.gwt.user.client.ui.UIObject#setHeight(java.lang.String)
-     */
-    @Override
-    public void setHeight(String newHeight) {
-        if (!newHeight.equals(height)) {
-            height = newHeight;
-            isHeightUndefined = "".equals(height);
-
-            if (!isHeightUndefined) {
-                intHeight = Integer.parseInt(newHeight.substring(0,
-                        newHeight.length() - 2));
-            } else {
-                intHeight = -1;
-            }
-
-            super.setHeight(height);
-            recalculateHeights();
-        }
+    public void setSizeForChildren(int newWidth, int newHeight) {
+        intWidth = newWidth;
+        intHeight = newHeight;
+        recalculateWidths();
+        recalculateHeights();
     }
 
     /**
@@ -661,8 +643,6 @@ public class VCalendar extends Composite {
      */
     protected void recalculateWidths() {
         if (!isWidthUndefined) {
-            outer.setWidth(intWidth + "px");
-            super.setWidth(intWidth + "px");
             nameToolbar.setWidthPX(intWidth);
             dayToolbar.setWidthPX(intWidth);
 
@@ -674,7 +654,6 @@ public class VCalendar extends Composite {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
             }
-
         } else {
             dayToolbar.setWidthPX(intWidth);
             nameToolbar.setWidthPX(intWidth);
@@ -682,27 +661,6 @@ public class VCalendar extends Composite {
             if (monthGrid != null) {
                 monthGrid.setWidthPX(intWidth);
             }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.gwt.user.client.ui.UIObject#setWidth(java.lang.String)
-     */
-    @Override
-    public void setWidth(String newWidth) {
-        if (!newWidth.equals(width)) {
-            width = newWidth;
-            isWidthUndefined = "".equals(width);
-
-            if (!isWidthUndefined) {
-                intWidth = Integer.parseInt(newWidth.substring(0,
-                        newWidth.length() - 2));
-            } else {
-                intWidth = -1;
-            }
-            recalculateWidths();
         }
     }
 
