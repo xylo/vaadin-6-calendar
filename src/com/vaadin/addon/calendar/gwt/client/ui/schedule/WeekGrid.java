@@ -761,9 +761,9 @@ public class WeekGrid extends SimplePanel {
                 DateCellSlot slot = new DateCellSlot(DateCell.this, new Date(
                         start), new Date(end));
                 if (i % 2 == 0) {
-                    slot.setStyleName("v-slot-even");
+                    slot.setStyleName("v-datecellslot-even");
                 } else {
-                    slot.setStyleName("v-slot");
+                    slot.setStyleName("v-datecellslot");
                 }
                 Event.sinkEvents(slot.getElement(), Event.MOUSEEVENTS);
                 mainElement.appendChild(slot.getElement());

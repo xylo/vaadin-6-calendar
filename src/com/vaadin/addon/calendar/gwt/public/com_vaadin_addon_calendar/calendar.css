@@ -252,11 +252,11 @@ div.v-calendar-event-all-day {
 	outline: none;
 }
 
-.v-calendar-day-times .v-slot,.v-calendar-day-times .v-slot-even {
+.v-calendar-day-times .v-datecellslot,.v-calendar-day-times .v-datecellslot-even {
 	border-bottom: 1px solid #ccc;
 }
 
-.v-calendar-day-times .v-slot-even {
+.v-calendar-day-times .v-datecellslot-even {
 	border-bottom-color: #eee;
 }
 
@@ -384,10 +384,10 @@ div.v-calendar-event-all-day {
 	width: 42px;
 }
 
-.v-calendar-day-times-Vsized .v-slot,.v-calendar-day-times-Vsized .v-slot-even {
+.v-calendar-day-times-Vsized .v-datecellslot,.v-calendar-day-times-Vsized .v-datecellslot-even {
 	height: 18px;
 }
 
-.v-calendar-day-times-Hsized, .v-calendar-day-times-Hsized .v-slot,.v-calendar-day-times-Hsized .v-slot-even {
+.v-calendar-day-times-Hsized, .v-calendar-day-times-Hsized .v-datecellslot,.v-calendar-day-times-Hsized .v-datecellslot-even {
 	width: 200px;
 }
