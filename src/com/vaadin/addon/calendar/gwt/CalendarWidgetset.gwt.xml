@@ -1,8 +1,8 @@
 <module>
 	<!-- Inherit super widgetset -->
-	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
 
-	<!--  Set stylesheet for this widget -->
+	<!-- Set stylesheet for this widget -->
 	<stylesheet src="com_vaadin_addon_calendar/calendar.css" />
 
+	<inherits name="com.vaadin.DefaultWidgetSet" />
 </module>
