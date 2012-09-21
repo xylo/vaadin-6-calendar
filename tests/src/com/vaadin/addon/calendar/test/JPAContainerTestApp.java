@@ -22,8 +22,8 @@ public class JPAContainerTestApp extends VerticalLayout {
         setSizeFull();
 
         // Create the JPA Container
-        eventContainer = JPAContainerFactory
-                .make(PersistentEvent.class, PERSISTANCE_UNIT);
+        eventContainer = JPAContainerFactory.make(PersistentEvent.class,
+                PERSISTANCE_UNIT);
 
         // Ensure we have no events in database from previous sessions
         eventContainer.removeAllItems();

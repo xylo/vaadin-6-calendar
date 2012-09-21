@@ -94,7 +94,7 @@ public class WeekGrid extends SimplePanel {
                 public void onScroll(ScrollEvent event) {
                     if (calendar.getScrollListener() != null) {
                         calendar.getScrollListener().scroll(
-                                scrollPanel.getScrollPosition());
+                                scrollPanel.getVerticalScrollPosition());
                     }
                 }
             });
@@ -118,7 +118,8 @@ public class WeekGrid extends SimplePanel {
 
     public void setVerticalScrollPosition(int verticalScrollPosition) {
         if (isVerticalScrollable()) {
-            ((ScrollPanel) wrapper).setScrollPosition(verticalScrollPosition);
+            ((ScrollPanel) wrapper)
+                    .setVerticalScrollPosition(verticalScrollPosition);
         }
     }
 
@@ -297,7 +298,7 @@ public class WeekGrid extends SimplePanel {
             if (comp >= 0
                     && comp2 < 0
                     || (comp == 0 && comp2 == 0 && VCalendar
-                    .isZeroLengthMidnightEvent(e))) {
+                            .isZeroLengthMidnightEvent(e))) {
                 // Same event may be over two DateCells if event's date
                 // range floats over one day. It can't float over two days,
                 // because event which range is over 24 hours, will be handled
@@ -531,7 +532,7 @@ public class WeekGrid extends SimplePanel {
     public static class Timebar extends HTML {
 
         private static final int[] timesFor12h = { 12, 1, 2, 3, 4, 5, 6, 7, 8,
-            9, 10, 11 };
+                9, 10, 11 };
 
         private int height;
 
@@ -649,7 +650,7 @@ public class WeekGrid extends SimplePanel {
 
                 int slotsPerHour = slotCellHeights.length / hoursPerDay;
                 int[] cellHeights = new int[slotCellHeights.length
-                                            / slotsPerHour];
+                        / slotsPerHour];
 
                 int slotHeightPosition = 0;
                 for (int i = 0; i < cellHeights.length; i++) {
@@ -1013,9 +1014,9 @@ public class WeekGrid extends SimplePanel {
                 for (Integer index : g.getItems()) {
                     DayEvent d = (DayEvent) getWidget(index);
                     d.getElement()
-                    .getStyle()
-                    .setMarginLeft((eventWidth * columns.get(index)),
-                            Unit.PX);
+                            .getStyle()
+                            .setMarginLeft((eventWidth * columns.get(index)),
+                                    Unit.PX);
                     d.setWidth(eventWidth + "px");
                     d.setSlotHeightInPX(getSlotHeight());
                 }
@@ -1058,9 +1059,9 @@ public class WeekGrid extends SimplePanel {
             boolean isFullyInside = top >= nextTop && bottom <= nextBottom;
             boolean isInsideFromTopSide = bottom <= nextBottom
                     && bottom >= nextTop;
-                    boolean isFullyOverlapping = top <= nextTop && bottom >= nextBottom;
-                    return isInsideFromBottomSide || isFullyInside
-                            || isInsideFromTopSide || isFullyOverlapping;
+            boolean isFullyOverlapping = top <= nextTop && bottom >= nextBottom;
+            return isInsideFromBottomSide || isFullyInside
+                    || isInsideFromTopSide || isFullyOverlapping;
         }
 
         /* Update top and bottom values. Add new index to the group. */
@@ -1296,9 +1297,9 @@ public class WeekGrid extends SimplePanel {
                         + currentDate.getDate();
                 if (weekgrid.getCalendar().getRangeSelectListener() != null) {
                     weekgrid.getCalendar()
-                    .getRangeSelectListener()
-                    .rangeSelected(
-                            yr + ":" + startMinutes + ":" + endMinutes);
+                            .getRangeSelectListener()
+                            .rangeSelected(
+                                    yr + ":" + startMinutes + ":" + endMinutes);
                 }
                 eventRangeStart = -1;
             } else {
@@ -1508,7 +1509,7 @@ public class WeekGrid extends SimplePanel {
 
                     topResizeBar.addClassName("v-calendar-event-resizetop");
                     bottomResizeBar
-                    .addClassName("v-calendar-event-resizebottom");
+                            .addClassName("v-calendar-event-resizebottom");
 
                     getElement().appendChild(topResizeBar);
                     getElement().appendChild(bottomResizeBar);
@@ -1687,8 +1688,7 @@ public class WeekGrid extends SimplePanel {
                                 || e.getParentElement() == caption) {
                             if (weekGrid.getCalendar().getEventClickListener() != null) {
                                 weekGrid.getCalendar().getEventClickListener()
-                                .eventClick(
-                                        calendarEvent);
+                                        .eventClick(calendarEvent);
                             }
                         }
                     }
@@ -1697,8 +1697,7 @@ public class WeekGrid extends SimplePanel {
                     removeGlobalResizeStyle();
                     if (weekGrid.getCalendar().getEventResizeListener() != null) {
                         weekGrid.getCalendar().getEventResizeListener()
-                        .eventResized(
-                                calendarEvent);
+                                .eventResized(calendarEvent);
                     }
                 }
             }
@@ -2047,12 +2046,14 @@ public class WeekGrid extends SimplePanel {
                     event.preventDefault();
                     event.stopPropagation();
                     weekgrid.getCalendar().getMouseEventListener()
-                    .contextMenu(event, DayEvent.this);
+                            .contextMenu(event, DayEvent.this);
                 }
             }
+
             @Override
             public Object getTooltipKey() {
                 return eventIndex;
+            }
         }
 
         public void onContextMenu(ContextMenuEvent event) {
@@ -2060,7 +2061,7 @@ public class WeekGrid extends SimplePanel {
                 event.preventDefault();
                 event.stopPropagation();
                 weekgrid.getCalendar().getMouseEventListener()
-                .contextMenu(event, DateCell.this);
+                        .contextMenu(event, DateCell.this);
             }
         }
     }

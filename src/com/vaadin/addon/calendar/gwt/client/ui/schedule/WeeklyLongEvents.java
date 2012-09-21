@@ -23,8 +23,6 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
 
     public static final int EVENT_MARGIN = 1;
 
-    private int width;
-
     private int rowCount = 0;
 
     private VCalendar calendar;
@@ -44,7 +42,6 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
     }
 
     public void setWidthPX(int width) {
-        this.width = width;
         if (getWidgetCount() == 0) {
             return;
         }
@@ -171,7 +168,7 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
     }
 
     public static class DateCellContainer extends FlowPanel implements
-    MouseDownHandler, MouseUpHandler {
+            MouseDownHandler, MouseUpHandler {
 
         private Date date;
 

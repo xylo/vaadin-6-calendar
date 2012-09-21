@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -460,7 +459,7 @@ public class VCalendar extends Composite {
     public CalendarEvent[] sortEventsByDuration(Collection<CalendarEvent> events) {
         CalendarEvent[] sorted = events
                 .toArray(new CalendarEvent[events.size()]);
-        Arrays.sort(sorted, getEventComparator());       
+        Arrays.sort(sorted, getEventComparator());
         return sorted;
     }
 
@@ -530,7 +529,7 @@ public class VCalendar extends Composite {
     }
 
     /**
-     * Updates the events in the Month viewq
+     * Updates the events in the Month view
      * 
      * @param daysCount
      *            How many days there are
@@ -670,7 +669,7 @@ public class VCalendar extends Composite {
             if (monthGrid != null) {
                 monthGrid.updateCellSizes(
                         intWidth - weekToolbar.getOffsetWidth(), intHeight
-                        - nameToolbar.getOffsetHeight());
+                                - nameToolbar.getOffsetHeight());
             } else if (weekGrid != null) {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
@@ -758,9 +757,9 @@ public class VCalendar extends Composite {
      * Is the component disabled
      * 
      * @param disabled
-     *          True if disabled
+     *            True if disabled
      */
-    public void setDisabled(boolean disabled){
+    public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
@@ -775,9 +774,9 @@ public class VCalendar extends Composite {
      * Is the component read-only
      * 
      * @param readOnly
-     *          True if component is readonly
+     *            True if component is readonly
      */
-    public void setReadOnly(boolean readOnly){
+    public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
 
@@ -940,7 +939,7 @@ public class VCalendar extends Composite {
      * Is the 24h time format used
      */
     public boolean is24HFormat() {
-        return this.format;
+        return format;
     }
 
     /**
@@ -1286,7 +1285,7 @@ public class VCalendar extends Composite {
      *            The listener to use
      */
     public void setListener(EventClickListener listener) {
-        this.eventClickListener = listener;
+        eventClickListener = listener;
     }
 
     private EventMovedListener eventMovedListener;
