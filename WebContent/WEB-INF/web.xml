@@ -10,11 +10,11 @@
   
   <servlet>
     <servlet-name>Demo</servlet-name>
-    <servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
+    <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
     <init-param>
       <description>
   		Vaadin application class to start</description>
-      <param-name>application</param-name>
+      <param-name>UI</param-name>
       <param-value>com.vaadin.addon.calendar.demo.CalendarTest</param-value>
     </init-param>
     <init-param>
@@ -29,9 +29,9 @@
 	<servlet>
 		<servlet-name>TestingApplication</servlet-name>
 		<servlet-class>
-		com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>		
+		com.vaadin.server.VaadinServlet</servlet-class>
 		<init-param>
-			<param-name>application</param-name>
+			<param-name>UI</param-name>
 			<param-value>com.vaadin.addon.calendar.test.TestingApplication</param-value>
 		</init-param>
 		<init-param>
