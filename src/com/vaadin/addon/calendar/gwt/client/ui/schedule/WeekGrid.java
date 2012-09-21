@@ -1658,7 +1658,7 @@ public class WeekGrid extends SimplePanel {
             }
 
             public void onMouseUp(MouseUpEvent event) {
-                if (mouseMoveCanceled) {
+                if (mouseMoveCanceled || !mouseMoveStarted) {
                     return;
                 }
 
