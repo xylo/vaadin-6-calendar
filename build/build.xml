@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Calendar" basedir="../" default="all">
+<project name="Calendar" basedir="../" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<ivy:resolve file="build/ivy.xml" />
 
     <!-- Main target that does all -->
     <target name="all" depends="compile, widgetset, tests, manual, javadoc, package-jar, package-zip, demo.war"/>
@@ -21,63 +23,52 @@
     <!-- Initialization                                                     -->
     <!-- ================================================================== -->
 
+	<!-- Retrieve dependencies with ivy. -->
+	<target name="resolve">
+		<ivy:retrieve conf="build" pattern="build/lib/dependency/[artifact](-[classifier])(-[revision]).[ext]"/>
+	</target>
+
     <!-- Clean old compilation results. -->
 	<target name="clean-all">
-		<delete dir="${result-path}" includes="**/*" followsymlinks="false" includeemptydirs="true" defaultexcludes="false" failonerror="false"/>
-	</target>
-
-    <!-- Checks that all the required libraries exist. -->
-	<target name="check-libs">
-		<available file="${gwt.lib.dir}/gwt-user.jar" property="gwt-user.present" />
-		<available file="${gwt.lib.dir}/gwt-dev.jar" property="gwt-dev.present" />
-
-		<fail message="${gwt.lib.dir}/gwt-user.jar missing" unless="gwt-user.present" />
-		<fail message="${gwt.lib.dir}/gwt-dev.jar missing" unless="gwt-dev.present" />
-	</target>
-
-    <!-- Initialization -->
-	<target name="init">
-	    <echo>Add-on version: "${version}"</echo>
-
-		<echo>Requirements for classpath:</echo>
-		<echo> ${gwt.lib.dir}/gwt-user.jar</echo>
-		<echo> ${gwt.lib.dir}/gwt-dev.jar</echo>
-
-        <property name="base-name" value="${addon.name}-${license.short.name}-${version}" />
-        <property name="jar.name" value="${base-name}.jar"/>
-        <property name="jar.path" value="${result-path}/${jar.name}"/>
-
-		<antcall target="check-libs"/>
-		
-		<copy todir="WebContent/WEB-INF/lib">
-			<fileset dir="build/lib/dependency">
-				<include name="*.jar"/>
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${result-path}" followsymlinks="false" defaultexcludes="false">
+				<include name="**/*"/>
 			</fileset>
-		</copy>
+		</delete>
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="build/lib/dependency" followsymlinks="false" defaultexcludes="false">
+				<include name="**/*.jar"/>
+			</fileset>
+		</delete>
+	</target>
 
-        <path id="test.classpath">
-            <fileset dir="build/lib">
-                <include name="**/*.jar" />
-            </fileset>
-            
-            <fileset dir="WebContent/WEB-INF/lib">
-                <include name="**/*.jar" />
-            </fileset>
+	<!-- Initialization -->
+	<target name="init" depends="resolve">
+		<echo>Add-on version: "${version}"</echo>
 
-            <fileset dir="build/lib">
-                <include name="junit-4.5.jar" />
-            </fileset>
-        </path>
+		<property name="base-name" value="${addon.name}-${license.short.name}-${version}" />
+		<property name="jar.name" value="${base-name}.jar" />
+		<property name="jar.path" value="${result-path}/${jar.name}" />
 
-        <path id="compile.classpath">
-            <fileset dir="build/lib">
-                <include name="**/*.jar" />
-            </fileset>
-            
-            <fileset dir="WebContent/WEB-INF/lib">
-                <include name="**/*.jar" />
-            </fileset>
-        </path>
+		<path id="test.classpath">
+			<fileset dir="build/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+		<path id="compile.classpath">
+			<fileset dir="build/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+		
+		<path id="widgetset.classpath">
+			<fileset dir="build/lib">
+				<include name="**/*.jar" />
+			</fileset>
+			<path location="src" />
+			<path location="${result-path}/war/WEB-INF/classes" />
+		</path>
 	</target>
 
     <!-- Fetch repository changes -->
@@ -150,7 +141,6 @@
 				<path path="${result-path}/src" />
 				<path path="test-src" />
 				<path path="WebContent/WEB-INF/classes" />
-				<path path="${gwt.lib.dir}/gwt-user.jar" />
 			</classpath>
 		</javac>
 
@@ -174,32 +164,16 @@
 	<target name="widgetset" depends="init,check-widgetset-uptodate" unless="widgetset.uptodate, run.no-tests">
 		<echo>Compiling widgetset</echo>
 
-		<java classname="com.vaadin.tools.WidgetsetCompiler" failonerror="yes" fork="yes" maxmemory="512m">
-			<arg value="-out" />
+		<java classname="com.google.gwt.dev.Compiler" failonerror="yes" fork="yes" maxmemory="512m" classpathref="widgetset.classpath">
+			<arg value="-war" />
 			<arg value="WebContent/VAADIN/widgetsets" />
 			<arg value="com.vaadin.addon.calendar.gwt.CalendarWidgetset" />
-			<jvmarg value="-Xss1024k" />
-			<jvmarg value="-Xmx1024M" />
+
+			<sysproperty key="vFailIfNotSerializable" value="true" />
+
+			<jvmarg value="-Xss8M" />
+			<jvmarg value="-XX:MaxPermSize=256M" />
 			<jvmarg value="-Djava.awt.headless=true" />
-			<classpath>
-				<path path="${result-path}/src" />
-				<path path="${basedir}/${result-path}/war/WEB-INF/classes" />
-				<path path="WebContent/WEB-INF/classes" />
-				<fileset dir="build/lib">
-					<include name="**/vaadin*.jar" />
-				</fileset>
-				<fileset dir="build/lib/gwt">
-					<include name="**/gwt-*.jar" />
-					<include name="**/validation-api-*.jar" />
-				</fileset>
-				<fileset dir="${gwt.lib.dir}">
-					<include name="**/gwt-*.jar" />
-					<include name="**/validation-api-*.jar" />
-				</fileset>
-				<fileset dir="WebContent/WEB-INF/lib">
-					<include name="**/*.jar" />
-				</fileset>
-			</classpath>
 		</java>
 
 		<touch file="WebContent/VAADIN/widgetsets/.widgetset" verbose="true" />
@@ -426,7 +400,7 @@ Implementation-Vendor: ${addon.vendor}
     		  </condition>
     	</fail>        	
     </target>
-	
+
 	<target name="git-log">
         <exec executable="git" output="build/result/calendar-git-log.txt">
             <arg value="log" />

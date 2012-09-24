@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+	<!-- Default ivysettings.xml stuff -->
+	<include url="${ivy.default.settings.dir}/ivysettings-public.xml" />
+	<include url="${ivy.default.settings.dir}/ivysettings-shared.xml" />
+	<include url="${ivy.default.settings.dir}/ivysettings-local.xml" />
+	<include url="${ivy.default.settings.dir}/ivysettings-main-chain.xml" />
+	<include url="${ivy.default.settings.dir}/ivysettings-default-chain.xml" />
+
+	<settings defaultResolver="public" />
+	<resolvers>
+		<chain name="public-chain">
+			<ibiblio name="maven2" m2compatible="true" />
+			<ibiblio name="snapshots" m2compatible="true"
+				root="http://oss.sonatype.org/content/repositories/vaadin-snapshots/" />
+		</chain>
+		<chain name="public">
+			<ibiblio name="maven2" m2compatible="true" />
+			<ibiblio name="addons" m2compatible="true" root="http://maven.vaadin.com/vaadin-addons/" />
+			<ibiblio name="eclipselink" m2compatible="true" root="http://download.eclipse.org/rt/eclipselink/maven.repo/" />
+		</chain>
+	</resolvers>
+</ivysettings>
