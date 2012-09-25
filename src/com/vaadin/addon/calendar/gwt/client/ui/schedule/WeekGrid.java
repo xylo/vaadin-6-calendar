@@ -926,21 +926,17 @@ public class WeekGrid extends SimplePanel {
                 Group curGroup = getOverlappingEvents(i);
                 handled.addAll(curGroup.getItems());
 
-                int top = curGroup.top;
-                int bottom = curGroup.bottom;
-
                 boolean newGroup = true;
                 // No need to check other groups, if size equals the count
                 if (curGroup.getItems().size() != count) {
                     // Check other groups. When the whole group overlaps with
                     // other group, the group is merged to the other.
                     for (Group g : groups) {
-                        int nextTop = g.top;
-                        int nextBottom = g.bottom;
 
-                        if (doOverlap(top, bottom, nextTop, nextBottom)) {
+                        if (MinuteTimeRange.doesOverlap(
+                                curGroup.getDateRange(), g.getDateRange())) {
                             newGroup = false;
-                            updateGroup(g, curGroup, top, bottom);
+                            updateGroup(g, curGroup);
                         }
                     }
                 } else {
@@ -996,9 +992,10 @@ public class WeekGrid extends SimplePanel {
                     DayEvent d = (DayEvent) getWidget(eventIndex);
                     d.setMoveWidth(width);
 
-                    int freeSpaceCol = findFreeColumnSpaceOnLeft(d.getTop(),
-                            d.getTop() + d.getOffsetHeight() - 1, order,
-                            columns);
+                    int freeSpaceCol = findFreeColumnSpaceOnLeft(
+                            new MinuteTimeRange(d.getCalendarEvent()
+                                    .getStartTime(), d.getCalendarEvent()
+                                    .getEndTime()), order, columns);
                     if (freeSpaceCol >= 0) {
                         col = freeSpaceCol;
                         columns.put(eventIndex, col);
@@ -1032,7 +1029,7 @@ public class WeekGrid extends SimplePanel {
             }
         }
 
-        private int findFreeColumnSpaceOnLeft(int top, int bottom,
+        private int findFreeColumnSpaceOnLeft(MinuteTimeRange dateRange,
                 List<Integer> order, Map<Integer, Integer> columns) {
             int freeSpot = -1;
             int skipIndex = -1;
@@ -1048,9 +1045,11 @@ public class WeekGrid extends SimplePanel {
                 }
 
                 DayEvent d = (DayEvent) getWidget(eventIndex);
+                MinuteTimeRange nextRange = new MinuteTimeRange(d
+                        .getCalendarEvent().getStartTime(), d
+                        .getCalendarEvent().getEndTime());
 
-                if (doOverlap(top, bottom, d.getTop(),
-                        d.getTop() + d.getOffsetHeight() - 1)) {
+                if (MinuteTimeRange.doesOverlap(dateRange, nextRange)) {
                     skipIndex = col;
                     freeSpot = -1;
                 } else {
@@ -1061,27 +1060,18 @@ public class WeekGrid extends SimplePanel {
             return freeSpot;
         }
 
-        private boolean doOverlap(int top, int bottom, int nextTop,
-                int nextBottom) {
-            boolean isInsideFromBottomSide = top >= nextTop
-                    && top <= nextBottom;
-            boolean isFullyInside = top >= nextTop && bottom <= nextBottom;
-            boolean isInsideFromTopSide = bottom <= nextBottom
-                    && bottom >= nextTop;
-            boolean isFullyOverlapping = top <= nextTop && bottom >= nextBottom;
-            return isInsideFromBottomSide || isFullyInside
-                    || isInsideFromTopSide || isFullyOverlapping;
-        }
+        /* Update top and bottom date range values. Add new index to the group. */
+        private void updateGroup(Group targetGroup, Group byGroup) {
+            Date newStart = targetGroup.getStart();
+            Date newEnd = targetGroup.getEnd();
+            if (byGroup.getStart().before(targetGroup.getStart())) {
+                newStart = byGroup.getEnd();
+            }
+            if (byGroup.getStart().after(targetGroup.getEnd())) {
+                newStart = byGroup.getStart();
+            }
 
-        /* Update top and bottom values. Add new index to the group. */
-        private void updateGroup(Group targetGroup, Group byGroup, int top,
-                int bottom) {
-            if (top < targetGroup.top) {
-                targetGroup.top = top;
-            }
-            if (bottom > targetGroup.bottom) {
-                targetGroup.bottom = bottom;
-            }
+            targetGroup.setDateRange(new MinuteTimeRange(newStart, newEnd));
 
             for (Integer index : byGroup.getItems()) {
                 if (!targetGroup.getItems().contains(index)) {
@@ -1103,8 +1093,11 @@ public class WeekGrid extends SimplePanel {
 
             int count = getWidgetCount();
             DayEvent target = (DayEvent) getWidget(targetIndex);
-            int top = target.getTop();
-            int bottom = top + target.getOffsetHeight() - 1;
+            MinuteTimeRange targetRange = new MinuteTimeRange(target
+                    .getCalendarEvent().getStartTime(), target
+                    .getCalendarEvent().getEndTime());
+            Date groupStart = targetRange.getStart();
+            Date groupEnd = targetRange.getEnd();
 
             for (int i = 0; i < count; i++) {
                 if (targetIndex == i) {
@@ -1112,23 +1105,23 @@ public class WeekGrid extends SimplePanel {
                 }
 
                 DayEvent d = (DayEvent) getWidget(i);
-                int nextTop = d.getTop();
-                int nextBottom = nextTop + d.getOffsetHeight() - 1;
-                if (doOverlap(top, bottom, nextTop, nextBottom)) {
+                MinuteTimeRange nextRange = new MinuteTimeRange(d
+                        .getCalendarEvent().getStartTime(), d
+                        .getCalendarEvent().getEndTime());
+                if (MinuteTimeRange.doesOverlap(targetRange, nextRange)) {
                     g.add(i);
 
                     // Update top & bottom values to the greatest
-                    if (nextTop < top) {
-                        top = nextTop;
+                    if (nextRange.getStart().before(targetRange.getStart())) {
+                        groupStart = targetRange.getStart();
                     }
-                    if (nextBottom > bottom) {
-                        bottom = nextBottom;
+                    if (nextRange.getEnd().after(targetRange.getEnd())) {
+                        groupEnd = targetRange.getEnd();
                     }
                 }
             }
 
-            g.top = top;
-            g.bottom = bottom;
+            g.setDateRange(new MinuteTimeRange(groupStart, groupEnd));
             return g;
         }
 
@@ -1441,13 +1434,28 @@ public class WeekGrid extends SimplePanel {
         }
 
         private static class Group {
-            public int top;
-            public int bottom;
+            private MinuteTimeRange range;
             private final List<Integer> items;
 
             public Group(Integer index) {
                 items = new ArrayList<Integer>();
                 items.add(index);
+            }
+
+            public MinuteTimeRange getDateRange() {
+                return range;
+            }
+
+            public Date getStart() {
+                return range.getStart();
+            }
+
+            public Date getEnd() {
+                return range.getEnd();
+            }
+
+            public void setDateRange(MinuteTimeRange range) {
+                this.range = range;
             }
 
             public List<Integer> getItems() {
@@ -2077,5 +2085,43 @@ public class WeekGrid extends SimplePanel {
 
     public VCalendar getParentCalendar() {
         return calendar;
+    }
+
+    private static class MinuteTimeRange {
+        private final Date start;
+        private final Date end;
+
+        /**
+         * Creates a Date time range between start and end date. Drops seconds
+         * from the range.
+         * 
+         * @param start
+         *            Start time of the range
+         * @param end
+         *            End time of the range
+         * @param clearSeconds
+         *            Boolean Indicates, if seconds should be dropped from the
+         *            range start and end
+         */
+        public MinuteTimeRange(Date start, Date end) {
+            this.start = new Date(start.getTime());
+            this.end = new Date(end.getTime());
+            this.start.setSeconds(0);
+            this.end.setSeconds(0);
+        }
+
+        public Date getStart() {
+            return start;
+        }
+
+        public Date getEnd() {
+            return end;
+        }
+
+        public static boolean doesOverlap(MinuteTimeRange a, MinuteTimeRange b) {
+            boolean overlaps = a.getStart().compareTo(b.getEnd()) < 0
+                    && a.getEnd().compareTo(b.getStart()) > 0;
+            return overlaps;
+        }
     }
 }
