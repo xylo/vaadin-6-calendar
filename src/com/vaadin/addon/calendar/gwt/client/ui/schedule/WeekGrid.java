@@ -1609,6 +1609,8 @@ public class WeekGrid extends SimplePanel {
             }
 
             public void onMouseDown(MouseDownEvent event) {
+                startX = event.getClientX();
+                startY = event.getClientY();
                 if (isDisabled()
                         || event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
                     return;
@@ -1622,8 +1624,6 @@ public class WeekGrid extends SimplePanel {
                         || clickTargetsResize()) {
                     moveRegistration = addMouseMoveHandler(this);
                     setFocus(true);
-                    startX = event.getClientX();
-                    startY = event.getClientY();
                     try {
                         startYrelative = (int) ((double) event
                                 .getRelativeY(caption) % slotHeight);
@@ -1658,7 +1658,7 @@ public class WeekGrid extends SimplePanel {
             }
 
             public void onMouseUp(MouseUpEvent event) {
-                if (mouseMoveCanceled || !mouseMoveStarted) {
+                if (mouseMoveCanceled) {
                     return;
                 }
 
