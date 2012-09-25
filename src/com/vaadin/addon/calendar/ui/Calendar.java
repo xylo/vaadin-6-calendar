@@ -266,8 +266,8 @@ public class Calendar extends AbstractComponent implements
         setDefaultHandlers();
         currentCalendar.setTime(new Date());
         setEventProvider(eventProvider);
-        getState().setFirstDayOfWeek(firstDay);
-        getState().setLastDayOfWeek(lastDay);
+        getState().setFirstVisibleDayOfWeek(firstDay);
+        getState().setLastVisibleDayOfWeek(lastDay);
         getState().setFirstHourOfDay(firstHour);
         getState().setLastHourOfDay(lastHour);
         setTimeFormat(null);
@@ -435,7 +435,7 @@ public class Calendar extends AbstractComponent implements
 
         CalendarState state = getState();
 
-        state.setFDOW(currentCalendar.getFirstDayOfWeek());
+        state.setFirstDayOfWeek(currentCalendar.getFirstDayOfWeek());
 
         // If only one is null, throw exception
         // If both are null, set defaults
@@ -745,7 +745,7 @@ public class Calendar extends AbstractComponent implements
         if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7
                 && getLastVisibleDayOfWeek() >= firstDay) {
             this.firstDay = firstDay;
-            getState().setFirstDayOfWeek(firstDay);
+            getState().setFirstVisibleDayOfWeek(firstDay);
         }
     }
 
@@ -780,7 +780,7 @@ public class Calendar extends AbstractComponent implements
         if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7
                 && getFirstVisibleDayOfWeek() <= lastDay) {
             this.lastDay = lastDay;
-            getState().setLastDayOfWeek(lastDay);
+            getState().setLastVisibleDayOfWeek(lastDay);
         }
     }
 

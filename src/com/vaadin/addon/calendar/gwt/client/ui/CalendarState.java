@@ -14,11 +14,11 @@ public class CalendarState extends ComponentState {
     private boolean format24H;
     private String[] dayNames;
     private String[] monthNames;
-    private int firstDayOfWeek;
-    private int lastDayOfWeek;
+    private int firstVisibleDayOfWeek;
+    private int lastVisibleDayOfWeek;
     private int firstHourOfDay;
     private int lastHourOfDay;
-    private int fdow;
+    private int firstDayOfWeek;
     private int scroll;
     private String now;
     private List<CalendarState.Day> days;
@@ -239,8 +239,8 @@ public class CalendarState extends ComponentState {
      * 
      * @return
      */
-    public int getFirstDayOfWeek() {
-        return firstDayOfWeek;
+    public int getFirstVisibleDayOfWeek() {
+        return firstVisibleDayOfWeek;
     }
 
     /**
@@ -248,16 +248,16 @@ public class CalendarState extends ComponentState {
      * 
      * @param firstDayOfWeek
      */
-    public void setFirstDayOfWeek(int firstDayOfWeek) {
-        this.firstDayOfWeek = firstDayOfWeek;
+    public void setFirstVisibleDayOfWeek(int firstDayOfWeek) {
+        this.firstVisibleDayOfWeek = firstDayOfWeek;
     }
 
-    public int getLastDayOfWeek() {
-        return lastDayOfWeek;
+    public int getLastVisibleDayOfWeek() {
+        return lastVisibleDayOfWeek;
     }
 
-    public void setLastDayOfWeek(int lastDayOfWeek) {
-        this.lastDayOfWeek = lastDayOfWeek;
+    public void setLastVisibleDayOfWeek(int lastDayOfWeek) {
+        this.lastVisibleDayOfWeek = lastDayOfWeek;
     }
 
     public int getFirstHourOfDay() {
@@ -321,8 +321,8 @@ public class CalendarState extends ComponentState {
      * 
      * @return
      */
-    public int getFDOW() {
-        return fdow;
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
     }
 
     /**
@@ -330,7 +330,7 @@ public class CalendarState extends ComponentState {
      * 
      * @param fdow
      */
-    public void setFDOW(int fdow) {
-        this.fdow = fdow;
+    public void setFirstDayOfWeek(int fdow) {
+        this.firstDayOfWeek = fdow;
     }
 }

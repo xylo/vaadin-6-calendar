@@ -303,8 +303,8 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
         widget.set24HFormat(state.isFormat24H());
         widget.setDayNames(state.getDayNames());
         widget.setMonthNames(state.getMonthNames());
-        widget.setFirstDayNumber(state.getFirstDayOfWeek());
-        widget.setLastDayNumber(state.getLastDayOfWeek());
+        widget.setFirstDayNumber(state.getFirstVisibleDayOfWeek());
+        widget.setLastDayNumber(state.getLastVisibleDayOfWeek());
         widget.setFirstHourOfTheDay(state.getFirstHourOfDay());
         widget.setLastHourOfTheDay(state.getLastHourOfDay());
         widget.setReadOnly(state.readOnly);
@@ -410,7 +410,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
     private void updateMonthView(List<CalendarState.Day> days,
             List<CalendarState.Event> events) {
         CalendarState state = getState();
-        getWidget().updateMonthView(state.getFDOW(),
+        getWidget().updateMonthView(state.getFirstDayOfWeek(),
                 getWidget().getDateTimeFormat().parse(state.getNow()),
                 days.size(), calendarEventListOf(events),
                 calendarDayListOf(days));
@@ -421,7 +421,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
         CalendarState state = getState();
         getWidget().updateWeekView(state.getScroll(),
                 getWidget().getDateTimeFormat().parse(state.getNow()),
-                days.size(), state.getFDOW(), calendarEventListOf(events),
+                days.size(), state.getFirstDayOfWeek(), calendarEventListOf(events),
                 calendarDayListOf(days));
     }
 
