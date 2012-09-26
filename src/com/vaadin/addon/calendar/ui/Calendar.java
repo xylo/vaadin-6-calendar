@@ -716,7 +716,7 @@ public class Calendar extends AbstractComponent implements
      * integers represented by {@link java.util.Calendar#DAY_OF_WEEK}
      * 
      * @deprecated Use {@link Calendar#getFirstVisibleDayOfWeek()} and
-     *             {@link Calendar#GetLastVisibleDayOfWeek()} instead.
+     *             {@link Calendar#getLastVisibleDayOfWeek()} instead.
      * 
      */
     @Deprecated
@@ -841,8 +841,6 @@ public class Calendar extends AbstractComponent implements
      * 
      * @param firstHour
      *            the first hour of the day to show, between 0 and 23
-     * @param lastHour
-     *            the first hour of the day to show, between 0 and 23
      */
     public void setFirstVisibleHourOfDay(int firstHour) {
         if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23
@@ -873,8 +871,6 @@ public class Calendar extends AbstractComponent implements
      * {@link #setEndDate(Date)}.
      * </p>
      * 
-     * @param firstHour
-     *            the first hour of the day to show, between 0 and 23
      * @param lastHour
      *            the first hour of the day to show, between 0 and 23
      */

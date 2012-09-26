@@ -45,7 +45,7 @@ public class CalendarDateRange implements Serializable {
     /**
      * Get the start date of the date range
      * 
-     * @return
+     * @return the start Date of the range
      */
     public Date getStart() {
         return start;
@@ -54,7 +54,7 @@ public class CalendarDateRange implements Serializable {
     /**
      * Get the end date of the date range
      * 
-     * @return
+     * @return the end Date of the range
      */
     public Date getEnd() {
         return end;
@@ -65,7 +65,8 @@ public class CalendarDateRange implements Serializable {
      * 
      * @param date
      *            The date to check
-     * @return
+     * @return true if the date range contains a date start and end of range
+     *         inclusive; false otherwise
      */
     public boolean inRange(Date date) {
         if (date == null) {
@@ -76,9 +77,10 @@ public class CalendarDateRange implements Serializable {
     }
 
     /**
-     * Serialize the calendar range event for sending to the client side implementation
+     * Serialize the calendar range event for sending to the client side
+     * implementation
      * 
-     * @return
+     * @return the date range serialized as String
      */
     public String serialize() {
         return start.getTime() + DELIMITER + end.getTime();
