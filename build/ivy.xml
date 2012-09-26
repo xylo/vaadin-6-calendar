@@ -10,6 +10,7 @@
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="build->default" />
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="build->default" />
 		<dependency org="com.vaadin" name="vaadin-server" rev="7.0.0.beta2" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0.0.beta2" conf="build->default" />
 		<dependency org="com.vaadin" name="vaadin-client" rev="7.0.0.beta2" conf="build->default" />
 		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta2" conf="build->default" />
 	</dependencies>
