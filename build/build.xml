@@ -25,7 +25,8 @@
 
 	<!-- Retrieve dependencies with ivy. -->
 	<target name="resolve">
-		<ivy:retrieve conf="build" pattern="build/lib/dependency/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
+		<mkdir dir="build/lib/ivyretrieved" />
+		<ivy:retrieve conf="build" pattern="build/lib/ivyretrieved/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
 	</target>
 
     <!-- Clean old compilation results. -->
@@ -36,7 +37,7 @@
 			</fileset>
 		</delete>
 		<delete includeemptydirs="true" failonerror="false">
-			<fileset dir="build/lib/dependency" followsymlinks="false" defaultexcludes="false">
+			<fileset dir="build/lib/ivyretrieved" followsymlinks="false" defaultexcludes="false">
 				<include name="**/*.jar"/>
 			</fileset>
 		</delete>
