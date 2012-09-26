@@ -38,7 +38,7 @@ public class VCalendarAction extends Action {
      * 
      * @param owner
      */
-    public VCalendarAction(VCalendarPaintable owner) {
+    public VCalendarAction(CalendarConnector owner) {
         super(owner);
     }
 
@@ -52,7 +52,7 @@ public class VCalendarAction extends Action {
      * @param key
      *            The unique action key which identifies this particular action
      */
-    public VCalendarAction(VCalendarPaintable owner, CalendarServerRpc rpc,
+    public VCalendarAction(CalendarConnector owner, CalendarServerRpc rpc,
             String key) {
         this(owner);
         this.rpc = rpc;

@@ -59,7 +59,7 @@ import com.vaadin.shared.ui.Connect;
  * @VERSION@
  */
 @Connect(com.vaadin.addon.calendar.ui.Calendar.class)
-public class VCalendarPaintable extends AbstractComponentConnector implements
+public class CalendarConnector extends AbstractComponentConnector implements
         VHasDropHandler, ActionOwner, SimpleManagedLayout {
 
     public static final String ACCESSCRITERIA = "-ac";
@@ -97,7 +97,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
     /**
      * 
      */
-    public VCalendarPaintable() {
+    public CalendarConnector() {
 
         // Listen to events
         registerListeners();
@@ -235,11 +235,11 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
                 left += Window.getScrollLeft();
                 getClient().getContextMenu().showAt(new ActionOwner() {
                     public String getPaintableId() {
-                        return VCalendarPaintable.this.getPaintableId();
+                        return CalendarConnector.this.getPaintableId();
                     }
 
                     public ApplicationConnection getClient() {
-                        return VCalendarPaintable.this.getClient();
+                        return CalendarConnector.this.getClient();
                     }
 
                     @SuppressWarnings("deprecation")
@@ -257,7 +257,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
                                     .getDate().getMonth(), cell.getDate()
                                     .getDate(), 23, 59, 59);
 
-                            return VCalendarPaintable.this.getActionsBetween(
+                            return CalendarConnector.this.getActionsBetween(
                                     start, end);
                         } else if (widget instanceof DateCell) {
                             /*
@@ -268,7 +268,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
                                     cell.getElement(), (Element) ne
                                             .getEventTarget().cast());
                             DateCellSlot slot = cell.getSlot(slotIndex);
-                            return VCalendarPaintable.this.getActionsBetween(
+                            return CalendarConnector.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
                         } else if (widget instanceof DayEvent) {
                             /*
@@ -276,7 +276,7 @@ public class VCalendarPaintable extends AbstractComponentConnector implements
                              */
                             DayEvent dayEvent = (DayEvent) widget;
                             CalendarEvent event = dayEvent.getCalendarEvent();
-                            Action[] actions = VCalendarPaintable.this
+                            Action[] actions = CalendarConnector.this
                                     .getActionsBetween(event.getStartTime(),
                                             event.getEndTime());
                             for (Action action : actions) {
