@@ -3,7 +3,7 @@ package com.vaadin.addon.calendar.test;
 import java.util.TimeZone;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.server.WrappedRequest;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
@@ -23,7 +23,7 @@ import com.vaadin.ui.VerticalLayout;
 public class TestingApplication extends UI {
 
     @Override
-    public void init(WrappedRequest request) {
+    public void init(VaadinRequest request) {
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         String pathInfo = request.getRequestPathInfo();

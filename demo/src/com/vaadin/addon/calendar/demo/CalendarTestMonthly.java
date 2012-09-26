@@ -11,7 +11,7 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.annotations.Theme;
-import com.vaadin.server.WrappedRequest;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
@@ -32,7 +32,7 @@ public class CalendarTestMonthly extends UI implements CalendarEventProvider {
     private Label label = new Label("");
 
     @Override
-    public void init(WrappedRequest request) {
+    public void init(VaadinRequest request) {
         calendarComponent = new Calendar(this);
         calendarComponent.setTimeFormat(TimeFormat.Format24H);
 

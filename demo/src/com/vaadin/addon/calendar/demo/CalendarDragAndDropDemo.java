@@ -12,7 +12,7 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.WrappedRequest;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -36,7 +36,7 @@ public class CalendarDragAndDropDemo extends UI {
             "Thea", "Epimetheus", "Metis" };
 
     @Override
-    public void init(WrappedRequest request) {
+    public void init(VaadinRequest request) {
         Table table = createDDTable();
         final Calendar calendar = createDDCalendar();
 

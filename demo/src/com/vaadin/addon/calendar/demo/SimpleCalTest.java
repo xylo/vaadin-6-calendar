@@ -27,7 +27,7 @@ import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.Page;
-import com.vaadin.server.WrappedRequest;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -49,7 +49,7 @@ public class SimpleCalTest extends UI {
 
     @SuppressWarnings("serial")
     @Override
-    public void init(WrappedRequest request) {
+    public void init(VaadinRequest request) {
         setLocale(Locale.US);
 
         final Calendar cal = new Calendar(provider);

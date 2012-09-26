@@ -12,7 +12,7 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.Calendar.TimeFormat;
 import com.vaadin.annotations.Theme;
-import com.vaadin.server.WrappedRequest;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -34,7 +34,7 @@ public class CalendarTestWeekly extends UI implements CalendarEventProvider {
     private final Label label = new Label("");
 
     @Override
-    public void init(WrappedRequest request) {
+    public void init(VaadinRequest request) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         calendarComponent = new Calendar(this);
