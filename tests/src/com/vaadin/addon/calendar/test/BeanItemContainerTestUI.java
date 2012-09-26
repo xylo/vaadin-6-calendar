@@ -11,16 +11,18 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 
-public class BeanItemContainerTestApp extends VerticalSplitPanel {
+public class BeanItemContainerTestUI extends UI {
 
     private Calendar calendar;
 
@@ -29,8 +31,12 @@ public class BeanItemContainerTestApp extends VerticalSplitPanel {
     private BeanItemContainer<BasicEvent> events = new BeanItemContainer<BasicEvent>(
             BasicEvent.class);
 
-    public BeanItemContainerTestApp() {
-        setSizeFull();
+    @SuppressWarnings("deprecation")
+    @Override
+    protected void init(VaadinRequest request) {
+        VerticalSplitPanel content = new VerticalSplitPanel();
+        content.setSizeFull();
+        setContent(content);
 
         // Create Calendar
         calendar = new Calendar();

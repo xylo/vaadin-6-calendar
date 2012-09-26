@@ -6,20 +6,25 @@ import java.util.GregorianCalendar;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
  * A testing application to demonstrate the use of the JPAContainer with the
  * Calendar
  */
-public class JPAContainerTestApp extends VerticalLayout {
+public class JPAContainerTestUI extends UI {
 
     public static final String PERSISTANCE_UNIT = "jpa-container-test-persistance-unit";
 
     private JPAContainer<PersistentEvent> eventContainer;
 
-    public JPAContainerTestApp() {
-        setSizeFull();
+    @Override
+    protected void init(VaadinRequest request) {
+        VerticalLayout content = new VerticalLayout();
+        content.setSizeFull();
+        setContent(content);
 
         // Create the JPA Container
         eventContainer = JPAContainerFactory.make(PersistentEvent.class,

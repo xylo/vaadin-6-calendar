@@ -13,9 +13,10 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class NotificationTestApp extends VerticalLayout {
+public class NotificationTestUI extends UI {
 
     private DummyEventProvider provider;
 
@@ -39,7 +40,10 @@ public class NotificationTestApp extends VerticalLayout {
 
     }
 
-    public NotificationTestApp() {
+    @Override
+    protected void init(com.vaadin.server.VaadinRequest request) {
+        VerticalLayout content = new VerticalLayout();
+        setContent(content);
         final Button btn = new Button("Show working notification",
                 new Button.ClickListener() {
                     public void buttonClick(ClickEvent event) {

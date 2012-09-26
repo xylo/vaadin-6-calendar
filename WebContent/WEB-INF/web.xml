@@ -31,8 +31,8 @@
 		<servlet-class>
 		com.vaadin.server.VaadinServlet</servlet-class>
 		<init-param>
-			<param-name>UI</param-name>
-			<param-value>com.vaadin.addon.calendar.test.TestingApplication</param-value>
+			<param-name>UIProvider</param-name>
+			<param-value>com.vaadin.addon.calendar.test.TestingUIProvider</param-value>
 		</init-param>
 		<init-param>
 			<param-name>widgetset</param-name>

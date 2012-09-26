@@ -7,17 +7,20 @@ import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.ui.Calendar;
 import com.vaadin.addon.calendar.ui.CalendarDateRange;
 import com.vaadin.event.Action;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class CalendarActionsApp extends VerticalLayout {
+public class CalendarActionsUI extends UI {
 
-    /**
-     * Construct
-     */
-    public CalendarActionsApp() {
-        setSizeFull();
+    @SuppressWarnings("deprecation")
+    @Override
+    protected void init(VaadinRequest request) {
+        VerticalLayout content = new VerticalLayout();
+        content.setSizeFull();
+        setContent(content);
 
         final Calendar calendar = new Calendar();
         calendar.setLocale(new Locale("fi", "FI"));
@@ -82,8 +85,7 @@ public class CalendarActionsApp extends VerticalLayout {
             }
         }));
 
-        setExpandRatio(calendar, 1);
+        content.setExpandRatio(calendar, 1);
 
     }
-
 }
