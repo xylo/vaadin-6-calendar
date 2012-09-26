@@ -1,1 +1,0 @@
-Build system generates dependencies into this folder. Leave it empty.

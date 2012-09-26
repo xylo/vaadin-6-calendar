@@ -25,7 +25,7 @@
 
 	<!-- Retrieve dependencies with ivy. -->
 	<target name="resolve">
-		<ivy:retrieve conf="build" pattern="build/lib/dependency/[artifact](-[classifier])(-[revision]).[ext]"/>
+		<ivy:retrieve conf="build" pattern="build/lib/dependency/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
 	</target>
 
     <!-- Clean old compilation results. -->
