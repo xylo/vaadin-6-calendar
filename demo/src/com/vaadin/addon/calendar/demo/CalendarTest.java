@@ -41,8 +41,10 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -97,7 +99,7 @@ public class CalendarTest extends UI {
     private Window scheduleEventPopup;
 
     private final FormLayout scheduleEventFieldLayout = new FormLayout();
-    private final FieldGroup scheduleEventFieldGroup = new FieldGroup();
+    private FieldGroup scheduleEventFieldGroup = new FieldGroup();
 
     private Button deleteEventButton;
 
@@ -143,7 +145,7 @@ public class CalendarTest extends UI {
     @SuppressWarnings("serial")
     @Override
     public void init(VaadinRequest request) {
-        VerticalLayout layout = new VerticalLayout();
+        GridLayout layout = new GridLayout();
         layout.setSizeFull();
         layout.setMargin(true);
         setContent(layout);
@@ -210,8 +212,6 @@ public class CalendarTest extends UI {
 
         initCalendar();
         initLayoutContent();
-        initFormFields();
-
         addInitialEvents();
     }
 
@@ -332,11 +332,11 @@ public class CalendarTest extends UI {
                 Alignment.MIDDLE_LEFT);
         controlPanel.setComponentAlignment(addNewEvent, Alignment.MIDDLE_LEFT);
 
-        VerticalLayout layout = (VerticalLayout) getContent();
+        GridLayout layout = (GridLayout) getContent();
         layout.addComponent(controlPanel);
         layout.addComponent(hl);
         layout.addComponent(calendarComponent);
-        layout.setExpandRatio(calendarComponent, 1);
+        layout.setRowExpandRatio(layout.getRows() - 1, 1.0f);
     }
 
     private void initNavigationButtons() {
@@ -457,7 +457,8 @@ public class CalendarTest extends UI {
         });
     }
 
-    private void initFormFields() {
+    private void initFormFields(Layout formLayout,
+            Class<? extends CalendarEvent> eventClass) {
 
         startDateField = createDateField("Start date");
         endDateField = createDateField("End date");
@@ -480,22 +481,29 @@ public class CalendarTest extends UI {
         });
 
         captionField = createTextField("Caption");
+        final TextField whereField = createTextField("Where");
         final TextArea descriptionField = createTextArea("Description");
         descriptionField.setRows(3);
 
         final ComboBox styleNameField = createStyleNameComboBox();
 
-        scheduleEventFieldLayout.addComponent(startDateField);
-        scheduleEventFieldLayout.addComponent(endDateField);
-        scheduleEventFieldLayout.addComponent(allDayField);
-        scheduleEventFieldLayout.addComponent(captionField);
-        scheduleEventFieldLayout.addComponent(descriptionField);
-        scheduleEventFieldLayout.addComponent(styleNameField);
+        formLayout.addComponent(startDateField);
+        formLayout.addComponent(endDateField);
+        formLayout.addComponent(allDayField);
+        formLayout.addComponent(captionField);
+        if (eventClass == CalendarTestEvent.class) {
+            formLayout.addComponent(whereField);
+        }
+        formLayout.addComponent(descriptionField);
+        formLayout.addComponent(styleNameField);
 
         scheduleEventFieldGroup.bind(startDateField, "start");
         scheduleEventFieldGroup.bind(endDateField, "end");
         scheduleEventFieldGroup.bind(captionField, "caption");
         scheduleEventFieldGroup.bind(descriptionField, "description");
+        if (eventClass == CalendarTestEvent.class) {
+            scheduleEventFieldGroup.bind(whereField, "where");
+        }
         scheduleEventFieldGroup.bind(styleNameField, "styleName");
         scheduleEventFieldGroup.bind(allDayField, "allDay");
     }
@@ -940,9 +948,10 @@ public class CalendarTest extends UI {
     }
 
     private void updateCalendarEventForm(CalendarEvent event) {
-        // Lets create a CalendarEvent BeanItem and pass it to the form's data
-        // source.
         BeanItem<CalendarEvent> item = new BeanItem<CalendarEvent>(event);
+        scheduleEventFieldLayout.removeAllComponents();
+        scheduleEventFieldGroup = new FieldGroup();
+        initFormFields(scheduleEventFieldLayout, event.getClass());
         scheduleEventFieldGroup.setBuffered(true);
         scheduleEventFieldGroup.setItemDataSource(item);
     }

@@ -3,6 +3,7 @@ package com.vaadin.addon.calendar.test;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import com.vaadin.addon.calendar.event.BasicEvent;
 import com.vaadin.addon.calendar.event.CalendarEvent;
@@ -55,6 +56,7 @@ public class NotificationTestUI extends UI {
 
         provider = new DummyEventProvider();
         final Calendar cal = new Calendar(provider);
+        cal.setLocale(Locale.US);
         cal.setSizeFull();
         cal.setHandler(new DateClickHandler() {
             public void dateClick(DateClickEvent event) {

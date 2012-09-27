@@ -10,15 +10,15 @@ import com.vaadin.event.Action;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 public class CalendarActionsUI extends UI {
 
     @SuppressWarnings("deprecation")
     @Override
     protected void init(VaadinRequest request) {
-        VerticalLayout content = new VerticalLayout();
+        GridLayout content = new GridLayout(1, 2);
         content.setSizeFull();
         setContent(content);
 
@@ -85,7 +85,7 @@ public class CalendarActionsUI extends UI {
             }
         }));
 
-        content.setExpandRatio(calendar, 1);
+        content.setRowExpandRatio(0, 1);
 
     }
 }
