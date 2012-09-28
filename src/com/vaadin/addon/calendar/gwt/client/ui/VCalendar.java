@@ -614,6 +614,9 @@ public class VCalendar extends Composite {
     public void setSizeForChildren(int newWidth, int newHeight) {
         intWidth = newWidth;
         intHeight = newHeight;
+        isWidthUndefined = intWidth == -1;
+        dayToolbar.setVerticalSized(isHeightUndefined);
+        dayToolbar.setHorizontalSized(isWidthUndefined);
         recalculateWidths();
         recalculateHeights();
     }
@@ -658,6 +661,9 @@ public class VCalendar extends Composite {
 
             if (monthGrid != null) {
                 monthGrid.setWidthPX(intWidth);
+            } else if (weekGrid != null) {
+                weekGrid.setWidthPX(intWidth);
+                weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
             }
         }
     }

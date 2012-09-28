@@ -3,6 +3,8 @@
  */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
+import java.util.Iterator;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -147,9 +149,31 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
     public void setVerticalSized(boolean sized) {
         verticalSized = sized;
+        updateDayLabelSizedStyleNames();
     }
 
     public void setHorizontalSized(boolean sized) {
         horizontalSized = sized;
+        updateDayLabelSizedStyleNames();
+    }
+
+    private void updateDayLabelSizedStyleNames() {
+        Iterator<Widget> it = iterator();
+        while (it.hasNext()) {
+            updateWidgetSizedStyleName(it.next());
+        }
+    }
+
+    private void updateWidgetSizedStyleName(Widget w) {
+        if (verticalSized) {
+            w.addStyleDependentName("Vsized");
+        } else {
+            w.removeStyleDependentName("VSized");
+        }
+        if (horizontalSized) {
+            w.addStyleDependentName("Hsized");
+        } else {
+            w.removeStyleDependentName("HSized");
+        }
     }
 }

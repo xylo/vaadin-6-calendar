@@ -318,18 +318,13 @@ public class CalendarConnector extends AbstractComponentConnector implements
         List<CalendarState.Day> days = state.getDays();
         List<CalendarState.Event> events = state.getEvents();
 
-        final int newWidth = getLayoutManager().getOuterWidth(
-                getWidget().getElement());
-        final int newHeight = getLayoutManager().getOuterHeight(
-                getWidget().getElement());
         if (monthView) {
             updateMonthView(days, events);
         } else {
             updateWeekView(days, events);
         }
-        if (newWidth != -1 && newHeight != -1) {
-            getWidget().setSizeForChildren(newWidth, newHeight);
-        }
+
+        updateSizes();
 
         registerEventToolTips(state.getEvents());
         updateActionMap(state.getActions());
@@ -412,7 +407,7 @@ public class CalendarConnector extends AbstractComponentConnector implements
         CalendarState state = getState();
         getWidget().updateMonthView(state.getFirstDayOfWeek(),
                 getWidget().getDateTimeFormat().parse(state.getNow()),
-                days.size(), calendarEventListOf(events),
+                days.size(), calendarEventListOf(events, state.isFormat24H()),
                 calendarDayListOf(days));
     }
 
@@ -421,7 +416,8 @@ public class CalendarConnector extends AbstractComponentConnector implements
         CalendarState state = getState();
         getWidget().updateWeekView(state.getScroll(),
                 getWidget().getDateTimeFormat().parse(state.getNow()),
-                days.size(), state.getFirstDayOfWeek(), calendarEventListOf(events),
+                days.size(), state.getFirstDayOfWeek(),
+                calendarEventListOf(events, state.isFormat24H()),
                 calendarDayListOf(days));
     }
 
@@ -586,7 +582,7 @@ public class CalendarConnector extends AbstractComponentConnector implements
     }
 
     private List<CalendarEvent> calendarEventListOf(
-            List<CalendarState.Event> events) {
+            List<CalendarState.Event> events, boolean format24h) {
         List<CalendarEvent> list = new ArrayList<CalendarEvent>(events.size());
         for (CalendarState.Event event : events) {
             final String dateFrom = event.getDateFrom();
@@ -599,6 +595,7 @@ public class CalendarConnector extends AbstractComponentConnector implements
             calendarEvent.setDescription(event.getDescription());
             calendarEvent.setStart(getWidget().getDateFormat().parse(dateFrom));
             calendarEvent.setEnd(getWidget().getDateFormat().parse(dateTo));
+            calendarEvent.setFormat24h(format24h);
             calendarEvent.setStartTime(getWidget().getDateTimeFormat().parse(
                     dateFrom + " " + timeFrom));
             calendarEvent.setEndTime(getWidget().getDateTimeFormat().parse(
@@ -624,9 +621,22 @@ public class CalendarConnector extends AbstractComponentConnector implements
 
     @Override
     public void layout() {
+        updateSizes();
+    }
+
+    private void updateSizes() {
         int height = getLayoutManager()
                 .getOuterHeight(getWidget().getElement());
         int width = getLayoutManager().getOuterWidth(getWidget().getElement());
+
+        if (isUndefinedWidth()) {
+            width = -1;
+        }
+        if (isUndefinedHeight()) {
+            height = -1;
+        }
+
         getWidget().setSizeForChildren(width, height);
+
     }
 }

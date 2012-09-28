@@ -134,6 +134,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             intHeight = px - BORDERPADDINGSIZE;
         }
 
+        // Couldn't measure height or it ended up negative. Don't bother
+        // continuing
+        if (intHeight == -1) {
+            return;
+        }
+
         if (clear) {
             while (getWidgetCount() > 1) {
                 remove(1);
@@ -201,6 +207,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             newHeight = EVENTHEIGHT;
         }
         bottomspacer.setHeight(newHeight + "px");
+
         if (clear) {
             add(bottomspacer);
         }
