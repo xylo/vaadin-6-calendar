@@ -4,7 +4,7 @@
 	<ivy:resolve file="build/ivy.xml" />
 
     <!-- Main target that does all -->
-    <target name="all" depends="compile, widgetset, tests, manual, javadoc, package-jar, package-zip, demo.war"/>
+    <target name="all" depends="clean-all, compile, widgetset, tests, manual, javadoc, package-jar, package-zip, demo.war"/>
 
 	<!-- Build type specific configuration -->
     <echo>Using build type specfic property file: "${build.properties.file}"</echo>
