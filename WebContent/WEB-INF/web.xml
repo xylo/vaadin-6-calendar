@@ -11,12 +11,10 @@
   <servlet>
     <servlet-name>Demo</servlet-name>
     <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
-    <init-param>
-      <description>
-  		Vaadin application class to start</description>
-      <param-name>UI</param-name>
-      <param-value>com.vaadin.addon.calendar.demo.CalendarTest</param-value>
-    </init-param>
+		<init-param>
+			<param-name>UIProvider</param-name>
+			<param-value>com.vaadin.addon.calendar.demo.DemoUIProvider</param-value>
+		</init-param>
     <init-param>
       <description>
   		Application widgetset</description>
