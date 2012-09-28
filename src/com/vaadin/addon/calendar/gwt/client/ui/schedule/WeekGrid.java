@@ -231,6 +231,7 @@ public class WeekGrid extends SimplePanel {
 
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
+                    dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
                     dc.setWidthPX(cellWidths[i - 1]);
                     if (dc.isToday()) {
                         dc.setTimeBarWidth(getOffsetWidth());
@@ -960,7 +961,6 @@ public class WeekGrid extends SimplePanel {
             for (int i = 0; i < slotElements.length; i++) {
                 slotElements[i].getStyle().setHeight(slotElementHeights[i],
                         Unit.PX);
-
             }
 
             Iterator<Widget> it = iterator();
