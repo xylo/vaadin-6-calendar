@@ -112,6 +112,8 @@
 				<pathelement path="${class-dir}" />
 			</classpath>
 
+			<formatter type="brief" usefile="no"/>
+
 			<jvmarg value="-Dcom.vaadin.testbench.tester.host=${com.vaadin.testbench.tester.host}" />
 			<jvmarg value="-Dcom.vaadin.testbench.deployment.url=${com.vaadin.testbench.deployment.url}" />
 			<!-- Define where the reference screenshots and diff files are saved -->
