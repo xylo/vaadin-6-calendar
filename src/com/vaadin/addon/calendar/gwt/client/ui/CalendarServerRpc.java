@@ -1,5 +1,6 @@
 package com.vaadin.addon.calendar.gwt.client.ui;
 
+import com.vaadin.shared.annotations.Delayed;
 import com.vaadin.shared.communication.ServerRpc;
 
 /**
@@ -29,5 +30,6 @@ public interface CalendarServerRpc extends ServerRpc {
     void actionOnEvent(String actionKey, String startDate, String endDate,
             int eventIndex);
 
+    @Delayed(lastonly = true)
     void scroll(int scrollPosition);
 }

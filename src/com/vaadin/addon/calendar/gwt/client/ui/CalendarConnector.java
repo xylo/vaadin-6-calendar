@@ -212,10 +212,7 @@ public class CalendarConnector extends AbstractComponentConnector implements
         });
         getWidget().setListener(new VCalendar.ScrollListener() {
             public void scroll(int scrollPosition) {
-                // This was using client.updateVariable() with immediate ==
-                // false,
-                // but equivalent for it is not apparently present in Vaadin 7
-                // alpha 3 yet
+                // This call is @Delayed (== non-immediate)
                 rpc.scroll(scrollPosition);
             }
         });
