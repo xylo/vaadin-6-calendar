@@ -67,6 +67,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
                     // setCellWidth(widget, cellw + "px");
                     // }
                     setCellWidth(widget, cellWidths[i - 1] + "px");
+                    widget.setWidth(cellWidths[i - 1] + "px");
                 }
             }
         }
