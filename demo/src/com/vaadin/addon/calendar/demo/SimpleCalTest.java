@@ -177,7 +177,7 @@ public class SimpleCalTest extends UI {
                         removeWindow(w);
                     }
                 }));
-                buttons.addComponent(new Button("Calcel", new ClickListener() {
+                buttons.addComponent(new Button("Cancel", new ClickListener() {
 
                     public void buttonClick(ClickEvent event) {
                         removeWindow(w);
