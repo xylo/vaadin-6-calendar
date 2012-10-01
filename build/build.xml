@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Calendar" basedir="../" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
 
+  <ivy:settings file="build/ivysettings.xml" />
 	<ivy:resolve file="build/ivy.xml" />
 
     <!-- Main target that does all -->
