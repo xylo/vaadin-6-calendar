@@ -39,7 +39,10 @@
 		</delete>
 		<delete includeemptydirs="true" failonerror="false">
 			<fileset dir="build/lib/ivyretrieved" followsymlinks="false" defaultexcludes="false">
-				<include name="**/*.jar"/>
+				<include name="**/*"/>
+			</fileset>
+			<fileset dir="build/lib/dependency" followsymlinks="false" defaultexcludes="false">
+				<include name="**/*"/>
 			</fileset>
 		</delete>
 	</target>
