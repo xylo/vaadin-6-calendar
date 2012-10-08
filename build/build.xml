@@ -28,6 +28,7 @@
 	<target name="resolve">
 		<mkdir dir="build/lib/ivyretrieved" />
 		<ivy:retrieve conf="build" pattern="build/lib/ivyretrieved/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
+		<ivy:retrieve conf="runtime" pattern="${result-path}/war/WEB-INF/lib/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
 	</target>
 
     <!-- Clean old compilation results. -->
@@ -363,7 +364,7 @@ Implementation-Vendor: ${addon.vendor}
 
 		<war destfile="${war.path}" webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="${result.classes}"/>
-			<lib dir="build/lib/ivyretrieved" />
+			<lib dir="${result-path}/war/WEB-INF/lib" excludes="*src*" />
 			<lib file="${jar.path}" />
 			<fileset dir="WebContent">
 				<patternset>
