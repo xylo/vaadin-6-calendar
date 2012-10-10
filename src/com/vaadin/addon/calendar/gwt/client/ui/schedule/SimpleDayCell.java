@@ -360,12 +360,21 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         }
     }
 
+    private boolean hasMoved(NativeEvent event, int xthreshold, int ythreshold) {
+        int xDiff = startX - Util.getTouchOrMouseClientX(event);
+        int yDiff = startY - Util.getTouchOrMouseClientY(event);
+        return Math.abs(xDiff) > xthreshold || Math.abs(yDiff) > ythreshold;
+    }
+
     private void handleMouseUpAndTouchEnd(NativeEvent event) {
 
         Widget w = null;
         com.google.gwt.user.client.Element eventTargetElement = (com.google.gwt.user.client.Element) Element
                 .as(event.getEventTarget());
-        if (isDragging() || isRangeSelect()) {
+        final boolean hasMoved = hasMoved(event, 3, 3);
+        if (isDragging() && hasMoved) {
+            w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
+        } else if (isRangeSelect()) {
             w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
         } else {
             if (labelMouseDown) {
@@ -392,15 +401,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         if (isDragging()) {
             MonthEventLabel mel = (MonthEventLabel) clickedWidget;
 
-            int xDiff = startX - Util.getTouchOrMouseClientX(event);
-            int yDiff = startY - Util.getTouchOrMouseClientY(event);
             startX = -1;
             startY = -1;
             prevDayDiff = 0;
             prevWeekDiff = 0;
 
-            if (!mel.isTimeSpecificEvent()
-                    && (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3)) {
+            if (!mel.isTimeSpecificEvent() && hasMoved) {
                 // If event was dragged, but no enough over day/week threshold
                 // moveEvent is null
                 if (moveEvent != null) {
