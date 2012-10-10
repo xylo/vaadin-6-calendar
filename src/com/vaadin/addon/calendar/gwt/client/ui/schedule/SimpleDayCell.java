@@ -11,19 +11,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.HumanInputEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseEvent;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.dom.client.TouchEndEvent;
-import com.google.gwt.event.dom.client.TouchEndHandler;
 import com.google.gwt.event.dom.client.TouchEvent;
 import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.dom.client.TouchStartHandler;
@@ -31,18 +20,21 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
+import com.vaadin.client.Util;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.ui.FocusableFlowPanel;
 
 /**
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FocusableFlowPanel implements
-        MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler,
-        TouchStartHandler, TouchEndHandler {
+        MouseDownHandler, TouchStartHandler, NativePreviewHandler {
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
@@ -57,14 +49,11 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private final int cell;
     private final int row;
     private boolean monthNameVisible;
-    private HandlerRegistration mouseUpRegistration;
     private HandlerRegistration mouseDownRegistration;
-    private HandlerRegistration mouseOverRegistration;
-    private HandlerRegistration moveRegistration;
     private HandlerRegistration bottomSpacerMouseDownHandler;
     private HandlerRegistration bottomSpacerTouchStartHandler;
     private HandlerRegistration touchStartRegistration;
-    private HandlerRegistration touchEndRegistration;
+    private HandlerRegistration nativePreviewRegistration;
     private boolean monthEventMouseDown;
     private boolean labelMouseDown;
     private int eventCount = 0;
@@ -82,7 +71,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private boolean scrollable = false;
     private boolean eventCanceled;
     private MonthGrid monthGrid;
-    private HandlerRegistration keyDownHandler;
+    boolean rangeSelect = false;
+    boolean dragging = false;
 
     public SimpleDayCell(VCalendar calendar, int row, int cell) {
         this.calendar = calendar;
@@ -97,9 +87,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         add(caption);
         add(bottomspacer);
         caption.addMouseDownHandler(this);
-        caption.addMouseUpHandler(this);
         caption.addTouchStartHandler(this);
-        caption.addTouchEndHandler(this);
     }
 
     @Override
@@ -181,7 +169,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         }
 
         updateEvents(slots, clear);
-
     }
 
     public void updateEvents(int slots, boolean clear) {
@@ -270,9 +257,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         MonthEventLabel eventDiv = new MonthEventLabel();
         eventDiv.addStyleDependentName("month");
         eventDiv.addMouseDownHandler(this);
-        eventDiv.addMouseUpHandler(this);
         eventDiv.addTouchStartHandler(this);
-        eventDiv.addTouchEndHandler(this);
         eventDiv.setCalendar(calendar);
         eventDiv.setEventIndex(e.getIndex());
 
@@ -352,65 +337,63 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                 + calendar.getMonthNames()[date.getMonth()]);
     }
 
-    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
-        return addDomHandler(handler, MouseMoveEvent.getType());
-    }
-
     @Override
     protected void onAttach() {
         super.onAttach();
-        mouseUpRegistration = addDomHandler(this, MouseUpEvent.getType());
-        touchEndRegistration = addDomHandler(this, TouchEndEvent.getType());
         mouseDownRegistration = addDomHandler(this, MouseDownEvent.getType());
         touchStartRegistration = addDomHandler(this, TouchStartEvent.getType());
-        mouseOverRegistration = addDomHandler(this, MouseOverEvent.getType());
     }
 
     @Override
     protected void onDetach() {
-        mouseUpRegistration.removeHandler();
-        touchEndRegistration.removeHandler();
         mouseDownRegistration.removeHandler();
         touchStartRegistration.removeHandler();
-        mouseOverRegistration.removeHandler();
         super.onDetach();
     }
 
-    public void onMouseUp(MouseUpEvent event) {
-        if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
-            return;
+    private void handleMouseOver(NativeEvent event) {
+        com.google.gwt.user.client.Element eventTargetElement = (com.google.gwt.user.client.Element) Element
+                .as(event.getEventTarget());
+        Widget w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
+        if (w != null) {
+            getMonthGrid().setSelectionEnd((SimpleDayCell) w);
         }
-
-        handleMouseUpAndTouchEnd(event);
     }
 
-    @Override
-    public void onTouchEnd(TouchEndEvent event) {
-        handleMouseUpAndTouchEnd(event);
-    }
+    private void handleMouseUpAndTouchEnd(NativeEvent event) {
 
-    private <H extends EventHandler> void handleMouseUpAndTouchEnd(
-            HumanInputEvent<H> event) {
-
-        Widget w = (Widget) event.getSource();
-        if (moveRegistration != null) {
-            Event.releaseCapture(getElement());
-            moveRegistration.removeHandler();
-            moveRegistration = null;
-            keyDownHandler.removeHandler();
-            keyDownHandler = null;
+        Widget w = null;
+        com.google.gwt.user.client.Element eventTargetElement = (com.google.gwt.user.client.Element) Element
+                .as(event.getEventTarget());
+        if (isDragging() || isRangeSelect()) {
+            w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
+        } else {
+            if (labelMouseDown) {
+                w = Util.findWidget(eventTargetElement, Label.class);
+                if (w != null) {
+                    String clickedDate = calendar.getDateFormat().format(date);
+                    if (calendar.getDateClickListener() != null) {
+                        calendar.getDateClickListener().dateClick(clickedDate);
+                    }
+                }
+            } else if (monthEventMouseDown
+                    && calendar.getEventClickListener() != null) {
+                w = Util.findWidget(eventTargetElement, MonthEventLabel.class);
+                if (w != null) {
+                    CalendarEvent e = getEventByWidget((MonthEventLabel) w);
+                    calendar.getEventClickListener().eventClick(e);
+                }
+            }
         }
 
-        if (w == bottomspacer && monthEventMouseDown) {
-            GWT.log("Mouse up over bottomspacer");
-
-        } else if (clickedWidget instanceof MonthEventLabel
-                && monthEventMouseDown) {
+        // if (w == bottomspacer && monthEventMouseDown) {
+        // GWT.log("Mouse up over bottomspacer");
+        // } else
+        if (isDragging()) {
             MonthEventLabel mel = (MonthEventLabel) clickedWidget;
 
-            Point endXY = getXY(event);
-            int xDiff = startX - endXY.x;
-            int yDiff = startY - endXY.y;
+            int xDiff = startX - Util.getTouchOrMouseClientX(event);
+            int yDiff = startY - Util.getTouchOrMouseClientY(event);
             startX = -1;
             startY = -1;
             prevDayDiff = 0;
@@ -418,26 +401,22 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
             if (!mel.isTimeSpecificEvent()
                     && (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3)) {
-                eventMoved(moveEvent);
-
-            } else if (calendar.getEventClickListener() != null) {
-                CalendarEvent e = getEventByWidget(mel);
-                calendar.getEventClickListener().eventClick(e);
+                // If event was dragged, but no enough over day/week threshold
+                // moveEvent is null
+                if (moveEvent != null) {
+                    eventMoved(moveEvent);
+                }
             }
 
             moveEvent = null;
-        } else if (w == this) {
+        } else if (isRangeSelect()) {
             getMonthGrid().setSelectionReady();
-
-        } else if (w instanceof Label && labelMouseDown) {
-            String clickedDate = calendar.getDateFormat().format(date);
-            if (calendar.getDateClickListener() != null) {
-                calendar.getDateClickListener().dateClick(clickedDate);
-            }
         }
         monthEventMouseDown = false;
         labelMouseDown = false;
         clickedWidget = null;
+        dragging = false;
+        rangeSelect = false;
     }
 
     public void onMouseDown(MouseDownEvent event) {
@@ -453,20 +432,66 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         handleMouseDownAndTouchStart(event);
     }
 
+    @Override
+    public void onPreviewNativeEvent(NativePreviewEvent event) {
+        int typeInt = event.getTypeInt();
+        switch (typeInt) {
+        case Event.ONMOUSEUP:
+        case Event.ONTOUCHEND:
+            event.cancel();
+            handleMouseUpAndTouchEnd(event.getNativeEvent());
+            nativePreviewRegistration.removeHandler();
+            break;
+        case Event.ONTOUCHCANCEL:
+            event.cancel();
+            nativePreviewRegistration.removeHandler();
+            break;
+        case Event.ONMOUSEOVER:
+            if (isRangeSelect()) {
+                handleMouseOver(event.getNativeEvent());
+            }
+            event.cancel();
+            break;
+        case Event.ONMOUSEMOVE:
+        case Event.ONTOUCHMOVE:
+            event.cancel();
+            handleMouseMoveAndTouchMove(event.getNativeEvent());
+            break;
+        case Event.KEYEVENTS:
+            if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE
+                    && isDragging()) {
+                event.cancel();
+                cancelEventDrag((MonthEventLabel) clickedWidget);
+            }
+        default:
+            break;
+        }
+    }
+
+    private boolean isRangeSelect() {
+        return rangeSelect;
+    }
+
+    private boolean isDragging() {
+        return dragging;
+    }
+
     private <H extends EventHandler> void handleMouseDownAndTouchStart(
             HumanInputEvent<H> event) {
         if (calendar.isDisabled()) {
             return;
         }
 
+        nativePreviewRegistration = Event.addNativePreviewHandler(this);
+        VConsole.log(">>>> handleMouseDownAndTouchStart, touch: "
+                + (event instanceof TouchEvent<?>) + ", " + getCell());
+
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
 
         if (w instanceof MonthEventLabel) {
-            // event clicks should be allowed even when read-only
             monthEventMouseDown = true;
-
-            if (w instanceof MonthEventLabel) {
+            if (!((MonthEventLabel) w).isTimeSpecificEvent()) {
                 startCalendarEventDrag(event, (MonthEventLabel) w);
             }
         } else if (!calendar.isReadOnly()) {
@@ -478,12 +503,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     setUnlimitedCellHeight();
                 }
                 reDraw(true);
-
             } else if (w == this && !scrollable) {
                 MonthGrid grid = getMonthGrid();
                 if (!grid.isDisabled() && calendar.isRangeSelectAllowed()) {
                     grid.setSelectionStart(this);
                     grid.setSelectionEnd(this);
+                    rangeSelect = true;
                 }
             } else if (w instanceof Label) {
                 labelMouseDown = true;
@@ -494,31 +519,23 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         event.preventDefault();
     }
 
-    public void onMouseOver(MouseOverEvent event) {
-        event.preventDefault();
-        getMonthGrid().setSelectionEnd(this);
-    }
-
-    public void onMouseMove(MouseMoveEvent event) {
-        if (clickedWidget instanceof MonthEventLabel && !monthEventMouseDown
-                || (startY < 0 && startX < 0)) {
+    private void handleMouseMoveAndTouchMove(NativeEvent event) {
+        if (!isDragging()) {
             return;
         }
 
         MonthEventLabel w = (MonthEventLabel) clickedWidget;
 
         if (calendar.isDisabledOrReadOnly()) {
-            Event.releaseCapture(getElement());
+            dragging = false;
             monthEventMouseDown = false;
             startY = -1;
             startX = -1;
             return;
         }
 
-        int currentY = event.getClientY();
-        int currentX = event.getClientX();
-        int moveY = (currentY - startY);
-        int moveX = (currentX - startX);
+        int moveY = (Util.getTouchOrMouseClientY(event) - startY);
+        int moveX = (Util.getTouchOrMouseClientX(event) - startX);
         if ((moveY < 5 && moveY > -6) && (moveX < 5 && moveX > -6)) {
             return;
         }
@@ -527,8 +544,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         int dateCellHeigth = getHeigth();
 
         Element parent = getMonthGrid().getElement();
-        int relativeX = event.getRelativeX(parent);
-        int relativeY = event.getRelativeY(parent);
+        Point relativeXY = getRelativeXY(event, parent);
         int weekDiff = 0;
         if (moveY > 0) {
             weekDiff = (startYrelative + moveY) / dateCellHeigth;
@@ -545,10 +561,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     / dateCellWidth;
         }
         // Check boundaries
-        if (relativeY < 0
-                || relativeY >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
-                || relativeX < 0
-                || relativeX >= (calendar.getMonthGrid().getColumnCount() * dateCellWidth)) {
+        if (relativeXY.y < 0
+                || relativeXY.y >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
+                || relativeXY.x < 0
+                || relativeXY.x >= (calendar.getMonthGrid().getColumnCount() * dateCellWidth)) {
             return;
         }
 
@@ -583,17 +599,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         }
     }
 
-    public <H extends EventHandler> void startCalendarEventDrag(
+    private <H extends EventHandler> void startCalendarEventDrag(
             HumanInputEvent<H> event, final MonthEventLabel w) {
-        if (w.isTimeSpecificEvent()) {
-            return;
-        }
-
-        moveRegistration = addMouseMoveHandler(this);
-        Point startXY = getXY(event);
-        startX = startXY.x;
-        startY = startXY.y;
-        Point relativeXY = getRelativeXY(event, w.getParent().getElement());
+        startX = Util.getTouchOrMouseClientX(event.getNativeEvent());
+        startY = Util.getTouchOrMouseClientY(event.getNativeEvent());
+        Point relativeXY = getRelativeXY(event.getNativeEvent(), w.getParent()
+                .getElement());
         startXrelative = relativeXY.x;
         startYrelative = relativeXY.y;
 
@@ -601,49 +612,30 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         startDateFrom = (Date) e.getStart().clone();
         startDateTo = (Date) e.getEnd().clone();
 
-        Event.setCapture(getElement());
-        keyDownHandler = addKeyDownHandler(new KeyDownHandler() {
-
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
-                    cancelEventDrag(w);
-                }
-            }
-
-        });
-
         focus();
 
+        dragging = true;
         GWT.log("Start drag");
     }
 
-    private <H extends EventHandler> Point getRelativeXY(
-            HumanInputEvent<H> event, Element relativeTo) {
-        if (event instanceof TouchEvent<?>) {
-            TouchEvent<?> touchEvent = (TouchEvent<?>) event;
-            Touch touch = touchEvent.getChangedTouches().get(0);
+    private Point getRelativeXY(NativeEvent event, Element relativeTo) {
+        if (Util.isTouchEvent(event)) {
+            Touch touch = event.getChangedTouches().get(0);
             return new Point(touch.getRelativeX(relativeTo) % getWidth(),
                     touch.getRelativeY(relativeTo) % getHeigth());
         } else {
-            MouseEvent<?> mouseEvent = (MouseEvent<?>) event;
-            return new Point(mouseEvent.getRelativeX(relativeTo) % getWidth(),
-                    mouseEvent.getRelativeY(relativeTo) % getHeigth());
-        }
-    }
-
-    private <H extends EventHandler> Point getXY(HumanInputEvent<H> event) {
-        if (event instanceof TouchEvent<?>) {
-            TouchEvent<?> touchEvent = (TouchEvent<?>) event;
-            Touch touch = touchEvent.getChangedTouches().get(0);
-            return new Point(touch.getClientX(), touch.getClientY());
-        } else {
-            MouseEvent<?> mouseEvent = (MouseEvent<?>) event;
-            return new Point(mouseEvent.getClientX(), mouseEvent.getClientY());
+            int relativeX = event.getClientX() - relativeTo.getAbsoluteLeft()
+                    + relativeTo.getScrollLeft()
+                    + relativeTo.getOwnerDocument().getScrollLeft();
+            int relativeY = event.getClientY() - relativeTo.getAbsoluteTop()
+                    + relativeTo.getScrollTop()
+                    + relativeTo.getOwnerDocument().getScrollTop();
+            return new Point(relativeX % getWidth(), relativeY % getHeigth());
         }
     }
 
     protected void cancelEventDrag(MonthEventLabel w) {
-        if (moveRegistration != null) {
+        if (isDragging()) {
             // reset position
             if (moveEvent == null) {
                 moveEvent = getEventByWidget(w);
@@ -654,11 +646,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             calendar.updateEventToMonthGrid(moveEvent);
 
             // reset drag-related properties
-            Event.releaseCapture(getElement());
-            moveRegistration.removeHandler();
-            moveRegistration = null;
-            keyDownHandler.removeHandler();
-            keyDownHandler = null;
             setFocus(false);
             monthEventMouseDown = false;
             startY = -1;
@@ -666,6 +653,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             moveEvent = null;
             labelMouseDown = false;
             clickedWidget = null;
+            dragging = false;
         }
     }
 
