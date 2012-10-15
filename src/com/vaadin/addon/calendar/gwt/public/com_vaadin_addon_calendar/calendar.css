@@ -117,7 +117,11 @@
 }
 
 .v-calendar-month-day-dragemphasis {
-		background-color: #a8a8a8;
+	background-color: #a8a8a8;
+}
+
+.v-calendar-month-day-emphasis {
+	background-color: #a8a8a8;
 }
 
 .v-calendar-month-day-scrollable {
@@ -176,6 +180,10 @@
 	background: #999;
 	display: block;
 	margin-left: -2px;
+}
+
+.v-calendar-event-all-day-dd {
+	z-index: 40000
 }
 
 div.v-calendar-event-all-day {
