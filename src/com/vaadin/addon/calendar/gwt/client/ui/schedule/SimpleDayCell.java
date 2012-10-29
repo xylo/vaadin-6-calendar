@@ -632,11 +632,13 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         lastMoveX = x;
         lastMoveY = y;
         Element dropElement = null;
+        dragEventWidget.setVisible(false);
         if (Util.isTouchEvent(event)) {
             dropElement = Util.getElementFromPoint(x, y);
         } else {
             dropElement = Util.getElementUnderMouse(event);
         }
+        dragEventWidget.setVisible(true);
         Widget potentialDropTarget = Util.findWidget(
                 (com.google.gwt.user.client.Element) Element.as(dropElement),
                 SimpleDayCell.class);
