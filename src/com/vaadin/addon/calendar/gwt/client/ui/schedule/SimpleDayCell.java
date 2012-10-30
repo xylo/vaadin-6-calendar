@@ -62,12 +62,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
     private int startX = -1;
     private int startY = -1;
-    private int startYrelative;
-    private int startXrelative;
     private int lastMoveX = -1;
     private int lastMoveY = -1;
-    private Date startDateFrom;
-    private Date startDateTo;
     private CalendarEvent moveEvent;
     private Widget clickedWidget;
     private Widget dragEventWidget;
@@ -408,9 +404,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             }
         }
 
-        // if (w == bottomspacer && monthEventMouseDown) {
-        // GWT.log("Mouse up over bottomspacer");
-        // } else
         if (isDragging()) {
             MonthEventLabel mel = (MonthEventLabel) clickedWidget;
 
@@ -521,9 +514,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                 + (event instanceof TouchEvent<?>) + ", " + getCell());
 
         Widget w = (Widget) event.getSource();
-        // Widget w = Util.findWidget((com.google.gwt.user.client.Element)
-        // Element
-        // .as(event.getNativeEvent().getEventTarget()), null);
 
         clickedWidget = w;
 
@@ -558,6 +548,14 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     }
 
     private void handleMouseMoveAndTouchMove(NativeEvent event) {
+        if (isDragging()) {
+            handleDragging(event);
+        } else if (isRangeSelect()) {
+            handleRangeSelect(event);
+        }
+    }
+
+    private void handleDragging(NativeEvent event) {
         if (!isDragging()) {
             return;
         }
@@ -582,8 +580,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     .setVisibility(Style.Visibility.HIDDEN);
         }
 
-        int moveY = (Util.getTouchOrMouseClientY(event) - startY);
-        int moveX = (Util.getTouchOrMouseClientX(event) - startX);
+        final int x = Util.getTouchOrMouseClientX(event);
+        final int y = Util.getTouchOrMouseClientY(event);
+        final int moveX = x - startX;
+        final int moveY = y - startY;
         if ((moveY < 5 && moveY > -6) && (moveX < 5 && moveX > -6)) {
             return;
         }
@@ -602,8 +602,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             return;
         }
 
-        final int x = Util.getTouchOrMouseClientX(event);
-        final int y = Util.getTouchOrMouseClientY(event);
         int newLeft = dragEventWidget.getAbsoluteLeft() - (lastMoveX - x);
         int newTop = dragEventWidget.getAbsoluteTop() - (lastMoveY - y);
         RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
@@ -623,6 +621,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                 lastDragEventCell = (SimpleDayCell) potentialDropTarget;
             }
         }
+    }
+
+    private void handleRangeSelect(NativeEvent event) {
+
     }
 
     @SuppressWarnings("deprecation")
@@ -648,14 +650,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         startY = Util.getTouchOrMouseClientY(event.getNativeEvent());
         lastMoveX = startX;
         lastMoveY = startY;
-        Point relativeXY = getRelativeXY(event.getNativeEvent(), w.getParent()
-                .getElement());
-        startXrelative = relativeXY.x;
-        startYrelative = relativeXY.y;
 
         moveEvent = getEventByWidget(w);
-        startDateFrom = (Date) moveEvent.getStart().clone();
-        startDateTo = (Date) moveEvent.getEnd().clone();
 
         focus();
 
