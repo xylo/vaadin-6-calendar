@@ -54,6 +54,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
             return;
         }
         if (selectionStart != null && selectionEnd != null) {
+
             Date startDate = selectionStart.getDate();
             Date endDate = selectionEnd.getDate();
             for (int row = 0; row < getRowCount(); row++) {
@@ -113,6 +114,32 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
         setFocus(false);
         selectionStart = null;
+    }
+
+    @SuppressWarnings("deprecation")
+    public void highlightDayCells(SimpleDayCell from, CalendarEvent event) {
+
+        Date highlightStart = from.getDate();
+        int offset = (int) (event.getStart().getMinutes()
+                * VCalendar.MINUTEINMILLIS + event.getStart().getHours()
+                * VCalendar.HOURINMILLIS);
+        Date highlightEnd = new Date(highlightStart.getTime() + offset
+                + event.getRangeInMilliseconds());
+
+        for (int row = 0; row < getRowCount(); row++) {
+            for (int cell = 0; cell < getCellCount(row); cell++) {
+                SimpleDayCell simpleDayCell = (SimpleDayCell) getWidget(row,
+                        cell);
+                if (VCalendar.isEventInDay(highlightStart, highlightEnd,
+                        simpleDayCell.getDate())) {
+                    simpleDayCell.addStyleDependentName("emphasis");
+                } else {
+                    simpleDayCell.removeStyleDependentName("emphasis");
+                }
+            }
+        }
+
+        addStyleDependentName("emphasis");
     }
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
