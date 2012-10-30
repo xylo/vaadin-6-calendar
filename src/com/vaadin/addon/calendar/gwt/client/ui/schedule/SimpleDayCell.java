@@ -387,8 +387,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         final boolean hasMoved = hasMoved(x, y, 3, 3);
         if (isDragging() && hasMoved) {
             w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
-        } else if (isRangeSelect()) {
-            w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
         } else {
             if (labelMouseDown) {
                 w = Util.findWidget(eventTargetElement, Label.class);
@@ -414,15 +412,20 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             startX = -1;
             startY = -1;
 
-            if (!mel.isTimeSpecificEvent() && hasMoved) {
+            if (!mel.isTimeSpecificEvent() && moveEvent != null && w != null
+                    && hasMoved) {
                 Date newEventDay = ((SimpleDayCell) w).getDate();
-                if (moveEvent != null
-                        && isEventMovedToDifferentDay(moveEvent, newEventDay)) {
+                if (isEventMovedToDifferentDay(moveEvent, newEventDay)) {
+                    getMonthGrid().removeHighlights();
                     eventMoved(moveEvent, newEventDay);
+                    moveEvent = null;
+                } else {
+                    cancelEventDrag((MonthEventLabel) clickedWidget);
                 }
+            } else {
+                cancelEventDrag((MonthEventLabel) clickedWidget);
             }
 
-            moveEvent = null;
         } else if (isRangeSelect()) {
             getMonthGrid().setSelectionReady();
         }
@@ -589,30 +592,31 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                         ((SimpleDayCell) potentialDropTarget), moveEvent);
                 lastDragEventCell = (SimpleDayCell) potentialDropTarget;
             }
-        } else {
+
+            int dateCellWidth = getWidth();
+            int dateCellHeigth = getHeigth();
+
+            Element parent = getMonthGrid().getElement();
+            Point relativeXY = getRelativeXY(event, parent);
+
+            // Check boundaries
+            if (relativeXY.y < 0
+                    || relativeXY.y >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
+                    || relativeXY.x < 0
+                    || relativeXY.x >= (calendar.getMonthGrid()
+                            .getColumnCount() * dateCellWidth)) {
+                return;
+            }
+
+            int newLeft = dragEventWidget.getAbsoluteLeft() - (lastMoveX - x);
+            int newTop = dragEventWidget.getAbsoluteTop() - (lastMoveY - y);
+            RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
+            lastMoveX = x;
+            lastMoveY = y;
+        } else if (!getMonthGrid().getElement().isOrHasChild(dropElement)) {
+            // Element under x,y is not descendant of VCalendar
             cancelEventDrag(w);
-            return;
         }
-
-        int dateCellWidth = getWidth();
-        int dateCellHeigth = getHeigth();
-
-        Element parent = getMonthGrid().getElement();
-        Point relativeXY = getRelativeXY(event, parent);
-
-        // Check boundaries
-        if (relativeXY.y < 0
-                || relativeXY.y >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
-                || relativeXY.x < 0
-                || relativeXY.x >= (calendar.getMonthGrid().getColumnCount() * dateCellWidth)) {
-            return;
-        }
-
-        int newLeft = dragEventWidget.getAbsoluteLeft() - (lastMoveX - x);
-        int newTop = dragEventWidget.getAbsoluteTop() - (lastMoveY - y);
-        RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
-        lastMoveX = x;
-        lastMoveY = y;
     }
 
     private Widget createDragEventWidget(MonthEventLabel from) {
@@ -643,7 +647,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         if (dayCell != null) {
             getMonthGrid().setSelectionEnd((SimpleDayCell) dayCell);
-        } else {
+        } else if (!getMonthGrid().getElement().isOrHasChild(overElement)) {
+            // Element under x,y is not a descendant of VCalendar.
             getMonthGrid().cancelRangeSelection();
         }
     }
@@ -652,12 +657,18 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private void eventMoved(CalendarEvent e, Date newDay) {
 
         Date oldStartTime = e.getStartTime();
-        Date newStart = new Date(newDay.getTime() + oldStartTime.getHours()
+        Date newStartTime = new Date(newDay.getTime() + oldStartTime.getHours()
                 * VCalendar.HOURINMILLIS + oldStartTime.getMinutes()
                 * VCalendar.MINUTEINMILLIS + oldStartTime.getSeconds() * 1000);
-        Date newEnd = new Date(newStart.getTime() + e.getRangeInMilliseconds());
+        Date newEndTime = new Date(newStartTime.getTime()
+                + e.getRangeInMilliseconds());
+        Date newStart = new Date(newDay.getTime());
+        Date newEnd = new Date(newEndTime.getYear(), newEndTime.getMonth(),
+                newEndTime.getDate(), 0, 0, 0);
         e.setStart(newStart);
         e.setEnd(newEnd);
+        e.setStartTime(newStartTime);
+        e.setEndTime(newEndTime);
 
         calendar.updateEventToMonthGrid(e);
         if (calendar.getEventMovedListener() != null) {
@@ -722,6 +733,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             startX = -1;
             moveEvent = null;
             labelMouseDown = false;
+            if (clickedWidget != null) {
+                clickedWidget.getElement().getStyle()
+                        .setVisibility(Visibility.VISIBLE);
+            }
             clickedWidget = null;
             if (dragEventWidget != null) {
                 dragEventWidget.removeFromParent();
@@ -730,6 +745,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             lastDragEventCell = null;
             dragging = false;
         }
+        getMonthGrid().removeHighlights();
     }
 
     public int getRow() {
