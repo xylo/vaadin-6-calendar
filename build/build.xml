@@ -29,6 +29,7 @@
 		<mkdir dir="build/lib/ivyretrieved" />
 		<ivy:retrieve conf="build" pattern="build/lib/ivyretrieved/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
 		<ivy:retrieve conf="runtime" pattern="${result-path}/war/WEB-INF/lib/[artifact](-[classifier])(-[revision]).[ext]" sync="true"/>
+		<ivy:retrieve conf="runtime" pattern="WebContent/WEB-INF/lib/[artifact](-[classifier])(-[revision]).[ext]"/>
 	</target>
 
     <!-- Clean old compilation results. -->

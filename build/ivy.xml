@@ -11,9 +11,9 @@
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="build->default; runtime->default" />
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="build->default; runtime->default" />
 		<dependency org="com.vaadin.addon" name="jpacontainer-addon-agpl-3.0" rev="3.0.0-alpha1" conf="build->default; runtime->default" />
-		<dependency org="com.vaadin" name="vaadin-server" rev="7.0.0.beta3" conf="build->default; runtime->default" />
-		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0.0.beta3" conf="build->default; runtime->default" />
-		<dependency org="com.vaadin" name="vaadin-client" rev="7.0.0.beta3" conf="build->default" />
-		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta3" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-server" rev="7.0.0.beta6" conf="build->default; runtime->default" />
+		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0.0.beta6" conf="build->default; runtime->default" />
+		<dependency org="com.vaadin" name="vaadin-client" rev="7.0.0.beta6" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta6" conf="build->default" />
 	</dependencies>
 </ivy-module>
