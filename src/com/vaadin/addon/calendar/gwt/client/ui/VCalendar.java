@@ -256,6 +256,31 @@ public class VCalendar extends Composite {
     	}
     }-*/;
 
+    @SuppressWarnings("deprecation")
+    public void highlightDayCells(SimpleDayCell from, CalendarEvent event) {
+
+        Date highlightStart = from.getDate();
+        int offset = (int) (event.getStart().getMinutes() * MINUTEINMILLIS + event
+                .getStart().getHours() * HOURINMILLIS);
+        Date highlightEnd = new Date(highlightStart.getTime() + offset
+                + event.getRangeInMilliseconds());
+
+        for (int row = 0; row < monthGrid.getRowCount(); row++) {
+            for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
+                SimpleDayCell simpleDayCell = (SimpleDayCell) monthGrid
+                        .getWidget(row, cell);
+                if (isEventInDay(highlightStart, highlightEnd,
+                        simpleDayCell.getDate())) {
+                    simpleDayCell.addStyleDependentName("emphasis");
+                } else {
+                    simpleDayCell.removeStyleDependentName("emphasis");
+                }
+            }
+        }
+
+        addStyleDependentName("emphasis");
+    }
+
     private void updateEventsToWeekGrid(CalendarEvent[] events) {
         List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
         List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();

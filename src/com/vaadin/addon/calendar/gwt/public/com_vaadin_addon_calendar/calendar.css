@@ -182,8 +182,11 @@
 	margin-left: -2px;
 }
 
+/* For all-day event drag indicator */
 .v-calendar-event-all-day-dd {
-	z-index: 40000
+	z-index: 40000;
+	cursor: default;
+	margin-left: 0;
 }
 
 div.v-calendar-event-all-day {

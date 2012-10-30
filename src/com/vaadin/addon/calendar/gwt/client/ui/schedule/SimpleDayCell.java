@@ -68,8 +68,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private int lastMoveY = -1;
     private Date startDateFrom;
     private Date startDateTo;
-    private int prevDayDiff = 0;
-    private int prevWeekDiff = 0;
     private CalendarEvent moveEvent;
     private Widget clickedWidget;
     private Widget dragEventWidget;
@@ -375,8 +373,17 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private void handleMouseUpAndTouchEnd(NativeEvent event) {
 
         Widget w = null;
+        if (dragEventWidget != null) {
+            dragEventWidget.setVisible(false);
+        }
         com.google.gwt.user.client.Element eventTargetElement = (com.google.gwt.user.client.Element) Element
-                .as(event.getEventTarget());
+                .as(getEventUnderMouseOrTouch(event,
+                        Util.getTouchOrMouseClientX(event),
+                        Util.getTouchOrMouseClientY(event)));
+        if (dragEventWidget != null) {
+            dragEventWidget.setVisible(true);
+        }
+
         final boolean hasMoved = hasMoved(event, 3, 3);
         if (isDragging() && hasMoved) {
             w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
@@ -409,14 +416,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
             startX = -1;
             startY = -1;
-            prevDayDiff = 0;
-            prevWeekDiff = 0;
 
             if (!mel.isTimeSpecificEvent() && hasMoved) {
-                // If event was dragged, but no enough over day/week threshold
-                // moveEvent is null
-                if (moveEvent != null) {
-                    eventMoved(moveEvent);
+                Date newEventDay = ((SimpleDayCell) w).getDate();
+                if (moveEvent != null
+                        && isEventMovedToDifferentDay(moveEvent, newEventDay)) {
+                    eventMoved(moveEvent, newEventDay);
                 }
             }
 
@@ -434,6 +439,15 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         lastDragEventCell = null;
         dragging = false;
         rangeSelect = false;
+    }
+
+    @SuppressWarnings("deprecation")
+    private boolean isEventMovedToDifferentDay(CalendarEvent event,
+            Date newEventDay) {
+        Date oldEventDay = event.getStart();
+        return ((oldEventDay.getDate() != newEventDay.getDate())
+                || (oldEventDay.getMonth() != newEventDay.getMonth()) || (oldEventDay
+                    .getYear() != newEventDay.getYear()));
     }
 
     public void onMouseDown(MouseDownEvent event) {
@@ -579,21 +593,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         Element parent = getMonthGrid().getElement();
         Point relativeXY = getRelativeXY(event, parent);
-        int weekDiff = 0;
-        if (moveY > 0) {
-            weekDiff = (startYrelative + moveY) / dateCellHeigth;
-        } else {
-            weekDiff = (moveY - (dateCellHeigth - startYrelative))
-                    / dateCellHeigth;
-        }
 
-        int dayDiff = 0;
-        if (moveX >= 0) {
-            dayDiff = (startXrelative + moveX) / dateCellWidth;
-        } else {
-            dayDiff = (moveX - (dateCellWidth - startXrelative))
-                    / dateCellWidth;
-        }
         // Check boundaries
         if (relativeXY.y < 0
                 || relativeXY.y >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
@@ -602,66 +602,40 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             return;
         }
 
-        GWT.log("Event moving delta: " + weekDiff + " weeks " + dayDiff
-                + " days" + " (" + getCell() + "," + getRow() + ")");
-
-        CalendarEvent e = moveEvent;
-        if (e == null) {
-            e = getEventByWidget(w);
-            moveEvent = e;
-        }
-
-        Date from = e.getStart();
-        Date to = e.getEnd();
-        long duration = to.getTime() - from.getTime();
-
-        long daysMs = dayDiff * VCalendar.DAYINMILLIS;
-        long weeksMs = weekDiff * VCalendar.WEEKINMILLIS;
-        from.setTime(startDateFrom.getTime() + weeksMs + daysMs);
-        to.setTime((from.getTime() + duration));
-        e.setStart(from);
-        e.setEnd(to);
-        e.setStartTime(new Date(from.getTime()));
-        e.setEndTime(new Date(to.getTime()));
-
         final int x = Util.getTouchOrMouseClientX(event);
         final int y = Util.getTouchOrMouseClientY(event);
-        RootPanel.get().setWidgetPosition(dragEventWidget,
-                dragEventWidget.getAbsoluteLeft() - (lastMoveX - x),
-                dragEventWidget.getAbsoluteTop() - (lastMoveY - y));
+        int newLeft = dragEventWidget.getAbsoluteLeft() - (lastMoveX - x);
+        int newTop = dragEventWidget.getAbsoluteTop() - (lastMoveY - y);
+        RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
         lastMoveX = x;
         lastMoveY = y;
         Element dropElement = null;
         dragEventWidget.setVisible(false);
-        if (Util.isTouchEvent(event)) {
-            dropElement = Util.getElementFromPoint(x, y);
-        } else {
-            dropElement = Util.getElementUnderMouse(event);
-        }
+        dropElement = getEventUnderMouseOrTouch(event, x, y);
         dragEventWidget.setVisible(true);
         Widget potentialDropTarget = Util.findWidget(
                 (com.google.gwt.user.client.Element) Element.as(dropElement),
                 SimpleDayCell.class);
         if (potentialDropTarget != null) {
             if (potentialDropTarget != lastDragEventCell) {
-                if (lastDragEventCell != null) {
-                    lastDragEventCell.hideEmphasis();
-                }
-                ((SimpleDayCell) potentialDropTarget).drawEmphasis();
+                calendar.highlightDayCells(
+                        ((SimpleDayCell) potentialDropTarget), moveEvent);
                 lastDragEventCell = (SimpleDayCell) potentialDropTarget;
             }
         }
     }
 
-    void hideEmphasis() {
-        removeStyleDependentName("emphasis");
-    }
+    @SuppressWarnings("deprecation")
+    private void eventMoved(CalendarEvent e, Date newDay) {
 
-    void drawEmphasis() {
-        addStyleDependentName("emphasis");
-    }
+        Date oldStartTime = e.getStartTime();
+        Date newStart = new Date(newDay.getTime() + oldStartTime.getHours()
+                * VCalendar.HOURINMILLIS + oldStartTime.getMinutes()
+                * VCalendar.MINUTEINMILLIS + oldStartTime.getSeconds() * 1000);
+        Date newEnd = new Date(newStart.getTime() + e.getRangeInMilliseconds());
+        e.setStart(newStart);
+        e.setEnd(newEnd);
 
-    private void eventMoved(CalendarEvent e) {
         calendar.updateEventToMonthGrid(e);
         if (calendar.getEventMovedListener() != null) {
             calendar.getEventMovedListener().eventMoved(e);
@@ -679,9 +653,9 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         startXrelative = relativeXY.x;
         startYrelative = relativeXY.y;
 
-        CalendarEvent e = getEventByWidget(w);
-        startDateFrom = (Date) e.getStart().clone();
-        startDateTo = (Date) e.getEnd().clone();
+        moveEvent = getEventByWidget(w);
+        startDateFrom = (Date) moveEvent.getStart().clone();
+        startDateTo = (Date) moveEvent.getEnd().clone();
 
         focus();
 
@@ -705,17 +679,16 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         }
     }
 
+    private Element getEventUnderMouseOrTouch(NativeEvent event, int x, int y) {
+        if (Util.isTouchEvent(event)) {
+            return Util.getElementFromPoint(x, y);
+        } else {
+            return Util.getElementUnderMouse(event);
+        }
+    }
+
     protected void cancelEventDrag(MonthEventLabel w) {
         if (isDragging()) {
-            // reset position
-            if (moveEvent == null) {
-                moveEvent = getEventByWidget(w);
-            }
-
-            moveEvent.setStart(startDateFrom);
-            moveEvent.setEnd(startDateTo);
-            calendar.updateEventToMonthGrid(moveEvent);
-
             // reset drag-related properties
             setFocus(false);
             monthEventMouseDown = false;
@@ -731,22 +704,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             lastDragEventCell = null;
             dragging = false;
         }
-    }
-
-    public void updateDragPosition(MonthEventLabel w, int dayDiff, int weekDiff) {
-        // Draw event to its new position only when position has changed
-        if (dayDiff == prevDayDiff && weekDiff == prevWeekDiff) {
-            return;
-        }
-
-        prevDayDiff = dayDiff;
-        prevWeekDiff = weekDiff;
-
-        if (moveEvent == null) {
-            moveEvent = getEventByWidget(w);
-        }
-
-        calendar.updateEventToMonthGrid(moveEvent);
     }
 
     public int getRow() {
