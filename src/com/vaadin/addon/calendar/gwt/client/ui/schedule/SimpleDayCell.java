@@ -605,6 +605,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         MonthEventLabel clonedLabel = from.doClone();
 
         clonedLabel.addStyleName("v-calendar-event-all-day-dd");
+        clonedLabel.addStyleName("v-calendar-event-start");
+        clonedLabel.addStyleName("v-calendar-event-end");
         clonedLabel.setWidth(from.getOffsetWidth() + "px");
         if (clonedLabel.getCaption() == null) {
             clonedLabel.setCaption(moveEvent.getCaption());
