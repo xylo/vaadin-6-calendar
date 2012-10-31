@@ -8,7 +8,6 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.HumanInputEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -559,8 +558,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         if (dragEventWidget == null) {
             dragEventWidget = createDragEventWidget(w);
-            clickedWidget.getElement().getStyle()
-                    .setVisibility(Visibility.HIDDEN);
+            clickedWidget.getElement().getStyle().setOpacity(0.5);
             Point relativeXY = getRelativeXY(event, clickedWidget.getElement());
             dragEventWidgetOffsetX = relativeXY.x;
             dragEventWidgetOffsetY = relativeXY.y;
@@ -741,8 +739,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             moveEvent = null;
             labelMouseDown = false;
             if (clickedWidget != null) {
-                clickedWidget.getElement().getStyle()
-                        .setVisibility(Visibility.VISIBLE);
+                clickedWidget.getElement().getStyle().setOpacity(1.0);
             }
             clickedWidget = null;
             if (dragEventWidget != null) {
