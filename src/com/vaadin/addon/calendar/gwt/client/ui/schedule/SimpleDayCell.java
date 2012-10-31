@@ -602,12 +602,17 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     }
 
     private Widget createDragEventWidget(MonthEventLabel from) {
-        Widget clonedWidget = from.doClone();
-        clonedWidget.addStyleName("v-calendar-event-all-day-dd");
-        clonedWidget.setWidth(from.getOffsetWidth() + "px");
-        RootPanel.get().add(clonedWidget, from.getAbsoluteLeft(),
+        MonthEventLabel clonedLabel = from.doClone();
+
+        clonedLabel.addStyleName("v-calendar-event-all-day-dd");
+        clonedLabel.setWidth(from.getOffsetWidth() + "px");
+        if (clonedLabel.getCaption() == null) {
+            clonedLabel.setCaption(moveEvent.getCaption());
+        }
+        RootPanel.get().add(clonedLabel, from.getAbsoluteLeft(),
                 from.getAbsoluteTop());
-        return clonedWidget;
+
+        return clonedLabel;
     }
 
     private Point checkBoundaries(Element parent, int x, int y, int relX,
@@ -861,6 +866,10 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         public void setTime(Date date) {
             time = date;
             renderCaption();
+        }
+
+        public String getCaption() {
+            return caption;
         }
 
         /**
