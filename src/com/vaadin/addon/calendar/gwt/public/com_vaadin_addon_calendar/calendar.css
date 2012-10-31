@@ -182,6 +182,11 @@
 	margin-left: -2px;
 }
 
+.v-calendar-event-all-day.dragged {
+	opacity: .5;
+	filter: alpha(opacity = 50);
+}
+
 /* For all-day event drag indicator */
 .v-calendar-event-all-day-dd {
 	z-index: 40000;

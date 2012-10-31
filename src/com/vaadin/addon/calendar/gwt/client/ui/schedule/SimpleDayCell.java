@@ -4,6 +4,7 @@
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
 import java.util.Date;
+import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -260,6 +261,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         eventDiv.addTouchStartHandler(this);
         eventDiv.setCalendar(calendar);
         eventDiv.setEventIndex(e.getIndex());
+        eventDiv.setEvent(e);
 
         if (timeEvent) {
             eventDiv.setTimeSpecificEvent(true);
@@ -407,7 +409,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                     && hasMoved) {
                 Date newEventDay = ((SimpleDayCell) w).getDate();
                 if (isEventMovedToDifferentDay(moveEvent, newEventDay)) {
-                    getMonthGrid().removeHighlights();
+                    getMonthGrid().removeDragHighlights();
                     eventMoved(moveEvent, newEventDay);
                     moveEvent = null;
                 } else {
@@ -558,7 +560,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
 
         if (dragEventWidget == null) {
             dragEventWidget = createDragEventWidget(w);
-            clickedWidget.getElement().getStyle().setOpacity(0.5);
+            getMonthGrid().setDraggedStyleForEvent(moveEvent, true);
             Point relativeXY = getRelativeXY(event, clickedWidget.getElement());
             dragEventWidgetOffsetX = relativeXY.x;
             dragEventWidgetOffsetY = relativeXY.y;
@@ -581,12 +583,12 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         }
         if (potentialDropTarget != null) {
             if (potentialDropTarget != lastDragEventCell) {
-                getMonthGrid().highlightDayCells(
+                getMonthGrid().addDragHighlightToDayCellRange(
                         ((SimpleDayCell) potentialDropTarget), moveEvent);
                 lastDragEventCell = (SimpleDayCell) potentialDropTarget;
             }
         } else {
-            getMonthGrid().removeHighlights();
+            getMonthGrid().removeDragHighlights();
         }
 
         Element parent = getMonthGrid().getElement();
@@ -743,11 +745,9 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             monthEventMouseDown = false;
             startY = -1;
             startX = -1;
-            moveEvent = null;
             labelMouseDown = false;
-            if (clickedWidget != null) {
-                clickedWidget.getElement().getStyle().setOpacity(1.0);
-            }
+            getMonthGrid().setDraggedStyleForEvent(moveEvent, false);
+            moveEvent = null;
             clickedWidget = null;
             if (dragEventWidget != null) {
                 dragEventWidget.removeFromParent();
@@ -756,7 +756,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             lastDragEventCell = null;
             dragging = false;
         }
-        getMonthGrid().removeHighlights();
+        getMonthGrid().removeDragHighlights();
     }
 
     public int getRow() {
@@ -811,6 +811,25 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         return events[i];
     }
 
+    /**
+     * Gets the Widget representing the CalendarEvent
+     * 
+     * @param event
+     *            the CalendarEvent of the Widget to get
+     * @return the Widget representing the event or null if event not found
+     */
+    public Widget getEventWidget(CalendarEvent event) {
+        Iterator<Widget> it = iterator();
+        while (it.hasNext()) {
+            Widget w = it.next();
+            if (w instanceof MonthEventLabel
+                    && ((MonthEventLabel) w).getEvent() == event) {
+                return w;
+            }
+        }
+        return null;
+    }
+
     public CalendarEvent[] getEvents() {
         return events;
     }
@@ -843,6 +862,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         private VCalendar calendar;
         private String caption;
         private Date time;
+        private CalendarEvent event;
 
         /**
          * Default constructor
@@ -913,6 +933,14 @@ public class SimpleDayCell extends FocusableFlowPanel implements
          */
         public void setEventIndex(int index) {
             eventIndex = index;
+        }
+
+        public void setEvent(CalendarEvent e) {
+            event = e;
+        }
+
+        public CalendarEvent getEvent() {
+            return event;
         }
 
         /**

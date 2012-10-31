@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
 public class MonthGrid extends FocusableGrid implements KeyDownHandler {
@@ -116,12 +117,22 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         selectionStart = null;
     }
 
+    /**
+     * Iterates all the day cells of this MonthGrid and sets the style for
+     * highlighted cells based on the given calendar event and start day cell
+     * 
+     * @param from
+     *            the SimpleDayCell from where to start the highlight
+     * @param event
+     *            the CalendarEvent to be used for highlight cell calculation
+     */
     @SuppressWarnings("deprecation")
-    public void highlightDayCells(SimpleDayCell from, CalendarEvent event) {
+    public void addDragHighlightToDayCellRange(SimpleDayCell from,
+            CalendarEvent event) {
         Date highlightStart = from.getDate();
-        int offset = (int) (event.getStart().getMinutes()
-                * VCalendar.MINUTEINMILLIS + event.getStart().getHours()
-                * VCalendar.HOURINMILLIS);
+        int offset = (int) (event.getStartTime().getMinutes()
+                * VCalendar.MINUTEINMILLIS + event.getStartTime().getHours()
+                * VCalendar.HOURINMILLIS + event.getStartTime().getSeconds() * 1000);
         Date highlightEnd = new Date(highlightStart.getTime() + offset
                 + event.getRangeInMilliseconds());
 
@@ -139,12 +150,45 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
     }
 
-    public void removeHighlights() {
+    /**
+     * Iterates all the day cells of this MonthGrid and removes the associated
+     * event drag highlight from all the cells
+     */
+    public void removeDragHighlights() {
         for (int row = 0; row < getRowCount(); row++) {
             for (int cell = 0; cell < getCellCount(row); cell++) {
                 SimpleDayCell simpleDayCell = (SimpleDayCell) getWidget(row,
                         cell);
                 simpleDayCell.removeStyleDependentName("emphasis");
+            }
+        }
+    }
+
+    /**
+     * Sets the style for day cell event slots indicating that the event is
+     * dragged
+     * 
+     * @param event
+     *            the CalendarEvent whose day cell slots should be modified
+     * @param on
+     *            true if the style is set, false otherwise
+     */
+    public void setDraggedStyleForEvent(CalendarEvent event, boolean on) {
+        if (event == null) {
+            return;
+        }
+
+        for (int row = 0; row < getRowCount(); row++) {
+            for (int cell = 0; cell < getCellCount(row); cell++) {
+                SimpleDayCell simpleDayCell = (SimpleDayCell) getWidget(row,
+                        cell);
+                if (VCalendar.isEventInDay(event.getStart(), event.getEnd(),
+                        simpleDayCell.getDate())) {
+                    Widget w = simpleDayCell.getEventWidget(event);
+                    if (w != null) {
+                        w.setStyleName("dragged", on);
+                    }
+                }
             }
         }
     }
