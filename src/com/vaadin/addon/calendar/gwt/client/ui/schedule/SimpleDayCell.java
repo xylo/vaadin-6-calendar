@@ -66,6 +66,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private CalendarEvent moveEvent;
     private Widget clickedWidget;
     private Widget dragEventWidget;
+    private int dragEventWidgetOffsetX = 0;
+    private int dragEventWidgetOffsetY = 0;
     private SimpleDayCell lastDragEventCell;
     private boolean scrollable = false;
     private boolean eventCanceled;
@@ -350,16 +352,6 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         super.onDetach();
     }
 
-    // private void handleMouseOver(NativeEvent event) {
-    // com.google.gwt.user.client.Element eventTargetElement =
-    // (com.google.gwt.user.client.Element) Element
-    // .as(event.getEventTarget());
-    // Widget w = Util.findWidget(eventTargetElement, SimpleDayCell.class);
-    // if (w != null) {
-    // getMonthGrid().setSelectionEnd((SimpleDayCell) w);
-    // }
-    // }
-
     private boolean hasMoved(int x, int y, int xthreshold, int ythreshold) {
         int xDiff = startX - x;
         int yDiff = startY - y;
@@ -569,10 +561,13 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             dragEventWidget = createDragEventWidget(w);
             clickedWidget.getElement().getStyle()
                     .setVisibility(Visibility.HIDDEN);
+            Point relativeXY = getRelativeXY(event, clickedWidget.getElement());
+            dragEventWidgetOffsetX = relativeXY.x;
+            dragEventWidgetOffsetY = relativeXY.y;
         }
 
-        final int x = Util.getTouchOrMouseClientX(event);
-        final int y = Util.getTouchOrMouseClientY(event);
+        int x = Util.getTouchOrMouseClientX(event);
+        int y = Util.getTouchOrMouseClientY(event);
 
         if (!hasMoved(x, y, 5, 5)) {
             return;
@@ -592,31 +587,20 @@ public class SimpleDayCell extends FocusableFlowPanel implements
                         ((SimpleDayCell) potentialDropTarget), moveEvent);
                 lastDragEventCell = (SimpleDayCell) potentialDropTarget;
             }
-
-            int dateCellWidth = getWidth();
-            int dateCellHeigth = getHeigth();
-
-            Element parent = getMonthGrid().getElement();
-            Point relativeXY = getRelativeXY(event, parent);
-
-            // Check boundaries
-            if (relativeXY.y < 0
-                    || relativeXY.y >= (calendar.getMonthGrid().getRowCount() * dateCellHeigth)
-                    || relativeXY.x < 0
-                    || relativeXY.x >= (calendar.getMonthGrid()
-                            .getColumnCount() * dateCellWidth)) {
-                return;
-            }
-
-            int newLeft = dragEventWidget.getAbsoluteLeft() - (lastMoveX - x);
-            int newTop = dragEventWidget.getAbsoluteTop() - (lastMoveY - y);
-            RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
-            lastMoveX = x;
-            lastMoveY = y;
-        } else if (!getMonthGrid().getElement().isOrHasChild(dropElement)) {
-            // Element under x,y is not descendant of VCalendar
-            cancelEventDrag(w);
+        } else {
+            getMonthGrid().removeHighlights();
         }
+
+        Element parent = getMonthGrid().getElement();
+        Point relativeXY = getRelativeXY(event, parent);
+        Point adjustedXY = checkBoundaries(parent, x, y, relativeXY.x,
+                relativeXY.y);
+
+        int newLeft = adjustedXY.x - dragEventWidgetOffsetX;
+        int newTop = adjustedXY.y - dragEventWidgetOffsetY;
+        RootPanel.get().setWidgetPosition(dragEventWidget, newLeft, newTop);
+        lastMoveX = adjustedXY.x;
+        lastMoveY = adjustedXY.y;
     }
 
     private Widget createDragEventWidget(MonthEventLabel from) {
@@ -626,6 +610,29 @@ public class SimpleDayCell extends FocusableFlowPanel implements
         RootPanel.get().add(clonedWidget, from.getAbsoluteLeft(),
                 from.getAbsoluteTop());
         return clonedWidget;
+    }
+
+    private Point checkBoundaries(Element parent, int x, int y, int relX,
+            int relY) {
+        final int minY = dragEventWidgetOffsetY;
+        final int minX = dragEventWidgetOffsetX;
+        final int maxY = parent.getClientHeight()
+                - dragEventWidget.getOffsetHeight() + dragEventWidgetOffsetY;
+        final int maxX = parent.getClientWidth()
+                - dragEventWidget.getOffsetWidth() + dragEventWidgetOffsetX;
+        // Check boundaries
+        if (relY < minY) {
+            y += minY - relY;
+        } else if (relY >= maxY) {
+            y -= relY - maxY;
+        }
+        if (relX < minX) {
+            x += minX - relX;
+        } else if (relX >= maxX) {
+            x -= relX - maxX;
+        }
+
+        return new Point(x, y);
     }
 
     private void handleRangeSelect(NativeEvent event) {
@@ -694,8 +701,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements
     private Point getRelativeXY(NativeEvent event, Element relativeTo) {
         if (Util.isTouchEvent(event)) {
             Touch touch = event.getChangedTouches().get(0);
-            return new Point(touch.getRelativeX(relativeTo) % getWidth(),
-                    touch.getRelativeY(relativeTo) % getHeigth());
+            return new Point(touch.getRelativeX(relativeTo),
+                    touch.getRelativeY(relativeTo));
         } else {
             int relativeX = event.getClientX() - relativeTo.getAbsoluteLeft()
                     + relativeTo.getScrollLeft()
@@ -703,7 +710,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements
             int relativeY = event.getClientY() - relativeTo.getAbsoluteTop()
                     + relativeTo.getScrollTop()
                     + relativeTo.getOwnerDocument().getScrollTop();
-            return new Point(relativeX % getWidth(), relativeY % getHeigth());
+            return new Point(relativeX, relativeY);
         }
     }
 
