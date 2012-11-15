@@ -8,6 +8,8 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -35,7 +37,7 @@ import com.vaadin.terminal.gwt.client.ui.FocusableFlowPanel;
  * A class representing a single cell within the calendar in month-view
  */
 public class SimpleDayCell extends FocusableFlowPanel implements
-MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
+        MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
 
     private static int BOTTOMSPACERHEIGHT = -1;
     private static int EVENTHEIGHT = -1;
@@ -262,6 +264,7 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
         eventDiv.addMouseUpHandler(this);
         eventDiv.setCalendar(calendar);
         eventDiv.setEventIndex(e.getIndex());
+        eventDiv.setCalendarEvent(e);
 
         if (timeEvent) {
             eventDiv.setTimeSpecificEvent(true);
@@ -705,12 +708,26 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
         private String caption;
         private Date time;
 
+        private CalendarEvent calendarEvent;
+
         /**
          * Default constructor
          */
         public MonthEventLabel() {
             setStylePrimaryName(STYLENAME);
             sinkEvents(VTooltip.TOOLTIP_EVENTS);
+            addDomHandler(new ContextMenuHandler() {
+                public void onContextMenu(ContextMenuEvent event) {
+                    calendar.getMouseEventListener().contextMenu(event,
+                            MonthEventLabel.this);
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            }, ContextMenuEvent.getType());
+        }
+
+        public void setCalendarEvent(CalendarEvent e) {
+            calendarEvent = e;
         }
 
         /**
@@ -817,6 +834,10 @@ MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseMoveHandler {
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
             calendar.handleTooltipEvent(event, eventIndex);
+        }
+
+        public CalendarEvent getCalendarEvent() {
+            return calendarEvent;
         }
     }
 }

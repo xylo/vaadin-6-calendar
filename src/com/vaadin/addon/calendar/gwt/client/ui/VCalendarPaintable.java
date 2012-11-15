@@ -22,6 +22,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.DateUtil;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.SimpleDayCell.MonthEventLabel;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DateCellSlot;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeekGrid.DateCell.DayEvent;
@@ -262,6 +263,15 @@ VHasDropHandler, ActionOwner {
                             }
                             return actions;
 
+                        } else if (widget instanceof MonthEventLabel) {
+                            MonthEventLabel mel = (MonthEventLabel) widget;
+                            CalendarEvent event = mel.getCalendarEvent();
+                            Action[] actions = VCalendarPaintable.this.getActionsBetween(
+                                    event.getStartTime(), event.getEndTime());
+                            for (Action action : actions) {
+                                ((VCalendarAction) action).setEvent(event);
+                            }
+                            return actions;
                         }
                         return null;
                     }
