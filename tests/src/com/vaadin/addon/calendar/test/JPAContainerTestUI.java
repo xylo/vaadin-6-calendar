@@ -43,7 +43,7 @@ public class JPAContainerTestUI extends UI {
         // Add an event to the calendar
         calendar.addEvent(createEvent(new Date()));
 
-        addComponent(calendar);
+        content.addComponent(calendar);
     }
 
     /**

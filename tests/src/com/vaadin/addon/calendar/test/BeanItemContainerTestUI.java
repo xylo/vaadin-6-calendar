@@ -46,14 +46,14 @@ public class BeanItemContainerTestUI extends UI {
         calendar.setStartDate(new Date(100, 1, 1));
         calendar.setEndDate(new Date(100, 2, 1));
 
-        addComponent(calendar);
+        content.addComponent(calendar);
 
         // Add event table connected to same data source
         table = createTable();
         table.setContainerDataSource(events);
         table.setVisibleColumns(new Object[] { "caption", "description",
                 "start", "end" });
-        addComponent(table);
+        content.addComponent(table);
     }
 
     /**
@@ -136,7 +136,7 @@ public class BeanItemContainerTestUI extends UI {
                         ContainerEventProvider.DESCRIPTION_PROPERTY,
                         ContainerEventProvider.STARTDATE_PROPERTY,
                         ContainerEventProvider.ENDDATE_PROPERTY)));
-        modal.addComponent(formLayout);
+        modal.setContent(formLayout);
         modal.addCloseListener(new Window.CloseListener() {
             public void windowClose(CloseEvent e) {
                 // Commit changes to bean

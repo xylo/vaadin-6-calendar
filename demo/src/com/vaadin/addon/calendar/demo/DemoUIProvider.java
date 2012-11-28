@@ -14,7 +14,7 @@ public class DemoUIProvider extends UIProvider {
     public Class<? extends UI> getUIClass(UIClassSelectionEvent event) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
-        String pathInfo = event.getRequest().getRequestPathInfo();
+        String pathInfo = event.getRequest().getPathInfo();
         if (pathInfo != null && pathInfo.length() <= classNamePrefix.length()) {
             return CalendarTest.class;
         }

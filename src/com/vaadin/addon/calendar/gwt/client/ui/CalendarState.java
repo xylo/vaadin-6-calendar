@@ -2,14 +2,14 @@ package com.vaadin.addon.calendar.gwt.client.ui;
 
 import java.util.List;
 
-import com.vaadin.shared.ComponentState;
+import com.vaadin.shared.AbstractComponentState;
 
 /**
  * 
  * @author Johannes
  * 
  */
-public class CalendarState extends ComponentState {
+public class CalendarState extends AbstractComponentState {
 
     private boolean format24H;
     private String[] dayNames;

@@ -77,9 +77,9 @@ public class CalendarActionsUI extends UI {
             }
         });
 
-        addComponent(calendar);
+        content.addComponent(calendar);
 
-        addComponent(new Button("Set week view", new Button.ClickListener() {
+        content.addComponent(new Button("Set week view", new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 calendar.setEndDate(new Date(100, 1, 7));
             }

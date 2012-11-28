@@ -6,10 +6,10 @@ package com.vaadin.addon.calendar.ui;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.EventListener;
 
 import com.vaadin.addon.calendar.event.CalendarEvent;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
-import com.vaadin.event.ComponentEventListener;
 import com.vaadin.util.ReflectTools;
 
 /**
@@ -32,7 +32,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param eventId
          * @return the assigned eventHandler, or null if no handler is assigned
          */
-        public ComponentEventListener getHandler(String eventId);
+        public EventListener getHandler(String eventId);
     }
 
     /**
@@ -106,7 +106,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Handler interface for when events are being dragged on the calendar
      * 
      */
-    public interface EventMoveHandler extends ComponentEventListener {
+    public interface EventMoveHandler extends EventListener {
 
         /** Trigger method for the MoveEvent. */
         public static final Method eventMoveMethod = ReflectTools.findMethod(
@@ -208,7 +208,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** RangeSelectHandler handles RangeSelectEvent. */
-    public interface RangeSelectHandler extends ComponentEventListener {
+    public interface RangeSelectHandler extends EventListener {
 
         /** Trigger method for the RangeSelectEvent. */
         public static final Method rangeSelectMethod = ReflectTools
@@ -288,7 +288,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** ForwardHandler handles ForwardEvent. */
-    public interface ForwardHandler extends ComponentEventListener {
+    public interface ForwardHandler extends EventListener {
 
         /** Trigger method for the ForwardEvent. */
         public static final Method forwardMethod = ReflectTools.findMethod(
@@ -323,7 +323,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** BackwardHandler handles BackwardEvent. */
-    public interface BackwardHandler extends ComponentEventListener {
+    public interface BackwardHandler extends EventListener {
 
         /** Trigger method for the BackwardEvent. */
         public static final Method backwardMethod = ReflectTools.findMethod(
@@ -366,7 +366,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** DateClickHandler handles DateClickEvent. */
-    public interface DateClickHandler extends ComponentEventListener {
+    public interface DateClickHandler extends EventListener {
 
         /** Trigger method for the DateClickEvent. */
         public static final Method dateClickMethod = ReflectTools.findMethod(
@@ -409,7 +409,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** EventClickHandler handles EventClick. */
-    public interface EventClickHandler extends ComponentEventListener {
+    public interface EventClickHandler extends EventListener {
 
         /** Trigger method for the EventClick. */
         public static final Method eventClickMethod = ReflectTools.findMethod(
@@ -476,7 +476,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** WeekClickHandler handles WeekClicks. */
-    public interface WeekClickHandler extends ComponentEventListener {
+    public interface WeekClickHandler extends EventListener {
 
         /** Trigger method for the WeekClick. */
         public static final Method weekClickMethod = ReflectTools.findMethod(
@@ -554,7 +554,7 @@ public interface CalendarComponentEvents extends Serializable {
     /**
      * Handler for EventResize event.
      */
-    public interface EventResizeHandler extends ComponentEventListener {
+    public interface EventResizeHandler extends EventListener {
 
         /** Trigger method for the EventResize. */
         public static final Method eventResizeMethod = ReflectTools.findMethod(

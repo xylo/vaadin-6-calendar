@@ -54,7 +54,7 @@ public class NotificationTestUI extends UI {
                                 .show("This will disappear when you move your mouse!");
                     }
                 });
-        addComponent(btn);
+        content.addComponent(btn);
 
         provider = new DummyEventProvider();
         final Calendar cal = new Calendar(provider);
@@ -70,7 +70,7 @@ public class NotificationTestUI extends UI {
                 cal.markAsDirty();
             }
         });
-        addComponent(cal);
+        content.addComponent(cal);
 
         java.util.Calendar javaCal = java.util.Calendar.getInstance();
         javaCal.set(java.util.Calendar.MONTH, 0);

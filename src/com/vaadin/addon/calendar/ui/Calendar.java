@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EventListener;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,7 +63,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ComponentEventListener;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
@@ -155,7 +155,7 @@ public class Calendar extends AbstractComponent implements
     private String weeklyCaptionFormat = null;
 
     /** Map from event ids to event handlers */
-    private final Map<String, ComponentEventListener> handlers;
+    private final Map<String, EventListener> handlers;
 
     /**
      * Drop Handler for Vaadin DD. By default null.
@@ -262,7 +262,7 @@ public class Calendar extends AbstractComponent implements
     public Calendar(String caption, CalendarEventProvider eventProvider) {
         registerRpc(rpc);
         setCaption(caption);
-        handlers = new HashMap<String, ComponentEventListener>();
+        handlers = new HashMap<String, EventListener>();
         setDefaultHandlers();
         currentCalendar.setTime(new Date());
         setEventProvider(eventProvider);
@@ -1323,7 +1323,7 @@ public class Calendar extends AbstractComponent implements
      *            The method on the lister to call when the event is triggered
      */
     protected void setHandler(String eventId, Class<?> eventType,
-            ComponentEventListener listener, Method listenerMethod) {
+            EventListener listener, Method listenerMethod) {
         if (handlers.get(eventId) != null) {
             removeListener(eventId, eventType, handlers.get(eventId));
             handlers.remove(eventId);
@@ -1449,7 +1449,7 @@ public class Calendar extends AbstractComponent implements
      * com.vaadin.addon.calendar.ui.CalendarComponentEvents.CalendarEventNotifier
      * #getHandler(java.lang.String)
      */
-    public ComponentEventListener getHandler(String eventId) {
+    public EventListener getHandler(String eventId) {
         return handlers.get(eventId);
     }
 

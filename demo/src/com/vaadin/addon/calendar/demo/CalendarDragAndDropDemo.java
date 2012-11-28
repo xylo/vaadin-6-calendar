@@ -19,6 +19,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
@@ -74,8 +75,10 @@ public class CalendarDragAndDropDemo extends UI {
             }
         });
 
-        getContent().addComponent(monthButton);
-        getContent().addComponent(main);
+        VerticalLayout content = new VerticalLayout();
+        content.addComponent(monthButton);
+        content.addComponent(main);
+        setContent(content);
     }
 
     private Table createDDTable() {

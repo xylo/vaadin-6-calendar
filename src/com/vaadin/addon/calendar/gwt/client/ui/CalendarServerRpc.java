@@ -30,6 +30,6 @@ public interface CalendarServerRpc extends ServerRpc {
     void actionOnEvent(String actionKey, String startDate, String endDate,
             int eventIndex);
 
-    @Delayed(lastonly = true)
+    @Delayed(lastOnly = true)
     void scroll(int scrollPosition);
 }
