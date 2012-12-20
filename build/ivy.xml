@@ -10,11 +10,11 @@
 		<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.0" conf="build->default" />
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="build->default" />
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="build->default" />
-<!-- 		<dependency org="com.vaadin.addon" name="jpacontainer-addon-agpl-3.0" rev="3.0.0-alpha2" conf="build->default" /> -->
-<!-- 		<dependency org="com.vaadin" name="vaadin-server" rev="7.0.0.beta11" conf="build->default" /> -->
-<!-- 		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0.0.beta11" conf="build->default" /> -->
-<!-- 		<dependency org="com.vaadin" name="vaadin-client" rev="7.0.0.beta11" conf="build->default" /> -->
-<!-- 		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta11" conf="build->default" /> -->
+		<dependency org="com.vaadin.addon" name="jpacontainer-addon-agpl-3.0" rev="3.0.0-alpha2" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-server" rev="7.0.0.beta11" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-themes" rev="7.0.0.beta11" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-client" rev="7.0.0.beta11" conf="build->default" />
+		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta11" conf="build->default" />
 		<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.1.1" conf="build->default; runtime->default" />
 		<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.0" conf="build->default; runtime->default" />
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="build->default; runtime->default" />
