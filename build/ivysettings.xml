@@ -10,6 +10,7 @@
 	<settings defaultResolver="snapshots-chain" />
 	<resolvers>
 		<chain name="snapshots-chain">
+			<ibiblio name="vaadin-releases" m2compatible="true" root="http://oss.sonatype.org/content/repositories/vaadin-releases/" />
 			<ibiblio name="addons" m2compatible="true" root="http://maven.vaadin.com/vaadin-addons/" />
 			<ibiblio name="snapshots" m2compatible="true"
 				root="http://oss.sonatype.org/content/repositories/vaadin-snapshots/" />
