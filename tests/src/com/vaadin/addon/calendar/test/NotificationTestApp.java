@@ -66,6 +66,7 @@ public class NotificationTestApp extends VerticalLayout {
         addComponent(cal);
 
         java.util.Calendar javaCal = java.util.Calendar.getInstance();
+        javaCal.set(java.util.Calendar.YEAR, 2012);
         javaCal.set(java.util.Calendar.MONTH, 0);
         javaCal.set(java.util.Calendar.DAY_OF_MONTH, 1);
         Date start = javaCal.getTime();
