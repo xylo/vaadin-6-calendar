@@ -25,7 +25,6 @@ public class HiddenFwdBackButtons extends VerticalLayout {
         addComponent(calendar);
         addComponent(new Button("Hide forward and back buttons",
                 new Button.ClickListener() {
-                    @Override
                     public void buttonClick(ClickEvent event) {
                         // This should hide the forward and back buttons.
                         calendar.setHandler((ForwardHandler) null);
