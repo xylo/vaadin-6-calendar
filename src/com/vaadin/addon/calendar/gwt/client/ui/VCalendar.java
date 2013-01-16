@@ -36,7 +36,7 @@ import com.vaadin.addon.calendar.ui.Calendar;
  * @version
  * @VERSION@
  */
-public class VCalendar extends Composite {
+public abstract class VCalendar extends Composite {
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
@@ -460,7 +460,7 @@ public class VCalendar extends Composite {
     public CalendarEvent[] sortEventsByDuration(Collection<CalendarEvent> events) {
         CalendarEvent[] sorted = events
                 .toArray(new CalendarEvent[events.size()]);
-        Arrays.sort(sorted, getEventComparator());       
+        Arrays.sort(sorted, getEventComparator());
         return sorted;
     }
 
@@ -667,7 +667,7 @@ public class VCalendar extends Composite {
             if (monthGrid != null) {
                 monthGrid.updateCellSizes(
                         intWidth - weekToolbar.getOffsetWidth(), intHeight
-                        - nameToolbar.getOffsetHeight());
+                                - nameToolbar.getOffsetHeight());
             } else if (weekGrid != null) {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());
@@ -755,9 +755,9 @@ public class VCalendar extends Composite {
      * Is the component disabled
      * 
      * @param disabled
-     *          True if disabled
+     *            True if disabled
      */
-    public void setDisabled(boolean disabled){
+    public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
@@ -772,9 +772,9 @@ public class VCalendar extends Composite {
      * Is the component read-only
      * 
      * @param readOnly
-     *          True if component is readonly
+     *            True if component is readonly
      */
-    public void setReadOnly(boolean readOnly){
+    public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
 
@@ -1411,7 +1411,7 @@ public class VCalendar extends Composite {
      * Handles to tooltip event
      * 
      * @param event
-     *          The browser event
+     *            The browser event
      */
     public void handleTooltipEvent(Event event, Object key) {
         // Nothing to do, for extension purposes
@@ -1486,4 +1486,15 @@ public class VCalendar extends Composite {
     public void setEventMoveAllowed(boolean eventMoveAllowed) {
         this.eventMoveAllowed = eventMoveAllowed;
     }
+
+    /**
+     * @return true if forward navigation is enabled
+     */
+    public abstract boolean isForwardNavigationEnabled();
+
+    /**
+     * @return true if backward navigation is enabled
+     */
+    public abstract boolean isBackwardNavigationEnabled();
+
 }

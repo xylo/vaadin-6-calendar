@@ -48,7 +48,7 @@ import com.vaadin.terminal.gwt.client.ui.dd.VHasDropHandler;
  * @VERSION@
  */
 public class VCalendarPaintable extends VCalendar implements Paintable,
-VHasDropHandler, ActionOwner {
+        VHasDropHandler, ActionOwner {
 
     public static final String ACCESSCRITERIA = "-ac";
     public static final String ATTR_WEEK = "w";
@@ -99,7 +99,8 @@ VHasDropHandler, ActionOwner {
         setListener(new DateClickListener() {
             public void dateClick(String date) {
                 if (!isDisabledOrReadOnly()
-                        && getClient().hasEventListeners(VCalendarPaintable.this,
+                        && getClient().hasEventListeners(
+                                VCalendarPaintable.this,
                                 CalendarEventId.DATECLICK)) {
                     client.updateVariable(getPaintableId(),
                             CalendarEventId.DATECLICK, date, true);
@@ -129,8 +130,7 @@ VHasDropHandler, ActionOwner {
                 if (client.hasEventListeners(VCalendarPaintable.this,
                         CalendarEventId.RANGESELECT)) {
                     client.updateVariable(getPaintableId(),
-                            CalendarEventId.RANGESELECT,
-                            value, true);
+                            CalendarEventId.RANGESELECT, value, true);
                 }
             }
         });
@@ -140,8 +140,7 @@ VHasDropHandler, ActionOwner {
                         && client.hasEventListeners(VCalendarPaintable.this,
                                 CalendarEventId.WEEKCLICK)) {
                     client.updateVariable(getPaintableId(),
-                            CalendarEventId.WEEKCLICK,
-                            event, true);
+                            CalendarEventId.WEEKCLICK, event, true);
                 }
             }
         });
@@ -157,8 +156,7 @@ VHasDropHandler, ActionOwner {
                     sb.append(DateUtil.formatClientSideTime(event
                             .getStartTime()));
                     client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTMOVE,
-                            sb.toString(), true);
+                            CalendarEventId.EVENTMOVE, sb.toString(), true);
                 }
             }
         });
@@ -184,8 +182,8 @@ VHasDropHandler, ActionOwner {
                             .getEndTime()));
 
                     client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTRESIZE,
-                            buffer.toString(), true);
+                            CalendarEventId.EVENTRESIZE, buffer.toString(),
+                            true);
                 }
             }
         });
@@ -200,8 +198,7 @@ VHasDropHandler, ActionOwner {
                 if (client.hasEventListeners(VCalendarPaintable.this,
                         CalendarEventId.EVENTCLICK)) {
                     client.updateVariable(getPaintableId(),
-                            CalendarEventId.EVENTCLICK,
-                            event.getIndex(), true);
+                            CalendarEventId.EVENTCLICK, event.getIndex(), true);
                 }
             }
         });
@@ -230,15 +227,14 @@ VHasDropHandler, ActionOwner {
                             SimpleDayCell cell = (SimpleDayCell) widget;
                             Date start = new Date(cell.getDate().getYear(),
                                     cell.getDate().getMonth(), cell.getDate()
-                                    .getDate(), 0, 0, 0);
+                                            .getDate(), 0, 0, 0);
 
                             Date end = new Date(cell.getDate().getYear(), cell
                                     .getDate().getMonth(), cell.getDate()
                                     .getDate(), 23, 59, 59);
 
                             return VCalendarPaintable.this.getActionsBetween(
-                                    start,
-                                    end);
+                                    start, end);
                         } else if (widget instanceof DateCell) {
                             /*
                              * Week and Day view
@@ -246,7 +242,7 @@ VHasDropHandler, ActionOwner {
                             DateCell cell = (DateCell) widget;
                             int slotIndex = DOM.getChildIndex(
                                     cell.getElement(), (Element) ne
-                                    .getEventTarget().cast());
+                                            .getEventTarget().cast());
                             DateCellSlot slot = cell.getSlot(slotIndex);
                             return VCalendarPaintable.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
@@ -421,7 +417,7 @@ VHasDropHandler, ActionOwner {
         }
     }
 
-    private List<Day> getDaysFromUIDL(UIDL daysUIDL){
+    private List<Day> getDaysFromUIDL(UIDL daysUIDL) {
         List<Day> days = new ArrayList<VCalendar.Day>();
         for (int i = 0; i < daysUIDL.getChildCount(); i++) {
             UIDL dayUidl = daysUIDL.getChildUIDL(i);
@@ -430,7 +426,7 @@ VHasDropHandler, ActionOwner {
                     .getStringAttribute(ATTR_FDATE);
             int dayOfWeek = dayUidl.getIntAttribute(ATTR_DOW);
             int week = dayUidl.getIntAttribute(ATTR_WEEK);
-            days.add(new Day(date,localized_date_format,dayOfWeek,week));
+            days.add(new Day(date, localized_date_format, dayOfWeek, week));
         }
         return days;
     }
@@ -518,6 +514,7 @@ VHasDropHandler, ActionOwner {
     }
 
     private List<String> actionKeys = new ArrayList<String>();
+
     private void updateActionMap(UIDL c) {
         actionMap.clear();
         actionKeys.clear();
@@ -626,5 +623,15 @@ VHasDropHandler, ActionOwner {
      */
     public String getPaintableId() {
         return PID;
+    }
+
+    @Override
+    public boolean isForwardNavigationEnabled() {
+        return client.hasEventListeners(this, CalendarEventId.FORWARD);
+    }
+
+    @Override
+    public boolean isBackwardNavigationEnabled() {
+        return client.hasEventListeners(this, CalendarEventId.BACKWARD);
     }
 }

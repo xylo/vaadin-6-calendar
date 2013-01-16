@@ -3,6 +3,7 @@
  */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -98,18 +99,18 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void addBackButton() {
-        // if (!calendar.getClient().hasEventListeners(calendar,
-        // CalendarEventId.FORWARD)) {
-        // nextLabel.getElement().getStyle().setOpacity(0);
-        // }
+        if (!calendar.isBackwardNavigationEnabled()) {
+            // nextLabel.getElement().getStyle().setOpacity(0);
+            nextLabel.getElement().getStyle().setHeight(0, Unit.PX);
+        }
         add(backLabel);
     }
 
     public void addNextButton() {
-        // if (!calendar.getClient().hasEventListeners(calendar,
-        // CalendarEventId.BACKWARD)) {
-        // backLabel.getElement().getStyle().setOpacity(0);
-        // }
+        if (!calendar.isForwardNavigationEnabled()) {
+            // backLabel.getElement().getStyle().setOpacity(0);
+            backLabel.getElement().getStyle().setHeight(0, Unit.PX);
+        }
         add(nextLabel);
     }
 
