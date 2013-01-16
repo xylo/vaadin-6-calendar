@@ -1,0 +1,8 @@
+.classpath
+.project
+.settings
+GWT development mode*
+WebContent/META-INF
+WebContent/VAADIN/widgetsets
+WebContent/VAADIN/gwt-unitCache
+build/classes
