@@ -1303,6 +1303,8 @@ public class VCalendar extends Composite {
     }
 
     private MouseEventListener mouseEventListener;
+    private boolean forwardNavigationEnabled = true;
+    private boolean backwardNavigationEnabled = true;
 
     /**
      * Get the listener that listen to mouse events
@@ -1391,5 +1393,21 @@ public class VCalendar extends Composite {
      */
     public void setEventMoveAllowed(boolean eventMoveAllowed) {
         this.eventMoveAllowed = eventMoveAllowed;
+    }
+
+    public boolean isBackwardNavigationEnabled() {
+        return backwardNavigationEnabled;
+    }
+
+    public void setBackwardNavigationEnabled(boolean enabled) {
+        backwardNavigationEnabled = enabled;
+    }
+
+    public boolean isForwardNavigationEnabled() {
+        return forwardNavigationEnabled;
+    }
+
+    public void setForwardNavigationEnabled(boolean enabled) {
+        forwardNavigationEnabled = enabled;
     }
 }

@@ -297,6 +297,10 @@ public class CalendarConnector extends AbstractComponentConnector implements
         VCalendar widget = getWidget();
         boolean monthView = state.getDays().size() > 7;
 
+        // Enable or disable the forward and backward navigation buttons
+        widget.setForwardNavigationEnabled(hasEventListener(CalendarEventId.FORWARD));
+        widget.setBackwardNavigationEnabled(hasEventListener(CalendarEventId.BACKWARD));
+
         widget.set24HFormat(state.isFormat24H());
         widget.setDayNames(state.getDayNames());
         widget.setMonthNames(state.getMonthNames());
