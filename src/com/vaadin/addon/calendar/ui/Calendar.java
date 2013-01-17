@@ -1346,11 +1346,6 @@ public class Calendar extends AbstractComponent implements
     public void setHandler(ForwardHandler listener) {
         setHandler(ForwardEvent.EVENT_ID, ForwardEvent.class, listener,
                 ForwardHandler.forwardMethod);
-        if (listener == null) {
-            // To work around removeListener not repainting when addListener
-            // does.
-            markAsDirty();
-        }
     }
 
     /*
@@ -1364,11 +1359,6 @@ public class Calendar extends AbstractComponent implements
     public void setHandler(BackwardHandler listener) {
         setHandler(BackwardEvent.EVENT_ID, BackwardEvent.class, listener,
                 BackwardHandler.backwardMethod);
-        if (listener == null) {
-            // To work around removeListener not repainting when addListener
-            // does.
-            markAsDirty();
-        }
     }
 
     /*
