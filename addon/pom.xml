@@ -24,6 +24,16 @@
 		<snapshot.repository.url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</snapshot.repository.url>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>test-on-hub</id>
+			<properties>
+				<!-- Intra net address for TB3 hub -->
+				<tb.hub>matin-vehje.office.itmill.com</tb.hub>
+			</properties>
+		</profile>
+	</profiles>
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>vaadin-snapshots</id>
@@ -100,10 +110,10 @@
 							<Vaadin-Widgetsets>com.vaadin.addon.calendar.gwt.CalendarWidgetset</Vaadin-Widgetsets>
 						</manifestEntries>
 					</archive>
-<!-- 					<excludes> -->
-<!-- 						Remove resources included due to gwt compilation -->
-<!-- 						TODO <exclude>**/demoandtestapp/*</exclude> -->
-<!-- 					</excludes> -->
+					<!-- <excludes> -->
+					<!-- Remove resources included due to gwt compilation -->
+					<!-- TODO <exclude>**/demoandtestapp/*</exclude> -->
+					<!-- </excludes> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -181,6 +191,28 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Copies the theme files from the demo project in the test phase -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>test</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/testwebapp/VAADIN/themes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>../demo/src/main/webapp/VAADIN/themes/</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 		</plugins>
 
@@ -215,8 +247,13 @@
 							<!-- Files here might match to naming convetions, but the are just 
 								vaadin apps containing you add-on components in varios setups. We can ignore 
 								them from test. -->
-							<!--TODO <exclude>**/demoandtestapp/**/*</exclude> <exclude>**/Abstract*</exclude> -->
+							<exclude>**/demo/*</exclude>
+							<exclude>**/test/*</exclude>
 						</excludes>
+						<includes>
+							<include>**/test/testbench/*</include>
+							<include>**/test/unit/*</include>
+						</includes>
 						<systemProperties>
 							<property>
 								<name>tb.hub</name>
@@ -389,9 +426,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- <dependency org="log4j" name="log4j" rev="1.2.17" conf="build->default" 
-			/> -->
-
 		<dependency>
 			<groupId>com.vaadin.addon</groupId>
 			<artifactId>jpacontainer-addon-agpl-3.0</artifactId>
@@ -399,22 +433,26 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- <dependency org="com.vaadin" name="vaadin-client-compiler" rev="7.0.0.beta11" 
-			conf="build->default" /> -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-testbench</artifactId>
+			<version>3.0.4</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.9.1</version>
-        <configuration>
-          <configLocation>build/checkstyle.xml</configLocation>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
-  
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.9.1</version>
+				<configuration>
+					<configLocation>build/checkstyle.xml</configLocation>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
 </project>

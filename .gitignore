@@ -11,3 +11,4 @@ demo/target
 demo/src/main/webapp/VAADIN/widgetsets
 demo/src/main/webapp/VAADIN/gwt-unitCache
 addon/target
+addon/chromedriver.log
