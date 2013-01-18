@@ -19,30 +19,10 @@
       <description>
   		Application widgetset</description>
       <param-name>widgetset</param-name>
-      <param-value>com.vaadin.addon.calendar.gwt.CalendarWidgetset</param-value>
+      <param-value>com.vaadin.addon.calendar.demo.AppWidgetSet</param-value>
     </init-param>
   </servlet>
-  
-  <!--  Testing -->
-	<servlet>
-		<servlet-name>TestingApplication</servlet-name>
-		<servlet-class>
-		com.vaadin.server.VaadinServlet</servlet-class>
-		<init-param>
-			<param-name>UIProvider</param-name>
-			<param-value>com.vaadin.addon.calendar.test.TestingUIProvider</param-value>
-		</init-param>
-		<init-param>
-			<param-name>widgetset</param-name>
-			<param-value>com.vaadin.addon.calendar.gwt.CalendarWidgetset</param-value>
-		</init-param>
-   </servlet>	
-    
-  <servlet-mapping>
-		<servlet-name>TestingApplication</servlet-name>
-		<url-pattern>/test/*</url-pattern>
-  </servlet-mapping>		
-	
+  	
   <servlet-mapping>
     <servlet-name>Demo</servlet-name>
     <url-pattern>/*</url-pattern>
