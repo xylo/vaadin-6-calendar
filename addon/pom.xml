@@ -3,9 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vaadin.addon</groupId>
 	<version>2.0.0-SNAPSHOT</version>
-	<artifactId>vaadin-calendar</artifactId>
+	<artifactId>vaadin-calendar-${license.short.name}</artifactId>
 	<packaging>jar</packaging>
 	<name>Vaadin Calendar</name>
+  <inceptionYear>2010</inceptionYear>
 
 	<organization>
 		<name>Vaadin Ltd</name>
@@ -22,6 +23,7 @@
 		<project.organization>Vaadin Ltd</project.organization>
 		<vaadin.version.maven>7.0.0.rc1</vaadin.version.maven>
 		<snapshot.repository.url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</snapshot.repository.url>
+    <license.short.name>agpl-3.0</license.short.name>
 	</properties>
 
 	<profiles>
@@ -43,10 +45,16 @@
 	</distributionManagement>
 
 	<licenses>
-		<license>
-			<name>CVALv2</name>
-			<url>https://vaadin.com/license/cval-2.0</url>
-		</license>
+    <license>
+        <name>GNU Affero General Public License version 3.0</name>
+        <url>http://www.gnu.org/licenses/agpl-3.0.html</url>
+        <distribution>repo</distribution>
+    </license>
+    <license>
+        <name>Commercial Vaadin Add-On License version 2.0</name>
+        <url>http://vaadin.com/license/cval-2.0</url>
+        <distribution>manual</distribution>
+    </license>
 	</licenses>
 
 	<build>
@@ -63,10 +71,38 @@
 		</resources>
 
 		<plugins>
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>license-maven-plugin</artifactId> 
-				<configuration> <licenseName>cval2</licenseName> <licenseResolver>file://${basedir}/src/license</licenseResolver> 
-				<includes> <include>**/main/**/*.java</include> </includes> </configuration> 
-				</plugin> -->
+			 <plugin>
+         <groupId>com.mycila.maven-license-plugin</groupId>
+         <artifactId>maven-license-plugin</artifactId>
+         <configuration>
+             <basedir>${basedir}</basedir>
+             <header>${basedir}/src/license/cval2/header.txt</header>
+             <quiet>false</quiet>
+             <failIfMissing>true</failIfMissing>
+             <aggregate>false</aggregate>
+             <useDefaultExcludes>true</useDefaultExcludes>
+             <useDefaultMapping>true</useDefaultMapping>
+             <encoding>UTF-8</encoding>
+             <properties>
+               <year>${project.inceptionYear}</year>
+             </properties>
+             <excludes>
+                 <exclude>target/**</exclude>
+                 <exclude>doc/**</exclude>
+                 <exclude>**/*.xml</exclude>
+                 <exclude>src/license/**/*</exclude>
+                 <exclude>README</exclude>
+                 <exclude>LICENSE</exclude>
+             </excludes>
+         </configuration>
+         <executions>
+             <execution>
+                 <goals>
+                     <goal>format</goal>
+                 </goals>
+             </execution>
+         </executions>
+     </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
