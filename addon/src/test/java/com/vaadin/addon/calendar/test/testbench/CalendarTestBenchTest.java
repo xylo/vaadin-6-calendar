@@ -86,8 +86,8 @@ public abstract class CalendarTestBenchTest extends TestBenchTestCase {
         String hubhost = System.getProperty("tb.hub");
         if (hubhost != null && !hubhost.isEmpty()) {
             try {
-                BASEURL = InetAddress.getLocalHost().getHostName() + ":"
-                        + TESTPORT + "/";
+                BASEURL = InetAddress.getLocalHost().getCanonicalHostName()
+                        + ":" + TESTPORT + "/";
                 URL remoteAddress = new URL("http://" + hubhost
                         + ":4444/wd/hub");
                 driver = TestBench.createDriver(new RemoteWebDriver(
