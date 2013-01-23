@@ -72,7 +72,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin.addon</groupId>
-			<artifactId>vaadin-calendar</artifactId>
+			<artifactId>vaadin-calendar-agpl-3.0</artifactId>
 			<version>${vaadin.calendar.version}</version>
 		</dependency>
 	</dependencies>
