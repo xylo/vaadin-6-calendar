@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,8 +87,7 @@ public abstract class CalendarTestBenchTest extends TestBenchTestCase {
         String hubhost = System.getProperty("tb.hub");
         if (hubhost != null && !hubhost.isEmpty()) {
             try {
-                BASEURL = InetAddress.getLocalHost().getCanonicalHostName()
-                        + ":" + TESTPORT + "/";
+                BASEURL = getHostName() + ":" + TESTPORT + "/";
                 URL remoteAddress = new URL("http://" + hubhost
                         + ":4444/wd/hub");
                 driver = TestBench.createDriver(new RemoteWebDriver(
@@ -106,6 +106,14 @@ public abstract class CalendarTestBenchTest extends TestBenchTestCase {
             // Throws an NPE if wd is null.
             driver = TestBench.createDriver(wd);
         }
+    }
+
+    private String getHostName() throws UnknownHostException {
+        String hostName = InetAddress.getLocalHost().getHostName();
+        if (hostName.startsWith("buildagent")) {
+            return hostName + ".intra.itmill.com";
+        }
+        return hostName;
     }
 
     protected void startBrowser() {
