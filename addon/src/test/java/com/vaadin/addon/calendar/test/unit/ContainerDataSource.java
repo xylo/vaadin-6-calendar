@@ -14,23 +14,6 @@
  */
 package com.vaadin.addon.calendar.test.unit;
 
-/*
- * #%L
- * Vaadin Calendar
- * %%
- * Copyright (C) 2010 - 2013 Vaadin Ltd
- * %%
- * This program is available under GNU Affero General Public License (version
- * 3 or later at your option).
- * 
- * See the file licensing.txt distributed with this software for more
- * information about licensing.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * #L%
- */
-
 import java.util.Date;
 import java.util.List;
 
@@ -101,7 +84,8 @@ public class ContainerDataSource extends TestCase {
         Indexed container = createTestBeanItemContainer();
 
         // Make the container sorted by caption
-        ((Sortable)container).sort(new Object[]{"caption"}, new boolean[]{true});
+        ((Sortable) container).sort(new Object[] { "caption" },
+                new boolean[] { true });
 
         // Set data source
         calendar.setContainerDataSource(container);
@@ -348,8 +332,7 @@ public class ContainerDataSource extends TestCase {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         for (int i = 1; i <= 10; i++) {
             eventContainer.addBean(new BasicEvent("Test " + i, "Description "
-                    + i,
-                    cal.getTime()));
+                    + i, cal.getTime()));
             cal.add(java.util.Calendar.DAY_OF_MONTH, 2);
         }
         return eventContainer;
@@ -367,7 +350,7 @@ public class ContainerDataSource extends TestCase {
             Item item = container.getItem(container.addItem());
             item.getItemProperty("testCaption").setValue("Test " + i);
             item.getItemProperty("testDescription")
-            .setValue("Description " + i);
+                    .setValue("Description " + i);
             item.getItemProperty("testStartDate").setValue(cal.getTime());
             item.getItemProperty("testEndDate").setValue(cal.getTime());
             cal.add(java.util.Calendar.DAY_OF_MONTH, 2);

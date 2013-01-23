@@ -14,23 +14,6 @@
  */
 package com.vaadin.addon.calendar.test.testbench;
 
-/*
- * #%L
- * Vaadin Calendar
- * %%
- * Copyright (C) 2010 - 2013 Vaadin Ltd
- * %%
- * This program is available under GNU Affero General Public License (version
- * 3 or later at your option).
- * 
- * See the file licensing.txt distributed with this software for more
- * information about licensing.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * #L%
- */
-
 import org.junit.Test;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
