@@ -25,8 +25,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
  * Implements basic functionality needed to enable backwards navigation.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
+ * @version ${pom.version}
  * 
  */
 @SuppressWarnings("serial")

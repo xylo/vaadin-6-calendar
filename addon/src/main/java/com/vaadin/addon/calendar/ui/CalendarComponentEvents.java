@@ -27,16 +27,14 @@ import com.vaadin.util.ReflectTools;
  * Interface for all Vaadin Calendar events.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
+ * @version ${pom.version}
  */
 public interface CalendarComponentEvents extends Serializable {
 
     /**
      * Notifier interface for notifying listener of calendar events
-     * 
      */
-    public interface CalendarEventNotifier {
+    public interface CalendarEventNotifier extends Serializable {
         /**
          * Get the assigned event handler for the given eventId.
          * 
@@ -49,8 +47,7 @@ public interface CalendarComponentEvents extends Serializable {
     /**
      * Notifier interface for event drag & drops.
      */
-    public interface EventMoveNotifier extends Serializable,
-            CalendarEventNotifier {
+    public interface EventMoveNotifier extends CalendarEventNotifier {
 
         /**
          * Set the EventMoveHandler.
@@ -117,7 +114,7 @@ public interface CalendarComponentEvents extends Serializable {
      * Handler interface for when events are being dragged on the calendar
      * 
      */
-    public interface EventMoveHandler extends EventListener {
+    public interface EventMoveHandler extends EventListener, Serializable {
 
         /** Trigger method for the MoveEvent. */
         public static final Method eventMoveMethod = ReflectTools.findMethod(
@@ -219,7 +216,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** RangeSelectHandler handles RangeSelectEvent. */
-    public interface RangeSelectHandler extends EventListener {
+    public interface RangeSelectHandler extends EventListener, Serializable {
 
         /** Trigger method for the RangeSelectEvent. */
         public static final Method rangeSelectMethod = ReflectTools
@@ -299,7 +296,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** ForwardHandler handles ForwardEvent. */
-    public interface ForwardHandler extends EventListener {
+    public interface ForwardHandler extends EventListener, Serializable {
 
         /** Trigger method for the ForwardEvent. */
         public static final Method forwardMethod = ReflectTools.findMethod(
@@ -334,7 +331,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** BackwardHandler handles BackwardEvent. */
-    public interface BackwardHandler extends EventListener {
+    public interface BackwardHandler extends EventListener, Serializable {
 
         /** Trigger method for the BackwardEvent. */
         public static final Method backwardMethod = ReflectTools.findMethod(
@@ -377,7 +374,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** DateClickHandler handles DateClickEvent. */
-    public interface DateClickHandler extends EventListener {
+    public interface DateClickHandler extends EventListener, Serializable {
 
         /** Trigger method for the DateClickEvent. */
         public static final Method dateClickMethod = ReflectTools.findMethod(
@@ -420,7 +417,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** EventClickHandler handles EventClick. */
-    public interface EventClickHandler extends EventListener {
+    public interface EventClickHandler extends EventListener, Serializable {
 
         /** Trigger method for the EventClick. */
         public static final Method eventClickMethod = ReflectTools.findMethod(
@@ -487,7 +484,7 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** WeekClickHandler handles WeekClicks. */
-    public interface WeekClickHandler extends EventListener {
+    public interface WeekClickHandler extends EventListener, Serializable {
 
         /** Trigger method for the WeekClick. */
         public static final Method weekClickMethod = ReflectTools.findMethod(
@@ -565,7 +562,7 @@ public interface CalendarComponentEvents extends Serializable {
     /**
      * Handler for EventResize event.
      */
-    public interface EventResizeHandler extends EventListener {
+    public interface EventResizeHandler extends EventListener, Serializable {
 
         /** Trigger method for the EventResize. */
         public static final Method eventResizeMethod = ReflectTools.findMethod(

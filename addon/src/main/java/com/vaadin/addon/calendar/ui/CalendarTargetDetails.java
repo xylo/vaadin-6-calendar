@@ -28,12 +28,11 @@ import com.vaadin.event.dd.TargetDetailsImpl;
  * includes the start time of the slot.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
+ * @version ${pom.version}
  */
+@SuppressWarnings("serial")
 public class CalendarTargetDetails extends TargetDetailsImpl {
 
-    private static final long serialVersionUID = -8555345741291476042L;
     private boolean hasDropTime;
 
     public CalendarTargetDetails(Map<String, Object> rawDropData,

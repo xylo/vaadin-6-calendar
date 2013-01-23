@@ -25,8 +25,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent;
  * Implements basic functionality needed to enable moving events.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
+ * @version ${pom.version}
  * 
  */
 @SuppressWarnings("serial")
