@@ -17,7 +17,7 @@
 			<directory>target</directory>
 			<outputDirectory>./</outputDirectory>
 			<includes>
-				<include>*-${project.version}*.jar</include>
+				<include>*${license.short.name}-${project.version}*.jar</include>
 			</includes>
 		</fileSet>
 		<fileSet>
