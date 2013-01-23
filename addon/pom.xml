@@ -239,7 +239,7 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-						<phase>test</phase>
+						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
