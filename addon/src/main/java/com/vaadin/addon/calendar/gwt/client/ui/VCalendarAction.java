@@ -25,7 +25,7 @@ import com.vaadin.client.ui.Action;
  * 
  * @since 1.3.0
  * @version
- * @VERSION@
+ * ${pom.version}
  * 
  */
 public class VCalendarAction extends Action {

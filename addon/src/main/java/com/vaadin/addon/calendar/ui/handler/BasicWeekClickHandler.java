@@ -27,7 +27,7 @@ import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicWeekClickHandler implements WeekClickHandler {

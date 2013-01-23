@@ -28,7 +28,7 @@ import com.vaadin.client.ui.dd.VDragEvent;
  * index and the day index are included in the drop details sent to the server.
  * 
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public class CalendarWeekDropHandler extends CalendarDropHandler {
 

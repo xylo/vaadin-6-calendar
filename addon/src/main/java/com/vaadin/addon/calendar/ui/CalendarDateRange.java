@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * 
  * @since 1.2.2
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class CalendarDateRange implements Serializable {

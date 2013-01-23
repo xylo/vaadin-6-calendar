@@ -24,7 +24,7 @@ import java.util.List;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public interface CalendarEventProvider extends Serializable {
     /**

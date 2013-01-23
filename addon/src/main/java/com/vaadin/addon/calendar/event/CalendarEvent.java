@@ -30,7 +30,7 @@ import java.util.Date;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public interface CalendarEvent extends Serializable {
 

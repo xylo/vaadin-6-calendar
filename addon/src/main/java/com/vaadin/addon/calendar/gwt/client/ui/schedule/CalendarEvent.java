@@ -23,7 +23,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
  * A client side implementation of a calendar event
  * 
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public class CalendarEvent {
     private int index;

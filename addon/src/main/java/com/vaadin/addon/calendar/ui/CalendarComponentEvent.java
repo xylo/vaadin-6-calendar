@@ -21,7 +21,7 @@ import com.vaadin.ui.Component;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  * */
 @SuppressWarnings("serial")
 public class CalendarComponentEvent extends Component.Event {

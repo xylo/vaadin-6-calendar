@@ -67,7 +67,7 @@ import com.vaadin.shared.ui.Connect;
  * 
  * @since 1.0.0
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @Connect(com.vaadin.addon.calendar.ui.Calendar.class)
 public class CalendarConnector extends AbstractComponentConnector implements

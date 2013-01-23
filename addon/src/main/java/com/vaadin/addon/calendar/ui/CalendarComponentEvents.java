@@ -28,7 +28,7 @@ import com.vaadin.util.ReflectTools;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public interface CalendarComponentEvents extends Serializable {
 

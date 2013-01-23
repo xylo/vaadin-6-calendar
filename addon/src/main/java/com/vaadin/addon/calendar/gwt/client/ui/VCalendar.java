@@ -44,7 +44,7 @@ import com.vaadin.addon.calendar.gwt.client.ui.schedule.WeeklyLongEvents;
  * 
  * @since 1.3.0
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public class VCalendar extends Composite {
 

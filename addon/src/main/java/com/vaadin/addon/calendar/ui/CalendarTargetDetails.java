@@ -29,7 +29,7 @@ import com.vaadin.event.dd.TargetDetailsImpl;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public class CalendarTargetDetails extends TargetDetailsImpl {
 

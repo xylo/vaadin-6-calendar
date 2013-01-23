@@ -27,7 +27,7 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {

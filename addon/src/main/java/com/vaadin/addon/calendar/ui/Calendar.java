@@ -102,7 +102,7 @@ import com.vaadin.ui.AbstractComponent;
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class Calendar extends AbstractComponent implements

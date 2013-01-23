@@ -39,7 +39,7 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * 
  * @author Vaadin Ltd.
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicEventProvider implements CalendarEditableEventProvider,

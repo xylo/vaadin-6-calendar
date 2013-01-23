@@ -19,7 +19,7 @@ package com.vaadin.addon.calendar.event;
  * 
  * @since 1.3.0
  * @version
- * @VERSION@
+ * ${pom.version}
  */
 public interface CalendarEditableEventProvider extends CalendarEventProvider {
 
