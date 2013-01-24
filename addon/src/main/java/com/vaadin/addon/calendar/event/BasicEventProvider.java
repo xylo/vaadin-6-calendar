@@ -38,12 +38,11 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * </p>
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
+ * @version ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicEventProvider implements CalendarEditableEventProvider,
-EventSetChangeNotifier, CalendarEvent.EventChangeListener {
+        EventSetChangeNotifier, CalendarEvent.EventChangeListener {
 
     protected List<CalendarEvent> eventList = new ArrayList<CalendarEvent>();
 
@@ -63,13 +62,15 @@ EventSetChangeNotifier, CalendarEvent.EventChangeListener {
             long from = startDate.getTime();
             long to = endDate.getTime();
 
-            long f = ev.getStart().getTime();
-            long t = ev.getEnd().getTime();
-            // Select only events that overlaps with startDate and
-            // endDate.
-            if ((f <= to && f >= from) || (t >= from && t <= to)
-                    || (f <= from && t >= to)) {
-                activeEvents.add(ev);
+            if (ev.getStart() != null && ev.getEnd() != null) {
+                long f = ev.getStart().getTime();
+                long t = ev.getEnd().getTime();
+                // Select only events that overlaps with startDate and
+                // endDate.
+                if ((f <= to && f >= from) || (t >= from && t <= to)
+                        || (f <= from && t >= to)) {
+                    activeEvents.add(ev);
+                }
             }
         }
 

@@ -60,6 +60,7 @@ public abstract class CalendarTestBenchTest extends TestBenchTestCase {
         DesiredCapabilities chrome = DesiredCapabilities.chrome();
         chrome.setPlatform(Platform.VISTA);
         DesiredCapabilities firefox = DesiredCapabilities.firefox();
+        firefox.setPlatform(Platform.MAC);
         return Arrays.asList(new DesiredCapabilities[][] { { chrome },
                 { firefox } });
     }
