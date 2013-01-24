@@ -50,6 +50,10 @@ public class TestingUIProvider extends UIProvider {
             return null;
         }
 
+        if (pathInfo.contains("favicon.ico")) {
+            return null;
+        }
+
         String className = pathInfo.substring(classNamePrefix.length());
         ClassLoader classLoader = event.getRequest().getService()
                 .getClassLoader();

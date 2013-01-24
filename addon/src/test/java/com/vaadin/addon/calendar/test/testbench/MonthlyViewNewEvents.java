@@ -15,6 +15,7 @@
 package com.vaadin.addon.calendar.test.testbench;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
@@ -61,11 +62,10 @@ public class MonthlyViewNewEvents extends CalendarTestBenchTest {
                 driver.findElement(
                         By.vaadin("ROOT::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field"))
                         .getAttribute("value"));
-        assertEquals(
-                "on",
-                driver.findElement(
+        assertTrue(driver
+                .findElement(
                         By.vaadin("ROOT::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]"))
-                        .getAttribute("value"));
+                .isSelected());
         clearAndType(
                 "ROOT::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VTextField[0]",
                 "Test event");
@@ -172,11 +172,10 @@ public class MonthlyViewNewEvents extends CalendarTestBenchTest {
                 driver.findElement(
                         By.vaadin("ROOT::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VPopupCalendar[1]#field"))
                         .getAttribute("value"));
-        assertEquals(
-                "on",
-                driver.findElement(
+        assertTrue(driver
+                .findElement(
                         By.vaadin("ROOT::/VWindow[0]/FocusableScrollPanel[0]/VVerticalLayout[0]/ChildComponentContainer[0]/VFormLayout[0]/VFormLayout$VFormLayoutTable[0]/VCheckBox[0]/domChild[0]"))
-                        .getAttribute("value"));
+                .isSelected());
         assertEquals(
                 "Test event",
                 driver.findElement(

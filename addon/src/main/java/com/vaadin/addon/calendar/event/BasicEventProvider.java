@@ -62,16 +62,16 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
             long from = startDate.getTime();
             long to = endDate.getTime();
 
-            // if (ev.getStart() != null && ev.getEnd() != null) {
-            long f = ev.getStart().getTime();
-            long t = ev.getEnd().getTime();
-            // Select only events that overlaps with startDate and
-            // endDate.
-            if ((f <= to && f >= from) || (t >= from && t <= to)
-                    || (f <= from && t >= to)) {
-                activeEvents.add(ev);
+            if (ev.getStart() != null && ev.getEnd() != null) {
+                long f = ev.getStart().getTime();
+                long t = ev.getEnd().getTime();
+                // Select only events that overlaps with startDate and
+                // endDate.
+                if ((f <= to && f >= from) || (t >= from && t <= to)
+                        || (f <= from && t >= to)) {
+                    activeEvents.add(ev);
+                }
             }
-            // }
         }
 
         return activeEvents;
