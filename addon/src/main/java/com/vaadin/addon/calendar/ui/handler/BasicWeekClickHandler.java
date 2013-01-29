@@ -14,20 +14,18 @@
  */
 package com.vaadin.addon.calendar.ui.handler;
 
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
+import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick;
-import com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler;
 
 /**
  * Implements basic functionality needed to change to week view when a week
  * number is clicked.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicWeekClickHandler implements WeekClickHandler {

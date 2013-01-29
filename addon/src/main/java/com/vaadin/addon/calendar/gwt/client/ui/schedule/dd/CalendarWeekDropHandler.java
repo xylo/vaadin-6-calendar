@@ -26,9 +26,6 @@ import com.vaadin.client.ui.dd.VDragEvent;
  * Handles DD when the weekly view is showing in the Calendar. In the weekly
  * view, drops are only allowed in the the time slots for each day. The slot
  * index and the day index are included in the drop details sent to the server.
- * 
- * @version
- * ${pom.version}
  */
 public class CalendarWeekDropHandler extends CalendarDropHandler {
 

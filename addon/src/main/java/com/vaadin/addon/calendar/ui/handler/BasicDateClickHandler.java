@@ -14,18 +14,17 @@
  */
 package com.vaadin.addon.calendar.ui.handler;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Implements basic functionality needed to switch to day view when a single day
  * is clicked.
  * 
  * @author Vaadin Ltd.
- * @version ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicDateClickHandler implements DateClickHandler {

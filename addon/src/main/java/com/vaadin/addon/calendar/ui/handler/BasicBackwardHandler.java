@@ -14,19 +14,17 @@
  */
 package com.vaadin.addon.calendar.ui.handler;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Implements basic functionality needed to enable backwards navigation.
  * 
  * @author Vaadin Ltd.
- * @version ${pom.version}
- * 
  */
 @SuppressWarnings("serial")
 public class BasicBackwardHandler implements BackwardHandler {

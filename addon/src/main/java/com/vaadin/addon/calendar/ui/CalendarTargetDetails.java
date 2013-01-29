@@ -14,11 +14,11 @@
  */
 package com.vaadin.addon.calendar.ui;
 
-import java.util.Date;
-import java.util.Map;
-
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetailsImpl;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Drop details for {@link com.vaadin.addon.calendar.ui.Calendar Calendar}. When
@@ -28,7 +28,6 @@ import com.vaadin.event.dd.TargetDetailsImpl;
  * includes the start time of the slot.
  * 
  * @author Vaadin Ltd.
- * @version ${pom.version}
  */
 @SuppressWarnings("serial")
 public class CalendarTargetDetails extends TargetDetailsImpl {

@@ -20,8 +20,6 @@ import com.vaadin.ui.Component;
  * All Calendar events extends this class.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  * */
 @SuppressWarnings("serial")
 public class CalendarComponentEvent extends Component.Event {

@@ -14,19 +14,17 @@
  */
 package com.vaadin.addon.calendar.gwt.client.ui;
 
-import java.util.Date;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEvent;
 import com.vaadin.client.ui.Action;
+
+import java.util.Date;
 
 /**
  * Action performed by the calendar
  * 
  * @since 1.3.0
- * @version
- * ${pom.version}
- * 
+ *
  */
 public class VCalendarAction extends Action {
 

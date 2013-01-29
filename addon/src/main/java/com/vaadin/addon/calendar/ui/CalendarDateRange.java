@@ -24,8 +24,6 @@ import java.util.logging.Logger;
  * Class for representing a date range.
  * 
  * @since 1.2.2
- * @version
- * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class CalendarDateRange implements Serializable {

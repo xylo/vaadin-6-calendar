@@ -59,14 +59,11 @@
 	</licenses>
 
 	<build>
-		<sourceDirectory>target/filtered-sources/java</sourceDirectory>
 		<resources>
 			<!-- These are also needed for the sources required by the GWT compiler 
 				to be included in the produced JARs -->
 			<resource>
 				<directory>src/main/java</directory>
-				<filtering>true</filtering>
-				<targetPath>../filtered-sources/java</targetPath>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>

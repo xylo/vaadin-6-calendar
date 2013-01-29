@@ -14,20 +14,19 @@
  */
 package com.vaadin.addon.calendar.ui;
 
+import com.vaadin.addon.calendar.event.CalendarEvent;
+import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
+import com.vaadin.util.ReflectTools;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.EventListener;
 
-import com.vaadin.addon.calendar.event.CalendarEvent;
-import com.vaadin.addon.calendar.gwt.client.ui.schedule.CalendarEventId;
-import com.vaadin.util.ReflectTools;
-
 /**
  * Interface for all Vaadin Calendar events.
  * 
  * @author Vaadin Ltd.
- * @version ${pom.version}
  */
 public interface CalendarComponentEvents extends Serializable {
 

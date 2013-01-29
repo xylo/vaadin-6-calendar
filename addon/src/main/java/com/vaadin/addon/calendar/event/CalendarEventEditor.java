@@ -32,8 +32,6 @@ import java.util.Date;
  * </p>
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  */
 public interface CalendarEventEditor extends CalendarEvent {
 

@@ -14,16 +14,13 @@
  */
 package com.vaadin.addon.calendar.gwt.client.ui.schedule;
 
-import java.util.Date;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 
+import java.util.Date;
+
 /**
  * A client side implementation of a calendar event
- * 
- * @version
- * ${pom.version}
  */
 public class CalendarEvent {
     private int index;

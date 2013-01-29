@@ -14,12 +14,12 @@
  */
 package com.vaadin.addon.calendar.event;
 
+import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
+import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.vaadin.addon.calendar.event.CalendarEvent.EventChange;
-import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier;
 
 /**
  * <p>
@@ -38,7 +38,6 @@ import com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotif
  * </p>
  * 
  * @author Vaadin Ltd.
- * @version ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicEventProvider implements CalendarEditableEventProvider,

@@ -18,8 +18,6 @@ package com.vaadin.addon.calendar.event;
  * An event provider which allows adding and removing events
  * 
  * @since 1.3.0
- * @version
- * ${pom.version}
  */
 public interface CalendarEditableEventProvider extends CalendarEventProvider {
 

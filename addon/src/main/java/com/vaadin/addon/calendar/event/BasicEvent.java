@@ -26,8 +26,6 @@ import com.vaadin.addon.calendar.event.CalendarEvent.EventChangeNotifier;
  * setters for all required fields and fires events when this event is changed.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {

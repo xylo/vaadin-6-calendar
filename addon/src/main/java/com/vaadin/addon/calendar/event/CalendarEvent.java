@@ -29,8 +29,6 @@ import java.util.Date;
  * are omitted in UI and only dates are shown.</li>
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  */
 public interface CalendarEvent extends Serializable {
 

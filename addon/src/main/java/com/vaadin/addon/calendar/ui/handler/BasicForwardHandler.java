@@ -14,19 +14,17 @@
  */
 package com.vaadin.addon.calendar.ui.handler;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import com.vaadin.addon.calendar.gwt.client.ui.VCalendar;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent;
 import com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Implements basic functionality needed to enable forward navigation.
  * 
  * @author Vaadin Ltd.
- * @version
- * ${pom.version}
  */
 @SuppressWarnings("serial")
 public class BasicForwardHandler implements ForwardHandler {
