@@ -37,16 +37,16 @@
 		<!-- Use a MANIFEST.MF file in zip, required by vaadin.com/directory. The 
 			file draws required details automatically from pom.xml -->
 		<file>
-			<source>MANIFEST.MF</source>
+			<source>../addon/MANIFEST.MF</source>
 			<outputDirectory>META-INF</outputDirectory>
 			<filtered>true</filtered>
 		</file>
 		<file>
-			<source>README</source>
+			<source>../addon/README</source>
 			<filtered>true</filtered>
 		</file>
 		<file>
-			<source>LICENSE</source>
+			<source>../addon/LICENSE</source>
 			<filtered>true</filtered>
 		</file>
 	</files>

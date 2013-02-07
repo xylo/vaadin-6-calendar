@@ -12,7 +12,7 @@ use the following maven module:
 
 	<dependency>
 		<groupId>com.vaadin.addon</groupId>
-		<artifactId>vaadin-charts</artifactId>
+		<artifactId>vaadin-calendar-${license.short.name}</artifactId>
 		<version>${project.version}</version>
 	</dependency>
 
@@ -20,7 +20,7 @@ Note, that the package also has client side extensions, so make sure that you
 compile your widgetset after installation!
 
 == Links ==
-Homepage: 				https://vaadin.com/add-ons/calendar
-Documentation:		https://vaadin.com/book/vaadin7/-/page/calendar.html
-Demo application: http://demo.vaadin.com/calendar
-Issue tracker: 		http://dev.vaadin.com/
+Homepage:          https://vaadin.com/add-ons/calendar
+Documentation:     https://vaadin.com/book/vaadin7/-/page/calendar.html
+Demo application:  http://demo.vaadin.com/calendar
+Issue tracker:     http://dev.vaadin.com/

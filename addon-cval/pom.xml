@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vaadin.addon</groupId>
 	<version>2.0.0-SNAPSHOT</version>
-	<artifactId>vaadin-calendar-agpl-3.0</artifactId>
+	<artifactId>vaadin-calendar-cval-2.0</artifactId>
 	<packaging>jar</packaging>
 	<name>Vaadin Calendar</name>
 	<inceptionYear>2010</inceptionYear>
@@ -21,20 +21,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.organization>Vaadin Ltd</project.organization>
-		<vaadin.version.maven>7.0.0.rc2</vaadin.version.maven>
+		<vaadin.version.maven>7.0.0</vaadin.version.maven>
 		<snapshot.repository.url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</snapshot.repository.url>
-        <license.short.name>agpl-3.0</license.short.name>
-	</properties>
-
-	<profiles>
-		<profile>
-			<id>test-on-hub</id>
-			<properties>
-				<!-- Intra net address for TB3 hub -->
-				<tb.hub>matin-vehje.office.itmill.com</tb.hub>
-			</properties>
-		</profile>
-	</profiles>
+        <license.short.name>cval-2.0</license.short.name>
+    </properties>
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -58,14 +48,15 @@
 	</licenses>
 
 	<build>
+        <sourceDirectory>../addon/src/main/java</sourceDirectory>
 		<resources>
 			<!-- These are also needed for the sources required by the GWT compiler 
 				to be included in the produced JARs -->
 			<resource>
-				<directory>src/main/java</directory>
+				<directory>../addon/src/main/java</directory>
 			</resource>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>../addon/src/main/resources</directory>
 			</resource>
 		</resources>
 
@@ -75,7 +66,7 @@
 				<artifactId>maven-license-plugin</artifactId>
 				<configuration>
 					<basedir>${basedir}</basedir>
-					<header>${basedir}/src/license/cval2/header.txt</header>
+					<header>${basedir}../addon/src/license/cval2/header.txt</header>
 					<quiet>false</quiet>
 					<failIfMissing>true</failIfMissing>
 					<aggregate>false</aggregate>
@@ -210,149 +201,11 @@
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 					<descriptors>
-						<descriptor>assembly.xml</descriptor>
+						<descriptor>../addon/assembly.xml</descriptor>
 					</descriptors>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<skip>${skipTests}</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Copies the theme files from the demo project in the test phase -->
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.6</version>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/testwebapp/VAADIN/themes</outputDirectory>
-							<resources>
-								<resource>
-									<directory>../demo/src/main/webapp/VAADIN/themes/</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<!-- Compile widget set for integration testing -->
-				<plugin>
-					<groupId>com.vaadin</groupId>
-					<artifactId>vaadin-maven-plugin</artifactId>
-					<version>${vaadin.version.maven}</version>
-					<configuration>
-						<webappDirectory>${project.build.directory}/testwebapp/VAADIN/widgetsets</webappDirectory>
-						<extraJvmArgs>-Xmx1g -Xms1g -XX:MaxPermSize=512m</extraJvmArgs>
-						<hostedWebapp>${project.build.directory}/testwebapp</hostedWebapp>
-						<noServer>true</noServer>
-						<runTarget>http://localhost:9998/</runTarget>
-						<draftCompile>true</draftCompile>
-						<style>PRETTY</style>
-						<module>com.vaadin.addon.calendar.gwt.CalendarWidgetset</module>
-
-						<!-- Skip in default phase, we only gwt compile for tests -->
-						<!--<skip>true</skip> -->
-						<!-- <attachDebugger>true</attachDebugger> -->
-						<strict>true</strict>
-					</configuration>
-
-				</plugin>
-				<plugin>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<configuration>
-						<excludes>
-							<!-- Files here might match to naming convetions, but the are just 
-								vaadin apps containing you add-on components in varios setups. We can ignore 
-								them from test. -->
-							<exclude>**/demo/*</exclude>
-							<exclude>**/test/*</exclude>
-						</excludes>
-						<includes>
-							<include>**/test/testbench/*</include>
-							<include>**/test/unit/*</include>
-						</includes>
-						<systemProperties>
-							<property>
-								<name>tb.hub</name>
-								<value>${tb.hub}</value>
-							</property>
-						</systemProperties>
-					</configuration>
-				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-dependency-plugin
-										</artifactId>
-										<versionRange>
-											[2.0.0,)
-										</versionRange>
-										<goals>
-											<goal>
-												copy-dependencies
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>com.vaadin</groupId>
-										<artifactId>
-											vaadin-maven-plugin
-										</artifactId>
-										<versionRange>
-											[${vaadin.version.maven},)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 
 	</build>
 
@@ -383,10 +236,6 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>eclipselink</id>
-			<url>http://download.eclipse.org/rt/eclipselink/maven.repo/</url>
 		</repository>
 	</repositories>
 
@@ -424,73 +273,6 @@
 			<version>${vaadin.version.maven}</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<version>7.2.2.v20101205</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-testbench</artifactId>
-			<version>3.0.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>eclipselink</artifactId>
-			<version>2.1.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>javax.persistence</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>2.2.8</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.vaadin.addon</groupId>
-			<artifactId>jpacontainer-addon-agpl-3.0</artifactId>
-			<version>3.0.0-alpha2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-testbench</artifactId>
-			<version>3.0.4</version>
-			<scope>test</scope>
-		</dependency>
-
 	</dependencies>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.9.1</version>
-				<configuration>
-					<configLocation>build/checkstyle.xml</configLocation>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 
 </project>
