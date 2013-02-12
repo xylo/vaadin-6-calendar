@@ -1,0 +1,8 @@
+
+= LICENSING =
+
+Vaadin Calendar is intended to be freely used and extended by anyone 
+without any fees. In order to guarantee these freedoms, Vaadin Calendar 
+is licensed under the Apache License, Version 2.0. The license is included
+as license-apache-2.0.txt in this software package.
+
