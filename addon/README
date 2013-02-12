@@ -6,13 +6,13 @@ a calendar component that you can use in any Vaadin application.
 This version is built against Vaadin ${vaadin.version.maven}.
 
 == Installation ==
-Vaadin Calendar is a standard Vaadin Add-on package. It is offered under dual licensing
-CVAL 2.0 or AGPL 3.0. To use it, drag the jar file in this package to your project or
+Vaadin Calendar is a standard Vaadin Add-on package. It is offered under Apache 2 license.
+To use it, drag the jar file in this package to your project or
 use the following maven module:
 
 	<dependency>
 		<groupId>com.vaadin.addon</groupId>
-		<artifactId>vaadin-calendar-${license.short.name}</artifactId>
+		<artifactId>vaadin-calendar</artifactId>
 		<version>${project.version}</version>
 	</dependency>
 
@@ -20,7 +20,6 @@ Note, that the package also has client side extensions, so make sure that you
 compile your widgetset after installation!
 
 == Links ==
-Homepage:          https://vaadin.com/add-ons/calendar
 Documentation:     https://vaadin.com/book/vaadin7/-/page/calendar.html
 Demo application:  http://demo.vaadin.com/calendar
 Issue tracker:     http://dev.vaadin.com/

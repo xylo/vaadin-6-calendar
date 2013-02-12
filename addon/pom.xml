@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vaadin.addon</groupId>
 	<version>2.0.0-SNAPSHOT</version>
-	<artifactId>vaadin-calendar-agpl-3.0</artifactId>
+	<artifactId>vaadin-calendar</artifactId>
 	<packaging>jar</packaging>
 	<name>Vaadin Calendar</name>
 	<inceptionYear>2010</inceptionYear>
@@ -23,7 +23,6 @@
 		<project.organization>Vaadin Ltd</project.organization>
 		<vaadin.version.maven>7.0.0.rc2</vaadin.version.maven>
 		<snapshot.repository.url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</snapshot.repository.url>
-        <license.short.name>agpl-3.0</license.short.name>
 	</properties>
 
 	<profiles>
@@ -45,16 +44,11 @@
 	</distributionManagement>
 
 	<licenses>
-		<license>
-			<name>GNU Affero General Public License version 3.0</name>
-			<url>http://www.gnu.org/licenses/agpl-3.0.html</url>
-			<distribution>repo</distribution>
-		</license>
-		<license>
-			<name>Commercial Vaadin Add-On License version 2.0</name>
-			<url>http://vaadin.com/license/cval-2.0</url>
-			<distribution>manual</distribution>
-		</license>
+    <license>
+    <name>The Apache Software License, Version 2.0</name>
+    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    <distribution>repo</distribution>
+    </license>
 	</licenses>
 
 	<build>
@@ -75,7 +69,7 @@
 				<artifactId>maven-license-plugin</artifactId>
 				<configuration>
 					<basedir>${basedir}</basedir>
-					<header>${basedir}/src/license/cval2/header.txt</header>
+					<header>${basedir}/src/license/apache2/header.txt</header>
 					<quiet>false</quiet>
 					<failIfMissing>true</failIfMissing>
 					<aggregate>false</aggregate>
