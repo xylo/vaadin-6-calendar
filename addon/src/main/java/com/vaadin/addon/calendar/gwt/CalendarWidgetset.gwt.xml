@@ -12,6 +12,4 @@
   <set-property name="compiler.useSourceMaps" value="true" />
   -->
 
-
-    <inherits name="com.vaadin.addon.calendar.demo.Widgetset" />
 </module>
